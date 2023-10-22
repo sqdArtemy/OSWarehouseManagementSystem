@@ -10,6 +10,10 @@ from db_config import Base
 # Importing project`s models
 from models.user import User
 from models.company import Company
+from models.store import Store
+from models.warehouse import Warehouse
+from models.order import Order
+from models.rack import Rack
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

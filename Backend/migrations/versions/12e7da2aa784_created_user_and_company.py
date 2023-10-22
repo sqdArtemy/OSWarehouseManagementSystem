@@ -31,12 +31,12 @@ def upgrade() -> None:
     op.create_index(op.f('ix_companies_company_name'), 'companies', ['company_name'], unique=False)
     op.create_table('users',
     sa.Column('user_id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('company_ud', sa.Integer(), nullable=True),
+    sa.Column('company_id', sa.Integer(), nullable=True),
     sa.Column('user_name', sa.String(length=100), nullable=True),
     sa.Column('user_phone', sa.String(length=15), nullable=True),
     sa.Column('user_email', sa.String(length=255), nullable=True),
     sa.Column('user_password', sa.String(length=255), nullable=True),
-    sa.ForeignKeyConstraint(['company_ud'], ['companies.company_id'], ),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.company_id'], ),
     sa.PrimaryKeyConstraint('user_id')
     )
     op.create_index(op.f('ix_users_user_email'), 'users', ['user_email'], unique=True)
