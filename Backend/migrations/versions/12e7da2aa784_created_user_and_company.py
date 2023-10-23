@@ -33,6 +33,7 @@ def upgrade() -> None:
     sa.Column('user_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('company_id', sa.Integer(), nullable=True),
     sa.Column('user_name', sa.String(length=100), nullable=True),
+    sa.Column('user_surname', sa.String(length=100), nullable=True),
     sa.Column('user_phone', sa.String(length=15), nullable=True),
     sa.Column('user_email', sa.String(length=255), nullable=True),
     sa.Column('user_password', sa.String(length=255), nullable=True),

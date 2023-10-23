@@ -11,7 +11,7 @@ class Order(Base):
     recipient_store_id = Column(Integer, ForeignKey("stores.store_id"))
     total_price = Column(Numeric(precision=20, scale=2), nullable=False)
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
     order_status = Column(
         Enum("new", "processing", "submitted", "finished", "cancelled", name="order_status"),
         nullable=False
