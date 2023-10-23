@@ -7,7 +7,7 @@ class Store(Base):
     __tablename__ = "stores"
 
     store_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    company_id = Column(Integer, ForeignKey("companies.company_id"))
+    company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=True)
     store_owner_id = Column(Integer, ForeignKey("users.user_id"))
     store_name = Column(String(50), index=True)
     store_address = Column(String(255), index=True)
