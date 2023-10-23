@@ -14,7 +14,7 @@ class Transaction(Base):
         nullable=False
     )
     created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
 
     # Relationships with other tables
     supplier = relationship("Warehouse", back_populates="supplier_transactions")
