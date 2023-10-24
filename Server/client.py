@@ -11,16 +11,18 @@ try:
     print("Connected to the server.")
 
     # Specify the role in a JSON message
-    message = {
-        "role": "backend",
-        "content": "Hello from the Python client"
-    }
-    client_socket.send(json.dumps(message).encode())
-    
-    message = input('Enter a message: ')
-    client_socket.send(json.dumps(message).encode())
-    data = client_socket.recv(1024)
-    print("Server's response:", data.decode())
+    #message = {
+     #   "role": "backend",
+      #  "content": "Hello from the Python client"
+    #}
+    #client_socket.send(json.dumps(message).encode())
+
+    while True:
+        new_message = input("Enter a message (or 'quit' to exit): ")
+        client_socket.send(new_message.encode())
+
+        data = client_socket.recv(1024)
+        print("Server's response:", data.decode())
 
 except ConnectionRefusedError:
     print("Connection to the server failed. Make sure the server is running.")
