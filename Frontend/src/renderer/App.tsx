@@ -1,14 +1,18 @@
-import {MemoryRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
-import {SignIn} from "./components/sign-in-component/sign-in";
+import {
+  MemoryRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import SignUp from './components/sign-up-component/sign-up';
 import './App.css';
-
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/sign-in" replace/>}/>
-        <Route path="/sign-in" element={<SignIn/>}/>
+        <Route path="/" element={<Navigate to="/sign-up" replace />} />
+        <Route path="/sign-up" element={<SignUp />} />
       </Routes>
     </Router>
   );

@@ -1,7 +1,7 @@
-export default function SignIn() {
+export default function SignUp() {
   return (
     <div>
-      <h1>Sign In</h1>
+      <h1>Sign Up</h1>
       <form>
         <input
           type="text"
@@ -15,7 +15,7 @@ export default function SignIn() {
           name="password"
           placeholder="Password"
         />
-        <button type="submit">SIGN UP</button>
+        <button type="submit">SIGN IN</button>
       </form>
     </div>
   );
