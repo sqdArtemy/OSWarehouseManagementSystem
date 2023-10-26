@@ -15,3 +15,4 @@ class Store(Base):
     # Relationships with other tables
     company = relationship("Company", back_populates="stores")
     store_owner = relationship("User", back_populates="stores")
+    received_orders = relationship("Order", back_populates="recipient_store")

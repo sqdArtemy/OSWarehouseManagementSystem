@@ -13,6 +13,7 @@ class Rack(Base):
     remaining_capacity = Column(Numeric(precision=20, scale=2), nullable=False)
 
     # Relationships with other tables
+    inventory = relationship("Inventory", back_populates="rack")
     warehouse = relationship("Warehouse", back_populates="racks")
 
     # Constraints

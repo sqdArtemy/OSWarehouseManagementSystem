@@ -17,8 +17,9 @@ class Transaction(Base):
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
 
     # Relationships with other tables
-    supplier = relationship("Warehouse", back_populates="supplier_transactions")
-    recipient_store = relationship("Warehouse", back_populates="receiver_transactions")
+    supplier = relationship("Warehouse", foreign_keys=[supplier_id], back_populates="supplier_transactions")
+    recipient_warehouse = relationship("Warehouse",  foreign_keys=[recipient_id], back_populates="receiver_transactions")
+    transaction_items = relationship("TransactionItem", back_populates="transaction")
 
     # Constraints
     __table_args__ = (

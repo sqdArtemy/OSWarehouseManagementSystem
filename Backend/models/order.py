@@ -20,6 +20,7 @@ class Order(Base):
     # Relationships with other tables
     supplier = relationship("Warehouse", back_populates="supplied_orders")
     recipient_store = relationship("Store", back_populates="received_orders")
+    ordered_items = relationship("OrderItem", back_populates="order")
 
     # Constraints
     __table_args__ = (
