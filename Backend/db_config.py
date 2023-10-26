@@ -1,11 +1,23 @@
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from env_loader import db_url
 
-# Creating engine and session
+# Creating engine and base
 engine = create_engine(db_url)
-SessionLocal = sessionmaker(auto_commit=False, autoflush=False, bind=engine)
-
 Base = declarative_base()
+
+
+@contextmanager
+def get_session():
+    session = Session(bind=engine)
+    try:
+        yield session
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()

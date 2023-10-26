@@ -14,8 +14,8 @@ class Inventory(Base):
     expiry_date = Column(Date)
 
     # Relationships with other tables
-    rack = relationship("Order", back_populates="inventory_of_rack")
-    product = relationship("Product", back_populates="inventory_product")
+    rack = relationship("Rack", back_populates="inventory")
+    product = relationship("Product", back_populates="inventory")
 
     # Constraints
     __table_args__ = (

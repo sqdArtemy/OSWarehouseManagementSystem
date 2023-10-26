@@ -8,18 +8,8 @@ from alembic import context
 from db_config import Base
 
 # Importing project`s models
-from models.user import User
-from models.company import Company
-from models.store import Store
-from models.warehouse import Warehouse
-from models.order import Order
-from models.rack import Rack
-from models.product import Product
-from models.order_item import OrderItem
-from models.inventory import Inventory
-from models.transaction import Transaction
-from models.transaction_item import TransactionItem
-
+from models import (User, Company, Store, Warehouse, Order, Rack,
+                    Product, OrderItem, Inventory, Transaction, TransactionItem)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

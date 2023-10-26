@@ -1,3 +1,4 @@
+from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Numeric, CheckConstraint
 from db_config import Base
 
@@ -12,6 +13,11 @@ class Product(Base):
     volume = Column(Numeric(precision=20, scale=4))
     price = Column(Numeric(precision=20, scale=2))
     expiry_duration = Column(Integer)
+
+    # Relationships with other tables
+    inventory = relationship("Inventory", back_populates="product")
+    ordered_item = relationship("OrderItem", back_populates="product")
+    product_transaction_items = relationship("TransactionItem", back_populates="product")
 
     # Constraints
     __table_args__ = (

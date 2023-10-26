@@ -13,7 +13,7 @@ class TransactionItem(Base):
 
     # Relationships with other tables
     transaction = relationship("Transaction", back_populates="transaction_items")
-    product = relationship("Transaction", back_populates="product_transaction_items")
+    product = relationship("Product", back_populates="product_transaction_items")
 
     # Constraints
     __table_args__ = (

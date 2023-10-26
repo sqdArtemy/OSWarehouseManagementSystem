@@ -17,3 +17,5 @@ class User(Base):
 
     # Relationships with other tables
     company = relationship("Company", back_populates="users")
+    stores = relationship("Store", back_populates="store_owner")
+    warehouses = relationship("Warehouse", back_populates="manager")
