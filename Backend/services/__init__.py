@@ -1,0 +1,1 @@
+from .middlewares import check_post_method_middleware
