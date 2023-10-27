@@ -1,18 +1,21 @@
-
-def check_post_method_middleware(function):
+def check_allowed_methods_middleware(allowed_methods):
     """
-    Check if the request method is POST
-    :param function: 'Endpoint' function
+    Check if the request method is one of the allowed methods.
+    :param allowed_methods: List of allowed HTTP methods
     """
-    def wrapper(*args, **kwargs):
-        method = args[0]["method"].upper()
+    def decorator(function):
+        def wrapper(*args, **kwargs):
+            request = args[0]
+            method = request.get("method", "").upper()
 
-        if method != "POST":
-            return {
-                "status_code": 405,
-                "message": "Method not allowed."
-            }
+            if method not in allowed_methods:
+                return {
+                    "status_code": 405,
+                    "message": "Method not allowed."
+                }
 
-        return function(*args, **kwargs)
+            return function(*args, **kwargs)
 
-    return wrapper
+        return wrapper
+
+    return decorator

@@ -9,9 +9,9 @@ def hash_password(password: str) -> bytes:
     return hashed_password
 
 
-def check_password(hashed_password: bytes, input_password: str) -> bool:
+def check_password(hashed_password: str, input_password: str) -> bool:
     # Checking password
-    return bcrypt.checkpw(input_password.encode("utf-8"), hashed_password)
+    return bcrypt.checkpw(input_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def create_token(user_id: int, user_role: str) -> str:
