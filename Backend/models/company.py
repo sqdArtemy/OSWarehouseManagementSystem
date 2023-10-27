@@ -14,3 +14,10 @@ class Company(Base):
     stores = relationship("Store", back_populates="company")
     users = relationship("User", back_populates="company")
     warehouses = relationship("Warehouse", back_populates="company")
+
+    def to_dict(self):
+        return {
+            "company_id": self.company_id,
+            "company_name": self.company_name,
+            "company_email": self.company_email
+        }

@@ -13,7 +13,6 @@ def sign_up(request: dict) -> dict:
     :param request: dictionary containing url, method and body
     :return: dictionary containing status_code and response body
     """
-    method = request["method"]
     body = request["body"]
 
     # Check if user role is valid
@@ -63,10 +62,11 @@ def sign_up(request: dict) -> dict:
                 company_id=new_company_id
             )
             session.add(new_user)
+            session.commit()
 
             return {
                 "status_code": 201,
-                "body": new_user
+                "body": new_user.to_dict()
             }
 
     except IntegrityError:
