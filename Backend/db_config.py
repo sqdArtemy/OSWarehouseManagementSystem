@@ -8,6 +8,7 @@ from env_loader import db_url
 # Creating engine and base
 engine = create_engine(db_url)
 Base = declarative_base()
+SessionMaker = sessionmaker(bind=engine)
 
 
 @contextmanager

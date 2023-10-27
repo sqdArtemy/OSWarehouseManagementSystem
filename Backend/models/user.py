@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class User(Base):
@@ -19,3 +19,15 @@ class User(Base):
     company = relationship("Company", back_populates="users")
     stores = relationship("Store", back_populates="store_owner")
     warehouses = relationship("Warehouse", back_populates="manager")
+
+    def to_dict(self):
+        user = SessionMaker().query(User).filter(User.user_id == self.user_id).first()
+        return {
+            "user_id": self.user_id,
+            "company": user.company.to_dict(),
+            "user_name": self.user_name,
+            "user_surname": self.user_surname,
+            "user_phone": self.user_phone,
+            "user_email": self.user_email,
+            "user_role": self.user_role
+        }
