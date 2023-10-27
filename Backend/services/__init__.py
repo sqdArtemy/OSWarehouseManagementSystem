@@ -1,1 +1,1 @@
-from .middlewares import check_post_method_middleware
+from .middlewares import check_allowed_methods_middleware
