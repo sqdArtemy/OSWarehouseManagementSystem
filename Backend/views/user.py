@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from models import User, Company
 from db_config import get_session
-from utilities import hash_password, is_email_valid, is_phone_valid
+from utilities import hash_password, is_email_valid, is_phone_valid, create_token
 from services import check_post_method_middleware
 from .company import create_company
 
@@ -66,7 +66,8 @@ def sign_up(request: dict) -> dict:
 
             return {
                 "status_code": 201,
-                "body": new_user.to_dict()
+                "body": new_user.to_dict(),
+                "token": create_token(new_user.user_id, new_user.user_role)
             }
 
     except IntegrityError:
