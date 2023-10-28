@@ -25,3 +25,14 @@ class Product(Base):
         CheckConstraint("volume > 0", name="check_volume"),
         CheckConstraint("price > 0", name="check_price")
     )
+
+    def to_dict(self):
+        return {
+            "product_id": self.product_id,
+            "product_name": self.product_name,
+            "description": self.description,
+            "weight": self.weight,
+            "volume": self.volume,
+            "price": self.price,
+            "expiry_duration": self.expiry_duration
+        }

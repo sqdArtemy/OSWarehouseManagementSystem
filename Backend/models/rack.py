@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, CheckConstraint
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class Rack(Base):
@@ -21,3 +21,13 @@ class Rack(Base):
         CheckConstraint("remaining_capacity <= overall_capacity", name="check_remaining_capacity"),
         CheckConstraint("overall_capacity > 0", name="check_overall_capacity")
     )
+
+    def to_dict(self):
+        rack = SessionMaker().query(Rack).filter(Rack.rack_id == self.rack_id).first()
+        return {
+            "rack_id": self.rack_id,
+            "warehouse": rack.warehouse.to_dict(),
+            "rack_position": self.rack_position,
+            "overall_capacity": self.overall_capacity,
+            "remaining_capacity": self.remaining_capacity
+        }

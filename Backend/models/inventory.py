@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint, Date
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class Inventory(Base):
@@ -21,3 +21,14 @@ class Inventory(Base):
     __table_args__ = (
         UniqueConstraint("rack_id", "product_id"),
     )
+
+    def to_dict(self):
+        inventory = SessionMaker().query(Inventory).filter(Inventory.inventory_id == self.inventory_id).first()
+        return {
+            "inventory_id": self.inventory_id,
+            "rack": inventory.rack.to_dict(),
+            "product": inventory.product.to_dict(),
+            "quantity": self.quantity,
+            "arrival_date": self.arrival_date,
+            "expiry_date": self.expiry_date
+        }

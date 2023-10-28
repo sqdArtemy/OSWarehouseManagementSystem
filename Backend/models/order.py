@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, Enum, ForeignKey, Numeric, CheckConstraint, DateTime, func
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class Order(Base):
@@ -27,3 +27,14 @@ class Order(Base):
         CheckConstraint("total_price > 0", name="check_total_price"),
     )
 
+    def to_dict(self):
+        order = SessionMaker().query(Order).filter(Order.order_id == self.order_id).first()
+        return {
+            "order_id": self.order_id,
+            "supplier": order.supplier.to_dict(),
+            "recipient_store": order.recipient_store.to_dict(),
+            "total_price": self.total_price,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+            "order_status": self.order_status
+        }
