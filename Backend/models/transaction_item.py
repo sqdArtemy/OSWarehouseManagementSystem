@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, ForeignKey, CheckConstraint, UniqueConstraint
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class TransactionItem(Base):
@@ -20,3 +20,12 @@ class TransactionItem(Base):
         CheckConstraint("quantity > 0", name="check_quantity"),
         UniqueConstraint("product_id", "transaction_id")
     )
+
+    def to_dict(self):
+        transaction_item = SessionMaker().query(TransactionItem).filter(TransactionItem.transaction_item_id == self.transaction_item_id).first()
+        return {
+            "transaction_item_id": self.transaction_item_id,
+            "transaction": transaction_item.transaction.to_dict(),
+            "product": transaction_item.product.to_dict(),
+            "quantity": self.quantity
+        }
