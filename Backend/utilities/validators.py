@@ -1,4 +1,5 @@
 import re
+from db_config import SessionMaker
 
 
 def is_email_valid(email: str) -> bool:
@@ -21,3 +22,13 @@ def is_phone_valid(phone_number: str) -> bool:
     phone_regexp_pattern = r'^\+?[0-9]{9,15}$'
 
     return re.match(phone_regexp_pattern, phone_number) is not None
+
+
+def is_instance_already_exists(model, **kwargs) -> bool:
+    """
+    Check if instance of given model already exists in database.
+    :param model: model to be checked
+    :param kwargs: arguments to be checked
+    :return: True in case of existing instance, False otherwise
+    """
+    return SessionMaker().query(model).filter_by(**kwargs).first() is not None
