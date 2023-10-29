@@ -1,7 +1,7 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, String, ForeignKey, Numeric, CheckConstraint
 from .transaction import Transaction
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class Warehouse(Base):
@@ -29,3 +29,14 @@ class Warehouse(Base):
         CheckConstraint("overall_capacity > 0", name="check_overall_capacity")
     )
 
+    def to_dict(self):
+        warehouse = SessionMaker().query(Warehouse).filter(Warehouse.warehouse_id == self.warehouse_id).first()
+        return {
+            "warehouse_id": self.warehouse_id,
+            "company": warehouse.manager.to_dict(),
+            "manager": warehouse.manager.to_dict(),
+            "warehouse_name": self.warehouse_name,
+            "warehouse_address": self.warehouse_address,
+            "overall_capacity": self.overall_capacity,
+            "remaining_capacity": self.remaining_capacity
+        }

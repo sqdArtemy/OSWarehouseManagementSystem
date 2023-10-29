@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, Enum, ForeignKey, CheckConstraint, DateTime, func
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class Transaction(Base):
@@ -25,3 +25,12 @@ class Transaction(Base):
     __table_args__ = (
         CheckConstraint("recipient_id <> supplier_id", name="check_recipient_supplier"),
     )
+
+    def to_dict(self):
+        transaction = SessionMaker().query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
+        return {
+            "transaction_id": self.transaction_id,
+            "supplier": transaction.supplier.to_dict(),
+            "recipient_warehouse": transaction.recipient_warehouse.to_dict(),
+            "status": self.status
+        }

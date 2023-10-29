@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class Store(Base):
@@ -16,3 +16,13 @@ class Store(Base):
     company = relationship("Company", back_populates="stores")
     store_owner = relationship("User", back_populates="stores")
     received_orders = relationship("Order", back_populates="recipient_store")
+
+    def to_dict(self):
+        store = SessionMaker().query(Store).filter(Store.store_id == self.store_id).first()
+        return {
+            "store_id": self.store_id,
+            "company": store.company.to_dict(),
+            "store_owner": store.store_owner.to_dict(),
+            "store_name": self.store_name,
+            "store_address": self.store_address
+        }
