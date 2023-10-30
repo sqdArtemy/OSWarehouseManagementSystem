@@ -1,20 +1,37 @@
 from sqlalchemy.exc import IntegrityError
 
-from db_config import Base, SessionMaker
+from db_config import SessionMaker
 from services import check_allowed_methods_middleware, view_function_middleware
 from utilities.enums.method import Method
 
 
-class GenericView:
+class ModelAttributesMeta(type):
+    """
+    Metaclass ensuring that ViewClass should have model and model_name attributes.
+    """
+    def __init__(cls, name, bases, attrs):
+        if 'model' not in attrs or 'model_name' not in attrs:
+            raise TypeError(f"Subclasses of GenericView must define 'model' and 'model_name' attributes")
+        super(ModelAttributesMeta, cls).__init__(name, bases, attrs)
+
+
+class GenericView(metaclass=ModelAttributesMeta):
     """
     Generic CRUD view for all models.
     """
-    def __init__(self, model: Base, model_name: str):
+    model = None
+    model_name = None
+
+    def __init__(self):
         self.session = SessionMaker()
-        self.model = model
-        self.model_name = model_name
         self.instance = None
         self.response = None
+        self.request = None
+        self.headers = None
+        self.body = None
+        self.url = None
+        self.method = None
+        self.instance_id = None
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
