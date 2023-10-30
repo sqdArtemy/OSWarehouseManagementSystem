@@ -35,27 +35,66 @@ void* handle_client(void* client_socket) {
         ssize_t valread = read(new_socket, buffer, sizeof(buffer) - 1);
         if (valread <= 0) {
             // Handle client disconnect here
-            printf("Client disconnected\n");
+            printf("Client with address %d disconnected\n", new_socket);
+            if(new_socket == server_fd){
+            	server_fd = -1;
+            }
             break; // Exit the loop
         }
         
         cJSON *parsedJson = cJSON_Parse(buffer);
         cJSON *role = cJSON_GetObjectItem(parsedJson, "role");
+        cJSON *headers = cJSON_GetObjectItem(parsedJson, "headers");
         
+        //connection of backend
         if(role != NULL && (strcmp(role->valuestring, "backend") == 0)){
         	if(server_fd == -1){
         		server_fd = new_socket;
+        		printf("Backend with address %d is connected\n", server_fd);
         	} else {
-        		const char *message = "There's already a connected backend";
+        		const char *message = "There is already a connected backend";
         		puts(message);
         		send(new_socket, message, strlen(message), 0);
         		close(new_socket);
         	}
         }
         
-     	printf("%s\n", buffer);
-        send(new_socket, buffer, strlen(buffer), 0);
-        fflush(stdout);
+        //connection of frontend
+        else if(role != NULL && (strcmp(role->valuestring, "frontend") == 0)){
+        	printf("Frontend with address %d is connected\n", new_socket);
+        }
+        
+        //frontend to backend
+        else if(headers != NULL && new_socket != server_fd){
+        	if(server_fd == -1){
+        		const char *message = "There is no connected backend side to the server";
+        		send(new_socket, message, strlen(message), 0);
+        	} 
+        	
+        	else {
+        		cJSON_AddNumberToObject(headers, "socket_id", new_socket);
+        		char *headerString = cJSON_Print(headers);
+        		
+        		cJSON *headersObject = cJSON_Parse(headerString);
+        		cJSON_DeleteItemFromObject(parsedJson, "headers");
+        		cJSON_AddItemToObject(parsedJson, "headers", headersObject);
+        		
+        		char *request = cJSON_Print(parsedJson);
+        		
+        		
+        		send(server_fd, request, strlen(request), 0);
+        	}
+        }
+        
+        //backend to frontend
+        else if(headers != NULL && new_socket == server_fd){
+        	int socket_id = cJSON_GetObjectItem(headers, "socket_id")->valueint;
+        	send(socket_id, buffer, strlen(buffer), 0);
+        }
+        
+     	//printf("%s\n", buffer);
+        //send(new_socket, buffer, strlen(buffer), 0);
+        //fflush(stdout);
     }
 
     // Close the connected socket for this client
@@ -73,7 +112,7 @@ int main(int argc, char const* argv[]) {
 
 	int PORT;
 	PORT = atoi(argv[1]);
-	
+	printf("SERVER IS RUNNING ON PORT %d\n", PORT);
 	
     struct sockaddr_in address;
     int opt = 1;
@@ -105,6 +144,7 @@ int main(int argc, char const* argv[]) {
         perror("listen");
         exit(EXIT_FAILURE);
     }
+
 
     while (true) {
         int* new_socket = (int*)malloc(sizeof(int));
