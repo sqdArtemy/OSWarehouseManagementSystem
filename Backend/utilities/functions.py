@@ -1,4 +1,5 @@
 import bcrypt
+import re
 
 
 def hash_password(password: str) -> bytes:
@@ -41,3 +42,19 @@ def decode_token(token: str) -> int:
     user_id = (int(token[1:]) - 420) // 69
 
     return user_id
+
+
+def extract_id_from_url(url: str, model_name: str) -> int | None:
+    """
+    Extracts id from url.
+    :param url: url from which id is extracted
+    :param model_name: name of the model in url
+    :return: id of the object
+    """
+    pattern = fr'/{model_name}/(\d+)(?:/|$)'
+    match = re.search(pattern, url)
+
+    if match:
+        return int(match.group(1))
+    else:
+        return None
