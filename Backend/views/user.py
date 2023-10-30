@@ -6,152 +6,149 @@ from utilities import (
     hash_password, is_email_valid, is_phone_valid, create_token, check_password, decode_token,
     is_instance_already_exists
 )
-from services import check_allowed_methods_middleware, check_allowed_roles_middleware
+from services import check_allowed_methods_middleware, check_allowed_roles_middleware, view_function_middleware
 from utilities.enums.method import Method
 from utilities.enums.data_related_enums import UserRole
 from utilities.templates import ResponseFactory
+from services.generics import GenericView
 
 from .company import create_company, is_company_already_exists
 
 
-@check_allowed_methods_middleware([Method.POST.value])
-def sign_up(request: dict) -> dict:
-    """
-    'Endpoint' to create a new user along with the company
-    :param request: dictionary containing url, method and body
-    :return: dictionary containing status_code and response body
-    """
-    body = request.get("body", {})
-    headers = request.get("headers", {})
-    response = ResponseFactory(400, {}, "", headers)
+class UserView(GenericView):
+    model = User
+    model_name = "user"
 
-    # Check if user role is valid
-    if body["user_role"] not in ("owner", "customer"):
-        response.message = "Only warehouse owner or customers can register to the service."
-        return response.create_response()
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.POST.value])
+    def sign_up(self, request: dict) -> dict:
+        """
+        'Endpoint' to create a new user along with the company
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
 
-    # Check if password and confirm_password are the same
-    if body["password"] != body["confirm_password"]:
-        response.message = "Password and confirm password are not the same."
-        return response.create_response()
+        # Check if user role is valid
+        if self.body["user_role"] not in ("owner", "customer"):
+            self.response.message = "Only warehouse owner or customers can register to the service."
+            return self.response.create_response()
 
-    if not is_email_valid(body["user_email"]):
-        response.message = "Invalid email address."
-        return response.create_response()
+        # Check if password and confirm_password are the same
+        if self.body["password"] != self.body["confirm_password"]:
+            self.response.message = "Password and confirm password are not the same."
+            return self.response.create_response()
 
-    if not is_phone_valid(body["user_phone"]):
-        response.message = "Invalid phone number."
-        return response.create_response()
+        if not is_email_valid(self.body["user_email"]):
+            self.response.message = "Invalid email address."
+            return self.response.create_response()
 
-    if is_company_already_exists(body["company_email"]):
-        response.message = "Company with given email already exists."
-        return response.create_response()
+        if not is_phone_valid(self.body["user_phone"]):
+            self.response.message = "Invalid phone number."
+            return self.response.create_response()
 
-    # Creation of new company
-    new_company_id = create_company(
-        {
-            "company_name": body["company_name"],
-            "company_email": body["company_email"]
-        }
-    )
+        if is_company_already_exists(self.body["company_email"]):
+            self.response.message = "Company with given email already exists."
+            return self.response.create_response()
 
-    try:
-        with get_session() as session:
-            # Creation of new user
-            new_user = User(
-                user_name=body["user_name"],
-                user_surname=body["user_surname"],
-                user_email=body["user_email"],
-                user_role=body["user_role"],
-                user_phone=body["user_phone"],
-                user_password=hash_password(body["password"]).decode("utf8"),
-                company_id=new_company_id
-            )
-            session.add(new_user)
+        # Creation of new company
+        new_company_id = create_company(
+            {
+                "company_name": self.body["company_name"],
+                "company_email": self.body["company_email"]
+            }
+        )
+
+        try:
+            with get_session() as session:
+                # Creation of new user
+                new_user = User(
+                    user_name=self.body["user_name"],
+                    user_surname=self.body["user_surname"],
+                    user_email=self.body["user_email"],
+                    user_role=self.body["user_role"],
+                    user_phone=self.body["user_phone"],
+                    user_password=hash_password(self.body["password"]).decode("utf8"),
+                    company_id=new_company_id
+                )
+                session.add(new_user)
+                session.commit()
+
+                # Setting token in headers
+                self.headers["token"] = create_token(new_user.user_id, new_user.user_role)
+
+                self.response.status_code = 201
+                self.response.data = new_user.to_dict()
+                return self.response.create_response()
+
+        except IntegrityError:
+            session.rollback()
+            session.delete(session.query(Company).filter_by(company_id=new_company_id).first())
             session.commit()
 
+            # Check if user email is already registered
+            if is_instance_already_exists(User, user_email=self.body["user_email"]):
+                self.response.message = "User email is already registered."
+                return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.POST.value])
+    def login(self, request: dict) -> dict:
+        """
+        'Endpoint' to login user.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+
+        if not is_email_valid(self.body["user_email"]):
+            self.response.message = "Invalid email address."
+            return self.response.create_response()
+
+        with get_session() as session:
+            user = session.query(User).filter_by(user_email=self.body["user_email"]).first()
+
+            if not user or not check_password(user.user_password, self.body["password"]):
+                self.response.message = "Wrong credentials."
+                return self.response.create_response()
+
             # Setting token in headers
-            headers["token"] = create_token(new_user.user_id, new_user.user_role)
+            self.headers["token"] = create_token(user.user_id, user.user_role)
 
-            response.status_code = 201
-            response.data = new_user.to_dict()
-            return response.create_response()
+            self.response.status_code = 200
+            self.response.data = user.to_dict()
+            return self.response.create_response()
 
-    except IntegrityError:
-        session.rollback()
-        session.delete(session.query(Company).filter_by(company_id=new_company_id).first())
-        session.commit()
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.POST.value])
+    def change_password(self, request: dict) -> dict:
+        """
+        'Endpoint' to change user password.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
 
-        # Check if user email is already registered
-        if is_instance_already_exists(User, user_email=body["user_email"]):
-            response.message = "User email is already registered."
-            return response.create_response()
+        user_id = decode_token(self.headers["token"])
+        old_password = self.body["old_password"]
+        new_password = self.body["new_password"]
+        confirm_password = self.body["confirm_password"]
 
+        # Check if password and confirm_password are the same
+        if new_password != confirm_password:
+            self.response.message = "Password and confirm password are not the same."
+            return self.response.create_response()
 
-@check_allowed_methods_middleware([Method.POST.value])
-def login(request: dict) -> dict:
-    """
-    'Endpoint' to login user.
-    :param request: dictionary containing url, method and body
-    :return: dictionary containing status_code and response body
-    """
-    body = request.get("body", {})
-    headers = request.get("headers", {})
-    response = ResponseFactory(400, {}, "", headers)
+        with get_session() as session:
+            user = session.query(User).filter_by(user_id=user_id).first()
 
-    if not is_email_valid(body["user_email"]):
-        response.message = "Invalid email address."
-        return response.create_response()
+            if not user or not check_password(user.user_password, old_password):
+                self.response.message = "Wrong credentials."
+                return self.response.create_response()
 
-    with get_session() as session:
-        user = session.query(User).filter_by(user_email=body["user_email"]).first()
+            user.user_password = hash_password(new_password).decode("utf8")
+            session.commit()
 
-        if not user or not check_password(user.user_password, body["password"]):
-            response.message = "Wrong credentials."
-            return response.create_response()
-
-        # Setting token in headers
-        headers["token"] = create_token(user.user_id, user.user_role)
-
-        response.status_code = 200
-        response.data = user.to_dict()
-        return response.create_response()
-
-
-@check_allowed_methods_middleware([Method.POST.value])
-def change_password(request: dict) -> dict:
-    """
-    'Endpoint' to change user password.
-    :param request: dictionary containing url, method and body
-    :return: dictionary containing status_code and response body
-    """
-    body = request.get("body", {})
-    headers = request.get("headers", {})
-    response = ResponseFactory(400, {}, "", headers)
-
-    user_id = decode_token(headers["token"])
-    old_password = body["old_password"]
-    new_password = body["new_password"]
-    confirm_password = body["confirm_password"]
-
-    # Check if password and confirm_password are the same
-    if new_password != confirm_password:
-        response.message = "Password and confirm password are not the same."
-        return response.create_response()
-
-    with get_session() as session:
-        user = session.query(User).filter_by(user_id=user_id).first()
-
-        if not user or not check_password(user.user_password, old_password):
-            response.message = "Wrong credentials."
-            return response.create_response()
-
-        user.user_password = hash_password(new_password).decode("utf8")
-        session.commit()
-
-        response.status_code = 200
-        response.data = user.to_dict()
-        return response.create_response()
+            self.response.status_code = 200
+            self.response.data = user.to_dict()
+            return self.response.create_response()
 
 
 @check_allowed_roles_middleware([UserRole.OWNER.value["code"]])
