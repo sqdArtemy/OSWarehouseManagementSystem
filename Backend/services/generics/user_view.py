@@ -7,6 +7,9 @@ from utilities.enums.method import Method
 
 
 class UserView(AbstractGenericView):
+    """
+    CRUD view for User model.
+    """
     model = User
     model_name = "user"
 
