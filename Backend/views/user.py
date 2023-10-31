@@ -6,7 +6,8 @@ from utilities import (
     hash_password, is_email_valid, is_phone_valid, create_token, check_password, decode_token,
     is_instance_already_exists
 )
-from services import check_allowed_methods_middleware, check_allowed_roles_middleware, view_function_middleware
+from services import (check_allowed_methods_middleware, check_allowed_roles_middleware, view_function_middleware,
+                      ValidationError, DatabaseError)
 from utilities.enums.method import Method
 from utilities.enums.data_related_enums import UserRole
 from utilities.templates import ResponseFactory
@@ -30,25 +31,20 @@ class UserView(GenericView):
 
         # Check if user role is valid
         if self.body["user_role"] not in ("owner", "customer"):
-            self.response.message = "Only warehouse owner or customers can register to the service."
-            return self.response.create_response()
+            raise ValidationError("Only warehouse owner or customers can register to the service.")
 
         # Check if password and confirm_password are the same
         if self.body["password"] != self.body["confirm_password"]:
-            self.response.message = "Password and confirm password are not the same."
-            return self.response.create_response()
+            raise ValidationError("Password and confirm password are not the same.")
 
         if not is_email_valid(self.body["user_email"]):
-            self.response.message = "Invalid email address."
-            return self.response.create_response()
+            raise ValidationError("Invalid email address.")
 
         if not is_phone_valid(self.body["user_phone"]):
-            self.response.message = "Invalid phone number."
-            return self.response.create_response()
+            raise ValidationError("Invalid phone number.")
 
         if is_company_already_exists(self.body["company_email"]):
-            self.response.message = "Company with given email already exists."
-            return self.response.create_response()
+            raise DatabaseError("Company with given email already exists.")
 
         # Creation of new company
         new_company_id = create_company(
@@ -87,8 +83,7 @@ class UserView(GenericView):
 
             # Check if user email is already registered
             if is_instance_already_exists(User, user_email=self.body["user_email"]):
-                self.response.message = "User email is already registered."
-                return self.response.create_response()
+                raise DatabaseError("User email is already registered.")
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
@@ -100,15 +95,13 @@ class UserView(GenericView):
         """
 
         if not is_email_valid(self.body["user_email"]):
-            self.response.message = "Invalid email address."
-            return self.response.create_response()
+            raise ValidationError("Invalid email address.")
 
         with get_session() as session:
             user = session.query(User).filter_by(user_email=self.body["user_email"]).first()
 
             if not user or not check_password(user.user_password, self.body["password"]):
-                self.response.message = "Wrong credentials."
-                return self.response.create_response()
+                raise ValidationError("Wrong credentials.")
 
             # Setting token in headers
             self.headers["token"] = create_token(user.user_id, user.user_role)
@@ -133,15 +126,13 @@ class UserView(GenericView):
 
         # Check if password and confirm_password are the same
         if new_password != confirm_password:
-            self.response.message = "Password and confirm password are not the same."
-            return self.response.create_response()
+            raise ValidationError("Password and confirm password are not the same.")
 
         with get_session() as session:
             user = session.query(User).filter_by(user_id=user_id).first()
 
             if not user or not check_password(user.user_password, old_password):
-                self.response.message = "Wrong credentials."
-                return self.response.create_response()
+                raise ValidationError("Wrong credentials.")
 
             user.user_password = hash_password(new_password).decode("utf8")
             session.commit()
