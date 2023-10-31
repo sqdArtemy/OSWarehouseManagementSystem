@@ -21,15 +21,15 @@ def controller(request: dict) -> dict:
         if "/user" in url:
             if method == Method.GET.value:
                 if "/users" in url:
-                    user_view.get_list(request)
+                    return user_view.get_list(request)
                 else:
-                    user_view.get(request)
+                    return user_view.get(request)
             elif method == Method.POST.value:
-                user_view.sign_up(request)
+                return user_view.sign_up(request)
             elif method == Method.DELETE.value:
-                user_view.delete(request)
+                return user_view.delete(request)
             elif method == Method.PUT.value:
-                user_view.update(request)
+                return user_view.update(request)
     except (ValidationError, DatabaseError) as e:
         response.status_code = e.status_code
         response.message = e.message
