@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 
 from db_config import SessionMaker
-from services import check_allowed_methods_middleware, view_function_middleware
+from services import check_allowed_methods_middleware, view_function_middleware, ValidationError, DatabaseError
 from utilities.enums.method import Method
 
 
@@ -42,9 +42,7 @@ class GenericView(metaclass=ModelAttributesMeta):
         :return: dictionary containing status_code and response body
         """
         if self.instance is None:
-            self.response.status_code = 404
-            self.response.message = f"{self.model_name.capitalize()} with given id does not exist."
-            return self.response.create_response()
+            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
 
         self.response.status_code = 200
         self.response.data = self.instance.to_dict()
@@ -75,9 +73,7 @@ class GenericView(metaclass=ModelAttributesMeta):
         :return: dictionary containing status_code and response body
         """
         if self.instance is None:
-            self.response.status_code = 404
-            self.response.message = f"{self.model_name.capitalize()} with given id does not exist."
-            return self.response.create_response()
+            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
 
         self.instance.delete()
         self.session.commit()
@@ -106,9 +102,7 @@ class GenericView(metaclass=ModelAttributesMeta):
 
         except IntegrityError as e:
             self.session.rollback()
-            self.response.status_code = 400
-            self.response.message = str(e)
-            return self.response.create_response()
+            raise DatabaseError(str(e))
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
@@ -130,7 +124,4 @@ class GenericView(metaclass=ModelAttributesMeta):
             return self.response.create_response()
 
         except IntegrityError as e:
-            self.session.rollback()
-            self.response.status_code = 400
-            self.response.message = str(e)
-            return self.response.create_response()
+            raise DatabaseError(str(e))
