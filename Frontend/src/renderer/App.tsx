@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom';
 import SignUp from './components/sign-up-component/sign-up';
 import './App.css';
+import './normalize.css';
 
 export default function App() {
   return (
