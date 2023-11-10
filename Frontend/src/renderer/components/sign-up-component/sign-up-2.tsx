@@ -1,7 +1,7 @@
 import React from 'react';
-import './sign-up.scss';
+import './sign-up-2.scss';
 
-export function SignUp() {
+export function SignUp_2() {
   return (
     <div className='sign-in-container'>
       <header>WAREHOUSE MANAGEMENT SYSTEM</header>
@@ -27,9 +27,12 @@ export function SignUp() {
           </div>
 
           <form>
-            <input id='name' placeholder={'Name of Company'} />
-            <input type='Email' id='email' placeholder={'Email of Company'} />
-            <button type='submit'>Continue</button>
+            <input id='name' placeholder={'Full Name'} />
+            <input id='number' placeholder={'Phone Number'}/>
+            <input type='Email' id='email' placeholder={'Email'} />
+            <input type='Password' id='password' placeholder={'Password'}/>
+            <input type='Password' id='re-password' placeholder={'Confirm Password'}/>
+            <button type='submit'>SIGN UP</button>
           </form>
 
         </div>
