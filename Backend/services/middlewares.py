@@ -36,7 +36,7 @@ def check_allowed_roles_middleware(allowed_roles):
     """
     def decorator(function):
         def wrapper(*args, **kwargs):
-            request = args[0]
+            request = kwargs["request"]
             headers = request.get("headers", {})
             token = headers.get("token", None)
 
@@ -67,6 +67,7 @@ def view_function_middleware(function):
     """
     def wrapper(*args, **kwargs):
         instance = args[0]
+        print(function)
         request = kwargs["request"]
         instance.request = request
         instance.headers = request.get("headers", {})

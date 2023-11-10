@@ -26,7 +26,12 @@ def controller(request: dict) -> dict:
                 else:
                     return user_view.get(request=request)
             elif method == Method.POST.value:
-                return user_view.sign_up(request=request)
+                if "/register" in url:
+                    return user_view.sign_up(request=request)
+                if "/login" in url:
+                    return user_view.login(request=request)
+                if "/users" in url:
+                    return user_view.create(request=request)
             elif method == Method.DELETE.value:
                 return user_view.delete(request=request)
             elif method == Method.PUT.value:

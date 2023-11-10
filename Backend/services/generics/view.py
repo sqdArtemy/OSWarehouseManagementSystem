@@ -91,15 +91,14 @@ class GenericView(metaclass=ModelAttributesMeta):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
-    def create(self, request: dict, **kwargs) -> dict:
+    def create(self, request: dict) -> dict:
         """
         Create instance of model by given arguments.
         :param request: dictionary containing url, method and body
-        :param kwargs: arguments to be checked, here you need to pass fields on which single instance will be created
         :return: dictionary containing status_code and response body
         """
         try:
-            instance = self.model(**kwargs)
+            instance = self.model(**self.body)
             self.session.add(instance)
             self.session.commit()
 
