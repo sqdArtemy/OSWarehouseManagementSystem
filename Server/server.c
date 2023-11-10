@@ -10,9 +10,17 @@
 #include <signal.h>
 #include <cjson/cJSON.h>
 #include <pthread.h>
+#include <arpa/inet.h>
+#include <time.h>
 
 
 int server_fd = -1;
+
+struct clientAddress {
+	int* client_socket;
+	int port;
+	char* address;
+};
 
 // Function to handle SIGINT signal
 void handle_sigint(int sig) {
@@ -24,18 +32,32 @@ void handle_sigint(int sig) {
     exit(EXIT_SUCCESS);
 }
 
+char* get_current_time(){
+	time_t current_time;
+	time(&current_time);
+	struct tm *local_time = localtime(&current_time);
+	
+	char *time_string = (char*)malloc(26);
+	strftime(time_string, 26, "%Y-%m-%d %H:%M:%S", local_time);
+	
+	return time_string;
+}
 
-void* handle_client(void* client_socket) {
+void* handle_client(void* client) {
+	struct clientAddress* clientArgs = (struct clientAddress*)client;
+	int port = clientArgs->port;
+	char* address = clientArgs->address;
+	
     cJSON *root = cJSON_CreateObject();
-    int new_socket = *((int*)client_socket);
+    int new_socket = *((int*)clientArgs->client_socket);
     char buffer[1024] = {0};
 
-    while (true) {
+    while (true) {    
     	memset(buffer, 0, sizeof(buffer));
         ssize_t valread = read(new_socket, buffer, sizeof(buffer) - 1);
         if (valread <= 0) {
             // Handle client disconnect here
-            printf("Client with address %d disconnected\n", new_socket);
+            printf("%s Client with ip address %s and port %d disconnected\n", get_current_time(), address, port);
             if(new_socket == server_fd){
             	server_fd = -1;
             }
@@ -48,12 +70,12 @@ void* handle_client(void* client_socket) {
         
         //connection of backend
         if(role != NULL && (strcmp(role->valuestring, "backend") == 0)){
+              	printf("%s Backend with ip address %s and port %d is connected\n", get_current_time(), address, port);
         	if(server_fd == -1){
         		server_fd = new_socket;
-        		printf("Backend with address %d is connected\n", server_fd);
         	} else {
-        		const char *message = "There is already a connected backend";
-        		puts(message);
+        		const char *message = "There is already a connected backend. The given backend will be disconnected\n";
+        		printf("%s %s", get_current_time(), message);
         		send(new_socket, message, strlen(message), 0);
         		close(new_socket);
         	}
@@ -61,7 +83,7 @@ void* handle_client(void* client_socket) {
         
         //connection of frontend
         else if(role != NULL && (strcmp(role->valuestring, "frontend") == 0)){
-        	printf("Frontend with address %d is connected\n", new_socket);
+        	printf("%s Frontend with ip address %s and port %d is connected\n", get_current_time(), address, port);
         }
         
         //frontend to backend
@@ -91,28 +113,26 @@ void* handle_client(void* client_socket) {
         	int socket_id = cJSON_GetObjectItem(headers, "socket_id")->valueint;
         	send(socket_id, buffer, strlen(buffer), 0);
         }
-        
-     	//printf("%s\n", buffer);
-        //send(new_socket, buffer, strlen(buffer), 0);
-        //fflush(stdout);
+
     }
 
     // Close the connected socket for this client
     close(new_socket);
-    free(client_socket);
+    free(clientArgs->client_socket);
     return NULL;
 }
 
 int main(int argc, char const* argv[]) {
 
-    if(argc != 2) {
-    	puts("You should specify the port number as the command line argument");
+    if(argc != 3) {
+    	puts("You should specify the port number and ip as the command line arguments");
     	exit(0);
     }
 
 	int PORT;
-	PORT = atoi(argv[1]);
-	printf("SERVER IS RUNNING ON PORT %d\n", PORT);
+	PORT = atoi(argv[2]);
+	const char* ip = argv[1];
+	printf("SERVER IS RUNNING ON IP %s PORT %d\n", ip, PORT);
 	
     struct sockaddr_in address;
     int opt = 1;
@@ -132,7 +152,7 @@ int main(int argc, char const* argv[]) {
     }
 
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = inet_addr(ip);
     address.sin_port = htons(PORT);
 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
@@ -154,7 +174,13 @@ int main(int argc, char const* argv[]) {
             free(new_socket);
         } else {
             pthread_t client_thread;
-            if (pthread_create(&client_thread, NULL, handle_client, (void*)new_socket) != 0) {
+            struct clientAddress* client = (struct clientAddress*)malloc(sizeof(struct clientAddress));
+            
+            client->port = address.sin_port;
+            client->address = inet_ntoa(address.sin_addr);
+            client->client_socket = new_socket; 
+            
+            if (pthread_create(&client_thread, NULL, handle_client, (void*)client) != 0) {
                 perror("pthread_create");
                 free(new_socket);
             }
