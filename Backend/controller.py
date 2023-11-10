@@ -21,7 +21,9 @@ def controller(request: dict) -> dict:
         if "/user" in url:
             if method == Method.GET.value:
                 if "/users" in url:
-                    return user_view.get_list(request)
+                    headers = request.get("headers", {})
+                    filters = headers.get("filters", {})
+                    return user_view.get_list(request=request, **filters)
                 else:
                     return user_view.get(request)
             elif method == Method.POST.value:

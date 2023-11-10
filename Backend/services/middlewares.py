@@ -67,7 +67,7 @@ def view_function_middleware(function):
     """
     def wrapper(*args, **kwargs):
         instance = args[0]
-        request = args[1]
+        request = kwargs["request"]
         instance.request = request
         instance.headers = request.get("headers", {})
         instance.body = request.get("body", {})

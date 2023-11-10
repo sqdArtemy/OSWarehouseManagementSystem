@@ -57,7 +57,14 @@ class GenericView(metaclass=ModelAttributesMeta):
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
-        instances = self.session.query(self.model).filter(**kwargs).all()
+        query = self.session.query(self.model)
+
+        # Applying filters
+        for column, value in kwargs.items():
+            if hasattr(self.model, column):
+                query = query.filter(getattr(self.model, column) == value)
+
+        instances = query.all()
         body = [instance.to_dict() for instance in instances]
         self.response.status_code = 200
         self.response.data = body
