@@ -57,7 +57,14 @@ class GenericView(metaclass=ModelAttributesMeta):
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
-        instances = self.session.query(self.model).filter(**kwargs).all()
+        query = self.session.query(self.model)
+
+        # Applying filters
+        for column, value in kwargs.items():
+            if hasattr(self.model, column):
+                query = query.filter(getattr(self.model, column) == value)
+
+        instances = query.all()
         body = [instance.to_dict() for instance in instances]
         self.response.status_code = 200
         self.response.data = body
@@ -84,15 +91,14 @@ class GenericView(metaclass=ModelAttributesMeta):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
-    def create(self, request: dict, **kwargs) -> dict:
+    def create(self, request: dict) -> dict:
         """
         Create instance of model by given arguments.
         :param request: dictionary containing url, method and body
-        :param kwargs: arguments to be checked, here you need to pass fields on which single instance will be created
         :return: dictionary containing status_code and response body
         """
         try:
-            instance = self.model(**kwargs)
+            instance = self.model(**self.body)
             self.session.add(instance)
             self.session.commit()
 
@@ -106,17 +112,19 @@ class GenericView(metaclass=ModelAttributesMeta):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
-    def update(self, request: dict, **kwargs) -> dict:
+    def update(self, request: dict) -> dict:
         """
         Update instance of model by given arguments.
         :param request: dictionary containing url, method and body
-        :param kwargs: arguments to be checked, here you need to pass fields on which single instance will be updated
         :return: dictionary containing status_code and response body
         """
+        if self.instance is None:
+            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
 
         try:
-            for key, value in kwargs.items():
-                setattr(self.instance, key, value)
+            for key, value in self.body.items():
+                if hasattr(self.instance, key):
+                    setattr(self.instance, key, value)
             self.session.commit()
 
             self.response.status_code = 200

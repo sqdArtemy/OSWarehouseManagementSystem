@@ -141,68 +141,67 @@ class UserView(GenericView):
             self.response.data = user.to_dict()
             return self.response.create_response()
 
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.PUT.value])
+    def update(self, request: dict) -> dict:
+        # Check if requested user is the same as the one that should be updated
+        if self.instance_id != decode_token(self.headers["token"]):
+            raise ValidationError(status_code=401, message="You can update only your own data.")
 
-@check_allowed_roles_middleware([UserRole.OWNER.value["code"]])
-@check_allowed_methods_middleware([Method.POST.value])
-def add_employee(request: dict) -> dict:
-    """
-    'Endpoint' to create a new employee for a company. Can be used only by the owner of the company.
-    :param request: dictionary containing url, method and body
-    :return: dictionary containing status_code and response body
-    """
-    body = request.get("body", {})
-    headers = request.get("headers", {})
-    response = ResponseFactory(400, {}, "", headers)
+        # Remove password if it was passed
+        if "user_password" in self.body:
+            del self.body["user_password"]
 
-    # Get owner id from token and retrieve owner`s company
-    owner_id = decode_token(headers["token"])
-    company = SessionMaker().query(User).filter_by(user_id=owner_id).first().company
-    company_id = company.company_id
-    company_name = company.company_name
+        return super().update(request=request)
 
-    # Autogenerate password from data
-    employee_name = body["user_name"]
-    employee_email = body["user_email"]
-    employee_surname = body["user_surname"]
-    employee_phone = body["user_phone"]
-    employee_role = body["user_role"]
-    password = f"{company_name[0]}{employee_name[0]}{employee_surname[0]}{employee_phone[1:5]}"
+    @view_function_middleware
+    @check_allowed_roles_middleware([UserRole.OWNER.value["code"]])
+    @check_allowed_methods_middleware([Method.POST.value])
+    def create(self, request: dict) -> dict:
+        """
+        'Endpoint' to create a new employee for a company. Can be used only by the owner of the company.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
 
-    if employee_role not in (UserRole.MANAGER.value["name"], UserRole.SHIPPER.value["name"]):
-        response.message = "Only managers or shippers can be added to the company."
-        return response.create_response()
+        # Get owner id from token and retrieve owner`s company
+        owner_id = decode_token(self.headers["token"])
+        company = SessionMaker().query(User).filter_by(user_id=owner_id).first().company
+        company_id = company.company_id
+        company_name = company.company_name
 
-    if not is_email_valid(employee_email):
-        response.message = "Invalid email address."
-        return response.create_response()
+        # Autogenerate password from data
+        employee_name = self.body["user_name"]
+        employee_email = self.body["user_email"]
+        employee_surname = self.body["user_surname"]
+        employee_phone = self.body["user_phone"]
+        employee_role = self.body["user_role"]
+        password = f"{company_name[0]}{employee_name[0]}{employee_surname[0]}{employee_phone[1:5]}"
 
-    if not is_phone_valid(employee_phone):
-        response.message = "Invalid phone number."
-        return response.create_response()
+        # Validating fields
+        if employee_role not in (UserRole.MANAGER.value["name"], UserRole.SHIPPER.value["name"]):
+            raise ValidationError("Only managers or shippers can be added to the company.")
 
-    try:
-        with get_session() as session:
-            new_employee = User(
-                user_name=employee_name,
-                user_surname=employee_surname,
-                user_email=employee_email,
-                user_role=employee_role,
-                user_phone=employee_phone,
-                user_password=hash_password(password).decode("utf8"),
-                company_id=company_id
-            )
+        if not is_email_valid(employee_email):
+            raise ValidationError("Invalid email address.")
 
-            session.add(new_employee)
-            session.commit()
+        if not is_phone_valid(employee_phone):
+            raise ValidationError("Invalid phone number.")
 
-            response.status_code = 201
-            response.data = new_employee.to_dict()
-            return response.create_response()
+        # Checking if user already exists or not
+        if is_instance_already_exists(User, user_email=self.body["user_email"]):
+            raise DatabaseError("User email is already registered.")
 
-    except IntegrityError:
-        session.rollback()
+        new_body = dict(
+            user_name=employee_name,
+            user_surname=employee_surname,
+            user_email=employee_email,
+            user_role=employee_role,
+            user_phone=employee_phone,
+            user_password=hash_password(password).decode("utf8"),
+            company_id=company_id
+        )
+        self.body = new_body
+        request["body"] = new_body
 
-        # Check if user email is already registered
-        if is_instance_already_exists(User, user_email=body["user_email"]):
-            response.message = "User email is already registered."
-            return response.create_response()
+        return super().create(request=request)
