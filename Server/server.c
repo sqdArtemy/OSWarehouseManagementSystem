@@ -57,7 +57,7 @@ void* handle_client(void* client) {
         ssize_t valread = read(new_socket, buffer, sizeof(buffer) - 1);
         if (valread <= 0) {
             // Handle client disconnect here
-            printf("%s Client with ip address %s %d disconnected\n", get_current_time(), address, port);
+            printf("%s Client with ip address %s and port %d disconnected\n", get_current_time(), address, port);
             if(new_socket == server_fd){
             	server_fd = -1;
             }
@@ -70,7 +70,7 @@ void* handle_client(void* client) {
         
         //connection of backend
         if(role != NULL && (strcmp(role->valuestring, "backend") == 0)){
-              	printf("%s Backend with ip address %s %d is connected\n", get_current_time(), address, port);
+              	printf("%s Backend with ip address %s and port %d is connected\n", get_current_time(), address, port);
         	if(server_fd == -1){
         		server_fd = new_socket;
         	} else {
@@ -83,7 +83,7 @@ void* handle_client(void* client) {
         
         //connection of frontend
         else if(role != NULL && (strcmp(role->valuestring, "frontend") == 0)){
-        	printf("%s Frontend with ip address %s %d is connected\n", get_current_time(), address, port);
+        	printf("%s Frontend with ip address %s and port %d is connected\n", get_current_time(), address, port);
         }
         
         //frontend to backend
@@ -124,14 +124,15 @@ void* handle_client(void* client) {
 
 int main(int argc, char const* argv[]) {
 
-    if(argc != 2) {
-    	puts("You should specify the port number as the command line argument");
+    if(argc != 3) {
+    	puts("You should specify the port number and ip as the command line arguments");
     	exit(0);
     }
 
 	int PORT;
-	PORT = atoi(argv[1]);
-	printf("SERVER IS RUNNING ON PORT %d\n", PORT);
+	PORT = atoi(argv[2]);
+	const char* ip = argv[1];
+	printf("SERVER IS RUNNING ON IP %s PORT %d\n", ip, PORT);
 	
     struct sockaddr_in address;
     int opt = 1;
@@ -151,7 +152,7 @@ int main(int argc, char const* argv[]) {
     }
 
     address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_addr.s_addr = inet_addr(ip);
     address.sin_port = htons(PORT);
 
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
