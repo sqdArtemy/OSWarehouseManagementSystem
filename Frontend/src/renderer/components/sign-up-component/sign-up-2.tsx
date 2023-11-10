@@ -7,11 +7,6 @@ export function SignUp_2() {
       <header>WAREHOUSE MANAGEMENT SYSTEM</header>
       <div className='content'>
 
-        <div className='status-icons'>
-          <div className='status-icon' id='sh'>SH</div>
-          <div className='status-icon' id='mng'>MNG</div>
-          <div className='status-icon' id='str'>STR</div>
-        </div>
 
         <div className='login-form'>
 
