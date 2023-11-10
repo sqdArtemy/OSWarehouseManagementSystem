@@ -12,26 +12,25 @@ def controller(request: dict) -> dict:
     """
 
     user_view = UserView()
-    headers = request.get("headers", {})
     url = request.get("url", "")
     method = request.get("method", "")
+    headers = request.get("headers", {})
+    filters = headers.get("filters", {})
     response = ResponseFactory(status_code=400, data={}, message="", headers=headers)
 
     try:
         if "/user" in url:
             if method == Method.GET.value:
                 if "/users" in url:
-                    headers = request.get("headers", {})
-                    filters = headers.get("filters", {})
                     return user_view.get_list(request=request, **filters)
                 else:
-                    return user_view.get(request)
+                    return user_view.get(request=request)
             elif method == Method.POST.value:
-                return user_view.sign_up(request)
+                return user_view.sign_up(request=request)
             elif method == Method.DELETE.value:
-                return user_view.delete(request)
+                return user_view.delete(request=request)
             elif method == Method.PUT.value:
-                return user_view.update(request)
+                return user_view.update(request=request)
     except (ValidationError, DatabaseError) as e:
         response.status_code = e.status_code
         response.message = e.message

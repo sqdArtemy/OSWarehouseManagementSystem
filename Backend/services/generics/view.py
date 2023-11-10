@@ -113,17 +113,19 @@ class GenericView(metaclass=ModelAttributesMeta):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
-    def update(self, request: dict, **kwargs) -> dict:
+    def update(self, request: dict) -> dict:
         """
         Update instance of model by given arguments.
         :param request: dictionary containing url, method and body
-        :param kwargs: arguments to be checked, here you need to pass fields on which single instance will be updated
         :return: dictionary containing status_code and response body
         """
+        if self.instance is None:
+            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
 
         try:
-            for key, value in kwargs.items():
-                setattr(self.instance, key, value)
+            for key, value in self.body.items():
+                if hasattr(self.instance, key):
+                    setattr(self.instance, key, value)
             self.session.commit()
 
             self.response.status_code = 200
