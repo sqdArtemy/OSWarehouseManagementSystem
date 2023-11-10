@@ -1,5 +1,5 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint, Date
+from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint, Date, Numeric, event
 from db_config import Base, SessionMaker
 
 
@@ -10,11 +10,12 @@ class Inventory(Base):
     rack_id = Column(Integer, ForeignKey("racks.rack_id"))
     product_id = Column(Integer, ForeignKey("products.product_id"))
     quantity = Column(Integer)
+    total_volume = Column(Numeric(precision=20, scale=2), default=0)
     arrival_date = Column(Date)
     expiry_date = Column(Date)
 
     # Relationships with other tables
-    rack = relationship("Rack", back_populates="inventory")
+    rack = relationship("Rack", back_populates="inventories")
     product = relationship("Product", back_populates="inventory")
 
     # Constraints
@@ -29,6 +30,15 @@ class Inventory(Base):
             "rack": inventory.rack.to_dict(),
             "product": inventory.product.to_dict(),
             "quantity": self.quantity,
+            "total_volume": self.total_volume,
             "arrival_date": self.arrival_date,
             "expiry_date": self.expiry_date
         }
+
+
+# Event listeners (like triggers in SQL)
+@event.listens_for(Inventory.total_volume, "set", retval=True)
+def update_remaining_rack_capacity(target, value, oldvalue, initiator):
+    if target.rack:
+        target.rack.remaining_capacity = target.rack.remaining_capacity - (value - oldvalue)
+    return value
