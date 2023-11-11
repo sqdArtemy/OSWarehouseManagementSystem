@@ -78,6 +78,7 @@ const createWindow = async () => {
       contextIsolation: false,
       nodeIntegration: true,
     },
+    autoHideMenuBar: true,
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));

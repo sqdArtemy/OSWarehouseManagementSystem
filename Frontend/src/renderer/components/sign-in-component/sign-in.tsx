@@ -9,18 +9,6 @@ export function SignIn() {
     <div className="sign-in-container">
       <header>WAREHOUSE MANAGEMENT SYSTEM</header>
       <div className="content">
-        <div className="status-icons">
-          <div className="status-icon" id="sh">
-            SH
-          </div>
-          <div className="status-icon" id="mng">
-            MNG
-          </div>
-          <div className="status-icon" id="str">
-            STR
-          </div>
-        </div>
-
         <div className="login-form">
           <div className="tabs-container">
             <div className="tabs-left">
