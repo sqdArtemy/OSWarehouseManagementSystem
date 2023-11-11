@@ -1,4 +1,4 @@
-from views import UserView
+from views import UserView, CompanyView
 from services import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
@@ -11,7 +11,10 @@ def controller(request: dict) -> dict:
     :return:
     """
 
+    # Views
     user_view = UserView()
+    company_view = CompanyView()
+
     url = request.get("url", "")
     method = request.get("method", "")
     headers = request.get("headers", {})
@@ -19,6 +22,7 @@ def controller(request: dict) -> dict:
     response = ResponseFactory(status_code=400, data={}, message="", headers=headers)
 
     try:
+        # User`s endpoints
         if "/user" in url:
             if method == Method.GET.value:
                 if "/users" in url:
@@ -36,6 +40,21 @@ def controller(request: dict) -> dict:
                 return user_view.delete(request=request)
             elif method == Method.PUT.value:
                 return user_view.update(request=request)
+
+        # Company`s endpoints
+        elif "/company" in url:
+            if method == Method.GET.value:
+                return company_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return company_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return company_view.update(request=request)
+        elif "/companies" in url:
+            if method == Method.GET.value:
+                return company_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return company_view.create(request=request)
+
     except (ValidationError, DatabaseError) as e:
         response.status_code = e.status_code
         response.message = e.message
