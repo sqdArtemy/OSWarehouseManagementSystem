@@ -4,3 +4,8 @@ export interface ISendData {
   method: 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH',
   url: string
 }
+
+export interface IConnectionData {
+  role: string,
+  message: string
+}

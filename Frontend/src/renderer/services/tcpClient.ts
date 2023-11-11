@@ -1,6 +1,6 @@
 import * as net from 'net';
-import { Socket } from 'node:net';
-import { ISendData } from './sendDataInterface';
+import { Socket } from 'net';
+import { IConnectionData, ISendData } from './sendDataInterface';
 
 export class TcpClient {
   client: Socket;
@@ -14,14 +14,14 @@ export class TcpClient {
   }
 
   async connect() {
-    this.client.connect(this.port, this.host, () => {
+    this.client.connect(this.port, this.host, async () => {
       console.log('Connected to server');
       const dataToSend = {
         role: 'frontend',
         message: 'Hello from the client!'
       };
 
-      this.client.write(JSON.stringify(dataToSend));
+      await this.send(dataToSend);
     });
 
     this.client.on('close', () => {
@@ -29,14 +29,22 @@ export class TcpClient {
     });
   }
 
-  async send(data: ISendData){
+  async send(data: ISendData | IConnectionData){
     return new Promise((resolve, reject) => {
-      this.client.write(JSON.stringify({
-        body: data.body,
-        headers: data.headers,
-        url: data.url,
-        method: data.method
-      }));
+
+      if ('body' in data) {
+        this.client.write(JSON.stringify({
+          body: data.body,
+          headers: data.headers,
+          url: data.url,
+          method: data.method
+        }));
+      } else {
+        this.client.write(JSON.stringify({
+          role: data.role,
+          message: data.message
+        }))
+      }
 
       const timer = setTimeout(() => {
         this.client.end();
@@ -45,6 +53,9 @@ export class TcpClient {
 
       this.client.on('data', data => {
         clearTimeout(timer);
+        if(data.toString() === 'There is no connected backend side to the server'){
+          reject('There is no connected backend side to the server');
+        }
         resolve(data.toString());
       });
 
@@ -56,17 +67,17 @@ export class TcpClient {
   }
 }
 
-const testClient = new TcpClient('192.168.56.101', 8500);
+const args = process.argv.slice(2);
+const serverAddress = args[0] ?? '127.0.0.1';  // Change this to your server's IP or hostname
+const serverPort = Number(args[1]) ?? 8000;
+export const apiClient = new TcpClient(serverAddress, serverPort);
 
-
-(async () => {
-  await testClient.connect();
-  const message1 = await testClient.send({ body: {}, headers: {}, url: '/test', method: 'GET' });
-  const message2 = await testClient.send({ body: { "1": 1 }, headers: {}, url: '/test', method: 'GET' });
-  const message3 = await testClient.send({ body: { "2": 2 }, headers: {}, url: '/test', method: 'GET' });
-  const message4 = await testClient.send({ body: { "5": 5 }, headers: { "6": 6 }, url: '/test', method: 'GET' });
-  console.log(message1);
-  console.log(message2);
-  console.log(message3);
-  console.log(message4);
+(async ()=> {
+  try {
+    await apiClient.connect();
+    const testMessage = await apiClient.send({ method: 'GET', url: '/test', headers: {}, body: {} });
+    console.log(testMessage);
+  } catch (e) {
+    console.log(e);
+  }
 })();
