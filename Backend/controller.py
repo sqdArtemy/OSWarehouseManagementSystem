@@ -1,4 +1,5 @@
-from views import UserView, CompanyView
+from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, StoreView, \
+    TransactionView, TransactionItemView, WarehouseView
 from services import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
@@ -14,12 +15,23 @@ def controller(request: dict) -> dict:
     # Views
     user_view = UserView()
     company_view = CompanyView()
+    inventory_view = InventoryView()
+    order_view = OrderView()
+    order_item_view = OrderItemView()
+    product_view = ProductView()
+    rack_view = RackView()
+    store_view = StoreView()
+    transaction_view = TransactionView()
+    transaction_item_view = TransactionItemView()
+    warehouse_view = WarehouseView()
 
     url = request.get("url", "")
     method = request.get("method", "")
     headers = request.get("headers", {})
     filters = headers.get("filters", {})
     response = ResponseFactory(status_code=400, data={}, message="", headers=headers)
+
+    # TODO: We need to refactor this code to avoid repetitions and make it more readable
 
     try:
         # User`s endpoints
@@ -54,6 +66,132 @@ def controller(request: dict) -> dict:
                 return company_view.get_list(request=request, **filters)
             elif method == Method.POST.value:
                 return company_view.create(request=request)
+
+        # Inventory`s endpoints
+        elif "/inventory" in url:
+            if method == Method.GET.value:
+                return inventory_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return inventory_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return inventory_view.update(request=request)
+        elif "/inventories" in url:
+            if method == Method.GET.value:
+                return inventory_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return inventory_view.create(request=request)
+
+        # Order`s endpoints
+        elif "/order" in url:
+            if method == Method.GET.value:
+                return order_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return order_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return order_view.update(request=request)
+        elif "/orders" in url:
+            if method == Method.GET.value:
+                return order_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return order_view.create(request=request)
+
+        # OrderItem`s endpoints
+        elif "/order_item" in url:
+            if method == Method.GET.value:
+                return order_item_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return order_item_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return order_item_view.update(request=request)
+        elif "/order_items" in url:
+            if method == Method.GET.value:
+                return order_item_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return order_item_view.create(request=request)
+
+        # Product`s endpoints
+        elif "/product" in url:
+            if method == Method.GET.value:
+                return product_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return product_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return product_view.update(request=request)
+        elif "/products" in url:
+            if method == Method.GET.value:
+                return product_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return product_view.create(request=request)
+
+        # Rack`s endpoints
+        elif "/rack" in url:
+            if method == Method.GET.value:
+                return rack_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return rack_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return rack_view.update(request=request)
+        elif "/racks" in url:
+            if method == Method.GET.value:
+                return rack_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return rack_view.create(request=request)
+
+        # Store`s endpoints
+        elif "/store" in url:
+            if method == Method.GET.value:
+                return store_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return store_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return store_view.update(request=request)
+        elif "/stores" in url:
+            if method == Method.GET.value:
+                return store_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return store_view.create(request=request)
+
+        # Transaction`s endpoints
+        elif "/transaction" in url:
+            if method == Method.GET.value:
+                return transaction_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return transaction_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return transaction_view.update(request=request)
+        elif "/transactions" in url:
+            if method == Method.GET.value:
+                return transaction_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return transaction_view.create(request=request)
+
+        # TransactionItem`s endpoints
+        elif "/transaction_item" in url:
+            if method == Method.GET.value:
+                return transaction_item_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return transaction_item_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return transaction_item_view.update(request=request)
+        elif "/transaction_items" in url:
+            if method == Method.GET.value:
+                return transaction_item_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return transaction_item_view.create(request=request)
+
+        # Warehouse`s endpoints
+        elif "/warehouse" in url:
+            if method == Method.GET.value:
+                return warehouse_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return warehouse_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return warehouse_view.update(request=request)
+        elif "/warehouses" in url:
+            if method == Method.GET.value:
+                return warehouse_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return warehouse_view.create(request=request)
 
     except (ValidationError, DatabaseError) as e:
         response.status_code = e.status_code
