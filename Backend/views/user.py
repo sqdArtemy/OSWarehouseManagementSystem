@@ -10,7 +10,6 @@ from services import (check_allowed_methods_middleware, check_allowed_roles_midd
                       ValidationError, DatabaseError)
 from utilities.enums.method import Method
 from utilities.enums.data_related_enums import UserRole
-from utilities.templates import ResponseFactory
 from services.generics import GenericView
 
 from .company import create_company, is_company_already_exists

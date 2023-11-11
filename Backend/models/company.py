@@ -12,6 +12,7 @@ class Company(Base):
 
     # Relationships with other tables
     stores = relationship("Store", back_populates="company")
+    products = relationship("Product", back_populates="company")
     users = relationship("User", back_populates="company")
     warehouses = relationship("Warehouse", back_populates="company")
 
