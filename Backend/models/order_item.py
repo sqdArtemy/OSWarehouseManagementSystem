@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, ForeignKey, CheckConstraint, UniqueConstraint
-from db_config import Base
+from db_config import Base, SessionMaker
 
 
 class OrderItem(Base):
@@ -20,3 +20,12 @@ class OrderItem(Base):
         CheckConstraint("quantity > 0", name="check_quantity"),
         UniqueConstraint("order_id", "product_id")
     )
+
+    def to_dict(self):
+        order_item = SessionMaker().query(OrderItem).filter(OrderItem.order_id == self.order_id).first()
+        return {
+            "order_item_id": self.order_item_id,
+            "order": order_item.order.to_dict(),
+            "product": order_item.product.to_dict(),
+            "quantity": self.quantity
+        }

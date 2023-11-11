@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, CheckConstraint
-from db_config import Base
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, CheckConstraint, event
+from db_config import Base, SessionMaker
 
 
 class Rack(Base):
@@ -13,6 +13,7 @@ class Rack(Base):
     remaining_capacity = Column(Numeric(precision=20, scale=2), nullable=False)
 
     # Relationships with other tables
+    inventories = relationship("Inventory", back_populates="rack")
     warehouse = relationship("Warehouse", back_populates="racks")
 
     # Constraints
@@ -20,3 +21,21 @@ class Rack(Base):
         CheckConstraint("remaining_capacity <= overall_capacity", name="check_remaining_capacity"),
         CheckConstraint("overall_capacity > 0", name="check_overall_capacity")
     )
+
+    def to_dict(self):
+        rack = SessionMaker().query(Rack).filter(Rack.rack_id == self.rack_id).first()
+        return {
+            "rack_id": self.rack_id,
+            "warehouse": rack.warehouse.to_dict(),
+            "rack_position": self.rack_position,
+            "overall_capacity": self.overall_capacity,
+            "remaining_capacity": self.remaining_capacity
+        }
+
+
+# Event listeners (like triggers in SQL)
+@event.listens_for(Rack.remaining_capacity, "set", retval=True)
+def update_warehouse_remaining_capacity(target, value, oldvalue, initiator):
+    if target.warehouse:
+        target.warehouse.remaining_capacity = target.warehouse.remaining_capacity - (value - oldvalue)
+    return value
