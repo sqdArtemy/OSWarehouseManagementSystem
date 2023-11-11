@@ -12,7 +12,7 @@ from utilities.enums.method import Method
 from utilities.enums.data_related_enums import UserRole
 from services.generics import GenericView
 
-from .company import create_company, is_company_already_exists
+from .company import CompanyView
 
 
 class UserView(GenericView):
@@ -42,16 +42,17 @@ class UserView(GenericView):
         if not is_phone_valid(self.body["user_phone"]):
             raise ValidationError("Invalid phone number.")
 
-        if is_company_already_exists(self.body["company_email"]):
-            raise DatabaseError("Company with given email already exists.")
-
-        # Creation of new company
-        new_company_id = create_company(
-            {
-                "company_name": self.body["company_name"],
-                "company_email": self.body["company_email"]
+        # Create new company
+        company_response = CompanyView().create(
+            request={
+                "method": Method.POST.value,
+                "body": {
+                    "company_name": self.body["company_name"],
+                    "company_email": self.body["company_email"]
+                }
             }
         )
+        new_company_id = int(company_response.get("body").get("company_id"))
 
         try:
             with get_session() as session:
@@ -75,7 +76,7 @@ class UserView(GenericView):
                 self.response.data = new_user.to_dict()
                 return self.response.create_response()
 
-        except IntegrityError:
+        except IntegrityError as e:
             session.rollback()
             session.delete(session.query(Company).filter_by(company_id=new_company_id).first())
             session.commit()
@@ -83,6 +84,11 @@ class UserView(GenericView):
             # Check if user email is already registered
             if is_instance_already_exists(User, user_email=self.body["user_email"]):
                 raise DatabaseError("User email is already registered.")
+
+            if is_instance_already_exists(User, user_phone=self.body["user_phone"]):
+                raise DatabaseError("User phone is already registered.")
+
+            raise DatabaseError(str(e))
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
