@@ -86,7 +86,7 @@ class GenericView(metaclass=ModelAttributesMeta):
         self.session.commit()
 
         self.response.status_code = 204
-        # self.response.message = f"{self.model_name.capitalize()} with given id has been deleted."
+        self.response.message = f"{self.model_name.capitalize()} with given id has been deleted."
         return self.response.create_response()
 
     @view_function_middleware
