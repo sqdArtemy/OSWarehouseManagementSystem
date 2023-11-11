@@ -82,11 +82,11 @@ class GenericView(metaclass=ModelAttributesMeta):
         if self.instance is None:
             raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
 
-        self.instance.delete()
+        self.session.delete(self.instance)
         self.session.commit()
 
-        self.response.status_code = 200
-        self.response.message = f"{self.model_name.capitalize()} with given id has been deleted."
+        self.response.status_code = 204
+        # self.response.message = f"{self.model_name.capitalize()} with given id has been deleted."
         return self.response.create_response()
 
     @view_function_middleware
