@@ -1,4 +1,4 @@
-.dashboard-container {
+.dashboard-layout-container {
   display: flex;
   flex-direction: row;
   min-height: 100%;
@@ -12,26 +12,112 @@
 
     .side-bar-top {
       min-height: 70%;
+      display: flex;
+      flex-direction: column;
+      gap: 3vw;
 
-      .side-bar-top-header {
+      .side-bar-top-header-container {
+        padding-top: 2vw;
         min-height: 10%;
-        text-align: center;
-        padding-top: 1rem;
+        width: 100%;
+        padding-left: 2vw;
+        padding-right: 2vw;
+
+        .side-bar-top-header {
+          text-align: center;
+          width: 100%;
+          font-size: 1.8vw;
+        }
       }
+
 
       .side-bar-top-content {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        padding-left: 1rem;
+
+
+        .side-bar-top-content-elements-container {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+
+
+          .side-bar-top-content-element {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            width: 100%;
+            gap: 0.7vw;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            padding-left: 1vw;
+            padding-top: 1vw;
+            padding-bottom: 1vw;
+
+            .side-bar-top-content-element-icon{
+              width: 2.5vw;
+            }
+
+            .side-bar-top-content-element-text {
+              font-size: 1.7vw;
+            }
+
+            &:hover {
+              background-color: #8F37FF;
+            }
+          }
+        }
       }
     }
 
     .side-bar-bottom {
       min-height: 30%;
+      width: 100%;
       border-top: 1.5px solid #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding-top: 2vw;
+      gap: 1vw;
+
+      .side-bar-bottom-profile {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+
+        .side-bar-bottom-profile-name {
+          font-size: 1.5vw;
+
+        }
+      }
+
+      button {
+        align-self: center;
+        padding: 10px 30px;
+        background-color: #5564B2;
+        color: white;
+        border-color: #FFFFFF;
+        border-width: 1px;
+        border-radius: 3px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 55%;
+        font-size: 1vw;
+        margin-top: 1.5rem;
+
+        &:hover {
+          background-color: darken(#5564B2, 10%);
+        }
+      }
     }
   }
 
 
+}
+
+.selected{
+  background-color: #8F37FF;
 }
