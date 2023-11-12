@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { TcpClient } from './services/tcpClient';
 import dotenv from "dotenv";
+import { UserApi } from './services/api/userApi';
 
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
@@ -20,6 +21,7 @@ export const apiClient = new TcpClient(serverAddress, Number(serverPort));
   }
 })();
 
+export const userApi = new UserApi();
 // // calling IPC exposed from preload script
 // window.electron.ipcRenderer.once('ipc-example', (arg) => {
 //   // eslint-disable-next-line no-console
