@@ -1,28 +1,18 @@
 import { ApiResponse } from '../apiRequestHandler';
 
 export interface IUser {
-  signIn(
-    email: string,
-    password: string,
-  ): Promise<ApiResponse>;
-  signUp(body: ISignUp): Promise<{ [key: string]: any } | any>;
-  addUser(
-    body: IAddUser
-  ): Promise<{ [key: string]: any } | any>;
-  deleteUser(id: number): Promise<{ [key: string]: any } | any>;
-  updateUser(
-    body: IAddUser,
-    id: number,
-  ): Promise<{ [key: string]: any } | any>;
-  getUser(id: number): Promise<{ [key: string]: any } | any>;
-  getAllUsers(filters: {
-    [key: string]: any;
-  }): Promise<{ [key: string]: any } | any>;
+  signIn(email: string, password: string): Promise<ApiResponse>;
+  signUp(body: ISignUp): Promise<ApiResponse>;
+  addUser(body: IAddUser): Promise<ApiResponse>;
+  deleteUser(id: number): Promise<ApiResponse>;
+  updateUser(body: IAddUser, id: number): Promise<ApiResponse>;
+  getUser(id: number): Promise<ApiResponse>;
+  getAllUsers(filters: { [key: string]: any }): Promise<ApiResponse>;
   resetPassword(
     oldPassword: string,
     newPassword: string,
     passwordConfirm: string,
-  ): Promise<{ [key: string]: any } | any>;
+  ): Promise<ApiResponse>;
 }
 
 export interface ISignUp {
@@ -46,6 +36,4 @@ export interface IAddUser {
   user_phone: string;
 }
 
-interface IGetUsersFilters {
-
-}
+interface IGetUsersFilters {}
