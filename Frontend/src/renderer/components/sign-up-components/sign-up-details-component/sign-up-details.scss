@@ -1,4 +1,4 @@
-.sign-in-container {
+.sign-up-details-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -63,12 +63,12 @@
       }
     }
 
-    .login-form {
+    .sign-up-details-form {
       display: flex;
       flex-direction: column;
       align-items: stretch;
       justify-content: flex-start;
-      gap:2vw;
+      gap: 2vw;
       border: 1px solid #ddd;
       padding: 50px 40px 30px 40px;
       border-radius: 5px;
@@ -116,6 +116,7 @@
           span {
             text-align: center;
             font-size: 1.5vw;
+            cursor: pointer;
 
             &.disabled {
               color: #868686;
