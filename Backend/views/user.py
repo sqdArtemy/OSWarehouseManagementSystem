@@ -4,16 +4,15 @@ from models import User, Company
 from db_config import get_session, SessionMaker
 from utilities import (
     hash_password, is_email_valid, is_phone_valid, create_token, check_password, decode_token,
-    is_instance_already_exists
+    is_instance_already_exists, extract_id_from_url
 )
 from services import (check_allowed_methods_middleware, check_allowed_roles_middleware, view_function_middleware,
                       ValidationError, DatabaseError)
 from utilities.enums.method import Method
 from utilities.enums.data_related_enums import UserRole
-from utilities.templates import ResponseFactory
 from services.generics import GenericView
 
-from .company import create_company, is_company_already_exists
+from .company import CompanyView
 
 
 class UserView(GenericView):
@@ -43,16 +42,17 @@ class UserView(GenericView):
         if not is_phone_valid(self.body["user_phone"]):
             raise ValidationError("Invalid phone number.")
 
-        if is_company_already_exists(self.body["company_email"]):
-            raise DatabaseError("Company with given email already exists.")
-
-        # Creation of new company
-        new_company_id = create_company(
-            {
-                "company_name": self.body["company_name"],
-                "company_email": self.body["company_email"]
+        # Create new company
+        company_response = CompanyView().create(
+            request={
+                "method": Method.POST.value,
+                "body": {
+                    "company_name": self.body["company_name"],
+                    "company_email": self.body["company_email"]
+                }
             }
         )
+        new_company_id = int(company_response.get("body").get("company_id"))
 
         try:
             with get_session() as session:
@@ -76,7 +76,7 @@ class UserView(GenericView):
                 self.response.data = new_user.to_dict()
                 return self.response.create_response()
 
-        except IntegrityError:
+        except IntegrityError as e:
             session.rollback()
             session.delete(session.query(Company).filter_by(company_id=new_company_id).first())
             session.commit()
@@ -84,6 +84,11 @@ class UserView(GenericView):
             # Check if user email is already registered
             if is_instance_already_exists(User, user_email=self.body["user_email"]):
                 raise DatabaseError("User email is already registered.")
+
+            if is_instance_already_exists(User, user_phone=self.body["user_phone"]):
+                raise DatabaseError("User phone is already registered.")
+
+            raise DatabaseError(str(e))
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
@@ -205,3 +210,56 @@ class UserView(GenericView):
         request["body"] = new_body
 
         return super().create(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.DELETE.value])
+    def delete(self, request: dict) -> dict:
+        """
+        Endpoint to delete user.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+
+        # define objects
+        id_to_del = extract_id_from_url(request["url"], "user")
+        user_to_del = SessionMaker().query(User).filter_by(user_id=id_to_del).first()
+        user_id = decode_token(self.headers["token"])
+        user = SessionMaker().query(User).filter_by(user_id=user_id).first()
+        user_role = user.user_role
+
+        # check if user is owner
+        if user_role != UserRole.OWNER.value["name"]:
+            raise ValidationError("Forbidden", 403)
+
+        # check if there is user_to_be_deleted in DB and
+        # is from the same company as the user who wants to delete
+        if not user_to_del or user_to_del.company_id != user.company_id:
+            raise ValidationError("User Not Found", 404)
+
+        # set null if manager has warehouse
+        elif user_to_del.user_role == UserRole.MANAGER.value["name"]:
+            for warehouse in user_to_del.warehouses:
+                warehouse.manager = None
+            user_to_del.warehouses = []
+            SessionMaker().commit()
+
+        # cannot delete shipper if he has active orders or transactions
+        else:
+            has_trans_or_orders = False
+            for order in user_to_del.orders:
+                if order.order_status == "processing":
+                    has_trans_or_orders = True
+                    break
+
+            for transaction in user_to_del.transactions:
+                if transaction.status == "processing":
+                    has_trans_or_orders = True
+                    break
+
+            if user_to_del.user_role == UserRole.SHIPPER.value["name"] and has_trans_or_orders:
+                raise ValidationError("The shipper cannot be deleted during active orders and transactions")
+
+        # empty body
+        request["body"] = self.body = dict()
+
+        return super().delete(request=request)

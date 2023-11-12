@@ -39,45 +39,46 @@ export class TcpClient {
           url: data.url,
           method: data.method
         }));
+
+        const timer = setTimeout(() => {
+          this.client.end();
+          reject(new Error('Request timed out'));
+        }, 10000);
+
+        this.client.on('data', data => {
+          clearTimeout(timer);
+          if(data.toString() === 'There is no connected backend side to the server'){
+            reject('There is no connected backend side to the server');
+          }
+          resolve(data.toString());
+        });
+
+        this.client.on('error', err => {
+          clearTimeout(timer);
+          reject(err);
+        });
+
       } else {
         this.client.write(JSON.stringify({
           role: data.role,
           message: data.message
         }))
       }
-
-      const timer = setTimeout(() => {
-        this.client.end();
-        reject(new Error('Request timed out'));
-      }, 10000);
-
-      this.client.on('data', data => {
-        clearTimeout(timer);
-        if(data.toString() === 'There is no connected backend side to the server'){
-          reject('There is no connected backend side to the server');
-        }
-        resolve(data.toString());
-      });
-
-      this.client.on('error', err => {
-        clearTimeout(timer);
-        reject(err);
-      });
     });
   }
 }
 
-const args = process.argv.slice(2);
-const serverAddress = args[0] ?? '127.0.0.1';  // Change this to your server's IP or hostname
-const serverPort = Number(args[1]) ?? 8000;
-export const apiClient = new TcpClient(serverAddress, serverPort);
-
-(async ()=> {
-  try {
-    await apiClient.connect();
-    const testMessage = await apiClient.send({ method: 'GET', url: '/test', headers: {}, body: {} });
-    console.log(testMessage);
-  } catch (e) {
-    console.log(e);
-  }
-})();
+// const args = process.argv.slice(2);
+// const serverAddress = args[0] ?? '127.0.0.1';  // Change this to your server's IP or hostname
+// const serverPort = Number(args[1]) ?? 8000;
+// export const apiClient = new TcpClient(serverAddress, serverPort);
+//
+// (async ()=> {
+//   try {
+//     await apiClient.connect();
+//     const testMessage = await apiClient.send({ method: 'GET', url: '/test', headers: {}, body: {} });
+//     console.log(testMessage);
+//   } catch (e) {
+//     console.log(e);
+//   }
+// })();
