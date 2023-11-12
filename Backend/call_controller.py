@@ -28,7 +28,7 @@ try:
 
             response = controller(json.loads(data.decode()))
 
-            client_socket.send(json.dumps(response).encode())
+            client_socket.send(json.dumps(response).encode() + "\n".encode())
 
             if not data:
                 continue  # The server has closed the connection
