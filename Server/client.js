@@ -1,8 +1,9 @@
 const net = require('net');
 const readline = require('readline');
+const args = process.argv.slice(2);
 
-const serverAddress = '127.0.0.1';  // Change this to your server's IP or hostname
-const serverPort = 8000;            // Change this to your server's port
+const serverAddress = args[0];  // Change this to your server's IP or hostname
+const serverPort = Number(args[1]);            // Change this to your server's port
 
 const client = new net.Socket();
 
