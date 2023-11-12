@@ -14,7 +14,8 @@ class Order(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
     order_status = Column(
-        Enum("new", "processing", "submitted", "finished", "cancelled", "delivered", name="order_status"),
+        Enum("new", "processing", "submitted", "finished", "cancelled", "delivered", "lost", "damaged",
+             name="order_status"),
         nullable=False
     )
 

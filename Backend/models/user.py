@@ -13,7 +13,7 @@ class User(Base):
     user_phone = Column(String(15), unique=True, index=True)
     user_email = Column(String(255), unique=True, index=True)
     user_password = Column(String(255))
-    user_role = Column(Enum("owner", "manager", "shipper", "customer", name="user_role"), nullable=False)
+    user_role = Column(Enum("owner", "manager", "shipper", "customer", "admin", name="user_role"), nullable=False)
 
     # Relationships with other tables
     company = relationship("Company", back_populates="users")
