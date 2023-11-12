@@ -23,7 +23,7 @@ export interface IUser {
   ): Promise<{ [key: string]: any } | any>;
 }
 
-interface ISignUp {
+export interface ISignUp {
   company_name: string;
   company_address: string;
   company_email: string;
@@ -36,7 +36,7 @@ interface ISignUp {
   confirm_password: string;
 }
 
-interface IAddUser {
+export interface IAddUser {
   user_name: string;
   user_surname: string;
   user_email: string;
