@@ -1,6 +1,6 @@
 import { IAddUser, ISignUp, IUser } from '../interfaces/usersInterface';
 import { apiClient } from '../../index';
-import { handleApiRequest } from '../apiRequestHandler';
+import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 
 export class UserApi implements IUser {
   token: string;
@@ -33,7 +33,7 @@ export class UserApi implements IUser {
     return Promise.resolve(undefined);
   }
 
-  public async signIn(email: string, password: string): Promise<any> {
+  public async signIn(email: string, password: string): Promise<ApiResponse> {
     const url = '/user/login';
     const method = 'POST'; // Adjust the method based on your API requirements
     const body = {
@@ -45,7 +45,11 @@ export class UserApi implements IUser {
 
     const response = await handleApiRequest({ url, method, body, headers});
     if(response?.success === true){
-      this.token = response?.data?.token;
+      this.token = response?.data?.headers?.token;
+      return {
+        success: true,
+        data: response?.data?.body
+      };
     } else {
       return response;
     }

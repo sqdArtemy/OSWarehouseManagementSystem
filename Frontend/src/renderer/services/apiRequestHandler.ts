@@ -1,7 +1,13 @@
 import { apiClient } from '../index';
 import { ISendData } from './sendDataInterface';
 
-export async function handleApiRequest(data: ISendData): Promise<{ [key: string]: any }> {
+export interface ApiResponse{
+  success: boolean;
+  message?: string;
+  data?: { [key: string]: any };
+}
+
+export async function handleApiRequest(data: ISendData): Promise<ApiResponse> {
   try {
     const request = await apiClient.send({
       headers: data.headers,
@@ -10,19 +16,20 @@ export async function handleApiRequest(data: ISendData): Promise<{ [key: string]
       body: data.body,
     });
 
-    const data = JSON.parse(String(request));
-    if (Number(data.status_code) >= 400) {
+    const responseData = JSON.parse(String(request));
+    if (Number(responseData.status_code) >= 400) {
       return {
         success: false,
-        message: data.message,
+        message: responseData.message,
       };
     } else {
       return {
         success: true,
-        data: data,
+        data: responseData,
       };
     }
   } catch (e) {
+    console.log(e);
     return {
       success: false,
       message: 'Technical issue',

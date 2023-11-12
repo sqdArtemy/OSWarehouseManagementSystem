@@ -1,8 +1,10 @@
+import { ApiResponse } from '../apiRequestHandler';
+
 export interface IUser {
   signIn(
     email: string,
     password: string,
-  ): Promise<{ [key: string]: any } | any>;
+  ): Promise<ApiResponse>;
   signUp(body: ISignUp): Promise<{ [key: string]: any } | any>;
   addUser(
     body: IAddUser
