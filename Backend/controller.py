@@ -203,3 +203,8 @@ def controller(request: dict) -> dict:
         response.status_code = e.status_code
         response.message = e.message
         return response.create_response()
+
+    except Exception as e:
+        response.status_code = 500
+        response.message = str(e)
+        return response.create_response()
