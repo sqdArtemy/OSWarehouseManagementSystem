@@ -14,7 +14,7 @@ export function DashboardLayout() {
   const sideBarElements = [
     { iconSrc: DashboardIcon, text: 'Dashboard' },
     { iconSrc: WarehousesIcon, text: 'Warehouses' },
-    { iconSrc: UsersIcon, text: 'Dashboard' },
+    { iconSrc: UsersIcon, text: 'Users' },
     { iconSrc: ItemsIcon, text: 'Items' },
   ];
 
