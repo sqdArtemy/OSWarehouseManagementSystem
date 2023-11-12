@@ -56,7 +56,21 @@ export class UserApi implements IUser {
   }
 
   public async signUp(body: ISignUp): Promise<any> {
-    return Promise.resolve(undefined);
+    const url = '/user/register';
+    const method = 'POST'; // Adjust the method based on your API requirements
+
+    const headers = {};
+
+    const response = await handleApiRequest({ url, method, body, headers});
+    if(response?.success === true){
+      this.token = response?.data?.headers?.token;
+      return {
+        success: true,
+        data: response?.data?.body
+      };
+    } else {
+      return response;
+    }
   }
 
   public async updateUser(body: IAddUser, id: number): Promise<any> {
