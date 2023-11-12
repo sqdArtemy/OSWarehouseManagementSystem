@@ -12,6 +12,8 @@ import Users from './components/owner/users-component/users';
 import Dashboard from './components/owner/dashboard-component/dashboard';
 import Warehouses from './components/owner/warehouses-component/warehouses';
 import Items from './components/owner/items-component/items';
+import { SignUp } from './components/sign-up-components/sign-up-component/sign-up';
+import { SignUpDetails } from './components/sign-up-components/sign-up-details-component/sign-up-details';
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="sign-in" replace />} />
         <Route path="sign-in" element={<SignIn />} />
+        <Route path="sign-up" element={<SignUp />} />
+        <Route path="sign-up-details" element={<SignUpDetails />} />
         <Route path="owner/*" element={<DashboardLayout />}>
           <Route
             path="./"
