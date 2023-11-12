@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './sign-in.scss';
 
 export function SignIn() {
+  const navigate = useNavigate();
   return (
     <div className='sign-in-container'>
       <header>WAREHOUSE MANAGEMENT SYSTEM</header>
@@ -13,7 +15,9 @@ export function SignIn() {
           <div className='tabs-container'>
             <div className='tabs-left'>
               <span id='id'>ID</span>
-              <span id='sign-in'>Sign In</span>
+              <span id='sign-in'>
+                Sign In
+                </span>
             </div>
             <div className='tabs-right'>
               <span id='login'>Login</span>
