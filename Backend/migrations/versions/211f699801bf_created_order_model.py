@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('total_price', sa.Numeric(precision=20, scale=2), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.Column('order_status', sa.Enum('new', 'processing', 'submitted', 'finished', 'cancelled', name='order_status'), nullable=False),
+    sa.Column('order_status', sa.Enum('new', 'processing', 'submitted', 'finished', 'cancelled', 'lost', 'damaged', name='order_status'), nullable=False),
     sa.CheckConstraint('total_price > 0', name='check_total_price'),
     sa.ForeignKeyConstraint(['recipient_store_id'], ['stores.store_id'], ),
     sa.ForeignKeyConstraint(['supplier_id'], ['warehouses.warehouse_id'], ),

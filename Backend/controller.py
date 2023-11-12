@@ -1,6 +1,6 @@
 from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, StoreView, \
     TransactionView, TransactionItemView, WarehouseView
-from services import ValidationError, DatabaseError
+from utilities.exceptions import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
 
@@ -39,8 +39,7 @@ def controller(request: dict) -> dict:
             if method == Method.GET.value:
                 if "/users" in url:
                     return user_view.get_list(request=request, **filters)
-                else:
-                    return user_view.get(request=request)
+                return user_view.get(request=request)
             elif method == Method.POST.value:
                 if "/register" in url:
                     return user_view.sign_up(request=request)
@@ -51,6 +50,8 @@ def controller(request: dict) -> dict:
             elif method == Method.DELETE.value:
                 return user_view.delete(request=request)
             elif method == Method.PUT.value:
+                if "/change_password" in url:
+                    return user_view.change_password(request=request)
                 return user_view.update(request=request)
 
         # Company`s endpoints
@@ -193,7 +194,17 @@ def controller(request: dict) -> dict:
             elif method == Method.POST.value:
                 return warehouse_view.create(request=request)
 
+        else:
+            response.status_code = 404
+            response.message = "Route not found."
+            return response.create_response()
+
     except (ValidationError, DatabaseError) as e:
         response.status_code = e.status_code
         response.message = e.message
+        return response.create_response()
+
+    except Exception as e:
+        response.status_code = 500
+        response.message = str(e)
         return response.create_response()
