@@ -1,4 +1,6 @@
 import { IAddUser, ISignUp, IUser } from '../interfaces/usersInterface';
+import { apiClient } from '../../index';
+import { handleApiRequest } from '../apiRequestHandler';
 
 export class UserApi implements IUser {
   token: string;
@@ -7,36 +9,53 @@ export class UserApi implements IUser {
     this.token = '';
   }
 
-  addUser(body: IAddUser): Promise<any> {
+  public async addUser(body: IAddUser): Promise<any> {
     return Promise.resolve(undefined);
   }
 
-  deleteUser(id: number): Promise<any> {
+  public async deleteUser(id: number): Promise<any> {
     return Promise.resolve(undefined);
   }
 
-  getAllUsers(filters: { [p: string]: any }): Promise<any> {
+  public async getAllUsers(filters: { [p: string]: any }): Promise<any> {
     return Promise.resolve(undefined);
   }
 
-  getUser(id: number): Promise<any> {
+  public async getUser(id: number): Promise<any> {
     return Promise.resolve(undefined);
   }
 
-  resetPassword(oldPassword: string, newPassword: string, passwordConfirm: string): Promise<any> {
+  public async resetPassword(
+    oldPassword: string,
+    newPassword: string,
+    passwordConfirm: string,
+  ): Promise<any> {
     return Promise.resolve(undefined);
   }
 
-  signIn(email: string, password: string): Promise<any> {
+  public async signIn(email: string, password: string): Promise<any> {
+    const url = '/user/login';
+    const method = 'POST'; // Adjust the method based on your API requirements
+    const body = {
+      user_email: email,
+      password,
+    };
+
+    const headers = {};
+
+    const response = await handleApiRequest({ url, method, body, headers});
+    if(response?.success === true){
+      this.token = response?.data?.token;
+    } else {
+      return response;
+    }
+  }
+
+  public async signUp(body: ISignUp): Promise<any> {
     return Promise.resolve(undefined);
   }
 
-  signUp(body: ISignUp): Promise<any> {
+  public async updateUser(body: IAddUser, id: number): Promise<any> {
     return Promise.resolve(undefined);
   }
-
-  updateUser(body: IAddUser, id: number): Promise<any> {
-    return Promise.resolve(undefined);
-  }
-
 }
