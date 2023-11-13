@@ -1,8 +1,9 @@
-from models import Product
+from models import Product, User
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities.enums.method import Method
 from utilities.exceptions import ValidationError
+from utilities import  extract_id_from_url, decode_token
 
 
 class ProductView(GenericView):
@@ -18,8 +19,28 @@ class ProductView(GenericView):
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
-        # TODO logic will be added later
-        return super().get_list(request=request, **kwargs)
+        # query = self.session.query(self.model).all()
+        #
+        # for filter_param, filter_val in kwargs:
+        #     if hasattr(self.model, filter_param):
+        #         # if product_name, then find all products with product_name like filter_val
+        #         if filter_param == "product_name":
+        #             query = query.filter(getattr(self.model, filter_param).like(f"%{filter_val}%")).all()
+        #
+        #         # if filter_param ends with _gte, then find all products with filter_param >= filter_val
+        #         elif filter_param.endswith("_gte"):
+        #             query = query.filter(getattr(self.model, filter_param[:-4]) >= filter_val).all()
+        #
+        #         # if filter_param ends with _lte, then find all products with filter_param <= filter_val
+        #         elif filter_param.endswith("_lte"):
+        #             query = query.filter(getattr(self.model, filter_param[:-4]) <= filter_val).all()
+        #
+        # instances = query.all()
+        # body = [instance.to_dict() for instance in instances]
+        # self.response.status_code = 200
+        # self.response.data = body
+        # return self.response.create_response()
+        pass
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
@@ -45,8 +66,18 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: logic will be added later
-        return super().delete(request=request)
+        id_to_del = extract_id_from_url(request["url"], "product")
+        product = self.session.query(Product).filter(Product.product_id == id_to_del).first()
+        deleter_id = decode_token(self.headers.get("token"))
+        deleter = self.session.query(User).filter(User.user_id == deleter_id).first()
+
+        if product is None or deleter.company_id != product.company_id:
+            raise ValidationError("Product Not Found", 404)
+
+        self.session.delete(product)
+        self.response.status_code = 204
+        self.response.data = {}
+        return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
