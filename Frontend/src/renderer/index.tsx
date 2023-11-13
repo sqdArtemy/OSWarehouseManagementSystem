@@ -15,7 +15,7 @@ export const apiClient = new TcpClient(serverAddress, Number(serverPort));
 
 (async ()=> {
   try {
-    //await apiClient.connect();
+    await apiClient.connect();
   } catch (e) {
     console.log(e);
   }
