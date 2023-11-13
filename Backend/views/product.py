@@ -9,6 +9,40 @@ class ProductView(GenericView):
     model_name = "product"
 
     @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict, **kwargs) -> dict:
+        """
+        Get all instances of product.
+        :param request: dictionary containing url, method and body
+        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
+        :return: dictionary containing status_code and response body with list of dictionaries of instances` data
+        """
+        # TODO logic will be added later
+        return super().get_list(request=request, **kwargs)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get(self, request: dict) -> dict:
+        """
+        Get response with desired product`s dictionary.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+        # TODO logic will be added later
+        return super().get(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.DELETE.value])
+    def delete(self, request: dict) -> dict:
+        """
+        Delete product from the database.
+        :param request: dictionary containing url, method, body and headers
+        :return: dictionary containing status_code and response body
+        """
+        # TODO: logic will be added later
+        return super().delete(request=request)
+
+    @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
     def create(self, request: dict) -> dict:
         """
