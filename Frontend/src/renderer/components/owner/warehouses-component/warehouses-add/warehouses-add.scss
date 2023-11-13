@@ -2,8 +2,58 @@
   margin-left: 50px;
   display: block;
   font-family: "Bai Jamjuree";
-  .label{
-    margin-bottom: 23px;
+  #label{
+    margin-bottom: 60px;
   }
+  .add-warehouse-form{
+    font-size: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    .titles{
+      display: flex;
+      flex-direction: column;
+    }
+    .inputs{
+      display: flex;
+      flex-direction: column;
+    }
+    .buttons{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+    #clear{
+      color: black;
+      background-color: gray;
+    }
+    #submit{
+      margin-left: 10px;
+    }
+  }
+}
+span{
+  margin-bottom: 45px;
+}
+input, select{
+  margin-bottom: 33px;
+  width: 339px;
+  height: 39px;
+  background: white;
+  border-radius: 6px;
+  border: 1px black solid;
+}
+button {
+  align-self: center;
+  padding: 10px 30px;
+  background-color: #0013C0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 50%;
+  font-size: 1vw;
+  margin-top: 1.5rem;
 }
 
