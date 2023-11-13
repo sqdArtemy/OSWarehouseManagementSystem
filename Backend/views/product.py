@@ -2,6 +2,7 @@ from models import Product
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities.enums.method import Method
+from utilities.exceptions import ValidationError
 
 
 class ProductView(GenericView):
@@ -28,8 +29,13 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method and body
         :return: dictionary containing status_code and response body
         """
-        # TODO logic will be added later
-        return super().get(request=request)
+        if self.instance is None:
+            raise ValidationError("Product Not Found", 404)
+
+        product = self.session.query(Product).filter(Product.product_id == self.instance_id).first()
+        self.response.status_code = 200
+        self.response.data = product.to_dict()
+        return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.DELETE.value])

@@ -32,7 +32,7 @@ class Product(Base):
         product = SessionMaker().query(Product).filter(Product.product_id == self.product_id).first()
         return {
             "product_id": self.product_id,
-            "company": product.company.to_dict(),
+            "company": product.company.to_dict() if product.company is not None else {},
             "product_name": self.product_name,
             "description": self.description,
             "weight": self.weight,
