@@ -8,31 +8,13 @@ import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-d
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 
-interface DataType {
-  key: number;
-  name: string;
-  age: number;
-  address: string;
-  description: string;
-}
-
-const data: DataType[] = [];
-for (let i = 1; i <= 10; i++) {
-  data.push({
-    key: i,
-    name: 'John Brown',
-    age: Number(`${i}2`),
-    address: `New York No. ${i} Lake Park`,
-    description: `My name is John Brown, I am ${i}2 years old, living in New York No. ${i} Lake Park.`,
-  });
-}
-
 export default function Users() {
   const [selectedRole, setSelectedRole] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
+  const [dataSource, setDataSource] = useState([]);
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -70,23 +52,6 @@ export default function Users() {
     }
   };
 
-  const dataSource = [
-    {
-      key: '1',
-      fullName: 'Mike',
-      duty: 'Shipper',
-      phoneNumber: '123456789',
-      email: '1213@abc.com',
-    },
-    {
-      key: '2',
-      fullName: 'Jesse',
-      duty: 'Manager',
-      phoneNumber: '987654321',
-      email: '3311@abc.com',
-    },
-  ];
-
   const placeholderRowCount = 30;
 
   const placeholderData = Array.from(
@@ -100,9 +65,9 @@ export default function Users() {
     }),
   );
 
-  const tableData = dataSource.length > 0 ? dataSource : placeholderData;
+  let tableData = dataSource.length > 0 ? dataSource : placeholderData;
   if (tableData.length < placeholderRowCount) {
-    tableData.push(...placeholderData.slice(tableData.length));
+    tableData = [...tableData, ...placeholderData.slice(tableData.length + 1)];
   }
   const columns = [
     {
@@ -170,6 +135,31 @@ export default function Users() {
 
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
+
+    setDataSource([
+      {
+        key: '1',
+        fullName: 'Mike',
+        duty: 'Shipper',
+        phoneNumber: '123456789',
+        email: '1213@abc.com',
+      },
+      {
+        key: '2',
+        fullName: 'Jesse',
+        duty: 'Manager',
+        phoneNumber: '987654321',
+        email: '3311@abc.com',
+      },
+      {
+        key: '3',
+        fullName: 'Mike',
+        duty: 'Shipper',
+        phoneNumber: '123456789',
+        email: '1213@mmal.com',
+      },
+    ]);
+
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
