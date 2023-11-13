@@ -1,6 +1,10 @@
 import bcrypt
 import re
 
+from db_config import SessionMaker
+from models import User
+from utilities.exceptions import ValidationError
+
 
 def hash_password(password: str) -> bytes:
     # Hashing password
@@ -38,8 +42,15 @@ def decode_token(token: str) -> int:
     :param token: encoded token.
     :return: id of the user from database
     """
+    if token is None:
+        raise ValidationError("Token is not provided.")
+    if not token.isalnum():
+        raise ValidationError("Token is not valid.")
 
     user_id = (int(token[1:]) - 420) // 69
+
+    if SessionMaker().query(User).filter_by(user_id=user_id).first() is None:
+        raise ValidationError("User with this token does not exist.")
 
     return user_id
 

@@ -1,8 +1,8 @@
 from db_config import SessionMaker
 from models import Company, User
 from utilities import is_email_valid, is_instance_already_exists, decode_token
-from services import (check_allowed_methods_middleware,  view_function_middleware, check_allowed_roles_middleware,
-                      ValidationError, DatabaseError)
+from services import check_allowed_methods_middleware,  view_function_middleware, check_allowed_roles_middleware
+from utilities.exceptions import ValidationError, DatabaseError
 from utilities.enums.method import Method
 from utilities.enums.data_related_enums import UserRole
 from services.generics import GenericView

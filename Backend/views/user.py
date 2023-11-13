@@ -6,8 +6,8 @@ from utilities import (
     hash_password, is_email_valid, is_phone_valid, create_token, check_password, decode_token,
     is_instance_already_exists, extract_id_from_url
 )
-from services import (check_allowed_methods_middleware, check_allowed_roles_middleware, view_function_middleware,
-                      ValidationError, DatabaseError)
+from services import check_allowed_methods_middleware, check_allowed_roles_middleware, view_function_middleware
+from utilities.exceptions import ValidationError, DatabaseError
 from utilities.enums.method import Method
 from utilities.enums.data_related_enums import UserRole
 from services.generics import GenericView
@@ -116,7 +116,7 @@ class UserView(GenericView):
             return self.response.create_response()
 
     @view_function_middleware
-    @check_allowed_methods_middleware([Method.POST.value])
+    @check_allowed_methods_middleware([Method.PUT.value])
     def change_password(self, request: dict) -> dict:
         """
         'Endpoint' to change user password.
@@ -124,10 +124,10 @@ class UserView(GenericView):
         :return: dictionary containing status_code and response body
         """
 
-        user_id = decode_token(self.headers["token"])
-        old_password = self.body["old_password"]
-        new_password = self.body["new_password"]
-        confirm_password = self.body["confirm_password"]
+        user_id = decode_token(self.headers.get("token"))
+        old_password = self.body.get("old_password")
+        new_password = self.body.get("new_password")
+        confirm_password = self.body.get("confirm_password")
 
         # Check if password and confirm_password are the same
         if new_password != confirm_password:
@@ -149,9 +149,15 @@ class UserView(GenericView):
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
     def update(self, request: dict) -> dict:
-        # Check if requested user is the same as the one that should be updated
-        if self.instance_id != decode_token(self.headers["token"]):
-            raise ValidationError(status_code=401, message="You can update only your own data.")
+        # Check if requested user is the same as the one that should be updated or if the requester is owner of the
+        # company where user is located
+        requester_id = decode_token(self.headers.get("token"))
+        requester = SessionMaker().query(User).filter_by(user_id=requester_id).first()
+
+        if self.instance_id != requester_id and (
+                self.instance.company_id != requester.company_id or requester.user_role != UserRole.OWNER.value["name"]
+        ):
+            raise ValidationError(status_code=401, message="You can not update data of this user.")
 
         # Remove password if it was passed
         if "user_password" in self.body:
@@ -170,7 +176,7 @@ class UserView(GenericView):
         """
 
         # Get owner id from token and retrieve owner`s company
-        owner_id = decode_token(self.headers["token"])
+        owner_id = decode_token(self.headers.get("token"))
         company = SessionMaker().query(User).filter_by(user_id=owner_id).first().company
         company_id = company.company_id
         company_name = company.company_name
@@ -223,7 +229,7 @@ class UserView(GenericView):
         # define objects
         id_to_del = extract_id_from_url(request["url"], "user")
         user_to_del = SessionMaker().query(User).filter_by(user_id=id_to_del).first()
-        user_id = decode_token(self.headers["token"])
+        user_id = decode_token(self.headers.get("token"))
         user = SessionMaker().query(User).filter_by(user_id=user_id).first()
         user_role = user.user_role
 

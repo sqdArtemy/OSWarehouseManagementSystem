@@ -1,7 +1,8 @@
 from sqlalchemy.exc import IntegrityError
 
 from db_config import SessionMaker
-from services import check_allowed_methods_middleware, view_function_middleware, ValidationError, DatabaseError
+from services import check_allowed_methods_middleware, view_function_middleware
+from utilities.exceptions import ValidationError, DatabaseError
 from utilities.enums.method import Method
 
 

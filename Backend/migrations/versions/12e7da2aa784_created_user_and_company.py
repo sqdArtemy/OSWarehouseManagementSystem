@@ -37,7 +37,7 @@ def upgrade() -> None:
     sa.Column('user_phone', sa.String(length=15), nullable=True),
     sa.Column('user_email', sa.String(length=255), nullable=True),
     sa.Column('user_password', sa.String(length=255), nullable=True),
-    sa.Column('user_role', sa.Enum('owner', 'manager', 'shipper', 'customer', name='user_role'), nullable=False),
+    sa.Column('user_role', sa.Enum('owner', 'manager', 'shipper', 'customer', 'admin', name='user_role'), nullable=False),
     sa.ForeignKeyConstraint(['company_id'], ['companies.company_id'], ),
     sa.PrimaryKeyConstraint('user_id')
     )
