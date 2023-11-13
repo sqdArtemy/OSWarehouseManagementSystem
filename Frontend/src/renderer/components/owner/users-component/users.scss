@@ -1,0 +1,147 @@
+.users-container {
+  display: flex;
+  flex-direction: row;
+  width: 85%;
+  min-height: 100vh;
+  align-items: center;
+
+  .users-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5vw;
+    min-height: 100vh;
+    width: 100%;
+    padding-top: 3vw;
+    padding-left: 3vw;
+
+
+    .users-table-header-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3vw;
+
+      .users-table-header {
+        font-size: 3vw;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: row;
+        gap: 10vw;
+        width: 100%;
+        align-items: center;
+
+
+        .search-bar-container {
+          display: flex;
+          flex-direction: row;
+
+          .search-bar-dropdown-container {
+            min-height: 3vw;
+            width: 10vw;
+
+            border: 0.5px solid #000000;
+
+
+          }
+
+
+          .search-bar-input {
+            width: 20vw;
+            min-height: 3vw;
+            border: 0.5px solid #000000;
+          }
+
+          .search-bar-button {
+            width: 3vw;
+            min-height: 3vw;
+            background: #5564B2;
+            display: inline-block;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-bottom-right-radius: 1vw;
+            border-top-right-radius: 1vw;
+
+            &:hover {
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+              border-color: #007bff;
+            }
+
+            &:focus {
+              box-shadow: inset 0 0 0 1px #007bff;
+            }
+
+          }
+        }
+
+        .delete-btn {
+          width: 2.2vw;
+          min-height: 2.2vw;
+        }
+
+        .add-btn {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5vw;
+
+          width: 10vw;
+          min-height: 2.2vw;
+          border: 0.5px solid #000000;
+
+
+          color: #FFFFFF;
+          background-color: #378BA4;
+          border-radius: 0.3rem;
+
+          cursor: pointer;
+          .add-btn-text{
+            font-size: 1.3vw;
+          }
+
+          &:hover {
+            background-color: #2C7A8B;
+          }
+
+          &:focus {
+            background-color: #2C7A8B;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+          }
+        }
+      }
+    }
+
+    .users-table {
+      width: 85%;
+      min-height: 70%;
+
+    }
+
+  }
+
+  .users-separator-line {
+    width: 2px;
+    height: 80%;
+    background-color: #000000;
+  }
+
+  .users-form {
+    min-height: 100vh;
+    width: 40%;
+  }
+}
+
+.highlight-bottom-border > td {
+  border-bottom: solid 1px black !important
+}
+
+.highlight-left-border > td {
+  border-left: solid 1px black !important
+}
+
+.enabled {
+  cursor: pointer;
+}
