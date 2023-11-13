@@ -71,10 +71,15 @@ class ProductView(GenericView):
         deleter_id = decode_token(self.headers.get("token"))
         deleter = self.session.query(User).filter(User.user_id == deleter_id).first()
 
+        # if product does not exist or deleter is not from the same company as product, raise ValidationError
         if product is None or deleter.company_id != product.company_id:
             raise ValidationError("Product Not Found", 404)
 
+        # delete
         self.session.delete(product)
+        self.session.commit()
+
+        # prepare response
         self.response.status_code = 204
         self.response.data = {}
         return self.response.create_response()
@@ -87,8 +92,35 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
-        return super().create(request=request)
+        # TODO: FIX: this method returns 'weight': Decimal('5.5000') instead if return 'weight': 5.5
+        # if product_name already exists in the database, raise ValidationError
+        product_name = self.body["product_name"]
+        if self.session.query(Product).filter(Product.product_name == product_name).first() is not None:
+            raise ValidationError("Product with this name already exists in the system", 400)
+
+        # get user who wants to create
+        creator_id = decode_token(self.headers.get("token"))
+        creator = self.session.query(User).filter(User.user_id == creator_id).first()
+
+        # create new product
+        product = Product(
+            product_name=product_name,
+            company_id=creator.company_id,
+            description=self.body.get("description"),
+            weight=self.body.get("weight"),
+            volume=self.body.get("volume"),
+            price=self.body.get("price"),
+            expiry_duration=self.body.get("expiry_duration")
+        )
+
+        # save product to the database
+        self.session.add(product)
+        self.session.commit()
+
+        # prepare response
+        self.response.status_code = 201
+        self.response.data = product.to_dict()
+        return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
