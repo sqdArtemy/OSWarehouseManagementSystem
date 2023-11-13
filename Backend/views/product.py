@@ -19,6 +19,8 @@ class ProductView(GenericView):
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
+        # TODO: I get error 'too many values to unpack (expected 2)'
+
         # query = self.session.query(self.model).all()
         #
         # for filter_param, filter_val in kwargs:
@@ -130,5 +132,27 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
-        return super().update(request=request)
+        # TODO: FIX: this method returns 'weight': Decimal('5.5000') instead if return 'weight': 5.5
+        # if product_name already exists in the database, raise ValidationError
+        product_name = self.body.get("product_name")
+        prod_with_same_name = self.session.query(Product).filter(Product.product_name == product_name).first()
+        if product_name is not None and prod_with_same_name is not None:
+            raise ValidationError("Product with this name already exists in the system", 400)
+
+        id_to_update = extract_id_from_url(request["url"], "product")
+        product = self.session.query(Product).filter(Product.product_id == id_to_update).first()
+        updater_id = decode_token(self.headers.get("token"))
+        updater = self.session.query(User).filter(User.user_id == updater_id).first()
+
+        # product does not exist or updater is not from the same company as product
+        if product is None or updater.company_id != product.company_id:
+            raise ValidationError("Product Not Found", 404)
+
+        for key, value in self.body.items():
+            if hasattr(product, key):
+                setattr(product, key, value)
+        self.session.commit()
+
+        self.response.status_code = 200
+        self.response.data = product.to_dict()
+        return self.response.create_response()
