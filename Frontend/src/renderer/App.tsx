@@ -10,16 +10,18 @@ import './App.css';
 import './normalize.css';
 import Users from './components/owner/users-component/users';
 import Dashboard from './components/owner/dashboard-component/dashboard';
-import Warehouses from './components/owner/warehouses-component/warehouses';
+import Warehouses from './components/owner/warehouses-component/warehouses/warehouses';
+import AddWarehouses from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 import Items from './components/owner/items-component/items';
 import { SignUp } from './components/sign-up-components/sign-up-component/sign-up';
 import { SignUpDetails } from './components/sign-up-components/sign-up-details-component/sign-up-details';
+import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 
 export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="sign-in" replace />} />
+        <Route path="/" element={<Navigate to="/owner/warehouses-add" replace />} />
         <Route path="sign-in" element={<SignIn />} />
         <Route path="sign-up" element={<SignUp />} />
         <Route path="sign-up-details" element={<SignUpDetails />} />
@@ -32,6 +34,7 @@ export default function App() {
           <Route path="users" element={<Users />} />
           <Route path="warehouses" element={<Warehouses />} />
           <Route path="items" element={<Items />} />
+          <Route path="warehouses-add" element={<WarehousesAdd />}/>
         </Route>
       </Routes>
     </Router>
