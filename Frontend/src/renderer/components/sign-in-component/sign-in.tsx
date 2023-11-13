@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiClient, userApi } from '../../index';
+import { userApi } from '../../index';
 import './sign-in.scss';
 
 export function SignIn() {
@@ -12,15 +12,14 @@ export function SignIn() {
     console.log('password', password);
     const response = await userApi.signIn(email, password);
 
-    if(response.success){
-      switch (response.data?.user_role){
+    if (response.success) {
+      switch (response.data?.user_role) {
         case 'owner':
           navigate('/owner');
           break;
         default:
           break;
       }
-
     } else {
       // some error message
     }
