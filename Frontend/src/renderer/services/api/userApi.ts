@@ -1,41 +1,74 @@
 import { IAddUser, ISignUp, IUser } from '../interfaces/usersInterface';
-import { apiClient } from '../../index';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 
 export class UserApi implements IUser {
   token: string;
+  userData: IAddUser;
 
   constructor() {
     this.token = '';
   }
 
-  public async addUser(body: IAddUser): Promise<any> {
-    return Promise.resolve(undefined);
+  get getToken(): string {
+    return this.token;
   }
 
-  public async deleteUser(id: number): Promise<any> {
-    return Promise.resolve(undefined);
+  get getUserData(): IAddUser {
+    return this.userData;
   }
 
-  public async getAllUsers(filters: { [p: string]: any }): Promise<any> {
-    return Promise.resolve(undefined);
+  public async addUser(body: IAddUser): Promise<ApiResponse> {
+    const url = '/user/users';
+    const method = 'POST';
+    const headers = { token: this.token } ;
+
+    return await handleApiRequest({ url, method, body, headers});
   }
 
-  public async getUser(id: number): Promise<any> {
-    return Promise.resolve(undefined);
+  public async deleteUser(id: number): Promise<ApiResponse> {
+    const url = '/user/' + id;
+    const method = 'DELETE';
+    const body = {};
+    const headers = { token: this.token } ;
+
+    return await handleApiRequest({ url, method, body, headers});
+  }
+
+  public async getAllUsers(filters: { [p: string]: any }): Promise<ApiResponse> {
+    const url = '/user/users';
+    const method = 'GET';
+    const body = {};
+
+    const headers = { filters, token: this.token };
+
+    return await handleApiRequest({ url, method, body, headers});
+  }
+
+  public async getUser(id: number): Promise<ApiResponse> {
+    const url = '/user/' + id;
+    const method = 'GET';
+    const body = {};
+    const headers = { token: this.token } ;
+
+    return await handleApiRequest({ url, method, body, headers});
   }
 
   public async resetPassword(
     oldPassword: string,
     newPassword: string,
     passwordConfirm: string,
-  ): Promise<any> {
-    return Promise.resolve(undefined);
+  ): Promise<ApiResponse> {
+    const url = '/user/change_password';
+    const method = 'PUT'; // Adjust the method based on your API requirements
+    const body = { old_password: oldPassword, new_password: newPassword, confirm_password: passwordConfirm};
+    const headers = { token: this.token } ;
+
+    return await handleApiRequest({ url, method, body, headers});
   }
 
   public async signIn(email: string, password: string): Promise<ApiResponse> {
     const url = '/user/login';
-    const method = 'POST'; // Adjust the method based on your API requirements
+    const method = 'POST';
     const body = {
       user_email: email,
       password,
@@ -46,6 +79,7 @@ export class UserApi implements IUser {
     const response = await handleApiRequest({ url, method, body, headers});
     if(response?.success === true){
       this.token = response?.data?.headers?.token;
+      this.userData = response?.data?.body;
       return {
         success: true,
         data: response?.data?.body
@@ -55,11 +89,30 @@ export class UserApi implements IUser {
     }
   }
 
-  public async signUp(body: ISignUp): Promise<any> {
-    return Promise.resolve(undefined);
+  public async signUp(body: ISignUp): Promise<ApiResponse> {
+    const url = '/user/register';
+    const method = 'POST';
+
+    const headers = {};
+
+    const response = await handleApiRequest({ url, method, body, headers});
+    if(response?.success === true){
+      this.token = response?.data?.headers?.token;
+      this.userData = response?.data?.body;
+      return {
+        success: true,
+        data: response?.data?.body
+      };
+    } else {
+      return response;
+    }
   }
 
-  public async updateUser(body: IAddUser, id: number): Promise<any> {
-    return Promise.resolve(undefined);
+  public async updateUser(body: IAddUser, id: number): Promise<ApiResponse> {
+    const url = '/user/' + id;
+    const method = 'PUT';
+    const headers = { token: this.token } ;
+
+    return await handleApiRequest({ url, method, body, headers});
   }
 }

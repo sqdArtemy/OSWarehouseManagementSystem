@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './sign-up.scss';
 import { useNavigate } from 'react-router-dom';
 
 export function SignUp() {
   const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+
+  const handleContinue = () => {
+    navigate('/sign-up-details', {
+      state: { name, email, address },
+    });
+  };
 
   return (
     <div className="sign-up-container">
@@ -30,14 +39,26 @@ export function SignUp() {
           </div>
 
           <form>
-            <input id="name" placeholder={'Name of Company'} />
-            <input type="Email" id="email" placeholder={'Email of Company'} />
-            <button
-              type="button"
-              onClick={() => {
-                navigate('/sign-up-details');
-              }}
-            >
+            <input
+              id="name"
+              placeholder={'Name of Company'}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              id="name"
+              placeholder={'Address of Company'}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+            <input
+              type="email"
+              id="email"
+              placeholder={'Email of Company'}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button type="button" onClick={handleContinue}>
               Continue
             </button>
           </form>
@@ -46,3 +67,4 @@ export function SignUp() {
     </div>
   );
 }
+
