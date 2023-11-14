@@ -2,30 +2,12 @@ import React, { useEffect, useState } from 'react';
 import './users.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-
-interface DataType {
-  key: number;
-  name: string;
-  age: number;
-  address: string;
-  description: string;
-}
-
-const data: DataType[] = [];
-for (let i = 1; i <= 10; i++) {
-  data.push({
-    key: i,
-    name: 'John Brown',
-    age: Number(`${i}2`),
-    address: `New York No. ${i} Lake Park`,
-    description: `My name is John Brown, I am ${i}2 years old, living in New York No. ${i} Lake Park.`,
-  });
-}
+import AddUserPopup from './add-user-component/add-user';
 
 export default function Users() {
   const [selectedRole, setSelectedRole] = useState('All');
@@ -33,6 +15,9 @@ export default function Users() {
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
+  const [dataSource, setDataSource] = useState([]);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [newUserData, setNewUserData] = useState({});
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -40,9 +25,12 @@ export default function Users() {
     e.domEvent.target.innerText = selectedRole;
   };
 
-  const handleDelete = () => {
+  const handleDeleteUser = (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
+    }
+    if (record) {
+      console.log('delete', record);
     }
   };
 
@@ -70,22 +58,23 @@ export default function Users() {
     }
   };
 
-  const dataSource = [
-    {
-      key: '1',
-      fullName: 'Mike',
-      duty: 'Shipper',
-      phoneNumber: '123456789',
-      email: '1213@abc.com',
-    },
-    {
-      key: '2',
-      fullName: 'Jesse',
-      duty: 'Manager',
-      phoneNumber: '987654321',
-      email: '3311@abc.com',
-    },
-  ];
+  const handleAddUser = (e) => {
+    setTimeout(() => {
+      if (e.target instanceof HTMLButtonElement) e.target.blur();
+      else {
+        (e.target as HTMLImageElement).parentElement?.blur();
+      }
+    }, 100);
+    setIsPopupVisible(true);
+  };
+
+  const handleEditUser = (record) => {
+    console.log('edit', record);
+  };
+
+  const hidePopup = () => {
+    setIsPopupVisible(false);
+  };
 
   const placeholderRowCount = 30;
 
@@ -100,11 +89,32 @@ export default function Users() {
     }),
   );
 
-  const tableData = dataSource.length > 0 ? dataSource : placeholderData;
+  let tableData = dataSource.length > 0 ? dataSource : placeholderData;
   if (tableData.length < placeholderRowCount) {
-    tableData.push(...placeholderData.slice(tableData.length));
+    tableData = [...tableData, ...placeholderData.slice(tableData.length + 1)];
   }
+
   const columns = [
+    {
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
+      width: '10%',
+      align: 'center',
+      render: (_, record) =>
+        record.fullName ? (
+          <span className={'table-actions-container'}>
+            <EditOutlined
+              onClick={() => handleEditUser(record)}
+              style={{ color: 'blue', cursor: 'pointer' }}
+            />
+            <DeleteOutlined
+              onClick={() => handleDeleteUser(record)}
+              style={{ color: 'red', cursor: 'pointer' }}
+            />
+          </span>
+        ) : null,
+    },
     {
       title: 'Full name',
       dataIndex: 'fullName',
@@ -170,6 +180,31 @@ export default function Users() {
 
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
+
+    setDataSource([
+      {
+        key: '1',
+        fullName: 'Mike',
+        duty: 'Shipper',
+        phoneNumber: '123456789',
+        email: '1213@abc.com',
+      },
+      {
+        key: '2',
+        fullName: 'Jesse',
+        duty: 'Manager',
+        phoneNumber: '987654321',
+        email: '3311@abc.com',
+      },
+      {
+        key: '3',
+        fullName: 'Mike',
+        duty: 'Shipper',
+        phoneNumber: '123456789',
+        email: '1213@mmal.com',
+      },
+    ]);
+
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
@@ -209,22 +244,17 @@ export default function Users() {
               className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
-              onClick={() => handleDelete()}
+              onClick={() => handleDeleteUser()}
             ></img>
-            <button
-              className={'add-btn'}
-              onClick={(e) => {
-                setTimeout(() => {
-                  if (e.target instanceof HTMLButtonElement) e.target.blur();
-                  else {
-                    (e.target as HTMLImageElement).parentElement?.blur();
-                  }
-                }, 100);
-              }}
-            >
+            <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add User</span>
             </button>
+            <AddUserPopup
+              hidePopup={hidePopup}
+              isPopupVisible={isPopupVisible}
+              userData={{ newUserData, setNewUserData }}
+            />
           </div>
         </div>
         <Table
@@ -232,7 +262,7 @@ export default function Users() {
             ...rowSelection,
           }}
           dataSource={tableData as []}
-          columns={columns}
+          columns={columns as []}
           scroll={scrollSize}
           pagination={false}
           size={'small'}
