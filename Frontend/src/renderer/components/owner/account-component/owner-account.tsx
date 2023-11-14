@@ -24,12 +24,14 @@ export default function OwnerAccount() {
             <input type="phone" className="phone"/>
             {!changePassDisplay ? (<input type="password" />) : (<><input type="password" /><input type="password" /><input type="password" /></>)}
             <div className="buttons">
-              <button id="submit"
+              <button id="change-pass"
                       onClick={
                         ()=>setChangePassDisplay(true)
                         }>
                         Change Password
               </button>
+              <button id="reset">Reset</button>
+              <button id="save">Save</button>
             </div>
           </div>
         </div>

@@ -29,6 +29,40 @@
 .owner-account-form{
   margin: 2.604vw;
 }
+.buttons{
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+#change-pass{
+  padding: 10px 30px;
+  background-color: #0013C0;
+  color: white;
+  border: none;
+  width: 55%;
+  &:hover {
+    background-color: darken(#0013C0, 10%);
+  }
+}
+#save{
+  background-color: #0013C0;
+  color: white;
+  border: none;
+  width: 20%;
+  &:hover {
+    background-color: darken(#0013C0, 10%);
+  }
+}
+#reset{
+  margin-left: 10%;
+  width: 20%;
+  border: none;
+  background-color: gray;
+  color: white;
+  &:hover {
+    background-color: darken(gray, 10%);
+  }
+}
 input{
   height: 2.3vw;
   border-radius: 6px;
@@ -40,19 +74,13 @@ span{
 }
 button{
   align-self: center;
-  padding: 10px 30px;
-  background-color: #0013C0;
-  color: white;
-  border: none;
-  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s;
-  width: 55%;
   font-size: 1vw;
+  border-radius: 5px;
   margin-top: 1.5rem;
-
-  &:hover {
-    background-color: darken(#0013C0, 10%);
-  }
+  transition: background-color 0.3s;
+  padding-bottom: 10px;
+  padding-top: 10px;
 }
+
 
