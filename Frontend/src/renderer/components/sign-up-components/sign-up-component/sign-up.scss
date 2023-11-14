@@ -1,4 +1,4 @@
-.sign-in-container {
+.sign-up-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -30,13 +30,45 @@
     min-height: 85vh;
     position: relative;
 
+    .status-icons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-right: 50px;
 
-    .login-form {
+
+      .status-icon {
+        width: 4.5vw;
+        height: 4.5vw;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        font-size: 1vw;
+
+        &#sh {
+          background-color: #FF6262;
+        }
+
+        &#mng {
+          background-color: #05EB00;
+        }
+
+        &#str {
+          background-color: #EBB700;
+        }
+
+
+      }
+    }
+
+    .sign-up-form {
       display: flex;
       flex-direction: column;
       align-items: stretch;
       justify-content: flex-start;
-      gap: 2vw;
+      gap:2vw;
       border: 1px solid #ddd;
       padding: 50px 40px 30px 40px;
       border-radius: 5px;
@@ -70,7 +102,6 @@
               font-size: 2vw;
             }
 
-
           }
 
 
@@ -86,12 +117,9 @@
             text-align: center;
             font-size: 1.5vw;
             cursor: pointer;
-
             &.disabled {
               color: #868686;
             }
-
-
           }
         }
 

@@ -1,4 +1,4 @@
-.sign-in-container {
+.sign-up-details-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,24 +25,23 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    gap: 2rem;
     width: 100%;
     min-height: 85vh;
     position: relative;
 
 
-    .login-form {
+    .sign-up-details-form {
       display: flex;
       flex-direction: column;
       align-items: stretch;
       justify-content: flex-start;
       gap: 2vw;
       border: 1px solid #ddd;
-      padding: 50px 40px 30px 40px;
+      padding: 2vw;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       min-width: 30vh;
-      min-height: 30vh;
+      min-height: 25vh;
       position: relative;
 
 
@@ -50,7 +49,7 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        gap: 13rem;
+        gap: 10vw;
         align-items: center;
 
 
@@ -69,7 +68,6 @@
             &#sign-in {
               font-size: 2vw;
             }
-
 
           }
 
@@ -90,8 +88,6 @@
             &.disabled {
               color: #868686;
             }
-
-
           }
         }
 
