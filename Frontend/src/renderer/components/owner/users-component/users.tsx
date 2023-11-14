@@ -26,12 +26,16 @@ export default function Users() {
     e.domEvent.target.innerText = selectedRole;
   };
 
-  const handleDeleteUser = (record?) => {
+  const handleDeleteUser = async (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
+      for (let user of selectedRows){
+        await userApi.deleteUser(user.user_id);
+      }
     }
     if (record) {
       console.log('delete', record);
+      await userApi.deleteUser(record.user_id);
     }
   };
 
@@ -48,7 +52,7 @@ export default function Users() {
       filters.user_role = selectedRole.toLowerCase();
     }
 
-    if(selectedRole === 'All'){
+    if(selectedRole === 'All' && filters.user_role){
       delete filters.user_role;
     }
 
