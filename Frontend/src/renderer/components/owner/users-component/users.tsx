@@ -7,6 +7,7 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
+import AddUserPopup from './add-user-component/add-user';
 
 export default function Users() {
   const [selectedRole, setSelectedRole] = useState('All');
@@ -15,6 +16,8 @@ export default function Users() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [newUserData, setNewUserData] = useState({});
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -50,6 +53,22 @@ export default function Users() {
     } else {
       setDeleteBtn(false);
     }
+  };
+
+  // Function to show popup
+  const handleAddUser = (e) => {
+    setTimeout(() => {
+      if (e.target instanceof HTMLButtonElement) e.target.blur();
+      else {
+        (e.target as HTMLImageElement).parentElement?.blur();
+      }
+    }, 100);
+    setIsPopupVisible(true);
+  };
+
+  // Function to hide popup
+  const hidePopup = () => {
+    setIsPopupVisible(false);
   };
 
   const placeholderRowCount = 30;
@@ -201,20 +220,15 @@ export default function Users() {
               alt={'Delete Button'}
               onClick={() => handleDelete()}
             ></img>
-            <button
-              className={'add-btn'}
-              onClick={(e) => {
-                setTimeout(() => {
-                  if (e.target instanceof HTMLButtonElement) e.target.blur();
-                  else {
-                    (e.target as HTMLImageElement).parentElement?.blur();
-                  }
-                }, 100);
-              }}
-            >
+            <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add User</span>
             </button>
+            <AddUserPopup
+              hidePopup={hidePopup}
+              isPopupVisible={isPopupVisible}
+              userData={{ newUserData, setNewUserData }}
+            />
           </div>
         </div>
         <Table
