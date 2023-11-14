@@ -2,7 +2,7 @@ import React from 'react';
 import './add-user.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 
-export interface INewUserData {
+export interface IUserData {
   'First Name'?: string;
   'Last Name'?: string;
   Email?: string;
@@ -18,7 +18,7 @@ export default function AddUser({
   isPopupVisible: boolean;
   hidePopup: () => void;
   userData: {
-    newUserData: INewUserData;
+    newUserData: IUserData;
     setNewUserData: (newUserData: unknown) => void;
   };
 }) {
@@ -57,7 +57,6 @@ export default function AddUser({
   const handleReset = () => {
     formRef.current?.resetFields();
   };
-
   return (
     <Modal
       title="Add New User"
@@ -114,6 +113,7 @@ export default function AddUser({
           >
             Reset
           </Button>
+
           <Button type="primary" htmlType="submit">
             Submit
           </Button>
