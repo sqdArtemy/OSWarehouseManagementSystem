@@ -121,15 +121,8 @@ class ProductView(GenericView):
         updater_id = decode_token(self.headers.get("token"))
         updater = self.session.query(User).filter(User.user_id == updater_id).first()
 
-        # product does not exist or updater is not from the same company as product
+        # if product does not exist or updater is not from the same company as product
         if product is None or updater.company_id != product.company_id:
             raise ValidationError("Product Not Found", 404)
 
-        for key, value in self.body.items():
-            if hasattr(product, key):
-                setattr(product, key, value)
-        self.session.commit()
-
-        self.response.status_code = 200
-        self.response.data = product.to_dict()
-        return self.response.create_response()
+        return super().update(request=request)
