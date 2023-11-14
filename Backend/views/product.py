@@ -68,23 +68,15 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        id_to_del = extract_id_from_url(request["url"], "product")
-        product = self.session.query(Product).filter(Product.product_id == id_to_del).first()
+        # get user who wants to delete
         deleter_id = decode_token(self.headers.get("token"))
         deleter = self.session.query(User).filter(User.user_id == deleter_id).first()
 
         # if product does not exist or deleter is not from the same company as product, raise ValidationError
-        if product is None or deleter.company_id != product.company_id:
+        if self.instance is None or deleter.company_id != self.instance.company_id:
             raise ValidationError("Product Not Found", 404)
 
-        # delete
-        self.session.delete(product)
-        self.session.commit()
-
-        # prepare response
-        self.response.status_code = 204
-        self.response.data = {}
-        return self.response.create_response()
+        return super().delete(request=request)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
