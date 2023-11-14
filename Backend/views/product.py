@@ -88,7 +88,7 @@ class ProductView(GenericView):
         """
         # TODO: FIX: this method returns 'weight': Decimal('5.5000') instead if return 'weight': 5.5
         # if product_name already exists in the database, raise ValidationError
-        product_name = self.body["product_name"]
+        product_name = self.body.get("product_name")
         if self.session.query(Product).filter(Product.product_name == product_name).first() is not None:
             raise ValidationError("Product with this name already exists in the system", 400)
 
@@ -96,25 +96,10 @@ class ProductView(GenericView):
         creator_id = decode_token(self.headers.get("token"))
         creator = self.session.query(User).filter(User.user_id == creator_id).first()
 
-        # create new product
-        product = Product(
-            product_name=product_name,
-            company_id=creator.company_id,
-            description=self.body.get("description"),
-            weight=self.body.get("weight"),
-            volume=self.body.get("volume"),
-            price=self.body.get("price"),
-            expiry_duration=self.body.get("expiry_duration")
-        )
+        # set creator`s company_id to body
+        self.body["company_id"] = creator.company_id
 
-        # save product to the database
-        self.session.add(product)
-        self.session.commit()
-
-        # prepare response
-        self.response.status_code = 201
-        self.response.data = product.to_dict()
-        return self.response.create_response()
+        return super().create(request=request)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
