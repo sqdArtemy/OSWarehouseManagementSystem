@@ -43,7 +43,7 @@ class GenericView(metaclass=ModelAttributesMeta):
         :return: dictionary containing status_code and response body
         """
         if self.instance is None:
-            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
+            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 404)
 
         self.response.status_code = 200
         self.response.data = self.instance.to_dict()

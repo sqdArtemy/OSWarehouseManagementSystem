@@ -52,13 +52,13 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method and body
         :return: dictionary containing status_code and response body
         """
-        if self.instance is None:
+        # check if the product and user have the same company_id
+        user_id = decode_token(self.headers.get("token"))
+        user = self.session.query(User).filter(User.user_id == user_id).first()
+        if user.company_id != self.instance.company_id:
             raise ValidationError("Product Not Found", 404)
 
-        product = self.session.query(Product).filter(Product.product_id == self.instance_id).first()
-        self.response.status_code = 200
-        self.response.data = product.to_dict()
-        return self.response.create_response()
+        return super().get(request=request)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.DELETE.value])
