@@ -1,9 +1,10 @@
 from models import Product, User
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
+from sqlalchemy import func
 from utilities.enums.method import Method
 from utilities.exceptions import ValidationError
-from utilities import  extract_id_from_url, decode_token
+from utilities import extract_id_from_url, decode_token
 
 
 class ProductView(GenericView):
@@ -116,13 +117,11 @@ class ProductView(GenericView):
         if product_name is not None and prod_with_same_name is not None:
             raise ValidationError("Product with this name already exists in the system", 400)
 
-        id_to_update = extract_id_from_url(request["url"], "product")
-        product = self.session.query(Product).filter(Product.product_id == id_to_update).first()
         updater_id = decode_token(self.headers.get("token"))
         updater = self.session.query(User).filter(User.user_id == updater_id).first()
 
         # if product does not exist or updater is not from the same company as product
-        if product is None or updater.company_id != product.company_id:
+        if self.instance is None or updater.company_id != self.instance.company_id:
             raise ValidationError("Product Not Found", 404)
 
         return super().update(request=request)
