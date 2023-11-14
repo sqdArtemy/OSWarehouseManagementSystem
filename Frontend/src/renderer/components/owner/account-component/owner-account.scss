@@ -1,0 +1,58 @@
+.warehouses-container{
+  width: 85vw;
+  height: 100%;
+}
+.owner-account-form{
+  width: 85vw;
+  height: 85vh;
+  display: flex;
+  flex-direction: row;
+}
+.titles{
+  width: 15vw;
+  font-size: 2vw;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 19px;
+}
+.inputs{
+  width: 20.772vw;
+  display: flex;
+  flex-direction: column;
+}
+.header{
+  font-size: 3vw;
+  min-height: 3vh;
+  margin-top: 3.981vw;
+  margin-left: 2.604vw;
+}
+.owner-account-form{
+  margin: 2.604vw;
+}
+input{
+  height: 2.3vw;
+  border-radius: 6px;
+  margin-bottom: 19px;
+  font-size: 1.7vw;
+}
+span{
+  margin-bottom: 19px;
+}
+button{
+  align-self: center;
+  padding: 10px 30px;
+  background-color: #0013C0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 55%;
+  font-size: 1vw;
+  margin-top: 1.5rem;
+
+  &:hover {
+    background-color: darken(#0013C0, 10%);
+  }
+}
+
