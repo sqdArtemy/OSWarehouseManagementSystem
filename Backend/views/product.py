@@ -4,7 +4,7 @@ from services.generics import GenericView
 from sqlalchemy import func
 from utilities.enums.method import Method
 from utilities.exceptions import ValidationError
-from utilities import extract_id_from_url, decode_token
+from utilities import decode_token
 
 
 class ProductView(GenericView):
@@ -20,30 +20,26 @@ class ProductView(GenericView):
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
-        # TODO: I get error 'too many values to unpack (expected 2)'
+        # TODO: FIX filter by volume_gte, volume_lte and other fields
+        query = self.session.query(self.model)
 
-        # query = self.session.query(self.model).all()
-        #
-        # for filter_param, filter_val in kwargs:
-        #     if hasattr(self.model, filter_param):
-        #         # if product_name, then find all products with product_name like filter_val
-        #         if filter_param == "product_name":
-        #             query = query.filter(getattr(self.model, filter_param).like(f"%{filter_val}%")).all()
-        #
-        #         # if filter_param ends with _gte, then find all products with filter_param >= filter_val
-        #         elif filter_param.endswith("_gte"):
-        #             query = query.filter(getattr(self.model, filter_param[:-4]) >= filter_val).all()
-        #
-        #         # if filter_param ends with _lte, then find all products with filter_param <= filter_val
-        #         elif filter_param.endswith("_lte"):
-        #             query = query.filter(getattr(self.model, filter_param[:-4]) <= filter_val).all()
-        #
-        # instances = query.all()
-        # body = [instance.to_dict() for instance in instances]
-        # self.response.status_code = 200
-        # self.response.data = body
-        # return self.response.create_response()
-        pass
+        # if product_name, then find all products with product_name like given in filter
+        product_name = kwargs.get("product_name")
+        if product_name is not None:
+            query = query.filter(Product.product_name.like(f"%{product_name}%"))
+
+        # if volume_gte is in the filter list then find all products with volume >= volume_gte
+        # volume_gte = kwargs.get("volume_gte")
+        # print(type(volume_gte))
+        # print(type(Product.volume))
+        # if volume_gte is not None:
+        #     query = query.filter(Product.volume >= volume_gte)
+
+        instances = query.all()
+        body = [instance.to_dict() for instance in instances]
+        self.response.status_code = 200
+        self.response.data = body
+        return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
