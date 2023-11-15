@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './users.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
@@ -25,9 +25,12 @@ export default function Users() {
     e.domEvent.target.innerText = selectedRole;
   };
 
-  const handleDelete = () => {
+  const handleDeleteUser = (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
+    }
+    if (record) {
+      console.log('delete', record);
     }
   };
 
@@ -55,7 +58,6 @@ export default function Users() {
     }
   };
 
-  // Function to show popup
   const handleAddUser = (e) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
@@ -66,7 +68,10 @@ export default function Users() {
     setIsPopupVisible(true);
   };
 
-  // Function to hide popup
+  const handleEditUser = (record) => {
+    console.log('edit', record);
+  };
+
   const hidePopup = () => {
     setIsPopupVisible(false);
   };
@@ -88,7 +93,28 @@ export default function Users() {
   if (tableData.length < placeholderRowCount) {
     tableData = [...tableData, ...placeholderData.slice(tableData.length + 1)];
   }
+
   const columns = [
+    {
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
+      width: '10%',
+      align: 'center',
+      render: (_, record) =>
+        record.fullName ? (
+          <span className={'table-actions-container'}>
+            <EditOutlined
+              onClick={() => handleEditUser(record)}
+              style={{ color: 'blue', cursor: 'pointer' }}
+            />
+            <DeleteOutlined
+              onClick={() => handleDeleteUser(record)}
+              style={{ color: 'red', cursor: 'pointer' }}
+            />
+          </span>
+        ) : null,
+    },
     {
       title: 'Full name',
       dataIndex: 'fullName',
@@ -218,7 +244,7 @@ export default function Users() {
               className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
-              onClick={() => handleDelete()}
+              onClick={() => handleDeleteUser()}
             ></img>
             <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
@@ -236,7 +262,7 @@ export default function Users() {
             ...rowSelection,
           }}
           dataSource={tableData as []}
-          columns={columns}
+          columns={columns as []}
           scroll={scrollSize}
           pagination={false}
           size={'small'}
