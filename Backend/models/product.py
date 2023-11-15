@@ -10,9 +10,9 @@ class Product(Base):
     company_id = Column(Integer, ForeignKey("companies.company_id"))
     product_name = Column(String(100), index=True, nullable=False)
     description = Column(String(255), index=True)
-    weight = Column(Numeric(precision=20, scale=4))
-    volume = Column(Numeric(precision=20, scale=4))
-    price = Column(Numeric(precision=20, scale=2))
+    weight = Column(Numeric(precision=20, scale=4, asdecimal=False))
+    volume = Column(Numeric(precision=20, scale=4, asdecimal=False))
+    price = Column(Numeric(precision=20, scale=2, asdecimal=False))
     expiry_duration = Column(Integer)
 
     # Relationships with other tables

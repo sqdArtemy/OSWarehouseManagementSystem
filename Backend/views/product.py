@@ -83,7 +83,6 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: FIX: this method returns 'weight': Decimal('5.5000') instead if return 'weight': 5.5
         # if product_name already exists in the database, raise ValidationError
         product_name = self.body.get("product_name")
         if self.session.query(Product).filter(Product.product_name == product_name).first() is not None:
@@ -106,7 +105,6 @@ class ProductView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: FIX: this method returns 'weight': Decimal('5.5000') instead if return 'weight': 5.5
         # if product_name already exists in the database, raise ValidationError
         product_name = self.body.get("product_name")
         prod_with_same_name = self.session.query(Product).filter(Product.product_name == product_name).first()
