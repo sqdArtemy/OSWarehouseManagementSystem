@@ -1,12 +1,24 @@
-from models import Warehouse
+from decimal import Decimal
+from sqlite3 import IntegrityError
+from typing import Dict, List, Any
+
+from sqlalchemy import func
+
+from db_config import get_session, SessionMaker
+from models import Warehouse, User, Rack
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
+from utilities import ValidationError, DatabaseError, decode_token, extract_id_from_url
 from utilities.enums.method import Method
 
 
 class WarehouseView(GenericView):
     model = Warehouse
     model_name = "warehouse"
+
+    def __init__(self):
+        super().__init__()
+        self.company_id = None
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
@@ -16,8 +28,61 @@ class WarehouseView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
-        return super().create(request=request)
+
+        owner_id = decode_token(self.headers.get("token"))
+        manager_id = self.body.get("manager_id")
+        overall_capacity = self.body.get("overall_capacity")
+        remaining_capacity = self.body.get("remaining_capacity")
+
+        with get_session() as session:
+
+            company_id = session.query(User.company_id).filter_by(user_id=owner_id).scalar()
+
+            # Check if the manager exists
+            manager = session.query(User).filter_by(user_id=manager_id,
+                                                    user_role='manager',
+                                                    company_id=company_id).first()
+
+            if not manager:
+                raise ValidationError("Manager not found", 404)
+
+            # Check if the manager is already assigned to another warehouse
+            existing_warehouse = session.query(Warehouse).filter_by(manager_id=manager_id).first()
+
+            if existing_warehouse:
+                raise ValidationError("The specified manager is already assigned to another warehouse", 400)
+
+            if not remaining_capacity:
+                remaining_capacity = overall_capacity
+
+            company_id = session.query(User.company_id).filter_by(user_id=manager_id).scalar()
+
+            try:
+                # Create a new warehouse
+                new_warehouse = Warehouse(
+                    warehouse_name=self.body["warehouse_name"],
+                    warehouse_address=self.body["warehouse_address"],
+                    manager_id=manager_id,
+                    company_id=company_id,
+                    overall_capacity=overall_capacity,
+                    remaining_capacity=remaining_capacity
+                )
+
+                session.add(new_warehouse)
+                session.commit()
+
+                # Build the response
+                response_data = {
+                    "status": 201,
+                    "data": new_warehouse.to_dict(),
+                    "headers": self.headers
+                }
+
+                return response_data
+
+            except IntegrityError as e:
+                session.rollback()
+                raise DatabaseError(str(e))
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
@@ -27,5 +92,191 @@ class WarehouseView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
+
+        # id of warehouse to be modified
+        warehouse_id = extract_id_from_url(request["url"], "warehouse")
+
+        owner_id = decode_token(self.headers.get("token"))
+        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
+        manager_id = self.body.get("manager_id")
+        manager = SessionMaker().query(User).filter_by(user_id=manager_id,
+                                                       user_role='manager',
+                                                       company_id=company_id).first()
+        if not manager:
+            raise ValidationError("Manager not found", 404)
+
+        existing_warehouse = SessionMaker().query(Warehouse).filter(
+                                                            Warehouse.manager_id == manager_id,
+                                                            Warehouse.warehouse_id != warehouse_id
+                                                        ).first()
+        if existing_warehouse:
+            raise ValidationError("The specified manager is already assigned to another warehouse", 400)
+
+        # Check if the warehouse exists and belongs to the same company
+        warehouse = SessionMaker().query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
+
+        if not warehouse:
+            raise ValidationError("Warehouse Not Found", 404)
+
+        overall_capacity = self.body.get("overall_capacity")
+
+        # Calculate the change in capacity
+        capacity_change = float(warehouse.overall_capacity) - overall_capacity
+
+        # Check if the overall capacity is being reduced
+        if overall_capacity < warehouse.overall_capacity:
+            racks_sum = SessionMaker().query(
+                                    func.sum(Rack.overall_capacity),
+                                    func.sum(Rack.remaining_capacity)
+                                    ).filter_by(warehouse_id=warehouse_id).first()
+            print(capacity_change)
+            if racks_sum[0] is not None and overall_capacity < racks_sum[0]:
+                raise ValidationError("Overall capacity cannot be less than the overall capacity in racks", 400)
+            elif racks_sum[1] is not None and overall_capacity < racks_sum[1]:
+                raise ValidationError("Overall capacity cannot be less than the remaining capacity in racks", 400)
+            elif capacity_change > warehouse.remaining_capacity:
+                raise ValidationError("Overall capacity cannot be less than the remaining capacity", 400)
+
+        # Update warehouse information
+        self.body["remaining_capacity"] = warehouse.remaining_capacity - Decimal(str(capacity_change))
+        self.body = warehouse.to_dict()
+
         return super().update(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.DELETE.value])
+    def delete(self, request: dict) -> dict:
+        """
+        Delete a warehouse in the database.
+        :param request: dictionary containing url, method, body and headers
+        :return: dictionary containing status_code and response body
+        """
+
+        # id of warehouse to be deleted
+        warehouse_id = extract_id_from_url(request["url"], "warehouse")
+
+        owner_id = decode_token(self.headers.get("token"))
+        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
+
+        with get_session() as session:
+            warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
+
+            if not warehouse:
+                raise ValidationError("Warehouse Not Found", 404)
+            if warehouse.remaining_capacity != warehouse.overall_capacity:
+                raise ValidationError("The inventory must be empty to delete the warehouse", 400)
+
+            # Check if there are racks associated with the warehouse
+            racks = session.query(Rack).filter_by(warehouse_id=warehouse_id).all()
+
+            # Delete racks if they exist
+            for rack in racks:
+                session.delete(rack)
+
+            # Delete the warehouse
+            session.delete(warehouse)
+
+        response_data = {
+            "status": 204,
+            "data": {},
+            "headers": self.headers
+        }
+
+        return response_data
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get(self, request: dict) -> dict:
+        """
+        Get information about a warehouse including details about its racks.
+        :param request: dictionary containing url, method, and headers
+        :return: dictionary containing status_code and response body
+        """
+        # id of the warehouse to be retrieved
+        warehouse_id = extract_id_from_url(request["url"], "warehouse")
+
+        owner_id = decode_token(self.headers.get("token"))
+        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
+
+        warehouse = SessionMaker().query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
+
+        if not warehouse:
+            raise ValidationError("Warehouse Not Found", 404)
+
+        # Get details about the warehouse
+        warehouse_info = {
+            "warehouse_id": warehouse.warehouse_id,
+            "manager_id": warehouse.manager_id,
+            "warehouse_name": warehouse.warehouse_name,
+            "warehouse_address": warehouse.warehouse_address,
+            "overall_capacity": warehouse.overall_capacity,
+            "remaining_capacity": warehouse.remaining_capacity,
+            "racks": []
+        }
+
+        # Get details about racks in the warehouse
+        racks = SessionMaker().query(Rack).filter_by(warehouse_id=warehouse_id).all()
+
+        for rack in racks:
+            rack_info = {
+                "rack_id": rack.rack_id,
+                "rack_position": rack.rack_position,
+                "overall_capacity": rack.overall_capacity,
+                "remaining_capacity": rack.remaining_capacity,
+                "ratio": (rack.remaining_capacity / rack.overall_capacity) * 100
+            }
+            warehouse_info["racks"].append(rack_info)
+
+        response_data = {
+                "status": 201,
+                "data": warehouse_info,
+                "headers": self.headers
+        }
+        return response_data
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict, **kwargs) -> dict:
+        """
+        Get information about warehouses of a company, optionally filtered by warehouse_name.
+        :param request: dictionary containing url, method, headers, and filters
+        :return: dictionary containing status_code and response body
+        """
+        owner_id = decode_token(self.headers.get("token"))
+        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
+
+        # Check if warehouse_name filter is provided
+        warehouse_name_filter = request.get("filters", {}).get("warehouse_name")
+
+        with get_session() as session:
+            # Query warehouses of the company
+            warehouses_query = session.query(Warehouse).filter_by(company_id=company_id)
+
+            # Apply warehouse_name filter if provided
+            if warehouse_name_filter:
+                warehouses_query = warehouses_query.filter(Warehouse.warehouse_name.like(f"%{warehouse_name_filter}%"))
+
+            warehouses = warehouses_query.all()
+
+            # Format the response data
+            warehouses_info = [
+                {
+                    "warehouse_id": warehouse.warehouse_id,
+                    "warehouse_name": warehouse.warehouse_name,
+                    "warehouse_address": warehouse.warehouse_address,
+                    "manager_id": warehouse.manager_id,
+                    "company_id": warehouse.company_id,
+                    "overall_capacity": warehouse.overall_capacity,
+                    "remaining_capacity": warehouse.remaining_capacity
+                }
+                for warehouse in warehouses
+            ]
+
+        response_data = {
+            "status": 200,
+            "data": warehouses_info,
+            "headers": self.headers
+        }
+
+        return response_data
+

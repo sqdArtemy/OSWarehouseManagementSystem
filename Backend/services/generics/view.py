@@ -30,6 +30,7 @@ class GenericView(metaclass=ModelAttributesMeta):
         self.request = None
         self.headers = None
         self.body = None
+        self.filters = None
         self.url = None
         self.method = None
         self.instance_id = None
