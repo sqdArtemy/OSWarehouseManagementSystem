@@ -111,6 +111,11 @@ def controller(request: dict) -> dict:
                 return order_item_view.create(request=request)
 
         # Product`s endpoints
+        elif "/products" in url:
+            if method == Method.GET.value:
+                return product_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return product_view.create(request=request)
         elif "/product" in url:
             if method == Method.GET.value:
                 return product_view.get(request=request)
@@ -118,11 +123,6 @@ def controller(request: dict) -> dict:
                 return product_view.delete(request=request)
             elif method == Method.PUT.value:
                 return product_view.update(request=request)
-        elif "/products" in url:
-            if method == Method.GET.value:
-                return product_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return product_view.create(request=request)
 
         # Rack`s endpoints
         elif "/rack" in url:
