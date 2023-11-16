@@ -1,7 +1,6 @@
 from models import Product, User
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
-from sqlalchemy import func
 from utilities.enums.method import Method
 from utilities.exceptions import ValidationError
 from utilities import decode_token
@@ -29,11 +28,9 @@ class ProductView(GenericView):
             query = query.filter(Product.product_name.like(f"%{product_name}%"))
 
         # if volume_gte is in the filter list then find all products with volume >= volume_gte
-        # volume_gte = kwargs.get("volume_gte")
-        # print(type(volume_gte))
-        # print(type(Product.volume))
-        # if volume_gte is not None:
-        #     query = query.filter(Product.volume >= volume_gte)
+        volume_gte = kwargs.get("volume_gte")
+        if volume_gte is not None:
+            query = query.filter(Product.volume >= volume_gte)
 
         instances = query.all()
         body = [instance.to_dict() for instance in instances]

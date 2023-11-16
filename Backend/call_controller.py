@@ -1,5 +1,7 @@
 import socket
 import json
+from json import JSONDecodeError
+
 import select
 import sys
 from controller import controller
@@ -35,3 +37,5 @@ try:
 
 except ConnectionRefusedError:
     print("Connection to the server failed. Make sure the server is running.")
+except JSONDecodeError:
+    print("The server sent an invalid JSON message.")
