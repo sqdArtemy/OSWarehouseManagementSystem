@@ -27,8 +27,18 @@ try:
         if ready:
             # receive data
             data = client_socket.recv(1024)
+            request = dict()
 
-            response = controller(json.loads(data.decode()))
+            try:
+                request = json.loads(data.decode())
+                response = controller(request)
+            except JSONDecodeError:
+                response = {
+                    "status_code": 400,
+                    "message": "Invalid JSON.",
+                    "body": {},
+                    "headers": request.get("headers", {})
+                }
 
             client_socket.send(json.dumps(response).encode() + "\n".encode())
 
@@ -37,5 +47,3 @@ try:
 
 except ConnectionRefusedError:
     print("Connection to the server failed. Make sure the server is running.")
-except JSONDecodeError:
-    print("The server sent an invalid JSON message.")
