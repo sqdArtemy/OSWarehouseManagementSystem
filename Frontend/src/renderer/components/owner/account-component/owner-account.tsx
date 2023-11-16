@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import './owner-account.scss';
+//import './owner-account.scss';
 
 export default function OwnerAccount() {
   const [changePassDisplay, setChangePassDisplay] = useState(false)
