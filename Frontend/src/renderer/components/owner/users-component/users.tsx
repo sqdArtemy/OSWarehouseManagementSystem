@@ -8,6 +8,7 @@ import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-d
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import AddUserPopup from './add-user-component/add-user';
+import { userApi } from '../../../index';
 
 export default function Users() {
   const [selectedRole, setSelectedRole] = useState('All');
@@ -25,23 +26,60 @@ export default function Users() {
     e.domEvent.target.innerText = selectedRole;
   };
 
-  const handleDeleteUser = (record?) => {
+  const handleDeleteUser = async (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
+      for (let user of selectedRows){
+        await userApi.deleteUser(user.user_id);
+      }
     }
     if (record) {
       console.log('delete', record);
+      await userApi.deleteUser(record.user_id);
     }
   };
 
-  const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    console.log('search', searchValue);
+
+    const filters = {};
+    if (selectedRole){
+      filters.user_role = selectedRole.toLowerCase();
+    }
+
+    if(selectedRole === 'All' && filters.user_role){
+      delete filters.user_role;
+    }
+
+    if(searchValue){
+      filters.user_name = searchValue;
+    }
+
+    const response = await userApi.getAllUsers(filters);
+    const users = response?.data?.body;
+    const dataItems = [];
+
+    if(users?.length) {
+      for (let i = 0; i < users.length; i++) {
+        dataItems.push({
+          key: (i + 1).toString(),
+          fullName: users[i].user_name + ' ' + users[i].user_surname,
+          duty: users[i].user_role,
+          phoneNumber: users[i].user_phone,
+          email: users[i].user_phone,
+          user_id: users[i].user_id
+        })
+      }
+
+      setDataSource(dataItems);
+    } else {
+      setDataSource([]);
+    }
   };
 
   const handleRowSelectionChange = (selectedRowKeys, selectedRows) => {
@@ -161,6 +199,7 @@ export default function Users() {
     }),
   };
 
+  let data = [];
   useEffect(() => {
     const calculateScrollSize = () => {
       const vw = Math.max(
@@ -181,29 +220,23 @@ export default function Users() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    setDataSource([
-      {
-        key: '1',
-        fullName: 'Mike',
-        duty: 'Shipper',
-        phoneNumber: '123456789',
-        email: '1213@abc.com',
-      },
-      {
-        key: '2',
-        fullName: 'Jesse',
-        duty: 'Manager',
-        phoneNumber: '987654321',
-        email: '3311@abc.com',
-      },
-      {
-        key: '3',
-        fullName: 'Mike',
-        duty: 'Shipper',
-        phoneNumber: '123456789',
-        email: '1213@mmal.com',
-      },
-    ]);
+    userApi.getAllUsers({}).then((result) => {
+      const users = result.data?.body;
+      if(users?.length) {
+        for (let i = 0; i < users.length; i++) {
+          data.push({
+            key: (i + 1).toString(),
+            fullName: users[i].user_name + ' ' + users[i].user_surname,
+            duty: users[i].user_role,
+            phoneNumber: users[i].user_phone,
+            email: users[i].user_phone,
+            user_id: users[i].user_id
+          })
+        }
+        setDataSource(data);
+      }
+    });
+
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);

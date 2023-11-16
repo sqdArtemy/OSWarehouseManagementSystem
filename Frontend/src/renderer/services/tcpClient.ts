@@ -14,15 +14,30 @@ export class TcpClient {
   }
 
   async connect() {
-    this.client.connect(this.port, this.host, async () => {
-      console.log('Connected to server');
+    try {
+      await new Promise((resolve, reject) => {
+        this.client.connect(this.port, this.host, () => {
+          console.log('Connected to server');
+          resolve();
+        });
+
+        this.client.on('error', (error) => {
+          reject(error);
+        });
+
+        setTimeout(() => reject(new Error('Connection timeout')), 5000);
+      });
+
       const dataToSend = {
         role: 'frontend',
         message: 'Hello from the client!'
       };
 
       await this.send(dataToSend);
-    });
+    } catch (error) {
+      console.error('Error connecting:', error.message);
+      throw error;
+    }
 
     this.client.on('close', () => {
       console.log('Connection closed');

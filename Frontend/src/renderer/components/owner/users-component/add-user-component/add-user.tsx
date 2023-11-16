@@ -1,6 +1,7 @@
 import React from 'react';
 import './add-user.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
+import { userApi } from '../../../../index';
 
 export interface IUserData {
   'First Name'?: string;
@@ -37,7 +38,7 @@ export default function AddUser({
     console.log('change');
   }
 
-  const onFinish = () => {
+  const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
     let check = false;
     for (let key in newUserData) {
@@ -51,6 +52,14 @@ export default function AddUser({
     } else {
       hidePopup();
     }
+    await userApi.addUser({
+      user_name: newUserData['First Name'],
+      user_surname: newUserData['Last Name'],
+      user_email: newUserData['Email'],
+      user_phone: newUserData['Phone'],
+      user_role: newUserData['Role']
+    });
+
     userData.setNewUserData(newUserData);
   };
 
