@@ -7,8 +7,18 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import AddUserPopup from './add-user-component/add-user';
 import { userApi } from '../../../index';
+import debounce from 'lodash.debounce';
+import AddUser from './add-user-component/add-user';
+import EditUser from './edit-user-component/edit-user';
+
+export interface IUserData {
+  fullName: string;
+  role: string;
+  phoneNumber: string;
+  email: string;
+  user_id: number;
+}
 
 export default function Users() {
   const [selectedRole, setSelectedRole] = useState('All');
@@ -17,8 +27,9 @@ export default function Users() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [newUserData, setNewUserData] = useState({});
+  const [isAddUserVisible, setIsAddUserVisible] = useState(false);
+  const [isEditUserVisible, setIsEditUserVisible] = useState(false);
+  const [userData, setUserData] = useState({});
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -29,7 +40,7 @@ export default function Users() {
   const handleDeleteUser = async (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
-      for (let user of selectedRows){
+      for (let user of selectedRows) {
         await userApi.deleteUser(user.user_id);
       }
     }
@@ -38,6 +49,29 @@ export default function Users() {
       await userApi.deleteUser(record.user_id);
     }
   };
+
+  const debouncedSearch = debounce(async (filters) => {
+    const response = await userApi.getAllUsers(filters);
+    const users = response?.data?.body;
+    const dataItems = [];
+
+    if (users?.length) {
+      for (let i = 0; i < users.length; i++) {
+        dataItems.push({
+          key: (i + 1).toString(),
+          fullName: users[i].user_name + ' ' + users[i].user_surname,
+          role: users[i].user_role,
+          phoneNumber: users[i].user_phone,
+          email: users[i].user_phone,
+          user_id: users[i].user_id,
+        });
+      }
+
+      setDataSource(dataItems);
+    } else {
+      setDataSource([]);
+    }
+  }, 500);
 
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
@@ -48,38 +82,18 @@ export default function Users() {
     }, 100);
 
     const filters = {};
-    if (selectedRole){
+    if (selectedRole) {
       filters.user_role = selectedRole.toLowerCase();
     }
 
-    if(selectedRole === 'All' && filters.user_role){
+    if (selectedRole === 'All' && filters.user_role) {
       delete filters.user_role;
     }
 
-    if(searchValue){
+    if (searchValue) {
       filters.user_name = searchValue;
     }
-
-    const response = await userApi.getAllUsers(filters);
-    const users = response?.data?.body;
-    const dataItems = [];
-
-    if(users?.length) {
-      for (let i = 0; i < users.length; i++) {
-        dataItems.push({
-          key: (i + 1).toString(),
-          fullName: users[i].user_name + ' ' + users[i].user_surname,
-          duty: users[i].user_role,
-          phoneNumber: users[i].user_phone,
-          email: users[i].user_phone,
-          user_id: users[i].user_id
-        })
-      }
-
-      setDataSource(dataItems);
-    } else {
-      setDataSource([]);
-    }
+    debouncedSearch(filters);
   };
 
   const handleRowSelectionChange = (selectedRowKeys, selectedRows) => {
@@ -103,15 +117,21 @@ export default function Users() {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    setIsPopupVisible(true);
+    setIsAddUserVisible(true);
   };
 
   const handleEditUser = (record) => {
     console.log('edit', record);
+    setUserData(record);
+    setIsEditUserVisible(true);
   };
 
-  const hidePopup = () => {
-    setIsPopupVisible(false);
+  const hideAddUser = () => {
+    setIsAddUserVisible(false);
+  };
+
+  const hideEditUser = () => {
+    setIsEditUserVisible(false);
   };
 
   const placeholderRowCount = 30;
@@ -121,7 +141,7 @@ export default function Users() {
     (_, index) => ({
       key: (index + 1).toString(),
       fullName: '',
-      duty: '',
+      role: '',
       phoneNumber: '',
       email: '',
     }),
@@ -159,9 +179,9 @@ export default function Users() {
       key: 'fullName',
     },
     {
-      title: 'Duty',
-      dataIndex: 'duty',
-      key: 'duty',
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
     },
     {
       title: 'Phone number',
@@ -222,21 +242,20 @@ export default function Users() {
 
     userApi.getAllUsers({}).then((result) => {
       const users = result.data?.body;
-      if(users?.length) {
+      if (users?.length) {
         for (let i = 0; i < users.length; i++) {
           data.push({
             key: (i + 1).toString(),
             fullName: users[i].user_name + ' ' + users[i].user_surname,
-            duty: users[i].user_role,
+            role: users[i].user_role,
             phoneNumber: users[i].user_phone,
             email: users[i].user_phone,
-            user_id: users[i].user_id
-          })
+            user_id: users[i].user_id,
+          });
         }
         setDataSource(data);
       }
     });
-
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -283,10 +302,15 @@ export default function Users() {
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add User</span>
             </button>
-            <AddUserPopup
-              hidePopup={hidePopup}
-              isPopupVisible={isPopupVisible}
-              userData={{ newUserData, setNewUserData }}
+            <AddUser
+              hidePopup={hideAddUser}
+              isPopupVisible={isAddUserVisible}
+              userData={{ userData: userData, setUserData: setUserData }}
+            />
+            <EditUser
+              hidePopup={hideEditUser}
+              isPopupVisible={isEditUserVisible}
+              userData={{ userData: userData, setUserData: setUserData }}
             />
           </div>
         </div>

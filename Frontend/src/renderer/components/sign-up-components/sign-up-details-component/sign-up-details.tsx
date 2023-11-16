@@ -6,7 +6,11 @@ import { userApi } from '../../../index';
 export function SignUpDetails() {
   const location = useLocation();
   const { state } = location;
-  const { name: companyName, email: companyEmail, address: companyAddress } = state || {};
+  const {
+    name: companyName,
+    email: companyEmail,
+    address: companyAddress,
+  } = state || {};
 
   const navigate = useNavigate();
   const [userName, setUserName] = useState('');
@@ -27,19 +31,19 @@ export function SignUpDetails() {
       password,
       confirm_password: rePassword,
       user_surname: lastName,
-      user_role: 'owner'
+      user_role: 'owner',
     });
 
-    if(response.success){
-      switch (response.data?.user_role){
+    if (response.success) {
+      switch (response.data?.user_role) {
         case 'owner':
           navigate('/owner');
           break;
         default:
           break;
       }
-
     } else {
+      console.log(response.message);
       // some error message
     }
   };
@@ -108,10 +112,7 @@ export function SignUpDetails() {
               value={rePassword}
               onChange={(e) => setRePassword(e.target.value)}
             />
-            <button
-              type="button"
-              onClick={async () => handleSignUp()}
-            >
+            <button type="button" onClick={async () => handleSignUp()}>
               SIGN UP
             </button>
           </form>

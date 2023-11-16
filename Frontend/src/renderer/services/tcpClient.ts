@@ -30,7 +30,7 @@ export class TcpClient {
 
       const dataToSend = {
         role: 'frontend',
-        message: 'Hello from the client!'
+        message: 'Hello from the client!',
       };
 
       await this.send(dataToSend);
@@ -44,40 +44,44 @@ export class TcpClient {
     });
   }
 
-  async send(data: ISendData | IConnectionData){
+  async send(data: ISendData | IConnectionData) {
     return new Promise((resolve, reject) => {
-
       if ('body' in data) {
-        this.client.write(JSON.stringify({
-          body: data.body,
-          headers: data.headers,
-          url: data.url,
-          method: data.method
-        }));
+        this.client.write(
+          JSON.stringify({
+            body: data.body,
+            headers: data.headers,
+            url: data.url,
+            method: data.method,
+          }),
+        );
 
         const timer = setTimeout(() => {
-          this.client.end();
           reject(new Error('Request timed out'));
         }, 10000);
 
-        this.client.on('data', data => {
+        this.client.on('data', (data) => {
           clearTimeout(timer);
-          if(data.toString() === 'There is no connected backend side to the server'){
+          if (
+            data.toString() ===
+            'There is no connected backend side to the server'
+          ) {
             reject('There is no connected backend side to the server');
           }
           resolve(data.toString());
         });
 
-        this.client.on('error', err => {
+        this.client.on('error', (err) => {
           clearTimeout(timer);
           reject(err);
         });
-
       } else {
-        this.client.write(JSON.stringify({
-          role: data.role,
-          message: data.message
-        }))
+        this.client.write(
+          JSON.stringify({
+            role: data.role,
+            message: data.message,
+          }),
+        );
       }
     });
   }
