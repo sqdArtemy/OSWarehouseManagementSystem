@@ -19,7 +19,6 @@ class ProductView(GenericView):
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
-        # TODO: FIX filter by volume_gte, volume_lte and other fields
         query = self.session.query(self.model)
 
         # if product_name, then find all products with product_name like given in filter
@@ -27,10 +26,13 @@ class ProductView(GenericView):
         if product_name is not None:
             query = query.filter(Product.product_name.like(f"%{product_name}%"))
 
-        # if volume_gte is in the filter list then find all products with volume >= volume_gte
-        volume_gte = kwargs.get("volume_gte")
-        if volume_gte is not None:
-            query = query.filter(Product.volume >= volume_gte)
+        for flt_key, flt_value in kwargs.items():
+            # if column_gte then find all products with volume >= volume_gte
+            if flt_key.endswith("_gte"):
+                query = query.filter(getattr(Product, flt_key[:-4]) >= flt_value)
+            # if column_lte then find all products with volume <= volume_lte
+            elif flt_key.endswith("_lte"):
+                query = query.filter(getattr(Product, flt_key[:-4]) <= flt_value)
 
         instances = query.all()
         body = [instance.to_dict() for instance in instances]
