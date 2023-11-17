@@ -44,6 +44,15 @@ export default function EditUser({
     wrapperCol: { offset: 16, span: 17 },
   };
 
+  const handleReset = () => {
+    formRef.current?.resetFields();
+  };
+
+  const onCancel = () => {
+    hidePopup();
+    handleReset();
+  };
+
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
     hidePopup();
@@ -61,10 +70,10 @@ export default function EditUser({
 
   return (
     <Modal
-      title="Edit User"
+      title={<p style={{ fontSize: '1.2vw' }}>Edit User</p>}
       open={isPopupVisible}
       onOk={onFinish}
-      onCancel={onFinish}
+      onCancel={onCancel}
       cancelButtonProps={{ style: { display: 'none' } }}
       okButtonProps={{ style: { display: 'none' } }}
     >
@@ -79,26 +88,38 @@ export default function EditUser({
       >
         <Form.Item
           name="First Name"
-          label="First Name"
+          label={<p style={{ fontSize: '1vw' }}>First Name</p>}
           rules={[{ required: true }]}
         >
-          <Input />
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           name="Last Name"
-          label="Last Name"
+          label={<p style={{ fontSize: '1vw' }}>Last Name</p>}
           rules={[{ required: true }]}
         >
-          <Input />
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
-        <Form.Item name="Email" label="Email" rules={[{ required: true }]}>
-          <Input />
+        <Form.Item
+          name="Email"
+          label={<p style={{ fontSize: '1vw' }}>Email</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
-        <Form.Item name="Phone" label="Phone" rules={[{ required: true }]}>
-          <Input />
+        <Form.Item
+          name="Phone"
+          label={<p style={{ fontSize: '1vw' }}>Phone</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
-        <Form.Item name="Role" label="Role" rules={[{ required: true }]}>
-          <Input disabled={true} />
+        <Form.Item
+          name="Role"
+          label={<p style={{ fontSize: '1vw' }}>Role</p>}
+          rules={[{ required: true }]}
+        >
+          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button type="primary" htmlType="submit">

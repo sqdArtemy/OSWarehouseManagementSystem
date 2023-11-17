@@ -71,7 +71,7 @@ export default function Users() {
     } else {
       setDataSource([]);
     }
-  }, 500);
+  }, 1000);
 
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
@@ -325,6 +325,7 @@ export default function Users() {
           size={'small'}
           className={'users-table'}
           bordered={true}
+          style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}
         />
       </div>
