@@ -19,10 +19,23 @@ class Warehouse(Base):
     # Relationships with other tables
     company = relationship("Company", back_populates="warehouses")
     manager = relationship("User", back_populates="warehouses")
-    supplied_orders = relationship("Order", back_populates="supplier")
     racks = relationship("Rack", back_populates="warehouse")
     supplier_transactions = relationship("Transaction", foreign_keys=[Transaction.supplier_id], back_populates="supplier")
     receiver_transactions = relationship("Transaction", foreign_keys=[Transaction.recipient_id], back_populates="recipient_warehouse")
+    supplied_orders = relationship(
+        "Order",
+        back_populates="supplier_warehouse",
+        primaryjoin="Warehouse.warehouse_id == Order.supplier_id",
+        foreign_keys="Order.supplier_id",
+        overlaps="supplier_orders"
+    )
+    received_orders = relationship(
+        "Order",
+        back_populates="recipient_warehouse",
+        primaryjoin="Warehouse.warehouse_id == Order.recipient_id",
+        foreign_keys="Order.recipient_id",
+        overlaps="recipient_orders"
+    )
 
     # Constraints
     __table_args__ = (

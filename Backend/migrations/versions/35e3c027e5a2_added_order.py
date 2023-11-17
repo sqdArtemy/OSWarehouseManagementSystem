@@ -23,16 +23,16 @@ def upgrade() -> None:
     op.create_table('orders',
                     sa.Column('order_id', sa.Integer(), autoincrement=True, nullable=False),
                     sa.Column('supplier_id', sa.Integer(), nullable=False),
-                    sa.Column('recipient_vendor_id', sa.Integer(), nullable=True),
+                    sa.Column('recipient_id', sa.Integer(), nullable=False),
                     sa.Column('total_price', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
                     sa.Column('created_at', sa.DateTime(), nullable=False),
                     sa.Column('updated_at', sa.DateTime(), nullable=True),
                     sa.Column('order_status',
                               sa.Enum('new', 'processing', 'submitted', 'finished', 'cancelled', 'delivered', 'lost',
                                       'damaged', name='order_status'), nullable=False),
+                    sa.Column('order_type', sa.Enum('from_warehouse', 'to_warehouse', name='order_type'),
+                              nullable=False),
                     sa.CheckConstraint('total_price > 0', name='check_total_price'),
-                    sa.ForeignKeyConstraint(['recipient_vendor_id'], ['vendors.vendor_id'], ),
-                    sa.ForeignKeyConstraint(['supplier_id'], ['warehouses.warehouse_id'], ),
                     sa.PrimaryKeyConstraint('order_id')
                     )
     op.create_index(op.f('ix_orders_order_id'), 'orders', ['order_id'], unique=False)
