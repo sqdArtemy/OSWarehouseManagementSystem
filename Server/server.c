@@ -124,7 +124,7 @@ void* handle_client(void* client) {
                 push(&clientsList, new_socket);
                 sleep(1);
             }
-          
+            usleep(50000);
             send_request(parsedJson, port, address, new_socket);            
           }
         }
