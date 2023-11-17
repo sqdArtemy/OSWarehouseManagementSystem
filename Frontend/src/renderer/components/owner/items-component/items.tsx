@@ -114,14 +114,29 @@ export default function Items() {
         ) : null,
     },
     {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+    },
+    {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Price',
-      dataIndex: 'price',
-      key: 'price',
+      title: 'Volume (m^3)',
+      dataIndex: 'volume',
+      key: 'volume',
+    },
+    {
+      title: 'Weight (kg)',
+      dataIndex: 'weight',
+      key: 'weight',
+    },
+    {
+      title: 'Expiry duration (yy,mm,dd)',
+      dataIndex: 'expiry-duration',
+      key: 'expiry-duration',
     },
   ];
 
@@ -171,18 +186,27 @@ export default function Items() {
     setDataSource([
       {
         key: '1',
+        type: 'Nonperishable',
         name: 'Dildo',
-        price: '$300',
+        volume: '1',
+        weight: '1',
+        'expiry-duration': '10,00,00'
       },
       {
         key: '2',
+        type: 'Nonperishable',
         name: 'Dildo',
-        price: '$300',
+        volume: '1',
+        weight: '1',
+        'expiry-duration': '10,00,00'
       },
       {
         key: '3',
+        type: 'Nonperishable',
         name: 'Dildo',
-        price: '$300',
+        volume: '1',
+        weight: '1',
+        'expiry-duration': '10,00,00'
       },
     ]);
 
