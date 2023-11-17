@@ -154,8 +154,29 @@ export default function Items() {
       label: '==',
     },
   ];
+  const types = [
+    {
+      label: 'ALL',
+    },
+    {
+      label: 'Freezer',
+    },
+    {
+      label: 'Refrigerated',
+    },
+    {
+      label: 'Dry',
+    },
+    {
+      label: 'Hazard',
+    },
+  ];
   const menuProps = {
     items,
+    onClick: handleMenuClick,
+  };
+  const menuPropsTypes = {
+    types,
     onClick: handleMenuClick,
   };
 
@@ -226,6 +247,17 @@ export default function Items() {
           <span className={'items-table-header'}>ITEMS</span>
           <div className={'options-container'}>
             <div className="search-bar-container">
+              <Dropdown
+                menu={menuProps}
+                className={'search-bar-dropdown-container'}
+              >
+                <Button>
+                  <Space>
+                    {selected}
+                    <DownOutlined />
+                  </Space>
+                </Button>
+              </Dropdown>
               <Dropdown
                 menu={menuProps}
                 className={'search-bar-dropdown-container'}
