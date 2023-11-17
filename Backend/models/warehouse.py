@@ -1,5 +1,5 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Integer, Column, String, ForeignKey, Numeric, CheckConstraint
+from sqlalchemy import Integer, Column, String, ForeignKey, Numeric, CheckConstraint, Enum
 from .transaction import Transaction
 from db_config import Base, SessionMaker
 
@@ -8,12 +8,13 @@ class Warehouse(Base):
     __tablename__ = "warehouses"
 
     warehouse_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    company_id = Column(Integer, ForeignKey("companies.company_id"))
-    manager_id = Column(Integer, ForeignKey("users.user_id"))
-    warehouse_name = Column(String(50), index=True)
-    warehouse_address = Column(String(255), index=True)
-    overall_capacity = Column(Numeric(precision=20, scale=2), nullable=False)
-    remaining_capacity = Column(Numeric(precision=20, scale=2), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=False)
+    manager_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    warehouse_name = Column(String(50), index=True, nullable=False)
+    warehouse_address = Column(String(255), index=True, nullable=False)
+    overall_capacity = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
+    remaining_capacity = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
+    warehouse_type = Column(Enum("freezer", "refrigerated", "dry", "hazardous", name="warehouse_type"), nullable=False)
 
     # Relationships with other tables
     company = relationship("Company", back_populates="warehouses")
@@ -38,5 +39,6 @@ class Warehouse(Base):
             "warehouse_name": self.warehouse_name,
             "warehouse_address": self.warehouse_address,
             "overall_capacity": self.overall_capacity,
-            "remaining_capacity": self.remaining_capacity
+            "remaining_capacity": self.remaining_capacity,
+            "warehouse_type": self.warehouse_type
         }

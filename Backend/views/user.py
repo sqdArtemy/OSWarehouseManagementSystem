@@ -29,15 +29,15 @@ class UserView(GenericView):
         """
 
         # Check if user role is valid
-        if self.body["user_role"] not in ("owner", "customer"):
-            raise ValidationError("Only warehouse owner or customers can register to the service.")
+        if self.body["user_role"] not in (UserRole.MANAGER.value["name"], UserRole.VENDOR.value["name"]):
+            raise ValidationError("Only warehouse managers or vendors can register to the service.")
 
         # Check if password and confirm_password are the same
         if self.body["password"] != self.body["confirm_password"]:
             raise ValidationError("Password and confirm password are not the same.")
 
         if not is_email_valid(self.body["user_email"]):
-            raise ValidationError("Invalid email address.")
+            raise ValidationError("Invalid user`s email address.")
 
         if not is_phone_valid(self.body["user_phone"]):
             raise ValidationError("Invalid phone number.")
@@ -155,7 +155,7 @@ class UserView(GenericView):
         requester = SessionMaker().query(User).filter_by(user_id=requester_id).first()
 
         if self.instance_id != requester_id and (
-                self.instance.company_id != requester.company_id or requester.user_role != UserRole.OWNER.value["name"]
+                self.instance.company_id != requester.company_id or requester.user_role != UserRole.MANAGER.value["name"]
         ):
             raise ValidationError(status_code=401, message="You can not update data of this user.")
 
@@ -166,7 +166,7 @@ class UserView(GenericView):
         return super().update(request=request)
 
     @view_function_middleware
-    @check_allowed_roles_middleware([UserRole.OWNER.value["code"]])
+    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"]])
     @check_allowed_methods_middleware([Method.POST.value])
     def create(self, request: dict) -> dict:
         """
@@ -190,8 +190,8 @@ class UserView(GenericView):
         password = f"{company_name[0]}{employee_name[0]}{employee_surname[0]}{employee_phone[1:5]}"
 
         # Validating fields
-        if employee_role not in (UserRole.MANAGER.value["name"], UserRole.SHIPPER.value["name"]):
-            raise ValidationError("Only managers or shippers can be added to the company.")
+        if employee_role not in (UserRole.SUPERVISOR.value["name"]):
+            raise ValidationError("Only managers can be added to the company.")
 
         if not is_email_valid(employee_email):
             raise ValidationError("Invalid email address.")
@@ -234,7 +234,7 @@ class UserView(GenericView):
         user_role = user.user_role
 
         # check if user is owner
-        if user_role != UserRole.OWNER.value["name"]:
+        if user_role != UserRole.MANAGER.value["name"]:
             raise ValidationError("Forbidden", 403)
 
         # check if there is user_to_be_deleted in DB and
@@ -243,27 +243,11 @@ class UserView(GenericView):
             raise ValidationError("User Not Found", 404)
 
         # set null if manager has warehouse
-        elif user_to_del.user_role == UserRole.MANAGER.value["name"]:
+        elif user_to_del.user_role == UserRole.SUPERVISOR.value["name"]:
             for warehouse in user_to_del.warehouses:
                 warehouse.manager = None
             user_to_del.warehouses = []
             SessionMaker().commit()
-
-        # cannot delete shipper if he has active orders or transactions
-        else:
-            has_trans_or_orders = False
-            for order in user_to_del.orders:
-                if order.order_status == "processing":
-                    has_trans_or_orders = True
-                    break
-
-            for transaction in user_to_del.transactions:
-                if transaction.status == "processing":
-                    has_trans_or_orders = True
-                    break
-
-            if user_to_del.user_role == UserRole.SHIPPER.value["name"] and has_trans_or_orders:
-                raise ValidationError("The shipper cannot be deleted during active orders and transactions")
 
         # empty body
         request["body"] = self.body = dict()
