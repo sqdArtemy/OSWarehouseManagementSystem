@@ -112,8 +112,14 @@ export default function AddItem({
           </Select>
         </Form.Item>
         <Form.Item name="Storage type" label="Storage type" rules={[{ required: true }]}>
-          <label>Stack-able <Input type="radio" name="storage-type" id="stack-able" value="stack-able"/></label>
-          <label>Nonstack-able <Input type="radio" name="storage-type" id="nonStack-able" value="nonStack-able"/></label>
+          <Select
+            placeholder="Select from following"
+            onChange={onRoleChange}
+            allowClear
+          >
+            <Option value="stackable">Stackable</Option>
+            <Option value="non-stackable">Non-stackable</Option>
+          </Select>
         </Form.Item>
         <Form.Item name="Description" label="Description" rules={[{ required: true }]}>
           <textarea placeholder="Write the description of item here" rows={4} cols={45}/>

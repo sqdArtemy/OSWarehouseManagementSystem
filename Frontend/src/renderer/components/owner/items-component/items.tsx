@@ -133,7 +133,6 @@ export default function Items() {
       label: 'Price',
     },
   ];
-
   const menuProps = {
     items,
     onClick: handleMenuClick,
