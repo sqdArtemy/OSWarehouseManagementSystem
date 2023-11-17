@@ -10,7 +10,7 @@ import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import AddUserPopup from './add-user-component/add-item';
 
 export default function Items() {
-  const [selectedRole, setSelectedRole] = useState('All');
+  const [selected, setSelected] = useState('==');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -21,8 +21,8 @@ export default function Items() {
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
-    setSelectedRole(e.domEvent.target.innerText);
-    e.domEvent.target.innerText = selectedRole;
+    setSelected(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selected;
   };
 
   const handleDeleteItem = (record?) => {
@@ -82,8 +82,11 @@ export default function Items() {
     { length: placeholderRowCount },
     (_, index) => ({
       key: (index + 1).toString(),
+      type: '',
       name: '',
-      price: '',
+      volume: '',
+      weight: '',
+      'expiry-duration': ''
     }),
   );
 
@@ -142,10 +145,13 @@ export default function Items() {
 
   const items = [
     {
-      label: 'Name',
+      label: '<=',
     },
     {
-      label: 'Price',
+      label: '>=',
+    },
+    {
+      label: '==',
     },
   ];
   const menuProps = {
@@ -226,11 +232,45 @@ export default function Items() {
               >
                 <Button>
                   <Space>
-                    {selectedRole}
+                    {selected}
                     <DownOutlined />
                   </Space>
                 </Button>
               </Dropdown>
+              <div className="filter">
+                <label className="labels" htmlFor="weight">Weight</label>
+                <input
+                  type=""
+                  className="search-bar-filter"
+                  id="weight"
+                  onChange={(e) => {
+                    setSearchValue(e.target.value);
+                  }}
+                />
+              </div>
+
+              <Dropdown
+                menu={menuProps}
+                className={'search-bar-dropdown-container'}
+              >
+                <Button>
+                  <Space>
+                    {selected}
+                    <DownOutlined />
+                  </Space>
+                </Button>
+              </Dropdown>
+              <div className="filter">
+                <label className="labels" htmlFor="volume">Volume</label>
+                <input
+                  type=""
+                  className="search-bar-filter"
+                  id="weight"
+                  onChange={(e) => {
+                    setSearchValue(e.target.value);
+                  }}
+                />
+              </div>
               <input
                 type=""
                 className="search-bar-input"
