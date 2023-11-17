@@ -5,7 +5,7 @@ from .order import OrderView
 from .order_item import OrderItemView
 from .product import ProductView
 from .rack import RackView
-from .store import StoreView
+from .vendor import VendorView
 from .transaction import TransactionView
 from .transaction_item import TransactionItemView
 from .warehouse import WarehouseView

@@ -9,14 +9,14 @@ class Transaction(Base):
     transaction_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     supplier_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=True)
     recipient_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=True)
-    shipper_id = Column(Integer, ForeignKey("users.user_id"))
+    shipper_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     status = Column(
         Enum("new", "processing", "submitted", "finished", "cancelled", "delivered", name="transaction_status"),
         nullable=False
     )
-    total_price = Column(Numeric(precision=20, scale=2), default=0)
-    is_internal = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=func.now())
+    total_price = Column(Numeric(precision=20, scale=2, asdecimal=False), default=0, nullable=False)
+    is_internal = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
 
     # Relationships with other tables

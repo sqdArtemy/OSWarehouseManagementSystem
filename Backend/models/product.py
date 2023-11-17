@@ -1,5 +1,5 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Numeric, CheckConstraint, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, CheckConstraint, ForeignKey, Boolean, Enum
 from db_config import Base, SessionMaker
 
 
@@ -7,13 +7,15 @@ class Product(Base):
     __tablename__ = "products"
 
     product_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    company_id = Column(Integer, ForeignKey("companies.company_id"))
+    company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=False)
     product_name = Column(String(100), index=True, nullable=False)
-    description = Column(String(255), index=True)
-    weight = Column(Numeric(precision=20, scale=4, asdecimal=False))
-    volume = Column(Numeric(precision=20, scale=4, asdecimal=False))
-    price = Column(Numeric(precision=20, scale=2, asdecimal=False))
-    expiry_duration = Column(Integer)
+    description = Column(String(255), index=True, nullable=False)
+    weight = Column(Numeric(precision=20, scale=4, asdecimal=False), nullable=False)
+    volume = Column(Numeric(precision=20, scale=4, asdecimal=False), nullable=False)
+    price = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
+    expiry_duration = Column(Integer, nullable=True)
+    is_stackable = Column(Boolean, nullable=False, default=True)
+    product_type = Column(Enum("freezer", "refrigerated", "dry", "hazardous", name="product_type"), nullable=False)
 
     # Relationships with other tables
     inventory = relationship("Inventory", back_populates="product")
@@ -38,5 +40,7 @@ class Product(Base):
             "weight": self.weight,
             "volume": self.volume,
             "price": self.price,
-            "expiry_duration": self.expiry_duration
+            "expiry_duration": self.expiry_duration,
+            "is_stackable": self.is_stackable,
+            "product_type": self.product_type
         }

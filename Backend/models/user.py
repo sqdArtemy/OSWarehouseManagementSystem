@@ -7,19 +7,20 @@ class User(Base):
     __tablename__ = "users"
 
     user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    company_id = Column(Integer, ForeignKey("companies.company_id"))
-    user_name = Column(String(100), index=True)
-    user_surname = Column(String(100), index=True)
-    user_phone = Column(String(15), unique=True, index=True)
-    user_email = Column(String(255), unique=True, index=True)
-    user_password = Column(String(255))
-    user_role = Column(Enum("owner", "manager", "shipper", "customer", "admin", name="user_role"), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=False)
+    user_name = Column(String(100), index=True, nullable=False)
+    user_surname = Column(String(100), index=True, nullable=False)
+    user_phone = Column(String(15), unique=True, index=True, nullable=False)
+    user_email = Column(String(255), unique=True, index=True, nullable=False)
+    user_address = Column(String(255), nullable=True)
+    user_password = Column(String(255), nullable=False)
+    user_role = Column(Enum("manager", "supervisor", "vendor", "admin", name="user_role"), nullable=False)
 
     # Relationships with other tables
     company = relationship("Company", back_populates="users")
     orders = relationship("Order", back_populates="shipper")
     transactions = relationship("Transaction", back_populates="shipper")
-    stores = relationship("Store", back_populates="store_owner")
+    vendors = relationship("Vendor", back_populates="vendor_owner")
     warehouses = relationship("Warehouse", back_populates="manager")
 
     def to_dict(self):
@@ -31,5 +32,6 @@ class User(Base):
             "user_surname": self.user_surname,
             "user_phone": self.user_phone,
             "user_email": self.user_email,
+            "user_address": self.user_address,
             "user_role": self.user_role
         }
