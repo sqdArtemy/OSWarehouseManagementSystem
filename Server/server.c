@@ -47,6 +47,22 @@ char* get_current_time(){
   return time_string;
 }
 
+void send_request(cJSON *json, int port, char* address, int new_socket){
+	cJSON *headers = cJSON_GetObjectItem(json, "headers");
+	cJSON_AddNumberToObject(headers, "port", port);
+	cJSON_AddStringToObject(headers, "address", address);
+	cJSON_AddNumberToObject(headers, "socket_id", new_socket);
+
+	char *headerString = cJSON_Print(headers);
+
+	cJSON *headersObject = cJSON_Parse(headerString);
+	cJSON_DeleteItemFromObject(json, "headers");
+	cJSON_AddItemToObject(json, "headers", headersObject);
+
+	char *request = cJSON_Print(json);
+	send(server_fd, request, strlen(request), 0);
+}
+
 void* handle_client(void* client) {
   struct clientAddress* clientArgs = (struct clientAddress*)client;
   int port = clientArgs->port;
@@ -66,20 +82,8 @@ void* handle_client(void* client) {
               deleteAll(&clientsList);
             } else {
             	cJSON *disconnectJson = cJSON_Parse(disconnect_json);
-            	cJSON *headers = cJSON_GetObjectItem(disconnectJson, "headers");
-            	cJSON_AddNumberToObject(headers, "port", port);
-            	cJSON_AddStringToObject(headers, "address", address);
-            	cJSON_AddNumberToObject(headers, "socket_id", new_socket);
-            	
-                char *headerString = cJSON_Print(headers);
-
-                cJSON *headersObject = cJSON_Parse(headerString);
-                cJSON_DeleteItemFromObject(disconnectJson, "headers");
-                cJSON_AddItemToObject(disconnectJson, "headers", headersObject);
-
-                char *request = cJSON_Print(disconnectJson);
-                send(server_fd, request, strlen(request), 0);
-                deleteValue(&clientsList, new_socket);
+            	send_request(disconnectJson, port, address, new_socket);
+              deleteValue(&clientsList, new_socket);
             }
             break;
         }
@@ -116,36 +120,12 @@ void* handle_client(void* client) {
           else {
             if(!isInArray(&clientsList, new_socket)){
                 cJSON *connectJson = cJSON_Parse(connect_json);
-            	cJSON *headers = cJSON_GetObjectItem(connectJson, "headers");
-            	cJSON_AddNumberToObject(headers, "port", port);
-            	cJSON_AddStringToObject(headers, "address", address);
-            	cJSON_AddNumberToObject(headers, "socket_id", new_socket);
-            	
-                char *headerString = cJSON_Print(headers);
-
-                cJSON *headersObject = cJSON_Parse(headerString);
-                cJSON_DeleteItemFromObject(connectJson, "headers");
-                cJSON_AddItemToObject(connectJson, "headers", headersObject);
-
-                char *request = cJSON_Print(connectJson);
-                send(server_fd, request, strlen(request), 0);
+            	send_request(connectJson, port, address, new_socket);
                 push(&clientsList, new_socket);
                 sleep(1);
             }
           
-            cJSON_AddNumberToObject(headers, "socket_id", new_socket);
-            cJSON_AddNumberToObject(headers, "port", port);
-            cJSON_AddStringToObject(headers, "address", address);
-            char *headerString = cJSON_Print(headers);
-            
-            cJSON *headersObject = cJSON_Parse(headerString);
-            cJSON_DeleteItemFromObject(parsedJson, "headers");
-            cJSON_AddItemToObject(parsedJson, "headers", headersObject);
-            
-            char *request = cJSON_Print(parsedJson);
-            
-            
-            send(server_fd, request, strlen(request), 0);
+            send_request(parsedJson, port, address, new_socket);            
           }
         }
         
