@@ -9,3 +9,4 @@ from .vendor import VendorView
 from .transaction import TransactionView
 from .transaction_item import TransactionItemView
 from .warehouse import WarehouseView
+from .transport import TransportView

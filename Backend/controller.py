@@ -1,5 +1,5 @@
 from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, VendorView, \
-    TransactionView, TransactionItemView, WarehouseView
+    TransactionView, TransactionItemView, WarehouseView, TransportView
 from utilities.exceptions import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
@@ -24,6 +24,7 @@ def controller(request: dict) -> dict:
     transaction_view = TransactionView()
     transaction_item_view = TransactionItemView()
     warehouse_view = WarehouseView()
+    transport_view = TransportView()
 
     url = request.get("url", "")
     method = request.get("method", "")
@@ -194,6 +195,21 @@ def controller(request: dict) -> dict:
             elif method == Method.POST.value:
                 return warehouse_view.create(request=request)
 
+        # Transport`s endpoints
+        elif "/transport" in url:
+            if method == Method.GET.value:
+                return transport_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return transport_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return transport_view.update(request=request)
+        elif "/transports" in url:
+            if method == Method.GET.value:
+                return transport_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return transport_view.create(request=request)
+
+        # In case of no route found
         else:
             response.status_code = 404
             response.message = "Route not found."
