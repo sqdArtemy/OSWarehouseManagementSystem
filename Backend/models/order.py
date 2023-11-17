@@ -7,11 +7,11 @@ class Order(Base):
     __tablename__ = "orders"
 
     order_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    supplier_id = Column(Integer, ForeignKey("warehouses.warehouse_id"))
-    shipper_id = Column(Integer, ForeignKey("users.user_id"))
+    supplier_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=False)
+    shipper_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     recipient_vendor_id = Column(Integer, ForeignKey("vendors.vendor_id"))
-    total_price = Column(Numeric(precision=20, scale=2), nullable=False)
-    created_at = Column(DateTime, default=func.now())
+    total_price = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
     order_status = Column(
         Enum("new", "processing", "submitted", "finished", "cancelled", "delivered", "lost", "damaged",
