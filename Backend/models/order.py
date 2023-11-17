@@ -8,7 +8,6 @@ class Order(Base):
 
     order_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     supplier_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=False)
-    shipper_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     recipient_vendor_id = Column(Integer, ForeignKey("vendors.vendor_id"))
     total_price = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
@@ -21,7 +20,6 @@ class Order(Base):
 
     # Relationships with other tables
     supplier = relationship("Warehouse", back_populates="supplied_orders")
-    shipper = relationship("User", back_populates="orders")
     recipient_vendor = relationship("Vendor", back_populates="received_orders")
     ordered_items = relationship("OrderItem", back_populates="order")
 
@@ -35,7 +33,6 @@ class Order(Base):
         return {
             "order_id": self.order_id,
             "supplier": order.supplier.to_dict(),
-            "shipper": order.shipper.to_dict(),
             "recipient_vendor": order.recipient_vendor.to_dict(),
             "total_price": self.total_price,
             "created_at": self.created_at,

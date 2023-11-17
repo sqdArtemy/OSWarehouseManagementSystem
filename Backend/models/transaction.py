@@ -9,7 +9,6 @@ class Transaction(Base):
     transaction_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     supplier_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=True)
     recipient_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=True)
-    shipper_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     status = Column(
         Enum("new", "processing", "submitted", "finished", "cancelled", "delivered", name="transaction_status"),
         nullable=False
@@ -21,7 +20,6 @@ class Transaction(Base):
 
     # Relationships with other tables
     supplier = relationship("Warehouse", foreign_keys=[supplier_id], back_populates="supplier_transactions")
-    shipper = relationship("User", back_populates="transactions")
     recipient_warehouse = relationship("Warehouse",  foreign_keys=[recipient_id], back_populates="receiver_transactions")
     transaction_items = relationship("TransactionItem", back_populates="transaction")
 
@@ -34,7 +32,6 @@ class Transaction(Base):
         transaction = SessionMaker().query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
         return {
             "transaction_id": self.transaction_id,
-            "shipper": transaction.shipper.to_dict(),
             "supplier": transaction.supplier.to_dict(),
             "recipient_warehouse": transaction.recipient_warehouse.to_dict(),
             "status": self.status
