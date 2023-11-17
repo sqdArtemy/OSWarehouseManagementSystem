@@ -23,7 +23,7 @@ class CompanyView(GenericView):
         company_email = self.body.get("company_email")
 
         if not is_email_valid(company_email):
-            raise ValidationError("Invalid email address")
+            raise ValidationError("Invalid company`s email address")
 
         if is_instance_already_exists(Company, company_email=company_email):
             raise DatabaseError("Company with this email already exists")
