@@ -37,7 +37,7 @@ class UserView(GenericView):
             raise ValidationError("Password and confirm password are not the same.")
 
         if not is_email_valid(self.body["user_email"]):
-            raise ValidationError("Invalid email address.")
+            raise ValidationError("Invalid user`s email address.")
 
         if not is_phone_valid(self.body["user_phone"]):
             raise ValidationError("Invalid phone number.")
