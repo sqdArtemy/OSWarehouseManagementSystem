@@ -31,7 +31,7 @@ class CompanyView(GenericView):
         return super().create(request=request)
 
     @view_function_middleware
-    @check_allowed_roles_middleware([UserRole.OWNER.value["code"]])
+    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"]])
     @check_allowed_methods_middleware([Method.PUT.value])
     def update(self, request: dict) -> dict:
         """
