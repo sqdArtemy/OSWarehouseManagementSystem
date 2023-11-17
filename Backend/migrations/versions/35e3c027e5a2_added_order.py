@@ -23,7 +23,6 @@ def upgrade() -> None:
     op.create_table('orders',
                     sa.Column('order_id', sa.Integer(), autoincrement=True, nullable=False),
                     sa.Column('supplier_id', sa.Integer(), nullable=False),
-                    sa.Column('shipper_id', sa.Integer(), nullable=False),
                     sa.Column('recipient_vendor_id', sa.Integer(), nullable=True),
                     sa.Column('total_price', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
                     sa.Column('created_at', sa.DateTime(), nullable=False),
@@ -33,7 +32,6 @@ def upgrade() -> None:
                                       'damaged', name='order_status'), nullable=False),
                     sa.CheckConstraint('total_price > 0', name='check_total_price'),
                     sa.ForeignKeyConstraint(['recipient_vendor_id'], ['vendors.vendor_id'], ),
-                    sa.ForeignKeyConstraint(['shipper_id'], ['users.user_id'], ),
                     sa.ForeignKeyConstraint(['supplier_id'], ['warehouses.warehouse_id'], ),
                     sa.PrimaryKeyConstraint('order_id')
                     )

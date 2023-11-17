@@ -24,7 +24,6 @@ def upgrade() -> None:
                     sa.Column('transaction_id', sa.Integer(), autoincrement=True, nullable=False),
                     sa.Column('supplier_id', sa.Integer(), nullable=True),
                     sa.Column('recipient_id', sa.Integer(), nullable=True),
-                    sa.Column('shipper_id', sa.Integer(), nullable=False),
                     sa.Column('status', sa.Enum('new', 'processing', 'submitted', 'finished', 'cancelled', 'delivered',
                                                 name='transaction_status'), nullable=False),
                     sa.Column('total_price', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
@@ -33,7 +32,6 @@ def upgrade() -> None:
                     sa.Column('updated_at', sa.DateTime(), nullable=True),
                     sa.CheckConstraint('recipient_id <> supplier_id', name='check_recipient_supplier'),
                     sa.ForeignKeyConstraint(['recipient_id'], ['warehouses.warehouse_id'], ),
-                    sa.ForeignKeyConstraint(['shipper_id'], ['users.user_id'], ),
                     sa.ForeignKeyConstraint(['supplier_id'], ['warehouses.warehouse_id'], ),
                     sa.PrimaryKeyConstraint('transaction_id')
                     )

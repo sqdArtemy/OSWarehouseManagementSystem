@@ -18,8 +18,6 @@ class User(Base):
 
     # Relationships with other tables
     company = relationship("Company", back_populates="users")
-    orders = relationship("Order", back_populates="shipper")
-    transactions = relationship("Transaction", back_populates="shipper")
     vendors = relationship("Vendor", back_populates="vendor_owner")
     warehouses = relationship("Warehouse", back_populates="manager")
 
