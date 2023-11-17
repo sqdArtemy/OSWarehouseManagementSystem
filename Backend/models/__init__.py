@@ -4,7 +4,7 @@ from .order import Order
 from .order_item import OrderItem
 from .product import Product
 from .rack import Rack
-from .store import Store
+from .vendor import Vendor
 from .transaction import Transaction
 from .transaction_item import TransactionItem
 from .user import User

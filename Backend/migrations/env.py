@@ -8,7 +8,7 @@ from alembic import context
 from db_config import Base
 
 # Importing project`s models
-from models import (User, Company, Store, Warehouse, Order, Rack,
+from models import (User, Company, Vendor, Warehouse, Order, Rack,
                     Product, OrderItem, Inventory, Transaction, TransactionItem)
 
 # this is the Alembic Config object, which provides

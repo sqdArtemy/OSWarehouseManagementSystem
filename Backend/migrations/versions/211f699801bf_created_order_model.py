@@ -29,7 +29,7 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('order_status', sa.Enum('new', 'processing', 'submitted', 'finished', 'cancelled', 'lost', 'damaged', name='order_status'), nullable=False),
     sa.CheckConstraint('total_price > 0', name='check_total_price'),
-    sa.ForeignKeyConstraint(['recipient_store_id'], ['stores.store_id'], ),
+    sa.ForeignKeyConstraint(['recipient_vendor_id'], ['vendors.vendor_id'], ),
     sa.ForeignKeyConstraint(['supplier_id'], ['warehouses.warehouse_id'], ),
     sa.PrimaryKeyConstraint('order_id')
     )

@@ -1,4 +1,4 @@
-from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, StoreView, \
+from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, VendorView, \
     TransactionView, TransactionItemView, WarehouseView
 from utilities.exceptions import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
@@ -20,7 +20,7 @@ def controller(request: dict) -> dict:
     order_item_view = OrderItemView()
     product_view = ProductView()
     rack_view = RackView()
-    store_view = StoreView()
+    vendor_view = VendorView()
     transaction_view = TransactionView()
     transaction_item_view = TransactionItemView()
     warehouse_view = WarehouseView()
@@ -138,19 +138,19 @@ def controller(request: dict) -> dict:
             elif method == Method.POST.value:
                 return rack_view.create(request=request)
 
-        # Store`s endpoints
-        elif "/store" in url:
+        # Vendor`s endpoints
+        elif "/vendor" in url:
             if method == Method.GET.value:
-                return store_view.get(request=request)
+                return vendor_view.get(request=request)
             elif method == Method.DELETE.value:
-                return store_view.delete(request=request)
+                return vendor_view.delete(request=request)
             elif method == Method.PUT.value:
-                return store_view.update(request=request)
-        elif "/stores" in url:
+                return vendor_view.update(request=request)
+        elif "/vendors" in url:
             if method == Method.GET.value:
-                return store_view.get_list(request=request, **filters)
+                return vendor_view.get_list(request=request, **filters)
             elif method == Method.POST.value:
-                return store_view.create(request=request)
+                return vendor_view.create(request=request)
 
         # Transaction`s endpoints
         elif "/transaction" in url:
