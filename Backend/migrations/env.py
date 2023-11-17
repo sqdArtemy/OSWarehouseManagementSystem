@@ -9,7 +9,7 @@ from db_config import Base
 
 # Importing project`s models
 from models import (User, Company, Vendor, Warehouse, Order, Rack,
-                    Product, OrderItem, Inventory, Transaction, TransactionItem)
+                    Product, OrderItem, Inventory, Transaction, TransactionItem, Transport)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

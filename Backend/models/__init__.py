@@ -9,3 +9,4 @@ from .transaction import Transaction
 from .transaction_item import TransactionItem
 from .user import User
 from .warehouse import Warehouse
+from .transport import Transport
