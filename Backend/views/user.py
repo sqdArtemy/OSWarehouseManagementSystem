@@ -29,8 +29,8 @@ class UserView(GenericView):
         """
 
         # Check if user role is valid
-        if self.body["user_role"] not in ("owner", "customer"):
-            raise ValidationError("Only warehouse owner or customers can register to the service.")
+        if self.body["user_role"] not in (UserRole.MANAGER.value["name"], UserRole.VENDOR.value["name"]):
+            raise ValidationError("Only warehouse managers or vendors can register to the service.")
 
         # Check if password and confirm_password are the same
         if self.body["password"] != self.body["confirm_password"]:
