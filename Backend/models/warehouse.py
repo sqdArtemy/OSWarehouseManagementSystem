@@ -25,16 +25,16 @@ class Warehouse(Base):
     supplied_orders = relationship(
         "Order",
         back_populates="supplier_warehouse",
-        primaryjoin="Warehouse.warehouse_id == Order.supplier_id",
+        primaryjoin="and_(Warehouse.warehouse_id == Order.supplier_id, Order.order_type == 'from_warehouse')",
         foreign_keys="Order.supplier_id",
-        overlaps="supplier_orders"
+        overlaps="supplied_orders,supplier_vendor"
     )
     received_orders = relationship(
         "Order",
         back_populates="recipient_warehouse",
-        primaryjoin="Warehouse.warehouse_id == Order.recipient_id",
+        primaryjoin="and_(Warehouse.warehouse_id == Order.recipient_id, Order.order_type == 'to_warehouse')",
         foreign_keys="Order.recipient_id",
-        overlaps="recipient_orders"
+        overlaps="received_orders,recipient_vendor"
     )
 
     # Constraints

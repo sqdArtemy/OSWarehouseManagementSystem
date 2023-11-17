@@ -17,16 +17,16 @@ class Vendor(Base):
     supplied_orders = relationship(
         "Order",
         back_populates="supplier_vendor",
-        primaryjoin="Vendor.vendor_id == Order.supplier_id",
+        primaryjoin="and_(Vendor.vendor_id == Order.supplier_id, Order.order_type == 'to_warehouse')",
         foreign_keys="Order.supplier_id",
-        overlaps="vendor_supplied_orders"
+        overlaps="supplier_warehouse"
     )
     received_orders = relationship(
         "Order",
         back_populates="recipient_vendor",
-        primaryjoin="Vendor.vendor_id == Order.recipient_id",
+        primaryjoin="and_(Vendor.vendor_id == Order.recipient_id, Order.order_type == 'from_warehouse')",
         foreign_keys="Order.recipient_id",
-        overlaps="vendor_received_orders"
+        overlaps="recipient_warehouse"
     )
 
     def to_dict(self):
