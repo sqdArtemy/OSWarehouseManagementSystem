@@ -12,36 +12,6 @@ class ProductView(GenericView):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
-    def get_list(self, request: dict, **kwargs) -> dict:
-        """
-        Get all instances of product.
-        :param request: dictionary containing url, method and body
-        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
-        :return: dictionary containing status_code and response body with list of dictionaries of instances` data
-        """
-        query = self.session.query(self.model)
-
-        # if product_name, then find all products with product_name like given in filter
-        product_name = kwargs.get("product_name")
-        if product_name is not None:
-            query = query.filter(Product.product_name.like(f"%{product_name}%"))
-
-        for flt_key, flt_value in kwargs.items():
-            # if column_gte then find all products with volume >= volume_gte
-            if flt_key.endswith("_gte"):
-                query = query.filter(getattr(Product, flt_key[:-4]) >= flt_value)
-            # if column_lte then find all products with volume <= volume_lte
-            elif flt_key.endswith("_lte"):
-                query = query.filter(getattr(Product, flt_key[:-4]) <= flt_value)
-
-        instances = query.all()
-        body = [instance.to_dict() for instance in instances]
-        self.response.status_code = 200
-        self.response.data = body
-        return self.response.create_response()
-
-    @view_function_middleware
-    @check_allowed_methods_middleware([Method.GET.value])
     def get(self, request: dict) -> dict:
         """
         Get response with desired product`s dictionary.
