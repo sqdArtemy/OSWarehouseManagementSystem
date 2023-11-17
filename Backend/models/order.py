@@ -1,5 +1,5 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Integer, Column, Enum, ForeignKey, Numeric, CheckConstraint, DateTime, func
+from sqlalchemy import Integer, Column, Enum, Numeric, CheckConstraint, DateTime, func
 from db_config import Base, SessionMaker
 
 
@@ -28,27 +28,31 @@ class Order(Base):
         "Warehouse",
         back_populates="supplied_orders",
         foreign_keys=supplier_id,
-        primaryjoin="Order.supplier_id == Warehouse.warehouse_id"
+        primaryjoin="and_(Order.supplier_id == Warehouse.warehouse_id, Order.order_type == 'from_warehouse')"
     )
-    recipient_vendor = relationship(
-        "Vendor",
-        back_populates="received_orders",
-        foreign_keys=recipient_id,
-        primaryjoin="Order.recipient_id == Vendor.vendor_id"
-    )
+
     supplier_vendor = relationship(
         "Vendor",
         back_populates="supplied_orders",
         foreign_keys="Order.supplier_id",
-        primaryjoin="Order.supplier_id == Vendor.vendor_id",
-        overlaps="supplier_vendor_relationship"
+        primaryjoin="and_(Order.supplier_id == Vendor.vendor_id, Order.order_type == 'to_warehouse')",
+        overlaps="supplier_warehouse"
     )
+
+    # Recipient relationships
     recipient_warehouse = relationship(
         "Warehouse",
         back_populates="received_orders",
         foreign_keys="Order.recipient_id",
-        primaryjoin="Order.recipient_id == Warehouse.warehouse_id",
-        overlaps="recipient_warehouse_relationship"
+        primaryjoin="and_(Order.recipient_id == Warehouse.warehouse_id, Order.order_type == 'to_warehouse')"
+    )
+
+    recipient_vendor = relationship(
+        "Vendor",
+        back_populates="received_orders",
+        foreign_keys=recipient_id,
+        primaryjoin="and_(Order.recipient_id == Vendor.vendor_id, Order.order_type == 'from_warehouse')",
+        overlaps="recipient_warehouse"
     )
 
     # Constraints
