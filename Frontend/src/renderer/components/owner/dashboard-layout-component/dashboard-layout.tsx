@@ -64,7 +64,13 @@ export function DashboardLayout() {
           </div>
         </div>
         <div className="side-bar-bottom">
-          <div className="side-bar-bottom-profile">
+          <div
+            className="side-bar-bottom-profile"
+            onClick={() => {
+              setSelected(null);
+              navigate('/owner/profile');
+            }}
+          >
             <span className="side-bar-bottom-profile-icon">
               <img src={DashboardProfileIcon} alt={'Dashboard Profile Icon'} />
             </span>
