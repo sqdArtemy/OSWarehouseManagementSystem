@@ -39,7 +39,7 @@
           .search-bar-dropdown-container {
             min-height: 3vw;
             width: 10vw;
-
+            font-size: 1vw;
             border: 0.5px solid #000000;
 
 
@@ -172,4 +172,4 @@
   transition: all 0.3s ease;
 }
 
-
+.ant-table table { font-size: 1vw; }

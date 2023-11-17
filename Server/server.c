@@ -50,7 +50,7 @@ void* handle_client(void* client) {
 	
     cJSON *root = cJSON_CreateObject();
     int new_socket = *((int*)clientArgs->client_socket);
-    char buffer[1024] = {0};
+    char buffer[8192] = {0};
 
     while (true) {    
     	memset(buffer, 0, sizeof(buffer));

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { userApi } from '../../index';
 import './sign-in.scss';
+import { Tooltip } from 'antd';
 
 export function SignIn() {
   const [email, setEmail] = useState('');
@@ -49,18 +50,22 @@ export function SignIn() {
             </div>
           </div>
           <form>
-            <input
-              type="email"
-              id="email"
-              placeholder={'Email'}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              type="password"
-              id="password"
-              placeholder={'Password'}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <Tooltip title={'Input Email'} placement={'topLeft'}>
+              <input
+                type="email"
+                id="email"
+                placeholder={'Email'}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Password'} placement={'topLeft'}>
+              <input
+                type="password"
+                id="password"
+                placeholder={'Password'}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Tooltip>
             <button type="button" onClick={async () => handleSignIn()}>
               SIGN IN
             </button>
