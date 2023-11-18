@@ -15,6 +15,7 @@ import Dashboard from './components/owner/dashboard-component/dashboard';
 import Items from './components/owner/items-component/items';
 import { SignUp } from './components/sign-up-components/sign-up-component/sign-up';
 import { SignUpDetails } from './components/sign-up-components/sign-up-details-component/sign-up-details';
+import Profile from './components/owner/profile-component/profile';
 // import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 
 export default function App() {
@@ -35,6 +36,7 @@ export default function App() {
           {/*<Route path="warehouses" element={<Warehouses />} />*/}
           <Route path="items" element={<Items />} />
           {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
     </Router>

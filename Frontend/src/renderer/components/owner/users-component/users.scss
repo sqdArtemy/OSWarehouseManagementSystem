@@ -39,7 +39,7 @@
           .search-bar-dropdown-container {
             min-height: 3vw;
             width: 10vw;
-
+            font-size: 1vw;
             border: 0.5px solid #000000;
 
 
@@ -98,7 +98,8 @@
           border-radius: 0.3rem;
 
           cursor: pointer;
-          .add-btn-text{
+
+          .add-btn-text {
             font-size: 1.3vw;
           }
 
@@ -145,3 +146,30 @@
 .enabled {
   cursor: pointer;
 }
+
+.table-actions-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  align-items: center;
+  justify-content: center;
+
+  .delete-icon {
+    display: block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ff0000;
+
+
+
+  }
+}
+
+.delete-icon-light {
+  color: #ff8080;
+  display: block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ant-table table { font-size: 1vw; }

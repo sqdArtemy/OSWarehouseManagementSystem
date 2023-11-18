@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './sign-up.scss';
 import { useNavigate } from 'react-router-dom';
+import { Tooltip } from 'antd';
 
 export function SignUp() {
   const navigate = useNavigate();
@@ -39,25 +40,31 @@ export function SignUp() {
           </div>
 
           <form>
-            <input
-              id="name"
-              placeholder={'Name of Company'}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <input
-              id="name"
-              placeholder={'Address of Company'}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-            <input
-              type="email"
-              id="email"
-              placeholder={'Email of Company'}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <Tooltip title={'Input Name of Company'} placement={'topLeft'}>
+              <input
+                id="name"
+                placeholder={'Name of Company'}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Address of Company'} placement={'topLeft'}>
+              <input
+                id="name"
+                placeholder={'Address of Company'}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Email of Company'} placement={'topLeft'}>
+              <input
+                type="email"
+                id="email"
+                placeholder={'Email of Company'}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Tooltip>
             <button type="button" onClick={handleContinue}>
               Continue
             </button>
@@ -67,4 +74,3 @@ export function SignUp() {
     </div>
   );
 }
-
