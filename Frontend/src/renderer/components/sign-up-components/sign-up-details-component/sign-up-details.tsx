@@ -32,12 +32,12 @@ export function SignUpDetails() {
       password,
       confirm_password: rePassword,
       user_surname: lastName,
-      user_role: 'owner',
+      user_role: 'manager',
     });
 
     if (response.success) {
       switch (response.data?.user_role) {
-        case 'owner':
+        case 'manager':
           navigate('/owner');
           break;
         default:

@@ -23,7 +23,7 @@ try:
     client_socket.send(json.dumps(message).encode())
 
     while True:
-        ready, _, _ = select.select([client_socket], [], [], 2)  # Wait for up to 1 second for data
+        ready, _, _ = select.select([client_socket], [], [], 1)  # Wait for up to 1 second for data
         if ready:
             # receive data
             data = client_socket.recv(1048576)
@@ -39,7 +39,6 @@ try:
                     "body": {},
                     "headers": request.get("headers", {})
                 }
-            response = controller(json.loads(data.decode()))
 
             client_socket.send(json.dumps(response).encode() + "\n".encode())
 

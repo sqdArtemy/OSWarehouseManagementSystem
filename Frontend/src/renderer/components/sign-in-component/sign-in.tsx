@@ -15,13 +15,14 @@ export function SignIn() {
 
     if (response.success) {
       switch (response.data?.user_role) {
-        case 'owner':
+        case 'manager':
           navigate('/owner');
           break;
         default:
           break;
       }
     } else {
+      console.log(response)
       // some error message
     }
   };
