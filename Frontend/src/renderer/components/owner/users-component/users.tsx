@@ -30,6 +30,7 @@ export default function Users() {
   const [isAddUserVisible, setIsAddUserVisible] = useState(false);
   const [isEditUserVisible, setIsEditUserVisible] = useState(false);
   const [userData, setUserData] = useState({});
+  let filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -48,6 +49,23 @@ export default function Users() {
       console.log('delete', record);
       await userApi.deleteUser(record.user_id);
     }
+
+    const response = await userApi.getAllUsers(filters);
+
+    const users = response.data?.body;
+    if (users?.length) {
+      for (let i = 0; i < users.length; i++) {
+        data.push({
+          key: (i + 1).toString(),
+          fullName: users[i].user_name + ' ' + users[i].user_surname,
+          role: users[i].user_role,
+          phoneNumber: users[i].user_phone,
+          email: users[i].user_email,
+          user_id: users[i].user_id,
+        });
+      }
+      setDataSource(data);
+    }
   };
 
   const debouncedSearch = debounce(async (filters) => {
@@ -62,7 +80,7 @@ export default function Users() {
           fullName: users[i].user_name + ' ' + users[i].user_surname,
           role: users[i].user_role,
           phoneNumber: users[i].user_phone,
-          email: users[i].user_phone,
+          email: users[i].user_email,
           user_id: users[i].user_id,
         });
       }
@@ -81,7 +99,7 @@ export default function Users() {
       }
     }, 100);
 
-    const filters = {};
+    filters = {};
     if (selectedRole) {
       filters.user_role = selectedRole.toLowerCase();
     }
@@ -197,7 +215,7 @@ export default function Users() {
 
   const items = [
     {
-      label: 'Shipper',
+      label: 'Supervisor',
     },
     {
       label: 'Manager',
@@ -249,7 +267,7 @@ export default function Users() {
             fullName: users[i].user_name + ' ' + users[i].user_surname,
             role: users[i].user_role,
             phoneNumber: users[i].user_phone,
-            email: users[i].user_phone,
+            email: users[i].user_email,
             user_id: users[i].user_id,
           });
         }

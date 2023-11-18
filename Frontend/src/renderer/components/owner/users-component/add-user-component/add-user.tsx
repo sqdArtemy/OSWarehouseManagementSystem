@@ -59,14 +59,14 @@ export default function AddUser({
     } else {
       hidePopup();
     }
-    await userApi.addUser({
+    const response = await userApi.addUser({
       user_name: newUserData['First Name'],
       user_surname: newUserData['Last Name'],
       user_email: newUserData['Email'],
       user_phone: newUserData['Phone'],
-      user_role: newUserData['Role'],
+      user_role: 'supervisor',
     });
-
+    console.log(response);
     userData.setUserData(newUserData);
   };
 
@@ -119,20 +119,6 @@ export default function AddUser({
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
-        </Form.Item>
-        <Form.Item
-          name="Role"
-          label={<p style={{ fontSize: '1vw' }}>Role</p>}
-          rules={[{ required: true }]}
-        >
-          <Select
-            placeholder={'Select a Role'}
-            onChange={onRoleChange}
-            style={{ minHeight: '2vw' }}
-          >
-            <Select.Option value="manager">Manager</Select.Option>
-            <Select.Option value="shipper">Shipper</Select.Option>
-          </Select>
         </Form.Item>
         <Form.Item
           {...tailLayout}
