@@ -14,7 +14,7 @@ export interface INewUserData {
 export default function AddUser({
   isPopupVisible,
   hidePopup,
-  userData,
+  userData, onAddUserSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -22,6 +22,7 @@ export default function AddUser({
     userData: INewUserData;
     setUserData: (userData: unknown) => void;
   };
+  onAddUserSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
 
@@ -59,6 +60,7 @@ export default function AddUser({
     } else {
       hidePopup();
     }
+
     const response = await userApi.addUser({
       user_name: newUserData['First Name'],
       user_surname: newUserData['Last Name'],
@@ -67,6 +69,9 @@ export default function AddUser({
       user_role: 'supervisor',
     });
     console.log(response);
+    if(response.success){
+      onAddUserSuccess();
+    }
     userData.setUserData(newUserData);
   };
 

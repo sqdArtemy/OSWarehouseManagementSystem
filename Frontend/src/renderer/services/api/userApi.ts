@@ -117,5 +117,6 @@ export class UserApi implements IUser {
     if(response.success && this.userData.user_id == id){
       this.userData = response?.data?.body;
     }
+    return response;
   }
 }

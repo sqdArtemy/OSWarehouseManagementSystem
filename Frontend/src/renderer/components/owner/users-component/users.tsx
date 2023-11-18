@@ -50,27 +50,12 @@ export default function Users() {
       await userApi.deleteUser(record.user_id);
     }
 
-    const response = await userApi.getAllUsers(filters);
+    await getAllUsers(filters);
+  }
 
-    const users = response.data?.body;
-    if (users?.length) {
-      for (let i = 0; i < users.length; i++) {
-        data.push({
-          key: (i + 1).toString(),
-          fullName: users[i].user_name + ' ' + users[i].user_surname,
-          role: users[i].user_role,
-          phoneNumber: users[i].user_phone,
-          email: users[i].user_email,
-          user_id: users[i].user_id,
-        });
-      }
-      setDataSource(data);
-    }
-  };
-
-  const debouncedSearch = debounce(async (filters) => {
-    const response = await userApi.getAllUsers(filters);
-    const users = response?.data?.body;
+  const getAllUsers = async (filters: {[key: string]: any}) => {
+    const result = await userApi.getAllUsers(filters);
+    const users = result.data?.body;
     const dataItems = [];
 
     if (users?.length) {
@@ -89,6 +74,9 @@ export default function Users() {
     } else {
       setDataSource([]);
     }
+  }
+  const debouncedSearch = debounce(async (filters) => {
+    await getAllUsers(filters);
   }, 1000);
 
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -136,6 +124,14 @@ export default function Users() {
       }
     }, 100);
     setIsAddUserVisible(true);
+  };
+
+  const handleAddUserSuccess = async () => {
+    await getAllUsers(filters);
+  };
+
+  const handleEditUserSuccess = async () => {
+    await getAllUsers(filters);
   };
 
   const handleEditUser = (record) => {
@@ -258,11 +254,13 @@ export default function Users() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    userApi.getAllUsers({}).then((result) => {
+    userApi.getAllUsers(filters).then((result) =>{
       const users = result.data?.body;
+      const dataItems = [];
+
       if (users?.length) {
         for (let i = 0; i < users.length; i++) {
-          data.push({
+          dataItems.push({
             key: (i + 1).toString(),
             fullName: users[i].user_name + ' ' + users[i].user_surname,
             role: users[i].user_role,
@@ -271,7 +269,10 @@ export default function Users() {
             user_id: users[i].user_id,
           });
         }
-        setDataSource(data);
+
+        setDataSource(dataItems);
+      } else {
+        setDataSource([]);
       }
     });
 
@@ -324,11 +325,13 @@ export default function Users() {
               hidePopup={hideAddUser}
               isPopupVisible={isAddUserVisible}
               userData={{ userData: userData, setUserData: setUserData }}
+              onAddUserSuccess={handleAddUserSuccess}
             />
             <EditUser
               hidePopup={hideEditUser}
               isPopupVisible={isEditUserVisible}
               userData={{ userData: userData, setUserData: setUserData }}
+              onEditUserSuccess={handleEditUserSuccess}
             />
           </div>
         </div>
