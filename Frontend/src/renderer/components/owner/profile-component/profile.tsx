@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import './profile.scss';
 import { Button, Form, FormInstance, Input, Space } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
+import { userApi } from '../../../index';
 
 export default function Profile() {
   const [changePassDisplay, setChangePassDisplay] = useState(false);
   const [userData, setUserData] = useState({});
+  let id;
 
   const formRef = React.useRef<FormInstance>(null);
 
@@ -14,10 +16,33 @@ export default function Profile() {
     setChangePassDisplay(true);
   };
 
-  const onFinish = () => {
+  const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
+    if(newUserData['Current Password']){
+      await userApi.resetPassword(
+        newUserData['Current Password'], newUserData['New Password'],newUserData['Confirm Password'])
+    } else {
+      await userApi.updateUser({
+        user_name: newUserData['First Name'],
+        user_surname: newUserData['Last Name'],
+        user_email: newUserData['Email']
+      }, id);
+    }
     setUserData(newUserData);
   };
+
+  useEffect(() => {
+    const data = userApi.getUserData;
+    if (data) {
+      formRef.current?.setFieldsValue({
+        'First Name': data.user_name,
+        'Last Name': data.user_surname,
+        'Email': data.user_email,
+      });
+
+      id = data?.user_id;
+    }
+  }, []);
 
   const layout = {
     labelCol: { span: 8 },

@@ -29,11 +29,12 @@ export interface ISignUp {
 }
 
 export interface IAddUser {
-  user_name: string;
-  user_surname: string;
-  user_email: string;
-  user_role: string;
-  user_phone: string;
+  user_name?: string;
+  user_surname?: string;
+  user_email?: string;
+  user_role?: string;
+  user_phone?: string;
+  user_id?: number
 }
 
 interface IGetUsersFilters {}

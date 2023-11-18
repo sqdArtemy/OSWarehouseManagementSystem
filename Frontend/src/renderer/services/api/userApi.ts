@@ -113,6 +113,9 @@ export class UserApi implements IUser {
     const method = 'PUT';
     const headers = { token: this.token } ;
 
-    return await handleApiRequest({ url, method, body, headers});
+    const response = await handleApiRequest({ url, method, body, headers});
+    if(response.success && this.userData.user_id == id){
+      this.userData = response?.data?.body;
+    }
   }
 }
