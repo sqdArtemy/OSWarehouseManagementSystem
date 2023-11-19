@@ -4,12 +4,22 @@ from json import JSONDecodeError
 
 import select
 import sys
+
+from PyQt5.QtWidgets import QApplication
+
+from connections_console import ServerWindow
 from controller import controller
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 SERVER_IP = sys.argv[1]
 PORT = int(sys.argv[2])
+
+app = QApplication(sys.argv)
+window = ServerWindow()
+window.record_added.connect(window.update_records)
+window.show()
+
 
 try:
     client_socket.connect((SERVER_IP, PORT))
@@ -31,7 +41,7 @@ try:
 
             try:
                 request = json.loads(data.decode())
-                response = controller(request)
+                response = controller(request, window=window)
             except JSONDecodeError:
                 response = {
                     "status_code": 400,

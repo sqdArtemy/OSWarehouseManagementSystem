@@ -1,3 +1,4 @@
+from connections_console import ServerWindow
 from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, VendorView, \
     TransactionView, TransactionItemView, WarehouseView, TransportView
 from utilities.exceptions import ValidationError, DatabaseError
@@ -5,10 +6,11 @@ from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
 
 
-def controller(request: dict) -> dict:
+def controller(request: dict, window: ServerWindow = None) -> dict:
     """
     Controller for handling requests and processing response.
-    :param request:
+    :param request: Request object
+    :param window: ServerWindow object
     :return:
     """
 
@@ -35,8 +37,22 @@ def controller(request: dict) -> dict:
     # TODO: We need to refactor this code to avoid repetitions and make it more readable
 
     try:
+        if "/connect" in url:
+            window.signal_handler.record_added.emit(
+                headers.get("ip", ""),
+                headers.get("port", ""),
+                headers.get("socket_fd", ""),
+                "Connected"
+            )
+        elif "/disconnect" in url:
+            window.signal_handler.record_added.emit(
+                headers.get("ip", ""),
+                headers.get("port", ""),
+                headers.get("socket_fd", ""),
+                "Disconnected"
+            )
         # User`s endpoints
-        if "/user" in url:
+        elif "/user" in url:
             if method == Method.GET.value:
                 if "/users" in url:
                     return user_view.get_list(request=request, **filters)
