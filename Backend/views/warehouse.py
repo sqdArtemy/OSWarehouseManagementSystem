@@ -1,6 +1,5 @@
 from decimal import Decimal
 from sqlite3 import IntegrityError
-from typing import Dict, List, Any
 
 from sqlalchemy import func
 
@@ -29,43 +28,44 @@ class WarehouseView(GenericView):
         :return: dictionary containing status_code and response body
         """
 
-        owner_id = decode_token(self.headers.get("token"))
-        manager_id = self.body.get("manager_id")
+        creator = decode_token(self.headers.get("token"))
+        supervisor_id = self.body.get("supervisor_id")
         overall_capacity = self.body.get("overall_capacity")
         remaining_capacity = self.body.get("remaining_capacity")
 
         with get_session() as session:
 
-            company_id = session.query(User.company_id).filter_by(user_id=owner_id).scalar()
+            company_id = session.query(User.company_id).filter_by(user_id=creator).scalar()
 
-            # Check if the manager exists
-            manager = session.query(User).filter_by(user_id=manager_id,
-                                                    user_role='manager',
-                                                    company_id=company_id).first()
+            # Check if the supervisor exists
+            supervisor = session.query(User).filter_by(user_id=supervisor_id,
+                                                       user_role='supervisor',
+                                                       company_id=company_id).first()
 
-            if not manager:
-                raise ValidationError("Manager not found", 404)
+            if not supervisor:
+                raise ValidationError("supervisor not found", 404)
 
-            # Check if the manager is already assigned to another warehouse
-            existing_warehouse = session.query(Warehouse).filter_by(manager_id=manager_id).first()
+            # Check if the supervisor is already assigned to another warehouse
+            existing_warehouse = session.query(Warehouse).filter_by(supervisor_id=supervisor_id).first()
 
             if existing_warehouse:
-                raise ValidationError("The specified manager is already assigned to another warehouse", 400)
+                raise ValidationError("The specified supervisor is already assigned to another warehouse", 400)
 
             if not remaining_capacity:
                 remaining_capacity = overall_capacity
 
-            company_id = session.query(User.company_id).filter_by(user_id=manager_id).scalar()
+            company_id = session.query(User.company_id).filter_by(user_id=supervisor_id).scalar()
 
             try:
                 # Create a new warehouse
                 new_warehouse = Warehouse(
                     warehouse_name=self.body["warehouse_name"],
                     warehouse_address=self.body["warehouse_address"],
-                    manager_id=manager_id,
+                    supervisor_id=supervisor_id,
                     company_id=company_id,
                     overall_capacity=overall_capacity,
-                    remaining_capacity=remaining_capacity
+                    remaining_capacity=remaining_capacity,
+                    warehouse_type=self.body["warehouse_type"]
                 )
 
                 session.add(new_warehouse)
@@ -96,21 +96,21 @@ class WarehouseView(GenericView):
         # id of warehouse to be modified
         warehouse_id = extract_id_from_url(request["url"], "warehouse")
 
-        owner_id = decode_token(self.headers.get("token"))
-        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
-        manager_id = self.body.get("manager_id")
-        manager = SessionMaker().query(User).filter_by(user_id=manager_id,
-                                                       user_role='manager',
-                                                       company_id=company_id).first()
-        if not manager:
-            raise ValidationError("Manager not found", 404)
+        updator = decode_token(self.headers.get("token"))
+        company_id = SessionMaker().query(User.company_id).filter_by(user_id=updator).scalar()
+        supervisor_id = self.body.get("supervisor_id")
+        supervisor = SessionMaker().query(User).filter_by(user_id=supervisor_id,
+                                                          user_role='supervisor',
+                                                          company_id=company_id).first()
+        if not supervisor:
+            raise ValidationError("supervisor not found", 404)
 
         existing_warehouse = SessionMaker().query(Warehouse).filter(
-                                                            Warehouse.manager_id == manager_id,
-                                                            Warehouse.warehouse_id != warehouse_id
-                                                        ).first()
+            Warehouse.supervisor_id == supervisor_id,
+            Warehouse.warehouse_id != warehouse_id
+        ).first()
         if existing_warehouse:
-            raise ValidationError("The specified manager is already assigned to another warehouse", 400)
+            raise ValidationError("The specified supervisor is already assigned to another warehouse", 400)
 
         # Check if the warehouse exists and belongs to the same company
         warehouse = SessionMaker().query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
@@ -121,15 +121,14 @@ class WarehouseView(GenericView):
         overall_capacity = self.body.get("overall_capacity")
 
         # Calculate the change in capacity
-        capacity_change = float(warehouse.overall_capacity) - overall_capacity
+        capacity_change = float(warehouse.overall_capacity) - float(overall_capacity)
 
         # Check if the overall capacity is being reduced
         if overall_capacity < warehouse.overall_capacity:
             racks_sum = SessionMaker().query(
-                                    func.sum(Rack.overall_capacity),
-                                    func.sum(Rack.remaining_capacity)
-                                    ).filter_by(warehouse_id=warehouse_id).first()
-            print(capacity_change)
+                func.sum(Rack.overall_capacity),
+                func.sum(Rack.remaining_capacity)
+            ).filter_by(warehouse_id=warehouse_id).first()
             if racks_sum[0] is not None and overall_capacity < racks_sum[0]:
                 raise ValidationError("Overall capacity cannot be less than the overall capacity in racks", 400)
             elif racks_sum[1] is not None and overall_capacity < racks_sum[1]:
@@ -138,7 +137,7 @@ class WarehouseView(GenericView):
                 raise ValidationError("Overall capacity cannot be less than the remaining capacity", 400)
 
         # Update warehouse information
-        self.body["remaining_capacity"] = warehouse.remaining_capacity - Decimal(str(capacity_change))
+        self.body["remaining_capacity"] = warehouse.remaining_capacity - capacity_change
         self.body = warehouse.to_dict()
 
         return super().update(request=request)
@@ -155,8 +154,8 @@ class WarehouseView(GenericView):
         # id of warehouse to be deleted
         warehouse_id = extract_id_from_url(request["url"], "warehouse")
 
-        owner_id = decode_token(self.headers.get("token"))
-        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
+        deleter = decode_token(self.headers.get("token"))
+        company_id = SessionMaker().query(User.company_id).filter_by(user_id=deleter).scalar()
 
         with get_session() as session:
             warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
@@ -195,8 +194,8 @@ class WarehouseView(GenericView):
         # id of the warehouse to be retrieved
         warehouse_id = extract_id_from_url(request["url"], "warehouse")
 
-        owner_id = decode_token(self.headers.get("token"))
-        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
+        retriever = decode_token(self.headers.get("token"))
+        company_id = SessionMaker().query(User.company_id).filter_by(user_id=retriever).scalar()
 
         warehouse = SessionMaker().query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
 
@@ -206,11 +205,12 @@ class WarehouseView(GenericView):
         # Get details about the warehouse
         warehouse_info = {
             "warehouse_id": warehouse.warehouse_id,
-            "manager_id": warehouse.manager_id,
+            "supervisor_id": warehouse.supervisor_id,
             "warehouse_name": warehouse.warehouse_name,
             "warehouse_address": warehouse.warehouse_address,
             "overall_capacity": warehouse.overall_capacity,
             "remaining_capacity": warehouse.remaining_capacity,
+            "warehouse_type": warehouse.warehouse_type,
             "racks": []
         }
 
@@ -228,9 +228,9 @@ class WarehouseView(GenericView):
             warehouse_info["racks"].append(rack_info)
 
         response_data = {
-                "status": 201,
-                "data": warehouse_info,
-                "headers": self.headers
+            "status": 201,
+            "data": warehouse_info,
+            "headers": self.headers
         }
         return response_data
 
@@ -242,41 +242,5 @@ class WarehouseView(GenericView):
         :param request: dictionary containing url, method, headers, and filters
         :return: dictionary containing status_code and response body
         """
-        owner_id = decode_token(self.headers.get("token"))
-        company_id = SessionMaker().query(User.company_id).filter_by(user_id=owner_id).scalar()
 
-        # Check if warehouse_name filter is provided
-        warehouse_name_filter = request.get("filters", {}).get("warehouse_name")
-
-        with get_session() as session:
-            # Query warehouses of the company
-            warehouses_query = session.query(Warehouse).filter_by(company_id=company_id)
-
-            # Apply warehouse_name filter if provided
-            if warehouse_name_filter:
-                warehouses_query = warehouses_query.filter(Warehouse.warehouse_name.like(f"%{warehouse_name_filter}%"))
-
-            warehouses = warehouses_query.all()
-
-            # Format the response data
-            warehouses_info = [
-                {
-                    "warehouse_id": warehouse.warehouse_id,
-                    "warehouse_name": warehouse.warehouse_name,
-                    "warehouse_address": warehouse.warehouse_address,
-                    "manager_id": warehouse.manager_id,
-                    "company_id": warehouse.company_id,
-                    "overall_capacity": warehouse.overall_capacity,
-                    "remaining_capacity": warehouse.remaining_capacity
-                }
-                for warehouse in warehouses
-            ]
-
-        response_data = {
-            "status": 200,
-            "data": warehouses_info,
-            "headers": self.headers
-        }
-
-        return response_data
-
+        return super().get_list(request=request, **kwargs)
