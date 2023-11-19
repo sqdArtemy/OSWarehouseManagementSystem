@@ -13,21 +13,30 @@ import { IProductFilters } from '../../../services/interfaces/productsInterface'
 import debounce from 'lodash.debounce';
 
 export default function Items() {
-  const [selected, setSelected] = useState('==');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
+  const [searchVolumeValue, setSearchVolumeValue] = useState('');
+  const [searchWeightValue, setSearchWeightValue] = useState('');
+  const [selectVolumeValue, setSelectVolumeValue] = useState('<=');
+  const [selectWeightValue, setSelectWeightValue] = useState('<=');
   const [dataSource, setDataSource] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [newItemData, setNewItemData] = useState({});
 
   let filters: IProductFilters = {};
 
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
+  const handleWeightClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
-    setSelected(e.domEvent.target.innerText);
-    e.domEvent.target.innerText = selected;
+    setSelectWeightValue(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectVolumeValue;
+  };
+
+  const handleVolumeClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    setSelectVolumeValue(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectWeightValue;
   };
 
   const handleDeleteItem = (record?) => {
@@ -38,6 +47,15 @@ export default function Items() {
       console.log('delete', record);
     }
   };
+
+  const handleWeightInputChange = (e) => {
+    setSearchWeightValue(e.target.value);
+  };
+
+  const handleVolumeInputChange = (e) => {
+    setSearchVolumeValue(e.target.value);
+  };
+
 
   const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
@@ -52,6 +70,18 @@ export default function Items() {
     } else {
       if(!filters.product_name_like) delete filters.product_name_like;
     }
+
+    if (searchVolumeValue) {
+      filters.volume_lte = selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_gte = selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
+    }
+
+    if (searchWeightValue) {
+      filters.weight_lte = selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
+      filters.weight_gte = selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
+    }
+
+    console.log(filters);
     debouncedSearch(filters);
     console.log('search', searchValue);
   };
@@ -194,13 +224,16 @@ export default function Items() {
     {
       label: '>=',
     },
-    {
-      label: '==',
-    },
   ];
-  const menuProps = {
+
+  const menuVolumeProps = {
     items,
-    onClick: handleMenuClick,
+    onClick: handleVolumeClick,
+  };
+
+  const menuWeightProps = {
+    items,
+    onClick: handleWeightClick,
   };
 
   const rowSelection = {
@@ -267,13 +300,13 @@ export default function Items() {
           <div className={'options-container'}>
             <div className="search-bar-container">
               <Dropdown
-                menu={menuProps}
+                menu={menuWeightProps}
                 className={'search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
-                    {selected}
-                    <DownOutlined />
+                    {selectWeightValue}
+                    {/*<DownOutlined />*/}
                   </Space>
                 </Button>
               </Dropdown>
@@ -283,20 +316,18 @@ export default function Items() {
                   type=""
                   className="search-bar-filter"
                   id="weight"
-                  onChange={(e) => {
-                    setSearchValue(e.target.value);
-                  }}
+                  onChange={handleWeightInputChange}
                 />
               </div>
 
               <Dropdown
-                menu={menuProps}
+                menu={menuVolumeProps}
                 className={'search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
-                    {selected}
-                    <DownOutlined />
+                    {selectVolumeValue}
+                    {/*<DownOutlined />*/}
                   </Space>
                 </Button>
               </Dropdown>
@@ -305,10 +336,8 @@ export default function Items() {
                 <input
                   type=""
                   className="search-bar-filter"
-                  id="weight"
-                  onChange={(e) => {
-                    setSearchValue(e.target.value);
-                  }}
+                  id="volume"
+                  onChange={handleVolumeInputChange}
                 />
               </div>
               <input
