@@ -7,32 +7,64 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import AddUserPopup from './add-user-component/add-item';
+import AddItem from './add-user-component/add-item';
+import { productApi, userApi } from '../../../index';
+import { IProductFilters } from '../../../services/interfaces/productsInterface';
+import debounce from 'lodash.debounce';
+import EditUser from '../users-component/edit-user-component/edit-user';
+import EditItem from './edit-user-component/edit-item';
 
 export default function Items() {
-  const [selected, setSelected] = useState('==');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
+  const [searchVolumeValue, setSearchVolumeValue] = useState('');
+  const [searchWeightValue, setSearchWeightValue] = useState('');
+  const [selectVolumeValue, setSelectVolumeValue] = useState('<=');
+  const [selectWeightValue, setSelectWeightValue] = useState('<=');
   const [dataSource, setDataSource] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [newUserData, setNewUserData] = useState({});
+  const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
+  const [newItemData, setNewItemData] = useState({});
 
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
+  let filters: IProductFilters = {};
+
+  const handleWeightClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
-    setSelected(e.domEvent.target.innerText);
-    e.domEvent.target.innerText = selected;
+    setSelectWeightValue(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectVolumeValue;
   };
 
-  const handleDeleteItem = (record?) => {
+  const handleVolumeClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    setSelectVolumeValue(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectWeightValue;
+  };
+
+  const handleDeleteItem = async (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
+      for (let user of selectedRows) {
+        await productApi.deleteProduct(user.product_id);
+      }
     }
     if (record) {
       console.log('delete', record);
+      await productApi.deleteProduct(record.product_id);
     }
+
+    await getAllProducts(filters);
   };
+
+  const handleWeightInputChange = (e) => {
+    setSearchWeightValue(e.target.value);
+  };
+
+  const handleVolumeInputChange = (e) => {
+    setSearchVolumeValue(e.target.value);
+  };
+
 
   const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
@@ -41,6 +73,25 @@ export default function Items() {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
+
+    if(searchValue){
+      filters.product_name_like = searchValue;
+    } else {
+      if(!filters.product_name_like) delete filters.product_name_like;
+    }
+
+    if (searchVolumeValue) {
+      filters.volume_lte = selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_gte = selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
+    }
+
+    if (searchWeightValue) {
+      filters.weight_lte = selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
+      filters.weight_gte = selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
+    }
+
+    console.log(filters);
+    debouncedSearch(filters);
     console.log('search', searchValue);
   };
 
@@ -70,11 +121,57 @@ export default function Items() {
 
   const handleEditItem = (record) => {
     console.log('edit', record);
+    setNewItemData(record);
+    setIsEditPopupVisible(true);
   };
 
-  const hidePopup = () => {
+  const hideAddPopup = () => {
     setIsPopupVisible(false);
   };
+
+  const hideEditPopup = () => {
+    setIsEditPopupVisible(false);
+  };
+
+  const getAllProducts = async (filters: IProductFilters) => {
+    const result = await productApi.getAllProducts(filters);
+    const products = result.data?.body;
+    const dataItems = [];
+
+    if (products?.length) {
+      for (let i = 0; i < products.length; i++) {
+        dataItems.push({
+          key: (i + 1).toString(),
+          type: products[i].product_type,
+          name: products[i].product_name,
+          volume: products[i].volume,
+          weight: products[i].weight,
+          product_id: products[i].product_id,
+          'expiry-duration': products[i].expiry_duration,
+          description: products[i].description,
+          is_stackable: products[i].is_stackable,
+          price: products[i].price
+        });
+      }
+
+      setDataSource(dataItems);
+    } else {
+      setDataSource([]);
+    }
+  }
+
+
+  const debouncedSearch = debounce(async (filters) => {
+    await getAllProducts(filters);
+  }, 1000);
+
+  const handleAddItemSuccess = async () => {
+    await getAllProducts(filters);
+  }
+
+  const handleEditItemSuccess = async () => {
+    await getAllProducts(filters);
+  }
 
   const placeholderRowCount = 30;
 
@@ -137,7 +234,7 @@ export default function Items() {
       key: 'weight',
     },
     {
-      title: 'Expiry duration (yy,mm,dd)',
+      title: 'Expiry duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
     },
@@ -150,13 +247,16 @@ export default function Items() {
     {
       label: '>=',
     },
-    {
-      label: '==',
-    },
   ];
-  const menuProps = {
+
+  const menuVolumeProps = {
     items,
-    onClick: handleMenuClick,
+    onClick: handleVolumeClick,
+  };
+
+  const menuWeightProps = {
+    items,
+    onClick: handleWeightClick,
   };
 
   const rowSelection = {
@@ -189,32 +289,31 @@ export default function Items() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    setDataSource([
-      {
-        key: '1',
-        type: 'Nonperishable',
-        name: 'Dildo',
-        volume: '1',
-        weight: '1',
-        'expiry-duration': '10,00,00'
-      },
-      {
-        key: '2',
-        type: 'Nonperishable',
-        name: 'Dildo',
-        volume: '1',
-        weight: '1',
-        'expiry-duration': '10,00,00'
-      },
-      {
-        key: '3',
-        type: 'Nonperishable',
-        name: 'Dildo',
-        volume: '1',
-        weight: '1',
-        'expiry-duration': '10,00,00'
-      },
-    ]);
+    productApi.getAllProducts(filters).then((result) =>{
+      const products = result.data?.body;
+      const dataItems = [];
+
+      if (products?.length) {
+        for (let i = 0; i < products.length; i++) {
+          dataItems.push({
+            key: (i + 1).toString(),
+            type: products[i].product_type,
+            name: products[i].product_name,
+            volume: products[i].volume,
+            weight: products[i].weight,
+            'expiry-duration': products[i].expiry_duration,
+            product_id: products[i].product_id,
+            description: products[i].description,
+            is_stackable: products[i].is_stackable,
+            price: products[i].price
+          });
+        }
+
+        setDataSource(dataItems);
+      } else {
+        setDataSource([]);
+      }
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -227,13 +326,13 @@ export default function Items() {
           <div className={'options-container'}>
             <div className="search-bar-container">
               <Dropdown
-                menu={menuProps}
+                menu={menuWeightProps}
                 className={'search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
-                    {selected}
-                    <DownOutlined />
+                    {selectWeightValue}
+                    {/*<DownOutlined />*/}
                   </Space>
                 </Button>
               </Dropdown>
@@ -243,20 +342,18 @@ export default function Items() {
                   type=""
                   className="search-bar-filter"
                   id="weight"
-                  onChange={(e) => {
-                    setSearchValue(e.target.value);
-                  }}
+                  onChange={handleWeightInputChange}
                 />
               </div>
 
               <Dropdown
-                menu={menuProps}
+                menu={menuVolumeProps}
                 className={'search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
-                    {selected}
-                    <DownOutlined />
+                    {selectVolumeValue}
+                    {/*<DownOutlined />*/}
                   </Space>
                 </Button>
               </Dropdown>
@@ -265,10 +362,8 @@ export default function Items() {
                 <input
                   type=""
                   className="search-bar-filter"
-                  id="weight"
-                  onChange={(e) => {
-                    setSearchValue(e.target.value);
-                  }}
+                  id="volume"
+                  onChange={handleVolumeInputChange}
                 />
               </div>
               <input
@@ -295,10 +390,17 @@ export default function Items() {
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add Item</span>
             </button>
-            <AddUserPopup
-              hidePopup={hidePopup}
+            <AddItem
+              hidePopup={hideAddPopup}
               isPopupVisible={isPopupVisible}
-              userData={{ newUserData, setNewUserData }}
+              itemData={{ newItemData, setNewItemData }}
+              onAddItemSuccess={handleAddItemSuccess}
+            />
+            <EditItem
+              hidePopup={hideEditPopup}
+              isEditPopupVisible={isEditPopupVisible}
+              itemData={{ editItemData: newItemData, setEditItemData: setNewItemData }}
+              onEditItemSuccess={handleEditItemSuccess}
             />
           </div>
         </div>

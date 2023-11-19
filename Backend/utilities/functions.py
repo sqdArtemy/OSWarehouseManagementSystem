@@ -27,10 +27,10 @@ def create_token(user_id: int, user_role: str) -> str:
     :return: token
     """
     role_identifier = {
-        "owner": "0",
-        "manager": "1",
-        "shipper": "2",
-        "customer": "3"
+        "manager": "0",
+        "supervisor": "1",
+        "vendor": "2",
+        "admin": "3"
     }
 
     return role_identifier.get(user_role) + str(user_id*69 + 420)

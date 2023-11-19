@@ -1,5 +1,7 @@
 import socket
 import json
+from json import JSONDecodeError
+
 import select
 import sys
 from controller import controller
@@ -21,11 +23,22 @@ try:
     client_socket.send(json.dumps(message).encode())
 
     while True:
-        ready, _, _ = select.select([client_socket], [], [], 2)  # Wait for up to 1 second for data
+        ready, _, _ = select.select([client_socket], [], [], 1)  # Wait for up to 1 second for data
         if ready:
             # receive data
-            data = client_socket.recv(8192)
-            response = controller(json.loads(data.decode()))
+            data = client_socket.recv(1048576)
+            request = dict()
+
+            try:
+                request = json.loads(data.decode())
+                response = controller(request)
+            except JSONDecodeError:
+                response = {
+                    "status_code": 400,
+                    "message": "Invalid JSON.",
+                    "body": {},
+                    "headers": request.get("headers", {})
+                }
 
             client_socket.send(json.dumps(response).encode() + "\n".encode())
 

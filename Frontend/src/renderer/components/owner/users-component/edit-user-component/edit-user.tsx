@@ -8,7 +8,7 @@ import { IUserData } from '../users';
 export default function EditUser({
   isPopupVisible,
   hidePopup,
-  userData,
+  userData, onEditUserSuccess
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -16,6 +16,7 @@ export default function EditUser({
     userData: INewUserData | IUserData;
     setUserData: (userData: unknown) => void;
   };
+  onEditUserSuccess: () => void;
 }) {
   console.log(userData.userData);
   const formRef = React.useRef<FormInstance>(null);
@@ -57,14 +58,18 @@ export default function EditUser({
     const newUserData = formRef.current?.getFieldsValue();
     hidePopup();
 
-    // await userApi.addUser({
-    //   user_name: newUserData['First Name'],
-    //   user_surname: newUserData['Last Name'],
-    //   user_email: newUserData['Email'],
-    //   user_phone: newUserData['Phone'],
-    //   user_role: newUserData['Role'],
-    // });
+    const response = await userApi.updateUser({
+      user_name: newUserData['First Name'],
+      user_surname: newUserData['Last Name'],
+      user_email: newUserData['Email'],
+      user_phone: newUserData['Phone'],
+      user_role: userData?.userData?.role
+    }, userData.userData?.user_id);
 
+    console.log(response);
+    if(response?.success){
+      onEditUserSuccess();
+    }
     userData.setUserData(newUserData);
   };
 
@@ -113,13 +118,6 @@ export default function EditUser({
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
-        </Form.Item>
-        <Form.Item
-          name="Role"
-          label={<p style={{ fontSize: '1vw' }}>Role</p>}
-          rules={[{ required: true }]}
-        >
-          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button type="primary" htmlType="submit">
