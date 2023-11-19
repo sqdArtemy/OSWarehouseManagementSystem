@@ -8,7 +8,7 @@ import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-d
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import AddItem from './add-user-component/add-item';
-import { productApi } from '../../../index';
+import { productApi, userApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
 import EditUser from '../users-component/edit-user-component/edit-user';
@@ -42,13 +42,19 @@ export default function Items() {
     e.domEvent.target.innerText = selectWeightValue;
   };
 
-  const handleDeleteItem = (record?) => {
+  const handleDeleteItem = async (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
+      for (let user of selectedRows) {
+        await productApi.deleteProduct(user.product_id);
+      }
     }
     if (record) {
       console.log('delete', record);
+      await productApi.deleteProduct(record.product_id);
     }
+
+    await getAllProducts(filters);
   };
 
   const handleWeightInputChange = (e) => {

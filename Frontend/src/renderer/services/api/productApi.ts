@@ -16,7 +16,6 @@ export class ProductApi implements IProduct {
   private async handleApiRequestWithToken(
     data: ISendData,
   ): Promise<ApiResponse> {
-    console.log(data);
     data.headers.token = this.token || userApi.getToken;
     return await handleApiRequest({
       url: data.url,
