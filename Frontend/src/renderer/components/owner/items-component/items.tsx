@@ -11,6 +11,8 @@ import AddItem from './add-user-component/add-item';
 import { productApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
+import EditUser from '../users-component/edit-user-component/edit-user';
+import EditItem from './edit-user-component/edit-item';
 
 export default function Items() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
@@ -23,6 +25,7 @@ export default function Items() {
   const [selectWeightValue, setSelectWeightValue] = useState('<=');
   const [dataSource, setDataSource] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
   const [newItemData, setNewItemData] = useState({});
 
   let filters: IProductFilters = {};
@@ -112,10 +115,16 @@ export default function Items() {
 
   const handleEditItem = (record) => {
     console.log('edit', record);
+    setNewItemData(record);
+    setIsEditPopupVisible(true);
   };
 
-  const hidePopup = () => {
+  const hideAddPopup = () => {
     setIsPopupVisible(false);
+  };
+
+  const hideEditPopup = () => {
+    setIsEditPopupVisible(false);
   };
 
   const getAllProducts = async (filters: IProductFilters) => {
@@ -131,7 +140,11 @@ export default function Items() {
           name: products[i].product_name,
           volume: products[i].volume,
           weight: products[i].weight,
-          product_id: products[i].product_id
+          product_id: products[i].product_id,
+          'expiry-duration': products[i].expiry_duration,
+          description: products[i].description,
+          is_stackable: products[i].is_stackable,
+          price: products[i].price
         });
       }
 
@@ -147,6 +160,10 @@ export default function Items() {
   }, 1000);
 
   const handleAddItemSuccess = async () => {
+    await getAllProducts(filters);
+  }
+
+  const handleEditItemSuccess = async () => {
     await getAllProducts(filters);
   }
 
@@ -211,7 +228,7 @@ export default function Items() {
       key: 'weight',
     },
     {
-      title: 'Expiry duration (yy,mm,dd)',
+      title: 'Expiry duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
     },
@@ -279,7 +296,10 @@ export default function Items() {
             volume: products[i].volume,
             weight: products[i].weight,
             'expiry-duration': products[i].expiry_duration,
-            product_id: products[i].product_id
+            product_id: products[i].product_id,
+            description: products[i].description,
+            is_stackable: products[i].is_stackable,
+            price: products[i].price
           });
         }
 
@@ -365,10 +385,16 @@ export default function Items() {
               <span className={'add-btn-text'}>Add Item</span>
             </button>
             <AddItem
-              hidePopup={hidePopup}
+              hidePopup={hideAddPopup}
               isPopupVisible={isPopupVisible}
               itemData={{ newItemData, setNewItemData }}
               onAddItemSuccess={handleAddItemSuccess}
+            />
+            <EditItem
+              hidePopup={hideEditPopup}
+              isEditPopupVisible={isEditPopupVisible}
+              itemData={{ editItemData: newItemData, setEditItemData: setNewItemData }}
+              onEditItemSuccess={handleEditItemSuccess}
             />
           </div>
         </div>
