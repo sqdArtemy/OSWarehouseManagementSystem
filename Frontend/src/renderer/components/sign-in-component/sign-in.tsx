@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { userApi } from '../../index';
 import './sign-in.scss';
 import { Tooltip } from 'antd';
+import { useError } from '../error-component/error-context';
 
 export function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { showError } = useError();
   const handleSignIn = async () => {
     console.log('email', email);
     console.log('password', password);
@@ -22,7 +24,7 @@ export function SignIn() {
           break;
       }
     } else {
-      console.log(response)
+      showError(response.message);
       // some error message
     }
   };
