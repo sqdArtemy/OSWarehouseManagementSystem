@@ -140,6 +140,11 @@ def controller(request: dict) -> dict:
                 return rack_view.create(request=request)
 
         # Vendor`s endpoints
+        elif "/vendors" in url:
+            if method == Method.GET.value:
+                return vendor_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return vendor_view.create(request=request)
         elif "/vendor" in url:
             if method == Method.GET.value:
                 return vendor_view.get(request=request)
@@ -147,11 +152,6 @@ def controller(request: dict) -> dict:
                 return vendor_view.delete(request=request)
             elif method == Method.PUT.value:
                 return vendor_view.update(request=request)
-        elif "/vendors" in url:
-            if method == Method.GET.value:
-                return vendor_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return vendor_view.create(request=request)
 
         # Transaction`s endpoints
         elif "/transaction" in url:
