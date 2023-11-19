@@ -2,7 +2,7 @@ import { IAddUser, ISignUp, IUser } from '../interfaces/usersInterface';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 
 export class UserApi implements IUser {
-  token: string;
+  private token: string;
   userData: IAddUser;
 
   constructor() {
