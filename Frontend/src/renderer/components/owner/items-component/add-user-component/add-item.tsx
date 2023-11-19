@@ -16,7 +16,7 @@ export interface IitemData {
 export default function AddItem({
   isPopupVisible,
   hidePopup,
-  itemData,
+  itemData, onAddItemSuccess
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -24,6 +24,7 @@ export default function AddItem({
     newItemData: IitemData;
     setNewItemData: (newItemData: unknown) => void;
   };
+  onAddItemSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
 
@@ -74,9 +75,9 @@ export default function AddItem({
 
     });
     console.log(response);
-    // if(response.success){
-    //   onAddUserSuccess();
-    // }
+    if(response.success){
+      onAddItemSuccess();
+    }
     itemData.setNewItemData(newitemData);
   };
 

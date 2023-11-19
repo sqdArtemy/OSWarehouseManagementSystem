@@ -10,6 +10,7 @@ import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import AddItem from './add-user-component/add-item';
 import { productApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
+import debounce from 'lodash.debounce';
 
 export default function Items() {
   const [selected, setSelected] = useState('==');
@@ -45,6 +46,13 @@ export default function Items() {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
+
+    if(searchValue){
+      filters.product_name_like = searchValue;
+    } else {
+      if(!filters.product_name_like) delete filters.product_name_like;
+    }
+    debouncedSearch(filters);
     console.log('search', searchValue);
   };
 
@@ -101,6 +109,15 @@ export default function Items() {
     } else {
       setDataSource([]);
     }
+  }
+
+
+  const debouncedSearch = debounce(async (filters) => {
+    await getAllProducts(filters);
+  }, 1000);
+
+  const handleAddItemSuccess = async () => {
+    await getAllProducts(filters);
   }
 
   const placeholderRowCount = 30;
@@ -322,6 +339,7 @@ export default function Items() {
               hidePopup={hidePopup}
               isPopupVisible={isPopupVisible}
               itemData={{ newItemData, setNewItemData }}
+              onAddItemSuccess={handleAddItemSuccess}
             />
           </div>
         </div>
