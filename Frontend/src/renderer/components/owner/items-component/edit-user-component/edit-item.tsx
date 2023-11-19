@@ -1,9 +1,9 @@
-import React from 'react';
-import './add-item.scss';
+import React, { useEffect } from 'react';
+import './edit-item.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { productApi, userApi } from '../../../../index';
+import { productApi } from '../../../../index';
 
-export interface IitemData {
+export interface IEditItemData {
   'Product Name'?: string;
   Weight?: string;
   Volume?: string;
@@ -13,18 +13,19 @@ export interface IitemData {
   Description?: string;
 }
 
-export default function AddItem({
-  isPopupVisible,
-  hidePopup,
-  itemData, onAddItemSuccess
-}: {
-  isPopupVisible: boolean;
+export default function EditItem({
+                                   hidePopup,
+                                   isEditPopupVisible, // Change isPopupVisible to isEditPopupVisible
+                                   itemData,
+                                   onEditItemSuccess,
+                                 }: {
   hidePopup: () => void;
+  isEditPopupVisible: boolean; // Change isPopupVisible to isEditPopupVisible
   itemData: {
-    newItemData: IitemData;
-    setNewItemData: (newItemData: unknown) => void;
+    editItemData: IEditItemData;
+    setEditItemData: (editItemData: unknown) => void;
   };
-  onAddItemSuccess: () => void;
+  onEditItemSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
 
@@ -37,61 +38,93 @@ export default function AddItem({
     wrapperCol: { offset: 16, span: 17 },
   };
 
-  function onRoleChange() {
+  function onTypeChange() {
     console.log('change');
   }
 
-  const onFinish = async () => {
-    const newitemData = formRef.current?.getFieldsValue();
-    let check = false;
-    for (let key in newitemData) {
-      if (newitemData[key]) {
-        check = true;
-      }
-    }
-    if (!check) {
-      hidePopup();
-      handleReset();
-    } else {
-      hidePopup();
-    }
+  useEffect(() => {
+    if (isEditPopupVisible && itemData.editItemData && formRef.current) {
+      const {
+        name, weight, volume, price, type, expiry_duration, is_stackable, description, product_id
+      } = itemData.editItemData;
 
-    const typeMapping = {
-      "perishable-refrigerator": "refrigerated",
-      "perishable-freezer": "freezer",
-      nonperishable: "dry",
-      hazard: "hazardous"
-    };
+      const typeMapping = {
+        "refrigerated": "Perishable (Refrigerator used)",
+        "freezer": "Perishable (Freezer used)",
+        "dry": "Nonperishable",
+        "hazardous": "Hazard"
+      };
 
-    const response = await productApi.addProduct({
-      product_name : newitemData['Product Name'],
-      price: newitemData['Price'],
-      product_type: typeMapping[newitemData['Type of product']],
-      expiry_duration: newitemData['Average expiration time'] ?? null,
-      description: newitemData['Description'],
-      weight: newitemData['Weight'],
-      volume: newitemData['Volume'],
-      is_stackable: newitemData['Storage type'] === 'stackable',
-
-    });
-    console.log(response);
-    if(response.success){
-      onAddItemSuccess();
+      console.log(typeMapping[type]);
+      formRef.current.setFieldsValue({
+        'Product Name': name,
+        'Weight': weight,
+        'Volume': volume,
+        'Price': price,
+        'Average expiration time': itemData.editItemData['expiry-duration'],
+        'Storage type': is_stackable === true ? 'Stackable' : 'Non-stackable',
+        'Description': description,
+        'Type': typeMapping[type],
+      });
     }
-    itemData.setNewItemData(newitemData);
-  };
+  }, [itemData]);
 
   const handleReset = () => {
     formRef.current?.resetFields();
   };
-  // @ts-ignore
-  // @ts-ignore
+
+  const onCancel = () => {
+    hidePopup();
+    handleReset();
+  };
+
+  const onFinish = async () => {
+    const editItemData = formRef.current?.getFieldsValue();
+    hidePopup();
+
+    const typeMapping = {
+      'perishable-refrigerator': 'refrigerated',
+      'perishable-freezer': 'freezer',
+      nonperishable: 'dry',
+      hazard: 'hazardous',
+    };
+
+    const body = {
+      product_name: editItemData['Product Name'],
+      price: editItemData['Price'],
+      product_type: typeMapping[editItemData['Type']],
+      expiry_duration: editItemData['Average expiration time'] ?? null,
+      description: editItemData['Description'],
+      weight: editItemData['Weight'],
+      volume: editItemData['Volume'],
+      is_stackable: editItemData['Storage type'] === 'stackable',
+    }
+
+    if(editItemData['Product Name'] === itemData.editItemData.name){
+      delete body.product_name;
+    }
+
+    const response = await productApi.updateProduct(body,
+      itemData.editItemData?.product_id
+    );
+
+    console.log(response);
+    if (response?.success) {
+      onEditItemSuccess();
+    }
+    itemData.setEditItemData(editItemData);
+  };
+
+  function onRoleChange() {
+    console.log('change');
+  }
+
   return (
     <Modal
-      title="Add New Item"
-      open={isPopupVisible}
+      title="Edit Item"
+      visible={isEditPopupVisible}
       onOk={onFinish}
-      onCancel={onFinish}
+      onCancel={onCancel}
       cancelButtonProps={{ style: { display: 'none' } }}
       okButtonProps={{ style: { display: 'none' } }}
     >
@@ -124,7 +157,7 @@ export default function AddItem({
         <Form.Item name="Price" label="Price" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="Type of product" label="Type of product" rules={[{ required: true }]}>
+        <Form.Item name="Type" label="Type of product" rules={[{ required: true }]}>
           <Select
             placeholder="Select from following"
             onChange={onRoleChange}

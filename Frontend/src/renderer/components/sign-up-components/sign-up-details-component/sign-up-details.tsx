@@ -37,7 +37,7 @@ export function SignUpDetails() {
 
     if (response.success) {
       switch (response.data?.user_role) {
-        case 'owner':
+        case 'manager':
           navigate('/owner');
           break;
         default:

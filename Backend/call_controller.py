@@ -26,7 +26,7 @@ try:
         ready, _, _ = select.select([client_socket], [], [], 1)  # Wait for up to 1 second for data
         if ready:
             # receive data
-            data = client_socket.recv(1024)
+            data = client_socket.recv(1048576)
             request = dict()
 
             try:

@@ -2,7 +2,7 @@ import { IAddUser, ISignUp, IUser } from '../interfaces/usersInterface';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 
 export class UserApi implements IUser {
-  token: string;
+  private token: string;
   userData: IAddUser;
 
   constructor() {
@@ -113,6 +113,10 @@ export class UserApi implements IUser {
     const method = 'PUT';
     const headers = { token: this.token } ;
 
-    return await handleApiRequest({ url, method, body, headers});
+    const response = await handleApiRequest({ url, method, body, headers});
+    if(response.success && this.userData.user_id == id){
+      this.userData = response?.data?.body;
+    }
+    return response;
   }
 }

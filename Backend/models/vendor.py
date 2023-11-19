@@ -14,7 +14,20 @@ class Vendor(Base):
 
     # Relationships with other tables
     vendor_owner = relationship("User", back_populates="vendors")
-    received_orders = relationship("Order", back_populates="recipient_vendor")
+    supplied_orders = relationship(
+        "Order",
+        back_populates="supplier_vendor",
+        primaryjoin="and_(Vendor.vendor_id == Order.supplier_id, Order.order_type == 'to_warehouse')",
+        foreign_keys="Order.supplier_id",
+        overlaps="supplier_warehouse"
+    )
+    received_orders = relationship(
+        "Order",
+        back_populates="recipient_vendor",
+        primaryjoin="and_(Vendor.vendor_id == Order.recipient_id, Order.order_type == 'from_warehouse')",
+        foreign_keys="Order.recipient_id",
+        overlaps="recipient_warehouse"
+    )
 
     def to_dict(self):
         vendor = SessionMaker().query(Vendor).filter(Vendor.vendor_id == self.vendor_id).first()

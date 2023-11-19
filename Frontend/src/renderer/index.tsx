@@ -3,6 +3,7 @@ import App from './App';
 import { TcpClient } from './services/tcpClient';
 import dotenv from 'dotenv';
 import { UserApi } from './services/api/userApi';
+import { ProductApi } from './services/api/productApi';
 
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
@@ -22,6 +23,7 @@ export const apiClient = new TcpClient(serverAddress, Number(serverPort));
 })();
 
 export const userApi = new UserApi();
+export const productApi = new ProductApi();
 // // calling IPC exposed from preload script
 // window.electron.ipcRenderer.once('ipc-example', (arg) => {
 //   // eslint-disable-next-line no-console

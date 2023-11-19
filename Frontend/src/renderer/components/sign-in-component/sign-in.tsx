@@ -12,7 +12,7 @@ export function SignIn() {
     console.log('email', email);
     console.log('password', password);
     const response = await userApi.signIn(email, password);
-    console.log('response', response);
+
     if (response.success) {
       switch (response.data?.user_role) {
         case 'manager':
@@ -22,7 +22,8 @@ export function SignIn() {
           break;
       }
     } else {
-      console.log('error', response.message);
+      console.log(response)
+      // some error message
     }
   };
 

@@ -34,6 +34,16 @@ export class TcpClient {
       };
 
       await this.send(dataToSend);
+
+      const dataToConnect: ISendData = {
+        method: 'POST',
+        url: '/test',
+        body: {},
+        headers: {}
+      };
+
+      await sleep(500);
+      await this.send(dataToConnect);
     } catch (error) {
       console.error('Error connecting:', error.message);
       throw error;
@@ -82,10 +92,16 @@ export class TcpClient {
             message: data.message,
           }),
         );
+        resolve();
       }
     });
   }
 }
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 
 // const args = process.argv.slice(2);
 // const serverAddress = args[0] ?? '127.0.0.1';  // Change this to your server's IP or hostname
