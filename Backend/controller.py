@@ -133,6 +133,11 @@ def controller(request: dict) -> dict:
                 return product_view.update(request=request)
 
         # Rack`s endpoints
+        elif "/racks" in url:
+            if method == Method.GET.value:
+                return rack_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return rack_view.create(request=request)
         elif "/rack" in url:
             if method == Method.GET.value:
                 return rack_view.get(request=request)
@@ -140,11 +145,6 @@ def controller(request: dict) -> dict:
                 return rack_view.delete(request=request)
             elif method == Method.PUT.value:
                 return rack_view.update(request=request)
-        elif "/racks" in url:
-            if method == Method.GET.value:
-                return rack_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return rack_view.create(request=request)
 
         # Vendor`s endpoints
         elif "/vendors" in url:
@@ -189,6 +189,11 @@ def controller(request: dict) -> dict:
                 return transaction_item_view.create(request=request)
 
         # Warehouse`s endpoints
+        elif "/warehouses" in url:
+            if method == Method.GET.value:
+                return warehouse_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return warehouse_view.create(request=request)
         elif "/warehouse" in url:
             if method == Method.GET.value:
                 return warehouse_view.get(request=request)
@@ -196,11 +201,7 @@ def controller(request: dict) -> dict:
                 return warehouse_view.delete(request=request)
             elif method == Method.PUT.value:
                 return warehouse_view.update(request=request)
-        elif "/warehouses" in url:
-            if method == Method.GET.value:
-                return warehouse_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return warehouse_view.create(request=request)
+
 
         # Transport`s endpoints
         elif "/transport" in url:

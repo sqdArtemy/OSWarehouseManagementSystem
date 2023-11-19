@@ -9,7 +9,7 @@ class Warehouse(Base):
 
     warehouse_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     company_id = Column(Integer, ForeignKey("companies.company_id"), nullable=False)
-    manager_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    supervisor_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
     warehouse_name = Column(String(50), index=True, nullable=False)
     warehouse_address = Column(String(255), index=True, nullable=False)
     overall_capacity = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
@@ -18,7 +18,7 @@ class Warehouse(Base):
 
     # Relationships with other tables
     company = relationship("Company", back_populates="warehouses")
-    manager = relationship("User", back_populates="warehouses")
+    supervisor = relationship("User", back_populates="warehouses")
     racks = relationship("Rack", back_populates="warehouse")
     supplier_transactions = relationship("Transaction", foreign_keys=[Transaction.supplier_id], back_populates="supplier")
     receiver_transactions = relationship("Transaction", foreign_keys=[Transaction.recipient_id], back_populates="recipient_warehouse")
@@ -47,8 +47,8 @@ class Warehouse(Base):
         warehouse = SessionMaker().query(Warehouse).filter(Warehouse.warehouse_id == self.warehouse_id).first()
         return {
             "warehouse_id": self.warehouse_id,
-            "company": warehouse.manager.to_dict(),
-            "manager": warehouse.manager.to_dict(),
+            "company": warehouse.supervisor.to_dict(),
+            "supervisor": warehouse.supervisor.to_dict(),
             "warehouse_name": self.warehouse_name,
             "warehouse_address": self.warehouse_address,
             "overall_capacity": self.overall_capacity,
