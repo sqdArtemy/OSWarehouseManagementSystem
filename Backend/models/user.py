@@ -19,7 +19,7 @@ class User(Base):
     # Relationships with other tables
     company = relationship("Company", back_populates="users")
     vendors = relationship("Vendor", back_populates="vendor_owner")
-    warehouses = relationship("Warehouse", back_populates="manager")
+    warehouses = relationship("Warehouse", back_populates="supervisor")
 
     def to_dict(self):
         user = SessionMaker().query(User).filter(User.user_id == self.user_id).first()
