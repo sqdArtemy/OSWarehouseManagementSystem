@@ -5,7 +5,7 @@ export interface IProduct {
   deleteProduct(id: number): Promise<ApiResponse>;
   updateProduct(body: IAddProduct, id: number): Promise<ApiResponse>;
   getProduct(id: number): Promise<ApiResponse>;
-  getAllProduct(filters: IProductFilters): Promise<ApiResponse>;
+  getAllProducts(filters: IProductFilters): Promise<ApiResponse>;
 }
 
 

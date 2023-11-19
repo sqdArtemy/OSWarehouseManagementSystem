@@ -7,7 +7,9 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import AddUserPopup from './add-user-component/add-item';
+import AddItem from './add-user-component/add-item';
+import { productApi } from '../../../index';
+import { IProductFilters } from '../../../services/interfaces/productsInterface';
 
 export default function Items() {
   const [selected, setSelected] = useState('==');
@@ -17,7 +19,9 @@ export default function Items() {
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [newUserData, setNewUserData] = useState({});
+  const [newItemData, setNewItemData] = useState({});
+
+  let filters: IProductFilters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -75,6 +79,29 @@ export default function Items() {
   const hidePopup = () => {
     setIsPopupVisible(false);
   };
+
+  const getAllProducts = async (filters: IProductFilters) => {
+    const result = await productApi.getAllProducts(filters);
+    const products = result.data?.body;
+    const dataItems = [];
+
+    if (products?.length) {
+      for (let i = 0; i < products.length; i++) {
+        dataItems.push({
+          key: (i + 1).toString(),
+          type: products[i].product_type,
+          name: products[i].product_name,
+          volume: products[i].volume,
+          weight: products[i].weight,
+          product_id: products[i].product_id
+        });
+      }
+
+      setDataSource(dataItems);
+    } else {
+      setDataSource([]);
+    }
+  }
 
   const placeholderRowCount = 30;
 
@@ -189,32 +216,28 @@ export default function Items() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    setDataSource([
-      {
-        key: '1',
-        type: 'Nonperishable',
-        name: 'Dildo',
-        volume: '1',
-        weight: '1',
-        'expiry-duration': '10,00,00'
-      },
-      {
-        key: '2',
-        type: 'Nonperishable',
-        name: 'Dildo',
-        volume: '1',
-        weight: '1',
-        'expiry-duration': '10,00,00'
-      },
-      {
-        key: '3',
-        type: 'Nonperishable',
-        name: 'Dildo',
-        volume: '1',
-        weight: '1',
-        'expiry-duration': '10,00,00'
-      },
-    ]);
+    productApi.getAllProducts(filters).then((result) =>{
+      const products = result.data?.body;
+      const dataItems = [];
+
+      if (products?.length) {
+        for (let i = 0; i < products.length; i++) {
+          dataItems.push({
+            key: (i + 1).toString(),
+            type: products[i].product_type,
+            name: products[i].product_name,
+            volume: products[i].volume,
+            weight: products[i].weight,
+            'expiry-duration': products[i].expiry_duration,
+            product_id: products[i].product_id
+          });
+        }
+
+        setDataSource(dataItems);
+      } else {
+        setDataSource([]);
+      }
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -295,10 +318,10 @@ export default function Items() {
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add Item</span>
             </button>
-            <AddUserPopup
+            <AddItem
               hidePopup={hidePopup}
               isPopupVisible={isPopupVisible}
-              userData={{ newUserData, setNewUserData }}
+              itemData={{ newItemData, setNewItemData }}
             />
           </div>
         </div>

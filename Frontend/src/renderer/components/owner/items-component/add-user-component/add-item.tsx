@@ -1,8 +1,9 @@
 import React from 'react';
 import './add-item.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
+import { productApi, userApi } from '../../../../index';
 
-export interface IUserData {
+export interface IitemData {
   'Product Name'?: string;
   Weight?: string;
   Volume?: string;
@@ -15,13 +16,13 @@ export interface IUserData {
 export default function AddItem({
   isPopupVisible,
   hidePopup,
-  userData,
+  itemData,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
-  userData: {
-    newUserData: IUserData;
-    setNewUserData: (newUserData: unknown) => void;
+  itemData: {
+    newItemData: IitemData;
+    setNewItemData: (newItemData: unknown) => void;
   };
 }) {
   const formRef = React.useRef<FormInstance>(null);
@@ -39,11 +40,11 @@ export default function AddItem({
     console.log('change');
   }
 
-  const onFinish = () => {
-    const newUserData = formRef.current?.getFieldsValue();
+  const onFinish = async () => {
+    const newitemData = formRef.current?.getFieldsValue();
     let check = false;
-    for (let key in newUserData) {
-      if (newUserData[key]) {
+    for (let key in newitemData) {
+      if (newitemData[key]) {
         check = true;
       }
     }
@@ -53,7 +54,30 @@ export default function AddItem({
     } else {
       hidePopup();
     }
-    userData.setNewUserData(newUserData);
+
+    const typeMapping = {
+      "perishable-refrigerator": "refrigerated",
+      "perishable-freezer": "freezer",
+      nonperishable: "dry",
+      hazard: "hazardous"
+    };
+
+    const response = await productApi.addProduct({
+      product_name : newitemData['Product Name'],
+      price: newitemData['Price'],
+      product_type: typeMapping[newitemData['Type of product']],
+      expiry_duration: newitemData['Average expiration time'] ?? null,
+      description: newitemData['Description'],
+      weight: newitemData['Weight'],
+      volume: newitemData['Volume'],
+      is_stackable: newitemData['Storage type'] === 'stackable',
+
+    });
+    console.log(response);
+    // if(response.success){
+    //   onAddUserSuccess();
+    // }
+    itemData.setNewItemData(newitemData);
   };
 
   const handleReset = () => {
@@ -99,7 +123,7 @@ export default function AddItem({
         <Form.Item name="Price" label="Price" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="Expiration" label="Expiration" rules={[{ required: true }]}>
+        <Form.Item name="Type of product" label="Type of produc" rules={[{ required: true }]}>
           <Select
             placeholder="Select from following"
             onChange={onRoleChange}
@@ -110,6 +134,9 @@ export default function AddItem({
             <Option value="nonperishable">Nonperishable</Option>
             <Option value="hazard">Hazard</Option>
           </Select>
+        </Form.Item>
+        <Form.Item name="Average expiration time" label="Average expiration time" rules={[{ required: false }]}>
+          <Input />
         </Form.Item>
         <Form.Item name="Storage type" label="Storage type" rules={[{ required: true }]}>
           <Select

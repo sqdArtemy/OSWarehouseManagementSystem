@@ -20,7 +20,7 @@ export class ProductApi implements IProduct {
     return await handleApiRequest({
       url: data.url,
       method: data.method,
-      body: data.method,
+      body: data.body,
       headers: data.headers,
     });
   }
@@ -42,8 +42,8 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async getAllProduct(filters: IProductFilters): Promise<ApiResponse> {
-    const url = '/product/';
+  public async getAllProducts(filters: IProductFilters): Promise<ApiResponse> {
+    const url = '/product/products';
     const method = 'GET';
     const headers = { filters };
     const body = {};
