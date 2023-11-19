@@ -9,8 +9,8 @@ const root = createRoot(container);
 root.render(<App />);
 
 dotenv.config({ path: '.env' });
-const serverAddress = process.env.IP_IPC ?? '127.0.0.1';  // Change this to your server's IP or hostname
-const serverPort = process.env.PORT_IPC ?? 8000;
+const serverAddress = process.env.IP_IPC ?? '172.19.10.79'; // Change this to your server's IP or hostname
+const serverPort = process.env.PORT_IPC ?? 7777;
 export const apiClient = new TcpClient(serverAddress, Number(serverPort));
 
 (async () => {

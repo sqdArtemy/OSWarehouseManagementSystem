@@ -12,17 +12,17 @@ export function SignIn() {
     console.log('email', email);
     console.log('password', password);
     const response = await userApi.signIn(email, password);
-
+    console.log('response', response);
     if (response.success) {
       switch (response.data?.user_role) {
-        case 'owner':
+        case 'manager':
           navigate('/owner');
           break;
         default:
           break;
       }
     } else {
-      // some error message
+      console.log('error', response.message);
     }
   };
 

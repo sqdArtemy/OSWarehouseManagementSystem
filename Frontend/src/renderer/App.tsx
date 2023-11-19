@@ -10,12 +10,12 @@ import './App.css';
 import './normalize.css';
 import Users from './components/owner/users-component/users';
 import Dashboard from './components/owner/dashboard-component/dashboard';
-// import Warehouses from './components/owner/warehouses-component/warehouses/warehouses.scss';
 // import AddWarehouses from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 import Items from './components/owner/items-component/items';
 import { SignUp } from './components/sign-up-components/sign-up-component/sign-up';
 import { SignUpDetails } from './components/sign-up-components/sign-up-details-component/sign-up-details';
 import Profile from './components/owner/profile-component/profile';
+import Warehouses from './components/owner/warehouses-component/warehouses';
 // import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 
 export default function App() {
@@ -33,7 +33,7 @@ export default function App() {
           />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Users />} />
-          {/*<Route path="warehouses" element={<Warehouses />} />*/}
+          <Route path="warehouses" element={<Warehouses />} />
           <Route path="items" element={<Items />} />
           {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
           <Route path="profile" element={<Profile />} />

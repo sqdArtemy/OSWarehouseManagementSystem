@@ -177,21 +177,25 @@ export default function Users() {
       title: 'Full name',
       dataIndex: 'fullName',
       key: 'fullName',
+      align: 'center',
     },
     {
       title: 'Role',
       dataIndex: 'role',
       key: 'role',
+      align: 'center',
     },
     {
       title: 'Phone number',
       dataIndex: 'phoneNumber',
       key: 'phoneNumber',
+      align: 'center',
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      align: 'center',
     },
   ];
 
@@ -261,10 +265,10 @@ export default function Users() {
   }, []);
 
   return (
-    <div className="users-container">
-      <div className={'users-table-container'}>
-        <div className={'users-table-header-container'}>
-          <span className={'users-table-header'}>USERS</span>
+    <div className="warehouses-container">
+      <div className={'warehouses-table-container'}>
+        <div className={'warehouses-table-header-container'}>
+          <span className={'warehouses-table-header'}>USERS</span>
           <div className={'options-container'}>
             <div className="search-bar-container">
               <Dropdown
@@ -323,7 +327,7 @@ export default function Users() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'users-table'}
+          className={'warehouses-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}

@@ -41,7 +41,9 @@
             width: 10vw;
             font-size: 1vw;
             border: 0.5px solid #000000;
-
+            border-right: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
 
           }
 
@@ -123,11 +125,6 @@
 
   }
 
-  .users-separator-line {
-    width: 2px;
-    height: 80%;
-    background-color: #000000;
-  }
 
   .users-form {
     min-height: 100vh;
@@ -154,22 +151,6 @@
   align-items: center;
   justify-content: center;
 
-  .delete-icon {
-    display: block;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: #ff0000;
-
-
-
-  }
-}
-
-.delete-icon-light {
-  color: #ff8080;
-  display: block;
-  cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .ant-table table { font-size: 1vw; }

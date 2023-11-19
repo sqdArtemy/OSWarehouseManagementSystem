@@ -86,7 +86,7 @@ export default function Items() {
       name: '',
       volume: '',
       weight: '',
-      'expiry-duration': ''
+      'expiry-duration': '',
     }),
   );
 
@@ -196,7 +196,7 @@ export default function Items() {
         name: 'Dildo',
         volume: '1',
         weight: '1',
-        'expiry-duration': '10,00,00'
+        'expiry-duration': '10,00,00',
       },
       {
         key: '2',
@@ -204,7 +204,7 @@ export default function Items() {
         name: 'Dildo',
         volume: '1',
         weight: '1',
-        'expiry-duration': '10,00,00'
+        'expiry-duration': '10,00,00',
       },
       {
         key: '3',
@@ -212,7 +212,7 @@ export default function Items() {
         name: 'Dildo',
         volume: '1',
         weight: '1',
-        'expiry-duration': '10,00,00'
+        'expiry-duration': '10,00,00',
       },
     ]);
 
@@ -238,7 +238,9 @@ export default function Items() {
                 </Button>
               </Dropdown>
               <div className="filter">
-                <label className="labels" htmlFor="weight">Weight</label>
+                <label className="labels" htmlFor="weight">
+                  Weight
+                </label>
                 <input
                   type=""
                   className="search-bar-filter"
@@ -261,7 +263,9 @@ export default function Items() {
                 </Button>
               </Dropdown>
               <div className="filter">
-                <label className="labels" htmlFor="volume">Volume</label>
+                <label className="labels" htmlFor="volume">
+                  Volume
+                </label>
                 <input
                   type=""
                   className="search-bar-filter"
@@ -311,7 +315,7 @@ export default function Items() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'users-table'}
+          className={'warehouses-table'}
           bordered={true}
           rowClassName={'highlight-bottom-border highlight-left-border'}
         />
@@ -319,4 +323,3 @@ export default function Items() {
     </div>
   );
 }
-

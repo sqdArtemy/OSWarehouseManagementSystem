@@ -32,7 +32,7 @@ export function SignUpDetails() {
       password,
       confirm_password: rePassword,
       user_surname: lastName,
-      user_role: 'owner',
+      user_role: 'manager',
     });
 
     if (response.success) {
