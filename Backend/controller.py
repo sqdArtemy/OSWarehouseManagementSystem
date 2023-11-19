@@ -31,12 +31,19 @@ def controller(request: dict) -> dict:
     headers = request.get("headers", {})
     filters = headers.get("filters", {})
     response = ResponseFactory(status_code=400, data={}, message="", headers=headers)
+    ip = headers.get("ip", "")
+    port = headers.get("port", "")
+    socket_fd = headers.get("socket_fd", "")
 
     # TODO: We need to refactor this code to avoid repetitions and make it more readable
 
     try:
         # User`s endpoints
-        if "/user" in url:
+        if "/connect" in url:
+            print(f"\033[92m|CONNECTED -> IP: {ip}; PORT: {port}; SOCKET_FD: {socket_fd}|\033[0m")
+        elif "/disconnect" in url:
+            print(f"\033[91m|DISCONNECTED <- IP: {ip}; PORT: {port}; SOCKET_FD: {socket_fd}|\033[0m")
+        elif "/user" in url:
             if method == Method.GET.value:
                 if "/users" in url:
                     return user_view.get_list(request=request, **filters)
