@@ -43,12 +43,12 @@ class Warehouse(Base):
         CheckConstraint("overall_capacity > 0", name="check_overall_capacity")
     )
 
-    def to_dict(self):
+    def to_dict(self, cascade_fields: list[str] = ("company", "supervisor")):
         warehouse = SessionMaker().query(Warehouse).filter(Warehouse.warehouse_id == self.warehouse_id).first()
         return {
             "warehouse_id": self.warehouse_id,
-            "company": warehouse.supervisor.to_dict(),
-            "supervisor": warehouse.supervisor.to_dict(),
+            "company": warehouse.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
+            "supervisor": warehouse.supervisor.to_dict(cascade_fields=[]) if "supervisor" in cascade_fields else self.supervisor_id,
             "warehouse_name": self.warehouse_name,
             "warehouse_address": self.warehouse_address,
             "overall_capacity": self.overall_capacity,

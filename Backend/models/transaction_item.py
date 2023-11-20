@@ -21,11 +21,11 @@ class TransactionItem(Base):
         UniqueConstraint("product_id", "transaction_id")
     )
 
-    def to_dict(self):
+    def to_dict(self, cascade_filters: list[str] = ("transaction", "product")):
         transaction_item = SessionMaker().query(TransactionItem).filter(TransactionItem.transaction_item_id == self.transaction_item_id).first()
         return {
             "transaction_item_id": self.transaction_item_id,
-            "transaction": transaction_item.transaction.to_dict(),
-            "product": transaction_item.product.to_dict(),
+            "transaction": transaction_item.transaction.to_dict(cascade_filters=[]) if "transaction" in cascade_filters else self.transaction_id,
+            "product": transaction_item.product.to_dict(cascade_filters=[]) if "product" in cascade_filters else self.product_id,
             "quantity": self.quantity
         }

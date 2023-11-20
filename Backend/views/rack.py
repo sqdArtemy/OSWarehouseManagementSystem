@@ -1,6 +1,4 @@
 from sqlalchemy import func
-from sqlalchemy.orm import Session
-from sqlalchemy import select, join
 
 from db_config import SessionMaker
 from models import Rack, User, Warehouse, Inventory, Product

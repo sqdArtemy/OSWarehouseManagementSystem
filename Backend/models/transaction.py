@@ -28,11 +28,11 @@ class Transaction(Base):
         CheckConstraint("recipient_id <> supplier_id", name="check_recipient_supplier"),
     )
 
-    def to_dict(self):
+    def to_dict(self, cascade_filters: list[str] = ("supplier", "recipient_warehouse")):
         transaction = SessionMaker().query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
         return {
             "transaction_id": self.transaction_id,
-            "supplier": transaction.supplier.to_dict(),
-            "recipient_warehouse": transaction.recipient_warehouse.to_dict(),
+            "supplier": transaction.supplier.to_dict(cascade_filters=[]) if "supplier" in cascade_filters else self.supplier_id,
+            "recipient_warehouse": transaction.recipient_warehouse.to_dict(cascade_filters=[]) if "recipient_warehouse" in cascade_filters else self.recipient_id,
             "status": self.status
         }
