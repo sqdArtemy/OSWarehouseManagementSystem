@@ -30,11 +30,11 @@ class Product(Base):
         CheckConstraint("price > 0", name="check_price")
     )
 
-    def to_dict(self):
+    def to_dict(self, cascade_fields: list[str] = ("company",)):
         product = SessionMaker().query(Product).filter(Product.product_id == self.product_id).first()
         return {
             "product_id": self.product_id,
-            "company": product.company.to_dict() if product.company is not None else {},
+            "company": product.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
             "product_name": self.product_name,
             "description": self.description,
             "weight": self.weight,
