@@ -13,55 +13,6 @@ class RackView(GenericView):
     model_name = "rack"
 
     @view_function_middleware
-    @check_allowed_methods_middleware([Method.GET.value])
-    def get(self, request: dict) -> dict:
-        """
-        Get response with desired product`s dictionary.
-        :param request: dictionary containing url, method and body
-        :return: dictionary containing status_code and response body
-        """
-
-        rack_id = extract_id_from_url(request["url"], "rack")
-        rack = SessionMaker().query(Rack).filter_by(rack_id=rack_id).first()
-
-        retriever_id = decode_token(self.headers.get("token"))
-        retriever = SessionMaker().query(User).filter_by(user_id=retriever_id).first()
-        warehouse_ids = SessionMaker().query(Warehouse.warehouse_id).filter_by(company_id=retriever.company_id).all()
-        if rack is None or rack.warehouse_id in warehouse_ids:
-            raise ValidationError("Rack Not Found", 404)
-
-        rack_info = {
-            "warehouse_id": rack.warehouse_id,
-            "rack_id": rack.rack_id,
-            "rack_position": rack.rack_position,
-            "overall_capacity": rack.overall_capacity,
-            "remaining_capacity": rack.remaining_capacity,
-            "inventories": []
-        }
-
-        # Execute the query
-        inventories = SessionMaker().query(Inventory, Product).filter(Inventory.product_id == Product.product_id).all()
-
-        for inventory, product in inventories:
-            inventory_info = {
-                "inventory_id": inventory.inventory_id,
-                "product_id": inventory.product_id,
-                "product_name": product.product_name,
-                "quantity": inventory.quantity,
-                "total_volume": inventory.quantity * product.volume,
-                "arrival_date": inventory.arrival_date.strftime("%Y/%m/%d"),
-                "expiry_date": inventory.expiry_date.strftime("%Y/%m/%d")
-            }
-            rack_info["inventories"].append(inventory_info)
-
-        response_data = {
-            "status": 201,
-            "data": rack_info,
-            "headers": self.headers
-        }
-        return response_data
-
-    @view_function_middleware
     @check_allowed_methods_middleware([Method.DELETE.value])
     def delete(self, request: dict) -> dict:
         """

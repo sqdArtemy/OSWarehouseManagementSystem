@@ -47,7 +47,7 @@ class GenericView(metaclass=ModelAttributesMeta):
             raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 404)
 
         self.response.status_code = 200
-        self.response.data = self.instance.to_dict()
+        self.response.data = self.instance.to_dict(cascade_fields=[])
         return self.response.create_response()
 
     @view_function_middleware
