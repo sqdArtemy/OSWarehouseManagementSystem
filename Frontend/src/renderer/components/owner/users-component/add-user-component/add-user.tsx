@@ -14,7 +14,7 @@ export interface INewUserData {
 export default function AddUser({
   isPopupVisible,
   hidePopup,
-  userData,
+  userData, onAddUserSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -22,21 +22,29 @@ export default function AddUser({
     userData: INewUserData;
     setUserData: (userData: unknown) => void;
   };
+  onAddUserSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
 
   const layout = {
-    labelCol: { span: 8 },
+    labelCol: {
+      span: 8,
+    },
     wrapperCol: { span: 16 },
   };
 
   const tailLayout = {
-    wrapperCol: { offset: 16, span: 17 },
+    wrapperCol: { offset: 13, span: 17 },
   };
 
   function onRoleChange() {
     console.log('change');
   }
+
+  const onCancel = () => {
+    hidePopup();
+    handleReset();
+  };
 
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
@@ -52,14 +60,18 @@ export default function AddUser({
     } else {
       hidePopup();
     }
-    await userApi.addUser({
+
+    const response = await userApi.addUser({
       user_name: newUserData['First Name'],
       user_surname: newUserData['Last Name'],
       user_email: newUserData['Email'],
       user_phone: newUserData['Phone'],
-      user_role: newUserData['Role'],
+      user_role: 'supervisor',
     });
-
+    console.log(response);
+    if(response.success){
+      onAddUserSuccess();
+    }
     userData.setUserData(newUserData);
   };
 
@@ -68,10 +80,11 @@ export default function AddUser({
   };
   return (
     <Modal
-      title="Add New User"
+      title={<p style={{ fontSize: '1.2vw' }}>Add New User</p>}
+      width={'30vw'}
       open={isPopupVisible}
       onOk={onFinish}
-      onCancel={onFinish}
+      onCancel={onCancel}
       cancelButtonProps={{ style: { display: 'none' } }}
       okButtonProps={{ style: { display: 'none' } }}
     >
@@ -86,39 +99,41 @@ export default function AddUser({
       >
         <Form.Item
           name="First Name"
-          label="First Name"
+          label={<p style={{ fontSize: '1vw' }}>First Name</p>}
           rules={[{ required: true }]}
         >
-          <Input />
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           name="Last Name"
-          label="Last Name"
+          label={<p style={{ fontSize: '1vw' }}>Last Name</p>}
           rules={[{ required: true }]}
         >
-          <Input />
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
-        <Form.Item name="Email" label="Email" rules={[{ required: true }]}>
-          <Input />
+        <Form.Item
+          name="Email"
+          label={<p style={{ fontSize: '1vw' }}>Email</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
-        <Form.Item name="Phone" label="Phone" rules={[{ required: true }]}>
-          <Input />
+        <Form.Item
+          name="Phone"
+          label={<p style={{ fontSize: '1vw' }}>Phone</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
-        <Form.Item name="Role" label="Role" rules={[{ required: true }]}>
-          <Select
-            placeholder="Select a role"
-            onChange={onRoleChange}
-            allowClear
-          >
-            <Select.Option value="manager">Manager</Select.Option>
-            <Select.Option value="shipper">Shipper</Select.Option>
-          </Select>
-        </Form.Item>
-        <Form.Item {...tailLayout}>
+        <Form.Item
+          {...tailLayout}
+          labelAlign={'right'}
+          style={{ marginBottom: '1vw' }}
+        >
           <Button
             htmlType="button"
             onClick={handleReset}
-            style={{ marginRight: '1vw' }}
+            style={{ marginRight: '1.3vw' }}
           >
             Reset
           </Button>

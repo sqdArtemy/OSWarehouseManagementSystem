@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './sign-up-details.scss';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../../index';
+import { Tooltip } from 'antd';
 
 export function SignUpDetails() {
   const location = useLocation();
@@ -31,12 +32,12 @@ export function SignUpDetails() {
       password,
       confirm_password: rePassword,
       user_surname: lastName,
-      user_role: 'owner',
+      user_role: 'manager',
     });
 
     if (response.success) {
       switch (response.data?.user_role) {
-        case 'owner':
+        case 'manager':
           navigate('/owner');
           break;
         default:
@@ -73,45 +74,57 @@ export function SignUpDetails() {
           </div>
 
           <form>
-            <input
-              id="name"
-              placeholder={'First Name'}
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-            />
-            <input
-              id="userName"
-              placeholder={'Last Name'}
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-            <input
-              type="Email"
-              id="userEmail"
-              placeholder={'User Email'}
-              value={userEmail}
-              onChange={(e) => setUserEmail(e.target.value)}
-            />
-            <input
-              id="number"
-              placeholder={'Phone Number'}
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <input
-              type="Password"
-              id="password"
-              placeholder={'Password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-              type="Password"
-              id="re-password"
-              placeholder={'Confirm Password'}
-              value={rePassword}
-              onChange={(e) => setRePassword(e.target.value)}
-            />
+            <Tooltip title={'Input First Name'} placement={'topLeft'}>
+              <input
+                id="name"
+                placeholder={'First Name'}
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Last Name'} placement={'topLeft'}>
+              <input
+                id="userName"
+                placeholder={'Last Name'}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Email'} placement={'topLeft'}>
+              <input
+                type="Email"
+                id="userEmail"
+                placeholder={'User Email'}
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Phone Number'} placement={'topLeft'}>
+              <input
+                id="number"
+                placeholder={'Phone Number'}
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Password'} placement={'topLeft'}>
+              <input
+                type="Password"
+                id="password"
+                placeholder={'Password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Confirm Password'} placement={'topLeft'}>
+              <input
+                type="Password"
+                id="re-password"
+                placeholder={'Confirm Password'}
+                value={rePassword}
+                onChange={(e) => setRePassword(e.target.value)}
+              />
+            </Tooltip>
             <button type="button" onClick={async () => handleSignUp()}>
               SIGN UP
             </button>
@@ -121,4 +134,3 @@ export function SignUpDetails() {
     </div>
   );
 }
-

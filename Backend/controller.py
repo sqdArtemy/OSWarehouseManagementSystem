@@ -1,5 +1,5 @@
-from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, StoreView, \
-    TransactionView, TransactionItemView, WarehouseView
+from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, VendorView, \
+    TransactionView, TransactionItemView, WarehouseView, TransportView
 from utilities.exceptions import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
@@ -20,10 +20,11 @@ def controller(request: dict) -> dict:
     order_item_view = OrderItemView()
     product_view = ProductView()
     rack_view = RackView()
-    store_view = StoreView()
+    vendor_view = VendorView()
     transaction_view = TransactionView()
     transaction_item_view = TransactionItemView()
     warehouse_view = WarehouseView()
+    transport_view = TransportView()
 
     url = request.get("url", "")
     method = request.get("method", "")
@@ -111,6 +112,11 @@ def controller(request: dict) -> dict:
                 return order_item_view.create(request=request)
 
         # Product`s endpoints
+        elif "/products" in url:
+            if method == Method.GET.value:
+                return product_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return product_view.create(request=request)
         elif "/product" in url:
             if method == Method.GET.value:
                 return product_view.get(request=request)
@@ -118,11 +124,6 @@ def controller(request: dict) -> dict:
                 return product_view.delete(request=request)
             elif method == Method.PUT.value:
                 return product_view.update(request=request)
-        elif "/products" in url:
-            if method == Method.GET.value:
-                return product_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return product_view.create(request=request)
 
         # Rack`s endpoints
         elif "/rack" in url:
@@ -138,19 +139,19 @@ def controller(request: dict) -> dict:
             elif method == Method.POST.value:
                 return rack_view.create(request=request)
 
-        # Store`s endpoints
-        elif "/store" in url:
+        # Vendor`s endpoints
+        elif "/vendor" in url:
             if method == Method.GET.value:
-                return store_view.get(request=request)
+                return vendor_view.get(request=request)
             elif method == Method.DELETE.value:
-                return store_view.delete(request=request)
+                return vendor_view.delete(request=request)
             elif method == Method.PUT.value:
-                return store_view.update(request=request)
-        elif "/stores" in url:
+                return vendor_view.update(request=request)
+        elif "/vendors" in url:
             if method == Method.GET.value:
-                return store_view.get_list(request=request, **filters)
+                return vendor_view.get_list(request=request, **filters)
             elif method == Method.POST.value:
-                return store_view.create(request=request)
+                return vendor_view.create(request=request)
 
         # Transaction`s endpoints
         elif "/transaction" in url:
@@ -194,6 +195,21 @@ def controller(request: dict) -> dict:
             elif method == Method.POST.value:
                 return warehouse_view.create(request=request)
 
+        # Transport`s endpoints
+        elif "/transport" in url:
+            if method == Method.GET.value:
+                return transport_view.get(request=request)
+            elif method == Method.DELETE.value:
+                return transport_view.delete(request=request)
+            elif method == Method.PUT.value:
+                return transport_view.update(request=request)
+        elif "/transports" in url:
+            if method == Method.GET.value:
+                return transport_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return transport_view.create(request=request)
+
+        # In case of no route found
         else:
             response.status_code = 404
             response.message = "Route not found."

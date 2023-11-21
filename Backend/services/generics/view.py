@@ -43,7 +43,7 @@ class GenericView(metaclass=ModelAttributesMeta):
         :return: dictionary containing status_code and response body
         """
         if self.instance is None:
-            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
+            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 404)
 
         self.response.status_code = 200
         self.response.data = self.instance.to_dict()
@@ -62,7 +62,22 @@ class GenericView(metaclass=ModelAttributesMeta):
 
         # Applying filters
         for column, value in kwargs.items():
-            if hasattr(self.model, column):
+            # if column_gte then find all model instances with value >= value_gte
+            if column.endswith("_gte"):
+                column_name = column[:-4]
+                if hasattr(self.model, column_name):
+                    query = query.filter(getattr(self.model, column_name) >= value)
+            # if column_lte then find all model instances with value <= value_lte
+            elif column.endswith("_lte"):
+                column_name = column[:-4]
+                if hasattr(self.model, column_name):
+                    query = query.filter(getattr(self.model, column_name) <= value)
+            # if column_like then find all model instances with value like value_like
+            elif column.endswith("_like"):
+                column_name = column[:-5]
+                if hasattr(self.model, column_name):
+                    query = query.filter(getattr(self.model, column_name).like(f"%{value}%"))
+            elif hasattr(self.model, column):
                 query = query.filter(getattr(self.model, column) == value)
 
         instances = query.all()
@@ -120,7 +135,7 @@ class GenericView(metaclass=ModelAttributesMeta):
         :return: dictionary containing status_code and response body
         """
         if self.instance is None:
-            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
+            raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 404)
 
         try:
             for key, value in self.body.items():

@@ -7,12 +7,12 @@ class Inventory(Base):
     __tablename__ = "inventories"
 
     inventory_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    rack_id = Column(Integer, ForeignKey("racks.rack_id"))
-    product_id = Column(Integer, ForeignKey("products.product_id"))
-    quantity = Column(Integer)
-    total_volume = Column(Numeric(precision=20, scale=2), default=0)
-    arrival_date = Column(Date)
-    expiry_date = Column(Date)
+    rack_id = Column(Integer, ForeignKey("racks.rack_id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.product_id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    total_volume = Column(Numeric(precision=20, scale=2, asdecimal=False), default=0, nullable=False)
+    arrival_date = Column(Date, nullable=False)
+    expiry_date = Column(Date, nullable=True)
 
     # Relationships with other tables
     rack = relationship("Rack", back_populates="inventories")
