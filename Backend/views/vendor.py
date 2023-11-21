@@ -12,6 +12,43 @@ class VendorView(GenericView):
     model_name = "vendor"
 
     @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict, **kwargs) -> dict:
+        """
+        Get all instances of model.
+        :param request: dictionary containing url, method and body
+        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
+        :return: dictionary containing status_code and response body with list of dictionaries of instances` data
+        """
+        # get owner_id from token and filter vendors by it
+        owner_id = decode_token(self.headers.get("token"))
+        vendors = self.session.query(Vendor).filter(Vendor.vendor_owner_id == owner_id)
+
+        # create response
+        instances = vendors.all()
+        body = [instance.to_dict() for instance in instances]
+        self.response.status_code = 200
+        self.response.data = body
+
+        return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get(self, request: dict) -> dict:
+        """
+        Get response with desired vendor`s dictionary.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+        # check id user_id from token and vendor_owner_id are the same
+        user_id = decode_token(self.headers.get("token"))
+        vendor = self.session.query(Vendor).filter(Vendor.vendor_owner_id == user_id).first()
+        if self.instance is not None and vendor.vendor_owner_id != self.instance.vendor_owner_id:
+            raise ValidationError("Vendor with given id does not exist.", 404)
+
+        return super().get(request=request)
+
+    @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
     def create(self, request: dict) -> dict:
         """
