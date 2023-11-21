@@ -20,7 +20,7 @@ export interface IUserData {
   user_id: number;
 }
 
-export default function Users() {
+export default function OwnerUsers() {
   const [selectedRole, setSelectedRole] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);

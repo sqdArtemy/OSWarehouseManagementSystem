@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './warehouses.scss';
+import './users.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -9,70 +9,74 @@ import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import { userApi } from '../../../index';
 import debounce from 'lodash.debounce';
-import AddWarehouse from './add-warehouse-component/add-warehouse';
-import EditWarehouse from './edit-warehouse-component/edit-warehouse';
-// import AddUser from './add-user-component/add-user';
-// import EditUser from './edit-user-component/edit-user';
+import AddUser from './add-user-component/add-user';
+import EditUser from './edit-user-component/edit-user';
 
-export interface IWarehouseData {
-  warehouseName: string;
-  capacity: string;
-  supervisor: string;
-  type: string;
-  address: number;
+export interface IUserData {
+  fullName: string;
+  role: string;
+  phoneNumber: string;
+  email: string;
+  user_id: number;
 }
 
-export default function OwnerWarehouses() {
-  const [selectedType, setSelectedType] = useState('All');
+export default function AdminUsers() {
+  const [selectedRole, setSelectedRole] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
-  const [isAddWarehouseVisible, setIsAddWarehouseVisible] = useState(false);
-  const [isEditWarehouseVisible, setIsEditWarehouseVisible] = useState(false);
-  const [warehouseData, setWarehouseData] = useState({});
+  const [isAddUserVisible, setIsAddUserVisible] = useState(false);
+  const [isEditUserVisible, setIsEditUserVisible] = useState(false);
+  const [userData, setUserData] = useState({});
+  let filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
-    setSelectedType(e.domEvent.target.innerText);
-    e.domEvent.target.innerText = selectedType;
+    setSelectedRole(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectedRole;
   };
 
-  const handeDeleteWarehouse = async (record?) => {
-    // if (selectedRows.length > 0) {
-    //   console.log('delete', selectedRows);
-    //   for (let user of selectedRows) {
-    //     await userApi.deleteUser(user.user_id);
-    //   }
-    // }
+  const handleDeleteUser = async (record?) => {
+    if (selectedRows.length > 0) {
+      console.log('delete', selectedRows);
+      for (let user of selectedRows) {
+        await userApi.deleteUser(user.user_id);
+      }
+    }
     if (record) {
       console.log('delete', record);
       await userApi.deleteUser(record.user_id);
     }
-  };
 
+    await getAllUsers(filters);
+  }
+
+  const getAllUsers = async (filters: {[key: string]: any}) => {
+    const result = await userApi.getAllUsers(filters);
+    const users = result.data?.body;
+    const dataItems = [];
+
+    if (users?.length) {
+      for (let i = 0; i < users.length; i++) {
+        dataItems.push({
+          key: (i + 1).toString(),
+          fullName: users[i].user_name + ' ' + users[i].user_surname,
+          role: users[i].user_role,
+          phoneNumber: users[i].user_phone,
+          email: users[i].user_email,
+          user_id: users[i].user_id,
+        });
+      }
+
+      setDataSource(dataItems);
+    } else {
+      setDataSource([]);
+    }
+  }
   const debouncedSearch = debounce(async (filters) => {
-    // const response = await userApi.getAllUsers(filters);
-    // const users = response?.data?.body;
-    // const dataItems = [];
-    //
-    // if (users?.length) {
-    //   for (let i = 0; i < users.length; i++) {
-    //     dataItems.push({
-    //       key: (i + 1).toString(),
-    //       fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //       role: users[i].user_role,
-    //       phoneNumber: users[i].user_phone,
-    //       email: users[i].user_phone,
-    //       user_id: users[i].user_id,
-    //     });
-    //   }
-    //
-    //   setDataSource(dataItems);
-    // } else {
-    setDataSource([]);
-    // }
+    await getAllUsers(filters);
   }, 1000);
 
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -83,12 +87,12 @@ export default function OwnerWarehouses() {
       }
     }, 100);
 
-    const filters = {};
-    if (selectedType) {
-      filters.user_role = selectedType.toLowerCase();
+    filters = {};
+    if (selectedRole) {
+      filters.user_role = selectedRole.toLowerCase();
     }
 
-    if (selectedType === 'All' && filters.user_role) {
+    if (selectedRole === 'All' && filters.user_role) {
       delete filters.user_role;
     }
 
@@ -112,28 +116,36 @@ export default function OwnerWarehouses() {
     }
   };
 
-  const handleAddWarehouse = (e) => {
+  const handleAddUser = (e) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    setIsAddWarehouseVisible(true);
+    setIsAddUserVisible(true);
   };
 
-  const handleEditWarehouse = (record) => {
+  const handleAddUserSuccess = async () => {
+    await getAllUsers(filters);
+  };
+
+  const handleEditUserSuccess = async () => {
+    await getAllUsers(filters);
+  };
+
+  const handleEditUser = (record) => {
     console.log('edit', record);
-    setWarehouseData(record);
-    setIsEditWarehouseVisible(true);
+    setUserData(record);
+    setIsEditUserVisible(true);
   };
 
-  const hideAddWarehouse = () => {
-    setIsAddWarehouseVisible(false);
+  const hideAddUser = () => {
+    setIsAddUserVisible(false);
   };
 
-  const hideEditWarehouse = () => {
-    setIsEditWarehouseVisible(false);
+  const hideEditUser = () => {
+    setIsEditUserVisible(false);
   };
 
   const placeholderRowCount = 30;
@@ -142,11 +154,10 @@ export default function OwnerWarehouses() {
     { length: placeholderRowCount },
     (_, index) => ({
       key: (index + 1).toString(),
-      address: '',
-      capacity: '',
-      warehouseName: '',
-      supervisor: '',
-      type: '',
+      fullName: '',
+      role: '',
+      phoneNumber: '',
+      email: '',
     }),
   );
 
@@ -163,63 +174,51 @@ export default function OwnerWarehouses() {
       width: '10%',
       align: 'center',
       render: (_, record) =>
-        record.warehouseName ? (
+        record.fullName ? (
           <span className={'table-actions-container'}>
             <EditOutlined
-              onClick={() => handleEditWarehouse(record)}
+              onClick={() => handleEditUser(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
             />
             <DeleteOutlined
-              onClick={() => handeDeleteWarehouse(record)}
+              onClick={() => handleDeleteUser(record)}
               style={{ color: 'red', cursor: 'pointer' }}
             />
           </span>
         ) : null,
     },
     {
-      title: 'Warehouse name',
-      dataIndex: 'warehouseName',
-      key: 'warehouseName',
+      title: 'Full name',
+      dataIndex: 'fullName',
+      key: 'fullName',
       align: 'center',
     },
     {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
       align: 'center',
     },
     {
-      title: 'Suprevisor',
-      dataIndex: 'supervisor',
-      key: 'supervisor',
+      title: 'Phone number',
+      dataIndex: 'phoneNumber',
+      key: 'phoneNumber',
       align: 'center',
     },
     {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      align: 'center',
-    },
-    {
-      title: 'Capacity',
-      dataIndex: 'capacity',
-      key: 'capacity',
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
       align: 'center',
     },
   ];
 
   const items = [
     {
-      label: 'Freezer',
+      label: 'Supervisor',
     },
     {
-      label: 'Refrigerator',
-    },
-    {
-      label: 'Dry',
-    },
-    {
-      label: 'Hazardous',
+      label: 'Manager',
     },
   ];
 
@@ -234,7 +233,7 @@ export default function OwnerWarehouses() {
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.warehouseName === '',
+      disabled: record.fullName === '',
     }),
   };
 
@@ -259,57 +258,27 @@ export default function OwnerWarehouses() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    // userApi.getAllUsers({}).then((result) => {
-    //   const users = result.data?.body;
-    //   if (users?.length) {
-    //     for (let i = 0; i < users.length; i++) {
-    //       data.push({
-    //         key: (i + 1).toString(),
-    //         fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //         role: users[i].user_role,
-    //         phoneNumber: users[i].user_phone,
-    //         email: users[i].user_phone,
-    //         user_id: users[i].user_id,
-    //       });
-    //     }
-    //     setDataSource(data);
-    //   }
-    // });
+    userApi.getAllUsers(filters).then((result) =>{
+      const users = result.data?.body;
+      const dataItems = [];
 
-    setDataSource([
-      {
-        key: '1',
-        warehouseName: 'John Brown',
-        supervisor: '32',
-        address: 'New York No. 1 Lake Park',
-        type: 'Freezer',
-        capacity: 1000,
-      },
-      {
-        key: '2',
-        warehouseName: 'Jim Green',
-        supervisor: '42',
-        address: 'London No. 1 Lake Park',
-        type: 'Refrigerator',
-        capacity: 1000,
-      },
-      {
-        key: '3',
-        warehouseName: 'Joe Black',
-        supervisor: '32',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Dry',
-        capacity: 1000,
-      },
-      {
-        key: '4',
-        warehouseName: 'Disabled User',
-        supervisor: '99',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Hazardous',
-        capacity: 1000,
-      },
-    ]);
+      if (users?.length) {
+        for (let i = 0; i < users.length; i++) {
+          dataItems.push({
+            key: (i + 1).toString(),
+            fullName: users[i].user_name + ' ' + users[i].user_surname,
+            role: users[i].user_role,
+            phoneNumber: users[i].user_phone,
+            email: users[i].user_email,
+            user_id: users[i].user_id,
+          });
+        }
+
+        setDataSource(dataItems);
+      } else {
+        setDataSource([]);
+      }
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -318,7 +287,7 @@ export default function OwnerWarehouses() {
     <div className="warehouses-container">
       <div className={'warehouses-table-container'}>
         <div className={'warehouses-table-header-container'}>
-          <span className={'warehouses-table-header'}>WAREHOUSES</span>
+          <span className={'warehouses-table-header'}>USERS</span>
           <div className={'options-container'}>
             <div className="search-bar-container">
               <Dropdown
@@ -327,7 +296,7 @@ export default function OwnerWarehouses() {
               >
                 <Button>
                   <Space>
-                    {selectedType}
+                    {selectedRole}
                     <DownOutlined />
                   </Space>
                 </Button>
@@ -350,30 +319,23 @@ export default function OwnerWarehouses() {
               className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
-              onClick={() => handeDeleteWarehouse()}
+              onClick={() => handleDeleteUser()}
             ></img>
-            <button
-              className={'add-btn'}
-              onClick={(e) => handleAddWarehouse(e)}
-            >
+            <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Warehouse</span>
+              <span className={'add-btn-text'}>Add User</span>
             </button>
-            <AddWarehouse
-              hidePopup={hideAddWarehouse}
-              isPopupVisible={isAddWarehouseVisible}
-              warehouseData={{
-                warehouseData: warehouseData,
-                setWarehouseData: setWarehouseData,
-              }}
+            <AddUser
+              hidePopup={hideAddUser}
+              isPopupVisible={isAddUserVisible}
+              userData={{ userData: userData, setUserData: setUserData }}
+              onAddUserSuccess={handleAddUserSuccess}
             />
-            <EditWarehouse
-              hidePopup={hideEditWarehouse}
-              isPopupVisible={isEditWarehouseVisible}
-              warehouseData={{
-                warehouseData: warehouseData,
-                setWarehouseData: setWarehouseData,
-              }}
+            <EditUser
+              hidePopup={hideEditUser}
+              isPopupVisible={isEditUserVisible}
+              userData={{ userData: userData, setUserData: setUserData }}
+              onEditUserSuccess={handleEditUserSuccess}
             />
           </div>
         </div>

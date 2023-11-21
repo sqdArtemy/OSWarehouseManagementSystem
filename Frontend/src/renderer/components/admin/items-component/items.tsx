@@ -14,7 +14,7 @@ import debounce from 'lodash.debounce';
 import EditUser from '../users-component/edit-user-component/edit-user';
 import EditItem from './edit-user-component/edit-item';
 
-export default function OwnerItems() {
+export default function AdminItems() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);

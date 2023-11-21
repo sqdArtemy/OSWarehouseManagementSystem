@@ -5,7 +5,7 @@ import { Button, Form, FormInstance, Input, Space } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { userApi } from '../../../index';
 
-export default function OwnerProfile() {
+export default function AdminProfile() {
   const [changePassDisplay, setChangePassDisplay] = useState(false);
   const [userData, setUserData] = useState({});
   let id;

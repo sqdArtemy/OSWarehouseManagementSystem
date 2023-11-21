@@ -8,7 +8,7 @@ import ItemsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 
-export function OwnerDashboardLayout() {
+export function AdminDashboardLayout() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const sideBarElements = [
@@ -25,7 +25,7 @@ export function OwnerDashboardLayout() {
     const textElement: HTMLSpanElement = event.currentTarget
       .childNodes[1] as HTMLSpanElement;
     setSelected(index);
-    navigate(`/owner/${textElement.innerText.toLowerCase()}`);
+    navigate(`/admin/${textElement.innerText.toLowerCase()}`);
   };
 
   return (
@@ -68,7 +68,7 @@ export function OwnerDashboardLayout() {
             className="side-bar-bottom-profile"
             onClick={() => {
               setSelected(null);
-              navigate('/owner/profile');
+              navigate('/admin/profile');
             }}
           >
             <span className="side-bar-bottom-profile-icon">

@@ -22,7 +22,7 @@ export interface IWarehouseData {
   address: number;
 }
 
-export default function OwnerWarehouses() {
+export default function AdminWarehouses() {
   const [selectedType, setSelectedType] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
