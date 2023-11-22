@@ -18,7 +18,7 @@ class VendorView(GenericView):
         Get all instances of model.
         :param request: dictionary containing url, method and body
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
-        :return: dictionary containing status_code and response body with list of dictionaries of instances` data
+        :return: dictionary containing status_code and response body with list of dictionaries of vendors
         """
         # get owner_id from token and filter vendors by it
         owner_id = decode_token(self.headers.get("token"))
