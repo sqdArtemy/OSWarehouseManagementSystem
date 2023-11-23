@@ -23,12 +23,12 @@ class Inventory(Base):
         UniqueConstraint("rack_id", "product_id"),
     )
 
-    def to_dict(self):
+    def to_dict(self, cascade_fields: list[str] = ("rack", "product")):
         inventory = SessionMaker().query(Inventory).filter(Inventory.inventory_id == self.inventory_id).first()
         return {
             "inventory_id": self.inventory_id,
-            "rack": inventory.rack.to_dict(),
-            "product": inventory.product.to_dict(),
+            "rack": inventory.rack.to_dict(cascade_fields=[]) if "rack" in cascade_fields else self.rack_id,
+            "product": inventory.product.to_dict(cascade_fields=[]) if "product" in cascade_fields else self.product_id,
             "quantity": self.quantity,
             "total_volume": self.total_volume,
             "arrival_date": self.arrival_date,

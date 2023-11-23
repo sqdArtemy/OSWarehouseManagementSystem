@@ -31,12 +31,19 @@ def controller(request: dict) -> dict:
     headers = request.get("headers", {})
     filters = headers.get("filters", {})
     response = ResponseFactory(status_code=400, data={}, message="", headers=headers)
+    ip = headers.get("ip", "")
+    port = headers.get("port", "")
+    socket_fd = headers.get("socket_fd", "")
 
     # TODO: We need to refactor this code to avoid repetitions and make it more readable
 
     try:
         # User`s endpoints
-        if "/user" in url:
+        if "/connect" in url:
+            print(f"\033[92m|CONNECTED -> IP: {ip}; PORT: {port}; SOCKET_FD: {socket_fd}|\033[0m")
+        elif "/disconnect" in url:
+            print(f"\033[91m|DISCONNECTED <- IP: {ip}; PORT: {port}; SOCKET_FD: {socket_fd}|\033[0m")
+        elif "/user" in url:
             if method == Method.GET.value:
                 if "/users" in url:
                     return user_view.get_list(request=request, **filters)
@@ -126,6 +133,11 @@ def controller(request: dict) -> dict:
                 return product_view.update(request=request)
 
         # Rack`s endpoints
+        elif "/racks" in url:
+            if method == Method.GET.value:
+                return rack_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return rack_view.create(request=request)
         elif "/rack" in url:
             if method == Method.GET.value:
                 return rack_view.get(request=request)
@@ -133,13 +145,13 @@ def controller(request: dict) -> dict:
                 return rack_view.delete(request=request)
             elif method == Method.PUT.value:
                 return rack_view.update(request=request)
-        elif "/racks" in url:
-            if method == Method.GET.value:
-                return rack_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return rack_view.create(request=request)
 
         # Vendor`s endpoints
+        elif "/vendors" in url:
+            if method == Method.GET.value:
+                return vendor_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return vendor_view.create(request=request)
         elif "/vendor" in url:
             if method == Method.GET.value:
                 return vendor_view.get(request=request)
@@ -147,11 +159,6 @@ def controller(request: dict) -> dict:
                 return vendor_view.delete(request=request)
             elif method == Method.PUT.value:
                 return vendor_view.update(request=request)
-        elif "/vendors" in url:
-            if method == Method.GET.value:
-                return vendor_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return vendor_view.create(request=request)
 
         # Transaction`s endpoints
         elif "/transaction" in url:
@@ -182,6 +189,11 @@ def controller(request: dict) -> dict:
                 return transaction_item_view.create(request=request)
 
         # Warehouse`s endpoints
+        elif "/warehouses" in url:
+            if method == Method.GET.value:
+                return warehouse_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return warehouse_view.create(request=request)
         elif "/warehouse" in url:
             if method == Method.GET.value:
                 return warehouse_view.get(request=request)
@@ -189,11 +201,7 @@ def controller(request: dict) -> dict:
                 return warehouse_view.delete(request=request)
             elif method == Method.PUT.value:
                 return warehouse_view.update(request=request)
-        elif "/warehouses" in url:
-            if method == Method.GET.value:
-                return warehouse_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return warehouse_view.create(request=request)
+
 
         # Transport`s endpoints
         elif "/transport" in url:
