@@ -93,6 +93,40 @@ class VendorView(GenericView):
         :return: dictionary containing status_code and response body
         """
         # TODO: Add checkers and validations
+
+        # check id user_id from token and vendor_owner_id are the same
+        user_id = decode_token(self.headers.get("token"))
+        vendor = self.session.query(Vendor).filter(Vendor.vendor_owner_id == user_id).first()
+        if self.instance is not None and vendor.vendor_owner_id != self.instance.vendor_owner_id:
+            raise ValidationError("Store point not found", 404)
+
+        # if vendor has orders with status cancelled, finished, damaged, lost
+        # 400 ‘You cannot update the store point during active orders’
+        for order in vendor.received_orders + vendor.supplied_orders:
+            if order.order_status not in ["cancelled", "finished", "damaged", "lost"]:
+                self.response.status_code = 400
+                self.response.message = "You cannot update the store point during active orders"
+                return self.response.create_response()
+
+        # get the role for user_id
+        user = self.session.query(User).filter(User.user_id == user_id).first()
+
+        # if role is not vendor then return 403
+        if user.user_role != UserRole.VENDOR.value["name"]:
+            self.response.status_code = 403
+            self.response.message = "Ebanmisan? San vendor emassan"
+            return self.response.create_response()
+
+        # If the vendor_name of this vendor owner already exists
+        vendor_name = self.body.get("vendor_name")
+
+        query = self.session.query(Vendor).filter(Vendor.vendor_owner_id == user_id)
+        query = query.filter(Vendor.vendor_name == vendor_name)
+        if query.first() is not None:
+            self.response.status_code = 400
+            self.response.message = "The store point already exists for this vendor"
+            return self.response.create_response()
+
         return super().update(request=request)
 
     @view_function_middleware
