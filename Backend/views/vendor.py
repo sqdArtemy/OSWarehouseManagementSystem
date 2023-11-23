@@ -94,3 +94,23 @@ class VendorView(GenericView):
         """
         # TODO: Add checkers and validations
         return super().update(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.DELETE.value])
+    def delete(self, request: dict) -> dict:
+        """
+        Delete a vendor in the database.
+        :param request: dictionary containing url, method, body and headers
+        :return: dictionary containing status_code and response body
+        """
+        vendor = self.session.query(Vendor).filter(Vendor.vendor_id == self.instance_id).first()
+
+        # if vendor has orders with status cancelled, finished, damaged, lost
+        # 400 ‘You cannot update the store point during active orders’
+        for order in vendor.received_orders + vendor.supplied_orders:
+            if order.order_status not in ["cancelled", "finished", "damaged", "lost"]:
+                self.response.status_code = 400
+                self.response.message = "You cannot update the store point during active orders"
+                return self.response.create_response()
+
+        return super().delete(request=request)
