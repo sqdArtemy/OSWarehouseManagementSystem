@@ -7,6 +7,7 @@ from models import Warehouse, User, Rack
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities import ValidationError, DatabaseError, decode_token, extract_id_from_url
+from utilities.enums.data_related_enums import UserRole
 from utilities.enums.method import Method
 
 
@@ -243,5 +244,13 @@ class WarehouseView(GenericView):
         :param request: dictionary containing url, method, headers, and filters
         :return: dictionary containing status_code and response body
         """
+        with get_session() as session:
+            requester_id = decode_token(self.headers.get("token"))
+            requester = session.query(User).filter(User.user_id == requester_id).first()
+            company = requester.company
 
-        return super().get_list(request=request, **kwargs)
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                return super().get_list(request=request, **kwargs)
+            else:
+                query = session.query(Warehouse).filter(Warehouse.company_id == company.company_id)
+                return super().get_list(request=request, pre_selected_query=query, **kwargs)

@@ -155,12 +155,13 @@ class UserView(GenericView):
         :return: dictionary containing status_code and response body
         """
         with get_session() as session:
+            requester_id = decode_token(self.headers.get("token"))
             if self.requester_role == UserRole.ADMIN.value["code"]:
                 return super().get_list(request=request, **kwargs)
             else:
-                if self.requester_id is None:
+                if requester_id is None:
                     raise ValidationError("Unauthorized", 401)
-                requester_company = session.query(User).filter_by(user_id=self.requester_id).first().company
+                requester_company = session.query(User).filter_by(user_id=requester_id).first().company
                 query = session.query(self.model).filter_by(company_id=requester_company.company_id)
                 return super().get_list(request=request, pre_selected_query=query, **kwargs)
 
