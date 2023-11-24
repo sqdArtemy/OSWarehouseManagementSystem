@@ -48,9 +48,9 @@ export function SignUp() {
     console.log('locName', locName);
     console.log('locEmail', locEmail);
     console.log('locAddress', locAddress);
-    setName(locName);
-    setEmail(locEmail);
-    setAddress(locAddress);
+    setName(locName || '');
+    setEmail(locEmail || '');
+    setAddress(locAddress || '');
   }, [locName, locEmail, locAddress]);
 
   return (

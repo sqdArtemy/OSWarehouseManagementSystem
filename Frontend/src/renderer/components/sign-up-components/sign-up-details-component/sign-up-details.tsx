@@ -27,12 +27,12 @@ export function SignUpDetails() {
 
   useEffect(() => {
     if (state) {
-      setUserName(state.locFirstName);
-      setLastName(state.locLastName);
-      setUserEmail(state.locUserEmail);
-      setPhoneNumber(state.locPhoneNumber);
-      setPassword(state.locPassword);
-      setRePassword(state.locRePassword);
+      setUserName(state.locFirstName || '');
+      setLastName(state.locLastName || '');
+      setUserEmail(state.locUserEmail || '');
+      setPhoneNumber(state.locPhoneNumber || '');
+      setPassword(state.locPassword || '');
+      setRePassword(state.locRePassword || '');
     }
   }, [state]);
 

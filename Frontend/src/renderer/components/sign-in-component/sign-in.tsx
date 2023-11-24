@@ -56,8 +56,8 @@ export function SignIn() {
   };
 
   useEffect(() => {
-    setEmail(locLoginEmail);
-    setPassword(locLoginPassword);
+    setEmail(locLoginEmail || ''); // Use empty string as a fallback
+    setPassword(locLoginPassword || ''); // Use empty string as a fallback
   }, [locLoginEmail, locLoginPassword]);
 
   return (
