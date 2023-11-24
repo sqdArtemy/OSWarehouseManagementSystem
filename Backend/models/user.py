@@ -19,13 +19,13 @@ class User(Base):
     # Relationships with other tables
     company = relationship("Company", back_populates="users")
     vendors = relationship("Vendor", back_populates="vendor_owner")
-    warehouses = relationship("Warehouse", back_populates="manager")
+    warehouses = relationship("Warehouse", back_populates="supervisor")
 
-    def to_dict(self):
+    def to_dict(self, cascade_fields: list[str] = ("company",)):
         user = SessionMaker().query(User).filter(User.user_id == self.user_id).first()
         return {
             "user_id": self.user_id,
-            "company": user.company.to_dict(),
+            "company": user.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
             "user_name": self.user_name,
             "user_surname": self.user_surname,
             "user_phone": self.user_phone,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './dashboard-layout.scss';
 import DashboardProfileIcon from '../../../../../assets/icons/dashboard-profile-icon.png';
 import DashboardIcon from '../../../../../assets/icons/dashboard-icon.png';
@@ -7,10 +7,12 @@ import WarehousesIcon from '../../../../../assets/icons/dashboard-warehouses-ico
 import ItemsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
+import { userApi } from '../../../index';
 
 export function DashboardLayout() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
+  const [name, setName] = useState('Gentlemanbek');
   const sideBarElements = [
     { iconSrc: DashboardIcon, text: 'Dashboard' },
     { iconSrc: WarehousesIcon, text: 'Warehouses' },
@@ -27,6 +29,11 @@ export function DashboardLayout() {
     setSelected(index);
     navigate(`/owner/${textElement.innerText.toLowerCase()}`);
   };
+
+
+  useEffect(() => {
+    setName(userApi.getUserData.user_name + ' ' + userApi.getUserData.user_surname);
+  })
 
   return (
     <div className="dashboard-layout-container">
@@ -74,7 +81,7 @@ export function DashboardLayout() {
             <span className="side-bar-bottom-profile-icon">
               <img src={DashboardProfileIcon} alt={'Dashboard Profile Icon'} />
             </span>
-            <span className="side-bar-bottom-profile-name">Gentlemenbek</span>
+            <span className="side-bar-bottom-profile-name">{name}</span>
           </div>
 
           <button

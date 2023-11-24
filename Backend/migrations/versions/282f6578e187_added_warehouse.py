@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.create_table('warehouses',
                     sa.Column('warehouse_id', sa.Integer(), autoincrement=True, nullable=False),
                     sa.Column('company_id', sa.Integer(), nullable=False),
-                    sa.Column('manager_id', sa.Integer(), nullable=False),
+                    sa.Column('supervisor_id', sa.Integer(), nullable=False),
                     sa.Column('warehouse_name', sa.String(length=50), nullable=False),
                     sa.Column('warehouse_address', sa.String(length=255), nullable=False),
                     sa.Column('overall_capacity', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
@@ -34,7 +34,7 @@ def upgrade() -> None:
                     sa.CheckConstraint('overall_capacity > 0', name='check_overall_capacity'),
                     sa.CheckConstraint('remaining_capacity <= overall_capacity', name='check_remaining_capacity'),
                     sa.ForeignKeyConstraint(['company_id'], ['companies.company_id'], ),
-                    sa.ForeignKeyConstraint(['manager_id'], ['users.user_id'], ),
+                    sa.ForeignKeyConstraint(['supervisor_id'], ['users.user_id'], ),
                     sa.PrimaryKeyConstraint('warehouse_id')
                     )
     op.create_index(op.f('ix_warehouses_warehouse_address'), 'warehouses', ['warehouse_address'], unique=False)

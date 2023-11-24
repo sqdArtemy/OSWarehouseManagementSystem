@@ -21,11 +21,11 @@ class OrderItem(Base):
         UniqueConstraint("order_id", "product_id")
     )
 
-    def to_dict(self):
+    def to_dict(self, cascade_fields: list[str] = ("order", "product")):
         order_item = SessionMaker().query(OrderItem).filter(OrderItem.order_id == self.order_id).first()
         return {
             "order_item_id": self.order_item_id,
-            "order": order_item.order.to_dict(),
-            "product": order_item.product.to_dict(),
+            "order": order_item.order.to_dict(cascade_fields=[]) if "order" in cascade_fields else self.order_id,
+            "product": order_item.product.to_dict(cscade_fields=[]) if "product" in cascade_fields else self.product_id,
             "quantity": self.quantity
         }

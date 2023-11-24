@@ -13,6 +13,7 @@ import { IProductFilters } from '../../../services/interfaces/productsInterface'
 import debounce from 'lodash.debounce';
 import EditUser from '../users-component/edit-user-component/edit-user';
 import EditItem from './edit-user-component/edit-item';
+import { useError } from '../../error-component/error-context';
 
 export default function Items() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
@@ -46,12 +47,18 @@ export default function Items() {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
       for (let user of selectedRows) {
-        await productApi.deleteProduct(user.product_id);
+        const response = await productApi.deleteProduct(user.product_id);
+        if(!response.success) {
+            showError(response.message);
+          }
       }
     }
     if (record) {
       console.log('delete', record);
-      await productApi.deleteProduct(record.product_id);
+      const response = await productApi.deleteProduct(record.product_id);
+      if(!response.success) {
+        showError(response.message);
+      }
     }
 
     await getAllProducts(filters);
@@ -160,6 +167,7 @@ export default function Items() {
     }
   }
 
+  const { showError } = useError();
 
   const debouncedSearch = debounce(async (filters) => {
     await getAllProducts(filters);
