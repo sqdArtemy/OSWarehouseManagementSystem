@@ -54,11 +54,12 @@ class GenericView(metaclass=ModelAttributesMeta):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
-    def get_list(self, request: dict, pre_selected_query: Query = None, **kwargs) -> dict:
+    def get_list(self, request: dict, pre_selected_query: Query = None, cascade_fields: list[str] = (), **kwargs) -> dict:
         """
         Get all instances of model.
         :param request: dictionary containing url, method and body
         :param pre_selected_query: query which will be used to get instances
+        :param cascade_fields: fields which will be expanded in response
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
@@ -89,7 +90,7 @@ class GenericView(metaclass=ModelAttributesMeta):
                     query = query.filter(getattr(self.model, column) == value)
 
             instances = query.all()
-            body = [instance.to_dict() for instance in instances]
+            body = [instance.to_dict(cascade_fields=cascade_fields) for instance in instances]
             self.response.status_code = 200
             self.response.data = body
 
