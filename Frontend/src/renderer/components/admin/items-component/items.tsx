@@ -258,10 +258,6 @@ export default function AdminItems() {
     items,
     onClick: handleWeightClick,
   };
-  const menuPropsTypes = {
-    types,
-    onClick: handleMenuClick,
-  };
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -309,7 +305,7 @@ export default function AdminItems() {
             product_id: products[i].product_id,
             description: products[i].description,
             is_stackable: products[i].is_stackable,
-            price: products[i].price
+            price: products[i].price,
           });
         }
 
@@ -340,17 +336,17 @@ export default function AdminItems() {
                   </Space>
                 </Button>
               </Dropdown>
-              <Dropdown
-                menu={menuProps}
-                className={'search-bar-dropdown-container'}
-              >
-                <Button>
-                  <Space>
-                    {selected}
-                    <DownOutlined />
-                  </Space>
-                </Button>
-              </Dropdown>
+              {/* <Dropdown */}
+              {/*   menu={menuProps} */}
+              {/*   className={'search-bar-dropdown-container'} */}
+              {/* > */}
+              {/*   <Button> */}
+              {/*     <Space> */}
+              {/*       {selected} */}
+              {/*       <DownOutlined /> */}
+              {/*     </Space> */}
+              {/*   </Button> */}
+              {/* </Dropdown> */}
               <div className="filter">
                 <label className="labels" htmlFor="weight">Weight</label>
                 <input

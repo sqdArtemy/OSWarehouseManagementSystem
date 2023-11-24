@@ -11,7 +11,7 @@ export interface INewWarehouseData {
   Supervisor?: string;
 }
 
-export default function AddWarehouse({
+export default function AdminAddWarehouse({
   isPopupVisible,
   hidePopup,
   warehouseData,
