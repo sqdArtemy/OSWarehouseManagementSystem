@@ -51,9 +51,9 @@ export default function Users() {
     }
 
     await getAllUsers(filters);
-  }
+  };
 
-  const getAllUsers = async (filters: {[key: string]: any}) => {
+  const getAllUsers = async (filters: { [key: string]: any }) => {
     const result = await userApi.getAllUsers(filters);
     const users = result.data?.body;
     const dataItems = [];
@@ -74,7 +74,7 @@ export default function Users() {
     } else {
       setDataSource([]);
     }
-  }
+  };
   const debouncedSearch = debounce(async (filters) => {
     await getAllUsers(filters);
   }, 1000);
@@ -258,7 +258,7 @@ export default function Users() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    userApi.getAllUsers(filters).then((result) =>{
+    userApi.getAllUsers(filters).then((result) => {
       const users = result.data?.body;
       const dataItems = [];
 

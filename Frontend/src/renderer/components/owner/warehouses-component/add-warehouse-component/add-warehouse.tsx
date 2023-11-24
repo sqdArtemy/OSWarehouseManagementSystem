@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './add-warehouse.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
+import { userApi } from '../../../../index';
+
+import { useError } from '../../../error-component/error-context';
+import { useLoading } from '../../../loading-component/loading';
 
 export interface INewWarehouseData {
   'Warehouse Name'?: string;
@@ -23,6 +27,21 @@ export default function AddWarehouse({
   };
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { startLoading, stopLoading } = useLoading();
+  const { showError } = useError();
+
+  useEffect(() => {
+    if (isPopupVisible && warehouseData.warehouseData && formRef.current) {
+      startLoading();
+      userApi.getAllUsers({ user_role: 'supervisor' }).then((res) => {
+        console.log('supervisors', res);
+        stopLoading();
+        if (!res.success) {
+          showError(res.message);
+        }
+      });
+    }
+  }, [warehouseData]);
 
   const layout = {
     labelCol: {
@@ -41,7 +60,7 @@ export default function AddWarehouse({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
@@ -129,10 +148,10 @@ export default function AddWarehouse({
             onChange={onTypeChange}
             style={{ minHeight: '2vw' }}
           >
-            <Select.Option value="manager">Freezer</Select.Option>
-            <Select.Option value="shipper">Refrigerator</Select.Option>
-            <Select.Option value="manager">Dry</Select.Option>
-            <Select.Option value="shipper">Hazardous</Select.Option>
+            <Select.Option value="freezer">Freezer</Select.Option>
+            <Select.Option value="refrigerator">Refrigerator</Select.Option>
+            <Select.Option value="dry">Dry</Select.Option>
+            <Select.Option value="hazardous">Hazardous</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item

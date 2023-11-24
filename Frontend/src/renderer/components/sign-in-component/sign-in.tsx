@@ -4,11 +4,13 @@ import { userApi } from '../../index';
 import './sign-in.scss';
 import { Button, Tooltip } from 'antd';
 import { useError } from '../error-component/error-context';
+import { useLoading } from '../loading-component/loading';
 
 export function SignIn() {
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { startLoading, stopLoading } = useLoading();
   const navigate = useNavigate();
   const { state } = location;
   const {
@@ -39,12 +41,13 @@ export function SignIn() {
       showError('Please input password');
       return;
     }
-
+    startLoading();
     const response = await userApi.signIn(email, password);
 
     if (response.success) {
       switch (response.data?.user_role) {
         case 'manager':
+          stopLoading();
           navigate('/owner');
           break;
         case 'vendor':
@@ -54,6 +57,7 @@ export function SignIn() {
           break;
       }
     } else {
+      stopLoading();
       showError(response.message);
       // some error message
     }

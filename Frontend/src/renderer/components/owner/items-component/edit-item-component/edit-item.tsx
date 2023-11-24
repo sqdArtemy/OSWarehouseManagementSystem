@@ -84,12 +84,11 @@ export default function EditItem({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
     const editItemData = formRef.current?.getFieldsValue();
-    hidePopup();
 
     const typeMapping = {
       'perishable-refrigerator': 'refrigerated',
@@ -120,6 +119,7 @@ export default function EditItem({
 
     if (response?.success) {
       onEditItemSuccess();
+      hidePopup();
     } else {
       showError(response.message);
     }

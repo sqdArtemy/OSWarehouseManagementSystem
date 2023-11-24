@@ -9,7 +9,8 @@ import { useError } from '../../../error-component/error-context';
 export default function EditUser({
   isPopupVisible,
   hidePopup,
-  userData, onEditUserSuccess
+  userData,
+  onEditUserSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -19,6 +20,7 @@ export default function EditUser({
   };
   onEditUserSuccess: () => void;
 }) {
+  console.log(userData.userData);
   const formRef = React.useRef<FormInstance>(null);
   const { showError } = useError();
   useEffect(() => {
@@ -51,23 +53,26 @@ export default function EditUser({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
-    hidePopup();
 
-    const response = await userApi.updateUser({
-      user_name: newUserData['First Name'],
-      user_surname: newUserData['Last Name'],
-      user_email: newUserData['Email'],
-      user_phone: newUserData['Phone'],
-      user_role: userData?.userData?.role
-    }, userData.userData?.user_id);
+    const response = await userApi.updateUser(
+      {
+        user_name: newUserData['First Name'],
+        user_surname: newUserData['Last Name'],
+        user_email: newUserData['Email'],
+        user_phone: newUserData['Phone'],
+        user_role: userData?.userData?.role,
+      },
+      userData.userData?.user_id,
+    );
 
-    if(response?.success){
+    if (response?.success) {
       onEditUserSuccess();
+      hidePopup();
     } else {
       showError(response.message);
     }

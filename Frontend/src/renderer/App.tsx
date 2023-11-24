@@ -18,13 +18,16 @@ import Profile from './components/owner/profile-component/profile';
 import Warehouses from './components/owner/warehouses-component/warehouses';
 // import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 import { ErrorProvider } from './components/error-component/error-context';
+import { LoadingProvider } from './components/loading-component/loading';
 import Vendors from './components/vendor/vendors-component/vendors';
 import VendorOrders from './components/vendor/vendor-orders-component/vendor-orders';
 import { VendorLayout } from './components/vendor/vendor-layout-component/vendor-layout';
 
+
 export default function App() {
   return (
     <ErrorProvider>
+      <LoadingProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/sign-in" replace />} />
@@ -40,8 +43,8 @@ export default function App() {
             <Route path="users" element={<Users />} />
             <Route path="warehouses" element={<Warehouses />} />
             <Route path="items" element={<Items />} />
-            <Route path="profile" element={<Profile />} />
             {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
+            <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="vendor/*" element={<VendorLayout />}>
             <Route
@@ -55,6 +58,7 @@ export default function App() {
           </Route>
         </Routes>
       </Router>
+      </LoadingProvider>
     </ErrorProvider>
   );
 }
