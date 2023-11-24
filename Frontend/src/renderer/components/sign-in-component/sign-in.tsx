@@ -23,6 +23,7 @@ export function SignIn() {
     locPhoneNumber,
     locPassword,
     locRePassword,
+    locRole,
   } = state || {};
   const { showError } = useError();
   const handleSignIn = async () => {
@@ -89,6 +90,7 @@ export function SignIn() {
                       locPhoneNumber: locPhoneNumber,
                       locPassword: locPassword,
                       locRePassword: locRePassword,
+                      locRole: locRole,
                     },
                   });
                 }}

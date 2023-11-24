@@ -14,6 +14,7 @@ export function SignUpDetails() {
     locAddress: companyAddress,
     locLoginEmail,
     locLoginPassword,
+    locRole,
   } = state || {};
 
   const navigate = useNavigate();
@@ -94,6 +95,7 @@ export function SignUpDetails() {
                       locPhoneNumber: phoneNumber,
                       locPassword: password,
                       locRePassword: rePassword,
+                      locRole: locRole,
                     },
                   });
                 }}
@@ -176,6 +178,7 @@ export function SignUpDetails() {
                       locRePassword: rePassword,
                       locLoginEmail: locLoginEmail,
                       locLoginPassword: locLoginPassword,
+                      locRole: locRole,
                     },
                   });
                 }}
