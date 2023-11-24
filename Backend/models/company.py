@@ -15,7 +15,7 @@ class Company(Base):
     users = relationship("User", back_populates="company")
     warehouses = relationship("Warehouse", back_populates="company")
 
-    def to_dict(self, cascade_fields: list[str] = None):
+    def to_dict(self, cascade_fields: list[str] = ()):
         with get_session() as session:
             company = session.query(Company).filter(Company.company_id == self.company_id).first()
             return {
