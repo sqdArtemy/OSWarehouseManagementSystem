@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, ForeignKey, CheckConstraint, UniqueConstraint
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class OrderItem(Base):
@@ -22,10 +22,11 @@ class OrderItem(Base):
     )
 
     def to_dict(self, cascade_fields: list[str] = ("order", "product")):
-        order_item = SessionMaker().query(OrderItem).filter(OrderItem.order_id == self.order_id).first()
-        return {
-            "order_item_id": self.order_item_id,
-            "order": order_item.order.to_dict(cascade_fields=[]) if "order" in cascade_fields else self.order_id,
-            "product": order_item.product.to_dict(cscade_fields=[]) if "product" in cascade_fields else self.product_id,
-            "quantity": self.quantity
-        }
+        with get_session() as session:
+            order_item = session.query(OrderItem).filter(OrderItem.order_id == self.order_id).first()
+            return {
+                "order_item_id": self.order_item_id,
+                "order": order_item.order.to_dict(cascade_fields=[]) if "order" in cascade_fields else self.order_id,
+                "product": order_item.product.to_dict(cscade_fields=[]) if "product" in cascade_fields else self.product_id,
+                "quantity": self.quantity
+            }

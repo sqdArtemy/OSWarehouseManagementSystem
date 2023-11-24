@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, CheckConstraint, event
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class Rack(Base):
@@ -23,15 +23,16 @@ class Rack(Base):
     )
 
     def to_dict(self, cascade_fields: list[str] = ("warehouse",)):
-        rack = SessionMaker().query(Rack).filter(Rack.rack_id == self.rack_id).first()
-        return {
-            "rack_id": self.rack_id,
-            "warehouse": rack.warehouse.to_dict(cascade_fields=[]) if "warehouse" in cascade_fields else self.warehouse_id,
-            "rack_position": self.rack_position,
-            "overall_capacity": self.overall_capacity,
-            "remaining_capacity": self.remaining_capacity,
-            "inventories": [inventory.to_dict(cascade_fields=[]) for inventory in rack.inventories] if rack else []
-        }
+        with get_session() as session:
+            rack = session.query(Rack).filter(Rack.rack_id == self.rack_id).first()
+            return {
+                "rack_id": self.rack_id,
+                "warehouse": rack.warehouse.to_dict(cascade_fields=[]) if "warehouse" in cascade_fields else self.warehouse_id,
+                "rack_position": self.rack_position,
+                "overall_capacity": self.overall_capacity,
+                "remaining_capacity": self.remaining_capacity,
+                "inventories": [inventory.to_dict(cascade_fields=[]) for inventory in rack.inventories] if rack else []
+            }
 
 
 # Event listeners (like triggers in SQL)
