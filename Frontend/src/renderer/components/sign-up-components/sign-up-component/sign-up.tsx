@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './sign-up.scss';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Button, Tooltip } from 'antd';
+import { Button, Select, Tooltip } from 'antd';
+
+const roles: Select['OptionType'][] = [
+  { value: 'manager', label: 'Manager' },
+  { value: 'vendor', label: 'Vendor' },
+];
 
 export function SignUp() {
   const navigate = useNavigate();
@@ -9,6 +14,7 @@ export function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [role, setRole] = useState<Select['ValueType']>(' ');
   const {
     locLoginEmail,
     locLoginPassword,
@@ -21,6 +27,7 @@ export function SignUp() {
     locPhoneNumber,
     locPassword,
     locRePassword,
+    locRole,
   } = location.state || {};
 
   const handleContinue = () => {
@@ -40,6 +47,7 @@ export function SignUp() {
         locPhoneNumber: locPhoneNumber,
         locPassword: locPassword,
         locRePassword: locRePassword,
+        locRole: role,
       },
     });
   };
@@ -51,7 +59,12 @@ export function SignUp() {
     setName(locName || '');
     setEmail(locEmail || '');
     setAddress(locAddress || '');
+    setRole(locRole || '');
   }, [locName, locEmail, locAddress]);
+
+  const onRoleChange = (value) => {
+    setRole(value);
+  };
 
   return (
     <div className="sign-up-container">
@@ -81,6 +94,7 @@ export function SignUp() {
                       locPhoneNumber: locPhoneNumber,
                       locPassword: locPassword,
                       locRePassword: locRePassword,
+                      locRole: role,
                     },
                   });
                 }}
@@ -92,6 +106,20 @@ export function SignUp() {
           </div>
 
           <form>
+            <Tooltip title={'Select a Role'} placement={'topLeft'}>
+              <Select
+                className={'sign-up-select-role'}
+                placeholder={'Select a Role'}
+                value={role ? role : undefined}
+                onChange={(value) => onRoleChange(value)}
+                style={{
+                  minHeight: '2vw',
+                  marginBottom: '1vw',
+                  fontSize: '1.3vw',
+                }}
+                options={roles}
+              ></Select>
+            </Tooltip>
             <Tooltip title={'Input Name of Company'} placement={'topLeft'}>
               <input
                 id="name"

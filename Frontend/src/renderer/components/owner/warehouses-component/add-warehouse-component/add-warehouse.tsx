@@ -1,7 +1,6 @@
 import React from 'react';
 import './add-warehouse.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { userApi } from '../../../../index';
 
 export interface INewWarehouseData {
   'Warehouse Name'?: string;
@@ -36,7 +35,7 @@ export default function AddWarehouse({
     wrapperCol: { offset: 13, span: 17 },
   };
 
-  function onRoleChange() {
+  function onTypeChange() {
     console.log('change');
   }
 
@@ -127,7 +126,7 @@ export default function AddWarehouse({
         >
           <Select
             placeholder={'Select a Type'}
-            onChange={onRoleChange}
+            onChange={onTypeChange}
             style={{ minHeight: '2vw' }}
           >
             <Select.Option value="manager">Freezer</Select.Option>
