@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
-from db_config import Base, SessionMaker
+from db_config import Base, SessionMaker, get_session
 
 
 class User(Base):
@@ -22,14 +22,15 @@ class User(Base):
     warehouses = relationship("Warehouse", back_populates="supervisor")
 
     def to_dict(self, cascade_fields: list[str] = ("company",)):
-        user = SessionMaker().query(User).filter(User.user_id == self.user_id).first()
-        return {
-            "user_id": self.user_id,
-            "company": user.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
-            "user_name": self.user_name,
-            "user_surname": self.user_surname,
-            "user_phone": self.user_phone,
-            "user_email": self.user_email,
-            "user_address": self.user_address,
-            "user_role": self.user_role
-        }
+        with get_session() as session:
+            user = session.query(User).filter(User.user_id == self.user_id).first()
+            return {
+                "user_id": self.user_id,
+                "company": user.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
+                "user_name": self.user_name,
+                "user_surname": self.user_surname,
+                "user_phone": self.user_phone,
+                "user_email": self.user_email,
+                "user_address": self.user_address,
+                "user_role": self.user_role
+            }

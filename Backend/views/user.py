@@ -154,13 +154,15 @@ class UserView(GenericView):
         :param request: dictionary containing url, method and body
         :return: dictionary containing status_code and response body
         """
-
-        if self.requester_role == UserRole.ADMIN.value["code"]:
-            return super().get_list(request=request, **kwargs)
-        else:
-            requester_company = self.session.query(User).filter_by(user_id=self.requester_id).first().company
-            query = self.session.query(self.model).filter_by(company_id=requester_company.company_id)
-            return super().get_list(request=request, pre_selected_query=query, **kwargs)
+        with get_session() as session:
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                return super().get_list(request=request, **kwargs)
+            else:
+                if self.requester_id is None:
+                    raise ValidationError("Unauthorized", 401)
+                requester_company = session.query(User).filter_by(user_id=self.requester_id).first().company
+                query = session.query(self.model).filter_by(company_id=requester_company.company_id)
+                return super().get_list(request=request, pre_selected_query=query, **kwargs)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
