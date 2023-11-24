@@ -1,4 +1,4 @@
-from utilities import extract_id_from_url
+from utilities import extract_id_from_url, decode_token
 from utilities.templates import ResponseFactory
 
 
@@ -70,6 +70,8 @@ def view_function_middleware(function):
         request = kwargs["request"]
         instance.request = request
         instance.headers = request.get("headers", {})
+        instance.requester_id = decode_token(instance.headers.get("token", None))
+        instance.requester_role = instance.headers.get("token", " ")[0]
         instance.body = request.get("body", {})
         instance.url = request.get("url", "")
         instance.method = request.get("method", "")
