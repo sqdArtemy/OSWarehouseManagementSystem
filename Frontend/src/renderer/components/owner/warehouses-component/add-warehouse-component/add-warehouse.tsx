@@ -11,8 +11,13 @@ export interface INewWarehouseData {
   Capacity?: string;
   Address?: string;
   Type?: string;
-  Supervisor?: string;
+  Supervisor?: string[];
 }
+
+// const options: Select['OptionType'][] = [
+//   { value: 'manager', label: 'Manager' },
+//   { value: 'vendor', label: 'Vendor' },
+// ];
 
 export default function AddWarehouse({
   isPopupVisible,
@@ -29,12 +34,26 @@ export default function AddWarehouse({
   const formRef = React.useRef<FormInstance>(null);
   const { startLoading, stopLoading } = useLoading();
   const { showError } = useError();
+  const [options, setOptions] = React.useState<Select['OptionType'][]>([]);
+  const [supervisor, setSupervisor] = React.useState<Select['ValueType']>({});
 
   useEffect(() => {
     if (isPopupVisible && warehouseData.warehouseData && formRef.current) {
       startLoading();
       userApi.getAllUsers({ user_role: 'supervisor' }).then((res) => {
-        console.log('supervisors', res);
+        console.log('supervisors', res.data.body);
+
+        setOptions(
+          res.data.body.map((val) => {
+            return {
+              value: val.user_id,
+              label: val.user_name + ' ' + val.user_surname,
+            };
+          }),
+        );
+
+        setSupervisor(formRef.current.getFieldsValue()['Supervisor']);
+
         stopLoading();
         if (!res.success) {
           showError(res.message);
@@ -64,6 +83,9 @@ export default function AddWarehouse({
   };
 
   const onFinish = async () => {
+    formRef.current.setFieldsValue({
+      Supervisor: supervisor,
+    });
     const newWarehouseData = formRef.current?.getFieldsValue();
     let check = false;
     for (let key in newWarehouseData) {
@@ -71,12 +93,14 @@ export default function AddWarehouse({
         check = true;
       }
     }
+    console.log('new', newWarehouseData);
     if (!check) {
       hidePopup();
       handleReset();
     } else {
       hidePopup();
     }
+
     // await userApi.addUser({
     //   user_name: newUserData['First Name'],
     //   user_surname: newUserData['Last Name'],
@@ -136,7 +160,21 @@ export default function AddWarehouse({
           label={<p style={{ fontSize: '1vw' }}>Supervisor</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select
+            placeholder={'Select a Supervisor'}
+            style={{ minHeight: '2vw' }}
+            value={supervisor ? supervisor : undefined}
+            onChange={(value, option) => {
+              console.log('value', value);
+              console.log('option', option);
+              const supervisorObj = {
+                supervisor_id: option?.value,
+                fullName: option?.label,
+              };
+              setSupervisor(supervisorObj);
+            }}
+            options={options}
+          ></Select>
         </Form.Item>
         <Form.Item
           name="Type"
