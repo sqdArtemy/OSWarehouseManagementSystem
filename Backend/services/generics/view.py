@@ -1,4 +1,5 @@
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Query
 
 from db_config import SessionMaker
 from services import check_allowed_methods_middleware, view_function_middleware
@@ -34,6 +35,8 @@ class GenericView(metaclass=ModelAttributesMeta):
         self.url = None
         self.method = None
         self.instance_id = None
+        self.requester_id = None
+        self.requester_role = None
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
@@ -52,14 +55,18 @@ class GenericView(metaclass=ModelAttributesMeta):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
-    def get_list(self, request: dict, **kwargs) -> dict:
+    def get_list(self, request: dict, pre_selected_query: Query = None, **kwargs) -> dict:
         """
         Get all instances of model.
         :param request: dictionary containing url, method and body
+        :param pre_selected_query: query which will be used to get instances
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of instances` data
         """
-        query = self.session.query(self.model)
+        if pre_selected_query is not None:
+            query = pre_selected_query
+        else:
+            query = self.session.query(self.model)
 
         # Applying filters
         for column, value in kwargs.items():
