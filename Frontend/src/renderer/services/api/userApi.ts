@@ -38,7 +38,7 @@ export class UserApi implements IUser {
     const url = '/user/users';
     const method = 'GET';
     const body = {};
-
+    filters = {...filters, company_id: this.userData.company.company_id };
     const headers = { filters, token: this.token };
 
     return await handleApiRequest({ url, method, body, headers});

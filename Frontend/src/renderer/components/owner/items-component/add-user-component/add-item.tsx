@@ -2,6 +2,7 @@ import React from 'react';
 import './add-item.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { productApi, userApi } from '../../../../index';
+import { useError } from '../../../error-component/error-context';
 
 export interface IitemData {
   'Product Name'?: string;
@@ -41,6 +42,8 @@ export default function AddItem({
     console.log('change');
   }
 
+  const { showError } = useError();
+
   const onFinish = async () => {
     const newitemData = formRef.current?.getFieldsValue();
     let check = false;
@@ -74,9 +77,11 @@ export default function AddItem({
       is_stackable: newitemData['Storage type'] === 'stackable',
 
     });
-    console.log(response);
+
     if(response.success){
       onAddItemSuccess();
+    } else {
+      showError(response.message);
     }
     itemData.setNewItemData(newitemData);
   };

@@ -3,6 +3,7 @@ import './sign-up-details.scss';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../../index';
 import { Tooltip } from 'antd';
+import { useError } from '../../error-component/error-context';
 
 export function SignUpDetails() {
   const location = useLocation();
@@ -20,6 +21,7 @@ export function SignUpDetails() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
+  const { showError } = useError();
 
   const handleSignUp = async () => {
     const response = await userApi.signUp({
@@ -44,7 +46,7 @@ export function SignUpDetails() {
           break;
       }
     } else {
-      console.log(response.message);
+      showError(response.message);
       // some error message
     }
   };

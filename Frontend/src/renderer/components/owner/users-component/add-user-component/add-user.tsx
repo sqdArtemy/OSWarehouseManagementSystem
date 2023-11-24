@@ -2,6 +2,7 @@ import React from 'react';
 import './add-user.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { userApi } from '../../../../index';
+import { useError } from '../../../error-component/error-context';
 
 export interface INewUserData {
   'First Name'?: string;
@@ -61,6 +62,8 @@ export default function AddUser({
       hidePopup();
     }
 
+    const { showError } = useError();
+
     const response = await userApi.addUser({
       user_name: newUserData['First Name'],
       user_surname: newUserData['Last Name'],
@@ -68,9 +71,11 @@ export default function AddUser({
       user_phone: newUserData['Phone'],
       user_role: 'supervisor',
     });
-    console.log(response);
+
     if(response.success){
       onAddUserSuccess();
+    } else {
+      showError(response.message);
     }
     userData.setUserData(newUserData);
   };

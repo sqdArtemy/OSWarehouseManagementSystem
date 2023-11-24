@@ -4,6 +4,7 @@ import './profile.scss';
 import { Button, Form, FormInstance, Input, Space } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { userApi } from '../../../index';
+import { useError } from '../../error-component/error-context';
 
 export default function Profile() {
   const [changePassDisplay, setChangePassDisplay] = useState(false);
@@ -16,17 +17,28 @@ export default function Profile() {
     setChangePassDisplay(true);
   };
 
+  const { showError } = useError();
+
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
     if(newUserData['Current Password']){
-      await userApi.resetPassword(
-        newUserData['Current Password'], newUserData['New Password'],newUserData['Confirm Password'])
+      const response = await userApi.resetPassword(
+        newUserData['Current Password'], newUserData['New Password'],newUserData['Confirm Password']);
+
+        if(!response.success) {
+            showError(response.message);
+        }
+
     } else {
-      await userApi.updateUser({
+      const response = await userApi.updateUser({
         user_name: newUserData['First Name'],
         user_surname: newUserData['Last Name'],
         user_email: newUserData['Email']
       }, id);
+
+      if(!response.success) {
+        showError(response.message);
+      }
     }
     setUserData(newUserData);
   };

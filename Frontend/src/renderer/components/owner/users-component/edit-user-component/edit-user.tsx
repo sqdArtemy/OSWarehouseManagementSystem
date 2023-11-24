@@ -4,6 +4,7 @@ import { Button, Form, FormInstance, Input, Modal } from 'antd';
 import { userApi } from '../../../../index';
 import { INewUserData } from '../add-user-component/add-user';
 import { IUserData } from '../users';
+import { useError } from '../../../error-component/error-context';
 
 export default function EditUser({
   isPopupVisible,
@@ -54,6 +55,8 @@ export default function EditUser({
     handleReset();
   };
 
+  const { showError } = useError();
+
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
     hidePopup();
@@ -66,9 +69,10 @@ export default function EditUser({
       user_role: userData?.userData?.role
     }, userData.userData?.user_id);
 
-    console.log(response);
     if(response?.success){
       onEditUserSuccess();
+    } else {
+      showError(response.message);
     }
     userData.setUserData(newUserData);
   };

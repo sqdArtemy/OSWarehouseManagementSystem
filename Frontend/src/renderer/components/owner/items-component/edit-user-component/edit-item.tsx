@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import './edit-item.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { productApi } from '../../../../index';
+import { useError } from '../../../error-component/error-context';
 
 export interface IEditItemData {
   'Product Name'?: string;
@@ -78,6 +79,8 @@ export default function EditItem({
     handleReset();
   };
 
+  const { showError } = useError();
+
   const onFinish = async () => {
     const editItemData = formRef.current?.getFieldsValue();
     hidePopup();
@@ -108,10 +111,12 @@ export default function EditItem({
       itemData.editItemData?.product_id
     );
 
-    console.log(response);
     if (response?.success) {
       onEditItemSuccess();
+    } else {
+      showError(response.message);
     }
+
     itemData.setEditItemData(editItemData);
   };
 
