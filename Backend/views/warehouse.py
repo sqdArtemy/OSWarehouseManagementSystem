@@ -3,10 +3,10 @@ from sqlite3 import IntegrityError
 from sqlalchemy import func
 
 from db_config import get_session
-from models import Warehouse, User, Rack
+from models import Warehouse, User, Rack, Product, Inventory
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
-from utilities import ValidationError, DatabaseError, decode_token, extract_id_from_url
+from utilities import ValidationError, DatabaseError, decode_token, extract_id_from_url, is_instance_already_exists
 from utilities.enums.data_related_enums import UserRole
 from utilities.enums.method import Method
 
@@ -254,3 +254,76 @@ class WarehouseView(GenericView):
             else:
                 query = session.query(Warehouse).filter(Warehouse.company_id == company.company_id)
                 return super().get_list(request=request, pre_selected_query=query, **kwargs)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def suitable_for_order(self, request: dict, **kwargs) -> dict:
+        """
+        Returns a list of warehouses that are suitable for the order according to the order`s items.
+        :param request: dictionary containing url, method, headers, and filters
+        :return: response with list of available warehouses
+        """
+        if self.requester_role != UserRole.VENDOR.value["code"]:
+            raise ValidationError("You are not allowed to perform this action", 403)
+
+        company_id = self.body.get("company_id", None)
+        order_type = self.body.get("order_type", None)
+        products = self.body.get("items", [])
+        products_to_order = {}
+        main_product_type = None
+        product_ids = []
+        total_volume = 0
+
+        with get_session() as session:
+            if not company_id:
+                raise ValidationError("Company id is required", 400)
+            if order_type not in ["from_warehouse", "to_warehouse"]:
+                raise ValidationError("Invalid order type", 400)
+            if len(products) == 0:
+                raise ValidationError("Items are required", 400)
+            else:
+                main_product_type = session.query(Product.product_type).filter_by(product_id=products[0]["product_id"]).scalar()
+                product_types = []
+                for product in products:
+                    product_id, quantity = product.get("product_id"), product.get("quantity")
+
+                    if not is_instance_already_exists(Product, product_id=product_id):
+                        raise ValidationError(f"Product with id {product_id} does not exist", 404)
+
+                    product = session.query(Product).filter_by(product_id=product_id).first()
+                    total_volume += product.volume * quantity
+                    products_to_order[product_id] = quantity
+                    product_ids.append(product_id)
+                    product_types.append(product.product_type)
+
+                for product_type in product_types:
+                    if product_type != main_product_type:
+                        raise ValidationError("All products must be of the same type", 400)
+
+            # Get all warehouses of the company according to the product type
+            warehouses = session.query(Warehouse).filter(
+                Warehouse.company_id == company_id, Warehouse.warehouse_type == main_product_type
+            )
+
+            # Filter warehouses by order type
+            if order_type == "from_warehouse":
+                warehouses = warehouses.join(Rack).join(Inventory).filter(Inventory.product_id.in_(product_ids)).\
+                    with_entities(
+                        Warehouse,
+                        Inventory.product_id,
+                        func.sum(Inventory.quantity).label('total_quantity')
+                    ).group_by(Warehouse.warehouse_id, Inventory.product_id).all()
+
+                warehouses = [
+                    w[0] for w in warehouses if w[2] >= products_to_order[w[1]]
+                ]
+
+            elif order_type == "to_warehouse":
+                warehouses = warehouses.filter(Warehouse.remaining_capacity >= total_volume).all()
+
+            # Create response
+            body = [warehouse.to_dict() for warehouse in warehouses]
+            self.response.status_code = 200
+            self.response.data = body
+            return self.response.create_response()
+
