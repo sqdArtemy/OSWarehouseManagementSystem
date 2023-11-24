@@ -7,11 +7,11 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import AddItem from './add-user-component/add-item';
+import AddItem from './add-item-component/add-item';
 import { productApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
-import EditItem from './edit-user-component/edit-item';
+import EditItem from './edit-item-component/edit-item';
 import { useError } from '../../error-component/error-context';
 
 export default function Items() {

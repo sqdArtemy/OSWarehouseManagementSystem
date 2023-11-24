@@ -1,10 +1,10 @@
 import React from 'react';
 import './add-item.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { productApi, userApi } from '../../../../index';
+import { productApi } from '../../../../index';
 import { useError } from '../../../error-component/error-context';
 
-export interface IitemData {
+export interface IItemData {
   'Product Name'?: string;
   Weight?: string;
   Volume?: string;
@@ -17,12 +17,13 @@ export interface IitemData {
 export default function AddItem({
   isPopupVisible,
   hidePopup,
-  itemData, onAddItemSuccess
+  itemData,
+  onAddItemSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   itemData: {
-    newItemData: IitemData;
+    newItemData: IItemData;
     setNewItemData: (newItemData: unknown) => void;
   };
   onAddItemSuccess: () => void;
@@ -60,14 +61,14 @@ export default function AddItem({
     }
 
     const typeMapping = {
-      "perishable-refrigerator": "refrigerated",
-      "perishable-freezer": "freezer",
-      nonperishable: "dry",
-      hazard: "hazardous"
+      'perishable-refrigerator': 'refrigerated',
+      'perishable-freezer': 'freezer',
+      nonperishable: 'dry',
+      hazard: 'hazardous',
     };
 
     const response = await productApi.addProduct({
-      product_name : newitemData['Product Name'],
+      product_name: newitemData['Product Name'],
       price: newitemData['Price'],
       product_type: typeMapping[newitemData['Type of product']],
       expiry_duration: newitemData['Average expiration time'] ?? null,
@@ -75,10 +76,9 @@ export default function AddItem({
       weight: newitemData['Weight'],
       volume: newitemData['Volume'],
       is_stackable: newitemData['Storage type'] === 'stackable',
-
     });
 
-    if(response.success){
+    if (response.success) {
       onAddItemSuccess();
     } else {
       showError(response.message);
@@ -86,19 +86,24 @@ export default function AddItem({
     itemData.setNewItemData(newitemData);
   };
 
+  const onCancel = () => {
+    hidePopup();
+    handleReset();
+  };
+
   const handleReset = () => {
     formRef.current?.resetFields();
   };
-  // @ts-ignore
-  // @ts-ignore
   return (
     <Modal
       title="Add New Item"
       open={isPopupVisible}
       onOk={onFinish}
-      onCancel={onFinish}
+      onCancel={onCancel}
       cancelButtonProps={{ style: { display: 'none' } }}
       okButtonProps={{ style: { display: 'none' } }}
+      className={'add-item-popup'}
+      style={{ top: '3vw' }}
     >
       <Form
         {...layout}
@@ -116,11 +121,7 @@ export default function AddItem({
         >
           <Input />
         </Form.Item>
-        <Form.Item
-          name="Weight"
-          label="Weight"
-          rules={[{ required: true }]}
-        >
+        <Form.Item name="Weight" label="Weight" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item name="Volume" label="Volume" rules={[{ required: true }]}>
@@ -129,22 +130,38 @@ export default function AddItem({
         <Form.Item name="Price" label="Price" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="Type of product" label="Type of product" rules={[{ required: true }]}>
+        <Form.Item
+          name="Type of product"
+          label="Type of product"
+          rules={[{ required: true }]}
+        >
           <Select
             placeholder="Select from following"
             onChange={onRoleChange}
             allowClear
           >
-            <Option value="perishable-refrigerator">Perishable (Refrigerator used)</Option>
-            <Option value="perishable-freezer">Perishable (Freezer used)</Option>
+            <Option value="perishable-refrigerator">
+              Perishable (Refrigerator used)
+            </Option>
+            <Option value="perishable-freezer">
+              Perishable (Freezer used)
+            </Option>
             <Option value="nonperishable">Nonperishable</Option>
             <Option value="hazard">Hazard</Option>
           </Select>
         </Form.Item>
-        <Form.Item name="Average expiration time" label="Average expiration time" rules={[{ required: false }]}>
+        <Form.Item
+          name="Average expiration time"
+          label="Average expiration time"
+          rules={[{ required: false }]}
+        >
           <Input />
         </Form.Item>
-        <Form.Item name="Storage type" label="Storage type" rules={[{ required: true }]}>
+        <Form.Item
+          name="Storage type"
+          label="Storage type"
+          rules={[{ required: true }]}
+        >
           <Select
             placeholder="Select from following"
             onChange={onRoleChange}
@@ -154,8 +171,17 @@ export default function AddItem({
             <Option value="non-stackable">Non-stackable</Option>
           </Select>
         </Form.Item>
-        <Form.Item name="Description" label="Description" rules={[{ required: true }]}>
-          <textarea placeholder="Write the description of item here" rows={4} cols={45}/>
+        <Form.Item
+          name="Description"
+          label="Description"
+          rules={[{ required: true }]}
+        >
+          <textarea
+            placeholder="Write the description of item here"
+            rows={4}
+            cols={45}
+            style={{ resize: 'none' }}
+          />
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button
