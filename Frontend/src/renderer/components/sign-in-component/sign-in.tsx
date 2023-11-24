@@ -47,6 +47,9 @@ export function SignIn() {
         case 'manager':
           navigate('/owner');
           break;
+        case 'vendor':
+          navigate('/vendor');
+          break;
         default:
           break;
       }

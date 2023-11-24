@@ -29,6 +29,7 @@ export default function AddItem({
   onAddItemSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   const layout = {
     labelCol: { span: 8 },
@@ -42,8 +43,6 @@ export default function AddItem({
   function onRoleChange() {
     console.log('change');
   }
-
-  const { showError } = useError();
 
   const onFinish = async () => {
     const newitemData = formRef.current?.getFieldsValue();

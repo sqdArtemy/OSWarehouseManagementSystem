@@ -29,7 +29,7 @@ export default function EditItem({
   onEditItemSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
-
+  const { showError } = useError();
   const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
@@ -86,8 +86,6 @@ export default function EditItem({
     hidePopup();
     handleReset();
   };
-
-  const { showError } = useError();
 
   const onFinish = async () => {
     const editItemData = formRef.current?.getFieldsValue();

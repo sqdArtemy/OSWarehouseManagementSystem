@@ -22,7 +22,7 @@ export class VendorApi implements IVendor {
   }
 
   public async addVendor(body: IAddVendor): Promise<ApiResponse> {
-    const url = '/vendor/vendors';
+    const url = '/vendors';
     const method = 'POST';
     const headers = {};
 
@@ -39,7 +39,7 @@ export class VendorApi implements IVendor {
   }
 
   public async getAllVendors(filters: IVendorFilters): Promise<ApiResponse> {
-    const url = '/vendor/vendors';
+    const url = '/vendors';
     const method = 'GET';
     const headers = { filters };
     const body = {};

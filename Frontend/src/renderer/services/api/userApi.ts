@@ -18,7 +18,7 @@ export class UserApi implements IUser {
   }
 
   public async addUser(body: IAddUser): Promise<ApiResponse> {
-    const url = '/user/users';
+    const url = '/users';
     const method = 'POST';
     const headers = { token: this.token } ;
 
@@ -35,7 +35,7 @@ export class UserApi implements IUser {
   }
 
   public async getAllUsers(filters: { [p: string]: any }): Promise<ApiResponse> {
-    const url = '/user/users';
+    const url = '/users';
     const method = 'GET';
     const body = {};
     filters = {...filters, company_id: this.userData.company.company_id };

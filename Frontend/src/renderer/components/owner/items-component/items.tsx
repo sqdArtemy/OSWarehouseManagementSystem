@@ -28,6 +28,8 @@ export default function Items() {
   const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
   const [newItemData, setNewItemData] = useState({});
 
+  const { showError } = useError();
+
   let filters: IProductFilters = {};
 
   const handleWeightClick: MenuProps['onClick'] = (e) => {
@@ -168,8 +170,6 @@ export default function Items() {
       setDataSource([]);
     }
   };
-
-  const { showError } = useError();
 
   const debouncedSearch = debounce(async (filters) => {
     await getAllProducts(filters);

@@ -26,7 +26,7 @@ export class ProductApi implements IProduct {
   }
 
   public async addProduct(body: IAddProduct): Promise<ApiResponse> {
-    const url = '/product/products';
+    const url = '/products';
     const method = 'POST';
     const headers = {};
 
@@ -43,7 +43,7 @@ export class ProductApi implements IProduct {
   }
 
   public async getAllProducts(filters: IProductFilters): Promise<ApiResponse> {
-    const url = '/product/products';
+    const url = '/products';
     const method = 'GET';
     const headers = { filters };
     const body = {};

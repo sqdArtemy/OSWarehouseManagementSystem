@@ -48,13 +48,16 @@ export function SignUpDetails() {
       password,
       confirm_password: rePassword,
       user_surname: lastName,
-      user_role: 'manager',
+      user_role: locRole,
     });
 
     if (response.success) {
       switch (response.data?.user_role) {
         case 'manager':
           navigate('/owner');
+          break;
+        case 'vendor':
+          navigate('/vendor');
           break;
         default:
           break;
