@@ -1,5 +1,5 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Integer, Column, Enum, Numeric, CheckConstraint, DateTime, func
+from sqlalchemy import Integer, Column, Enum, Numeric, CheckConstraint, DateTime, func, ForeignKey
 from db_config import Base, SessionMaker
 
 
@@ -9,6 +9,7 @@ class Order(Base):
     order_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     supplier_id = Column(Integer, nullable=False)
     recipient_id = Column(Integer, nullable=False)
+    transport_id = Column(ForeignKey("transports.transport_id"), nullable=True)
     total_price = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
@@ -24,6 +25,7 @@ class Order(Base):
 
     # Relationships with other tables
     ordered_items = relationship("OrderItem", back_populates="order")
+    transport = relationship("Transport", back_populates="orders")
     supplier_warehouse = relationship(
         "Warehouse",
         back_populates="supplied_orders",
