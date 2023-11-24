@@ -20,22 +20,27 @@ export default function Profile() {
 
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
-    if(newUserData['Current Password']){
+    if (newUserData['Current Password']) {
       const response = await userApi.resetPassword(
-        newUserData['Current Password'], newUserData['New Password'],newUserData['Confirm Password']);
+        newUserData['Current Password'],
+        newUserData['New Password'],
+        newUserData['Confirm Password'],
+      );
 
-        if(!response.success) {
-            showError(response.message);
-        }
-
+      if (!response.success) {
+        showError(response.message);
+      }
     } else {
-      const response = await userApi.updateUser({
-        user_name: newUserData['First Name'],
-        user_surname: newUserData['Last Name'],
-        user_email: newUserData['Email']
-      }, id);
+      const response = await userApi.updateUser(
+        {
+          user_name: newUserData['First Name'],
+          user_surname: newUserData['Last Name'],
+          user_email: newUserData['Email'],
+        },
+        id,
+      );
 
-      if(!response.success) {
+      if (!response.success) {
         showError(response.message);
       }
     }
@@ -48,7 +53,7 @@ export default function Profile() {
       formRef.current?.setFieldsValue({
         'First Name': data.user_name,
         'Last Name': data.user_surname,
-        'Email': data.user_email,
+        Email: data.user_email,
       });
 
       id = data?.user_id;
@@ -56,12 +61,12 @@ export default function Profile() {
   }, []);
 
   const layout = {
-    labelCol: { span: 8 },
+    labelCol: { span: 5 },
     wrapperCol: { span: 10 },
   };
 
   const tailLayout = {
-    wrapperCol: { offset: 8, span: 10 },
+    wrapperCol: { offset: 5, span: 10 },
   };
 
   const handleReset = () => {
