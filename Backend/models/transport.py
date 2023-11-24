@@ -1,4 +1,6 @@
 from sqlalchemy import Column, Integer, Numeric, CheckConstraint, Enum
+from sqlalchemy.orm import relationship
+
 from db_config import Base
 
 
@@ -17,6 +19,10 @@ class Transport(Base):
         CheckConstraint("transport_speed > 0", name="check_transport_speed"),
         CheckConstraint("price_per_weight > 0", name="check_price_per_weight")
     )
+
+    # Relationships with other tables
+    orders = relationship("Order", back_populates="transport")
+    transactions = relationship("Transaction", back_populates="transport")
 
     def to_dict(self):
         return {
