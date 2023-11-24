@@ -196,12 +196,13 @@ def controller(request: dict) -> dict:
                 return warehouse_view.create(request=request)
         elif "/warehouse" in url:
             if method == Method.GET.value:
+                if "/suitable-warehouses-for-orders" in url:
+                    return warehouse_view.suitable_for_order(request=request)
                 return warehouse_view.get(request=request)
             elif method == Method.DELETE.value:
                 return warehouse_view.delete(request=request)
             elif method == Method.PUT.value:
                 return warehouse_view.update(request=request)
-
 
         # Transport`s endpoints
         elif "/transport" in url:
