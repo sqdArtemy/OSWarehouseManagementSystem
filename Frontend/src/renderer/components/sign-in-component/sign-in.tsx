@@ -50,6 +50,9 @@ export function SignIn() {
           stopLoading();
           navigate('/owner');
           break;
+        case 'vendor':
+          navigate('/vendor');
+          break;
         default:
           break;
       }

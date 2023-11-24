@@ -25,7 +25,7 @@ export class RackApi implements IRack {
   }
 
   public async addRack(body: IAddRack): Promise<ApiResponse> {
-    const url = '/rack/racks';
+    const url = '/racks';
     const method = 'POST';
     const headers = {};
 

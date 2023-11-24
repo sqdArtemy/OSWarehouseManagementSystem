@@ -9,6 +9,7 @@ class Transaction(Base):
     transaction_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     supplier_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=True)
     recipient_id = Column(Integer, ForeignKey("warehouses.warehouse_id"), nullable=True)
+    transport_id = Column(ForeignKey("transports.transport_id"), nullable=True)
     status = Column(
         Enum("new", "processing", "submitted", "finished", "cancelled", "delivered", name="transaction_status"),
         nullable=False
@@ -19,6 +20,7 @@ class Transaction(Base):
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
 
     # Relationships with other tables
+    transport = relationship("Transport", back_populates="transactions")
     supplier = relationship("Warehouse", foreign_keys=[supplier_id], back_populates="supplier_transactions")
     recipient_warehouse = relationship("Warehouse",  foreign_keys=[recipient_id], back_populates="receiver_transactions")
     transaction_items = relationship("TransactionItem", back_populates="transaction")
