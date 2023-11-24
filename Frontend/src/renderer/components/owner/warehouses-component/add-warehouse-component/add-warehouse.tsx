@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import './add-warehouse.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { userApi } from '../../../../index';
+import { userApi, warehouseApi } from '../../../../index';
 
 import { useError } from '../../../error-component/error-context';
 import { useLoading } from '../../../loading-component/loading';
@@ -18,6 +18,7 @@ export default function AddWarehouse({
   isPopupVisible,
   hidePopup,
   warehouseData,
+  onAddWarehouseSuccess
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -25,6 +26,7 @@ export default function AddWarehouse({
     warehouseData: INewWarehouseData;
     setWarehouseData: (userData: unknown) => void;
   };
+  onAddWarehouseSuccess: () => void
 }) {
   const formRef = React.useRef<FormInstance>(null);
   const { startLoading, stopLoading } = useLoading();
@@ -77,14 +79,20 @@ export default function AddWarehouse({
     } else {
       hidePopup();
     }
-    // await userApi.addUser({
-    //   user_name: newUserData['First Name'],
-    //   user_surname: newUserData['Last Name'],
-    //   user_email: newUserData['Email'],
-    //   user_phone: newUserData['Phone'],
-    //   user_role: newUserData['Role'],
-    // });
 
+    const response = await warehouseApi.addWarehouse({
+      warehouse_address: newWarehouseData['Address'],
+      warehouse_name: newWarehouseData['Warehouse Name'],
+      overall_capacity: newWarehouseData['Capacity'],
+      supervisor_id: newWarehouseData['Supervisor'],
+      warehouse_type: newWarehouseData['Type']
+    });
+
+    if(response.success){
+      onAddWarehouseSuccess();
+    } else {
+      showError(response.message);
+    }
     warehouseData.setWarehouseData(newWarehouseData);
   };
 

@@ -7,10 +7,11 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { userApi } from '../../../index';
+import { userApi, warehouseApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddWarehouse from './add-warehouse-component/add-warehouse';
 import EditWarehouse from './edit-warehouse-component/edit-warehouse';
+import { IWarehouseFilters } from '../../../services/interfaces/warehouseInterface';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -83,17 +84,17 @@ export default function Warehouses() {
       }
     }, 100);
 
-    const filters = {};
+    const filters: IWarehouseFilters = {};
     if (selectedType) {
-      filters.user_role = selectedType.toLowerCase();
+      filters.warehouse_type = selectedType.toLowerCase();
     }
 
-    if (selectedType === 'All' && filters.user_role) {
-      delete filters.user_role;
+    if (selectedType === 'All' && filters.warehouse_type) {
+      delete filters.warehouse_type;
     }
 
     if (searchValue) {
-      filters.user_name = searchValue;
+      filters.warehouse_name_like = searchValue;
     }
     debouncedSearch(filters);
   };
@@ -134,6 +135,27 @@ export default function Warehouses() {
 
   const hideEditWarehouse = () => {
     setIsEditWarehouseVisible(false);
+  };
+
+  const getAllWarehouses = async (filters: IWarehouseFilters) => {
+    const response = await warehouseApi.getAllWarehouses(filters);
+      const warehouses = result.data?.body;
+      if (warehouses?.length) {
+        for (let i = 0; i < warehouses.length; i++) {
+          data.push({
+            key: (i + 1).toString(),
+            warehouseName: warehouses[i].warehouse_name,
+            supervisor: warehouses[i].supervisor_id,
+            address: warehouses[i].warehouse_address,
+            type: warehouses[i].warehouse_type,
+            capacity: warehouses[i].remaining_capacity + '/' + warehouses[i].overall_capacity,
+            warehouse_id: warehouses[i].warehouse_id,
+            overall_capacity: warehouses[i].overall_capacity,
+            remaining_capacity: warehouses[i].remaining_capacity,
+          });
+        }
+        setDataSource(warehouses);
+      }
   };
 
   const placeholderRowCount = 30;
@@ -259,22 +281,25 @@ export default function Warehouses() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    // userApi.getAllUsers({}).then((result) => {
-    //   const users = result.data?.body;
-    //   if (users?.length) {
-    //     for (let i = 0; i < users.length; i++) {
-    //       data.push({
-    //         key: (i + 1).toString(),
-    //         fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //         role: users[i].user_role,
-    //         phoneNumber: users[i].user_phone,
-    //         email: users[i].user_phone,
-    //         user_id: users[i].user_id,
-    //       });
-    //     }
-    //     setDataSource(data);
-    //   }
-    // });
+    warehouseApi.getAllWarehouses({}).then((result) => {
+      const warehouses = result.data?.body;
+      if (warehouses?.length) {
+        for (let i = 0; i < warehouses.length; i++) {
+          data.push({
+            key: (i + 1).toString(),
+            warehouseName: warehouses[i].warehouse_name,
+            supervisor: warehouses[i].supervisor_id,
+            address: warehouses[i].warehouse_address,
+            type: warehouses[i].warehouse_type,
+            capacity: warehouses[i].remaining_capacity + '/' + warehouses[i].overall_capacity,
+            warehouse_id: warehouses[i].warehouse_id,
+            overall_capacity: warehouses[i].overall_capacity,
+            remaining_capacity: warehouses[i].remaining_capacity,
+          });
+        }
+        setDataSource(data);
+      }
+    });
 
     setDataSource([
       {
