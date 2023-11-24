@@ -80,12 +80,19 @@ export default function AddWarehouse({
       hidePopup();
     }
 
+    const typeMapping = {
+      'perishable-refrigerator': 'refrigerated',
+      'perishable-freezer': 'freezer',
+      nonperishable: 'dry',
+      hazard: 'hazardous',
+    };
+
     const response = await warehouseApi.addWarehouse({
       warehouse_address: newWarehouseData['Address'],
       warehouse_name: newWarehouseData['Warehouse Name'],
       overall_capacity: newWarehouseData['Capacity'],
       supervisor_id: newWarehouseData['Supervisor'],
-      warehouse_type: newWarehouseData['Type']
+      warehouse_type: typeMapping[newWarehouseData['Type']]
     });
 
     if(response.success){
