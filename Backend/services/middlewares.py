@@ -70,7 +70,8 @@ def view_function_middleware(function):
         request = kwargs["request"]
         instance.request = request
         instance.headers = request.get("headers", {})
-        instance.requester_id = decode_token(instance.headers.get("token", None))
+        token = instance.headers.get("token", None)
+        instance.requester_id = decode_token(token) if token else None
         instance.requester_role = instance.headers.get("token", " ")[0]
         instance.body = request.get("body", {})
         instance.url = request.get("url", "")
