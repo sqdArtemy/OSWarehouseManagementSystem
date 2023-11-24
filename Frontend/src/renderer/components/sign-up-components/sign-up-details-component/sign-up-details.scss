@@ -110,21 +110,18 @@
           font-size: 1vw;
         }
 
-        button {
-          align-self: center;
-          padding: 10px 30px;
-          background-color: #0013C0;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background-color 0.3s;
-          width: 55%;
-          font-size: 1vw;
-          margin-top: 1.5rem;
 
-          &:hover {
-            background-color: darken(#0013C0, 10%);
+        .form-btn-container {
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          gap: 2rem;
+          width: 100%;
+
+          button{
+            width: 10vw;
+            min-height: 2.2vw;
+            //font-size: 1vw;
           }
         }
       }

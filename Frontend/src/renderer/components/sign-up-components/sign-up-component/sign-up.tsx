@@ -1,19 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './sign-up.scss';
-import { useNavigate } from 'react-router-dom';
-import { Tooltip } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Button, Tooltip } from 'antd';
 
 export function SignUp() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const {
+    locLoginEmail,
+    locLoginPassword,
+    locName,
+    locEmail,
+    locAddress,
+    locFirstName,
+    locLastName,
+    locUserEmail,
+    locPhoneNumber,
+    locPassword,
+    locRePassword,
+  } = location.state || {};
 
   const handleContinue = () => {
+    console.log('name', name);
+    console.log('email', email);
+    console.log('address', address);
     navigate('/sign-up-details', {
-      state: { name, email, address },
+      state: {
+        locLoginEmail: locLoginEmail,
+        locLoginPassword: locLoginPassword,
+        locName: name,
+        locEmail: email,
+        locAddress: address,
+        locFirstName: locFirstName,
+        locLastName: locLastName,
+        locUserEmail: locUserEmail,
+        locPhoneNumber: locPhoneNumber,
+        locPassword: locPassword,
+        locRePassword: locRePassword,
+      },
     });
   };
+
+  useEffect(() => {
+    console.log('locName', locName);
+    console.log('locEmail', locEmail);
+    console.log('locAddress', locAddress);
+    setName(locName);
+    setEmail(locEmail);
+    setAddress(locAddress);
+  }, [locName, locEmail, locAddress]);
 
   return (
     <div className="sign-up-container">
@@ -30,7 +68,21 @@ export function SignUp() {
                 className="disabled"
                 id="login"
                 onClick={() => {
-                  navigate('/sign-in');
+                  navigate('/sign-in', {
+                    state: {
+                      locLoginEmail: locLoginEmail,
+                      locLoginPassword: locLoginPassword,
+                      locName: name,
+                      locEmail: email,
+                      locAddress: address,
+                      locFirstName: locFirstName,
+                      locLastName: locLastName,
+                      locUserEmail: locUserEmail,
+                      locPhoneNumber: locPhoneNumber,
+                      locPassword: locPassword,
+                      locRePassword: locRePassword,
+                    },
+                  });
                 }}
               >
                 Login
@@ -65,9 +117,9 @@ export function SignUp() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Tooltip>
-            <button type="button" onClick={handleContinue}>
+            <Button type="primary" onClick={handleContinue}>
               Continue
-            </button>
+            </Button>
           </form>
         </div>
       </div>
