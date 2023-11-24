@@ -2,16 +2,15 @@ import React, { useEffect, useState } from 'react';
 import './items.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
-import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import AddItem from './add-user-component/add-item';
-import { productApi, userApi } from '../../../index';
+import { productApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
-import EditUser from '../users-component/edit-user-component/edit-user';
 import EditItem from './edit-user-component/edit-item';
 import { useError } from '../../error-component/error-context';
 
@@ -48,15 +47,15 @@ export default function Items() {
       console.log('delete', selectedRows);
       for (let user of selectedRows) {
         const response = await productApi.deleteProduct(user.product_id);
-        if(!response.success) {
-            showError(response.message);
-          }
+        if (!response.success) {
+          showError(response.message);
+        }
       }
     }
     if (record) {
       console.log('delete', record);
       const response = await productApi.deleteProduct(record.product_id);
-      if(!response.success) {
+      if (!response.success) {
         showError(response.message);
       }
     }
@@ -72,7 +71,6 @@ export default function Items() {
     setSearchVolumeValue(e.target.value);
   };
 
-
   const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
@@ -81,20 +79,24 @@ export default function Items() {
       }
     }, 100);
 
-    if(searchValue){
+    if (searchValue) {
       filters.product_name_like = searchValue;
     } else {
-      if(!filters.product_name_like) delete filters.product_name_like;
+      if (!filters.product_name_like) delete filters.product_name_like;
     }
 
     if (searchVolumeValue) {
-      filters.volume_lte = selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
-      filters.volume_gte = selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_lte =
+        selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_gte =
+        selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
     }
 
     if (searchWeightValue) {
-      filters.weight_lte = selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
-      filters.weight_gte = selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
+      filters.weight_lte =
+        selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
+      filters.weight_gte =
+        selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
     }
 
     console.log(filters);
@@ -157,7 +159,7 @@ export default function Items() {
           'expiry-duration': products[i].expiry_duration,
           description: products[i].description,
           is_stackable: products[i].is_stackable,
-          price: products[i].price
+          price: products[i].price,
         });
       }
 
@@ -165,7 +167,7 @@ export default function Items() {
     } else {
       setDataSource([]);
     }
-  }
+  };
 
   const { showError } = useError();
 
@@ -175,11 +177,11 @@ export default function Items() {
 
   const handleAddItemSuccess = async () => {
     await getAllProducts(filters);
-  }
+  };
 
   const handleEditItemSuccess = async () => {
     await getAllProducts(filters);
-  }
+  };
 
   const placeholderRowCount = 30;
 
@@ -191,7 +193,7 @@ export default function Items() {
       name: '',
       volume: '',
       weight: '',
-      'expiry-duration': ''
+      'expiry-duration': '',
     }),
   );
 
@@ -273,7 +275,7 @@ export default function Items() {
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.fullName === '',
+      disabled: record.name === '',
     }),
   };
 
@@ -297,7 +299,7 @@ export default function Items() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    productApi.getAllProducts(filters).then((result) =>{
+    productApi.getAllProducts(filters).then((result) => {
       const products = result.data?.body;
       const dataItems = [];
 
@@ -313,7 +315,7 @@ export default function Items() {
             product_id: products[i].product_id,
             description: products[i].description,
             is_stackable: products[i].is_stackable,
-            price: products[i].price
+            price: products[i].price,
           });
         }
 
@@ -345,7 +347,9 @@ export default function Items() {
                 </Button>
               </Dropdown>
               <div className="filter">
-                <label className="labels" htmlFor="weight">Weight</label>
+                <label className="labels" htmlFor="weight">
+                  Weight
+                </label>
                 <input
                   type=""
                   className="search-bar-filter"
@@ -366,7 +370,9 @@ export default function Items() {
                 </Button>
               </Dropdown>
               <div className="filter">
-                <label className="labels" htmlFor="volume">Volume</label>
+                <label className="labels" htmlFor="volume">
+                  Volume
+                </label>
                 <input
                   type=""
                   className="search-bar-filter"
@@ -407,7 +413,10 @@ export default function Items() {
             <EditItem
               hidePopup={hideEditPopup}
               isEditPopupVisible={isEditPopupVisible}
-              itemData={{ editItemData: newItemData, setEditItemData: setNewItemData }}
+              itemData={{
+                editItemData: newItemData,
+                setEditItemData: setNewItemData,
+              }}
               onEditItemSuccess={handleEditItemSuccess}
             />
           </div>
@@ -429,4 +438,3 @@ export default function Items() {
     </div>
   );
 }
-
