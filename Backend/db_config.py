@@ -1,14 +1,13 @@
 from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 
 from env_loader import db_url
 
 # Creating engine and base
 engine = create_engine(db_url)
 Base = declarative_base()
-SessionMaker = sessionmaker(bind=engine)
 
 
 @contextmanager

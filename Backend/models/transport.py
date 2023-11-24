@@ -24,7 +24,7 @@ class Transport(Base):
     orders = relationship("Order", back_populates="transport")
     transactions = relationship("Transaction", back_populates="transport")
 
-    def to_dict(self):
+    def to_dict(self, cascade_fields: list[str] = None):
         return {
             "transport_id": self.transport_id,
             "transport_capacity": self.transport_capacity,

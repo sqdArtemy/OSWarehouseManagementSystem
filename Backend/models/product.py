@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, Numeric, CheckConstraint, ForeignKey, Boolean, Enum
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class Product(Base):
@@ -31,16 +31,17 @@ class Product(Base):
     )
 
     def to_dict(self, cascade_fields: list[str] = ("company",)):
-        product = SessionMaker().query(Product).filter(Product.product_id == self.product_id).first()
-        return {
-            "product_id": self.product_id,
-            "company": product.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
-            "product_name": self.product_name,
-            "description": self.description,
-            "weight": self.weight,
-            "volume": self.volume,
-            "price": self.price,
-            "expiry_duration": self.expiry_duration,
-            "is_stackable": self.is_stackable,
-            "product_type": self.product_type
-        }
+        with get_session() as session:
+            product = session.query(Product).filter(Product.product_id == self.product_id).first()
+            return {
+                "product_id": self.product_id,
+                "company": product.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
+                "product_name": self.product_name,
+                "description": self.description,
+                "weight": self.weight,
+                "volume": self.volume,
+                "price": self.price,
+                "expiry_duration": self.expiry_duration,
+                "is_stackable": self.is_stackable,
+                "product_type": self.product_type
+            }

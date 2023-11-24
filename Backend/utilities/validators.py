@@ -1,5 +1,5 @@
 import re
-from db_config import SessionMaker
+from db_config import get_session
 
 
 def is_email_valid(email: str) -> bool:
@@ -31,4 +31,5 @@ def is_instance_already_exists(model, **kwargs) -> bool:
     :param kwargs: arguments to be checked
     :return: True in case of existing instance, False otherwise
     """
-    return SessionMaker().query(model).filter_by(**kwargs).first() is not None
+    with get_session() as session:
+        return session.query(model).filter_by(**kwargs).first() is not None

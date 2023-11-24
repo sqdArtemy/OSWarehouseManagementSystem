@@ -1,7 +1,7 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, String, ForeignKey, Numeric, CheckConstraint, Enum
 from .transaction import Transaction
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class Warehouse(Base):
@@ -44,14 +44,15 @@ class Warehouse(Base):
     )
 
     def to_dict(self, cascade_fields: list[str] = ("company", "supervisor")):
-        warehouse = SessionMaker().query(Warehouse).filter(Warehouse.warehouse_id == self.warehouse_id).first()
-        return {
-            "warehouse_id": self.warehouse_id,
-            "company": warehouse.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
-            "supervisor": warehouse.supervisor.to_dict(cascade_fields=[]) if "supervisor" in cascade_fields else self.supervisor_id,
-            "warehouse_name": self.warehouse_name,
-            "warehouse_address": self.warehouse_address,
-            "overall_capacity": self.overall_capacity,
-            "remaining_capacity": self.remaining_capacity,
-            "warehouse_type": self.warehouse_type
-        }
+        with get_session() as session:
+            warehouse = session.query(Warehouse).filter(Warehouse.warehouse_id == self.warehouse_id).first()
+            return {
+                "warehouse_id": self.warehouse_id,
+                "company": warehouse.company.to_dict(cascade_fields=[]) if "company" in cascade_fields else self.company_id,
+                "supervisor": warehouse.supervisor.to_dict(cascade_fields=[]) if "supervisor" in cascade_fields else self.supervisor_id,
+                "warehouse_name": self.warehouse_name,
+                "warehouse_address": self.warehouse_address,
+                "overall_capacity": self.overall_capacity,
+                "remaining_capacity": self.remaining_capacity,
+                "warehouse_type": self.warehouse_type
+            }
