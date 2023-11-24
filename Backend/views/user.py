@@ -148,7 +148,7 @@ class UserView(GenericView):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
-    def get_list(self, request: dict) -> dict:
+    def get_list(self, request: dict, **kwargs) -> dict:
         """
         Get list of all users.
         :param request: dictionary containing url, method and body
@@ -156,11 +156,11 @@ class UserView(GenericView):
         """
 
         if self.requester_role == UserRole.ADMIN.value["code"]:
-            return super().get_list(request=request)
+            return super().get_list(request=request, **kwargs)
         else:
             requester_company = self.session.query(User).filter_by(user_id=self.requester_id).first().company
             query = self.session.query(self.model).filter_by(company_id=requester_company.company_id)
-            return super().get_list(request=request, pre_selected_query=query)
+            return super().get_list(request=request, pre_selected_query=query, **kwargs)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
