@@ -26,6 +26,7 @@ export default function AddUser({
   onAddUserSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   const layout = {
     labelCol: {
@@ -61,8 +62,6 @@ export default function AddUser({
     } else {
       hidePopup();
     }
-
-    const { showError } = useError();
 
     const response = await userApi.addUser({
       user_name: newUserData['First Name'],

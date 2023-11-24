@@ -19,9 +19,8 @@ export default function EditUser({
   };
   onEditUserSuccess: () => void;
 }) {
-  console.log(userData.userData);
   const formRef = React.useRef<FormInstance>(null);
-
+  const { showError } = useError();
   useEffect(() => {
     if (isPopupVisible && userData.userData && formRef.current) {
       const { fullName, email, phoneNumber, role } = userData.userData;
@@ -54,8 +53,6 @@ export default function EditUser({
     hidePopup();
     handleReset();
   };
-
-  const { showError } = useError();
 
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();

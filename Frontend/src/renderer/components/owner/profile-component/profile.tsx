@@ -9,6 +9,7 @@ import { useError } from '../../error-component/error-context';
 export default function Profile() {
   const [changePassDisplay, setChangePassDisplay] = useState(false);
   const [userData, setUserData] = useState({});
+  const { showError } = useError();
   let id;
 
   const formRef = React.useRef<FormInstance>(null);
@@ -16,8 +17,6 @@ export default function Profile() {
   const handleChangePass = () => {
     setChangePassDisplay(true);
   };
-
-  const { showError } = useError();
 
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
