@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './add-user.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { userApi } from '../../../../index';
@@ -15,7 +15,8 @@ export interface INewUserData {
 export default function AddUser({
   isPopupVisible,
   hidePopup,
-  userData, onAddUserSuccess,
+  userData,
+  onAddUserSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -26,6 +27,7 @@ export default function AddUser({
   onAddUserSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   const layout = {
     labelCol: {
@@ -62,8 +64,6 @@ export default function AddUser({
       hidePopup();
     }
 
-    const { showError } = useError();
-
     const response = await userApi.addUser({
       user_name: newUserData['First Name'],
       user_surname: newUserData['Last Name'],
@@ -72,9 +72,10 @@ export default function AddUser({
       user_role: 'supervisor',
     });
 
-    if(response.success){
+    if (response.success) {
       onAddUserSuccess();
     } else {
+      console.log('response', response.message);
       showError(response.message);
     }
     userData.setUserData(newUserData);
