@@ -147,6 +147,22 @@ class UserView(GenericView):
             return self.response.create_response()
 
     @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict) -> dict:
+        """
+        Get list of all users.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+
+        if self.requester_role == UserRole.ADMIN.value["code"]:
+            return super().get_list(request=request)
+        else:
+            requester_company = self.session.query(User).filter_by(user_id=self.requester_id).first().company
+            query = self.session.query(self.model).filter_by(company_id=requester_company.company_id)
+            return super().get_list(request=request, pre_selected_query=query)
+
+    @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
     def update(self, request: dict) -> dict:
         # Check if requested user is the same as the one that should be updated or if the requester is owner of the
