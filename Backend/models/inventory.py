@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, ForeignKey, UniqueConstraint, Date, Numeric, event
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class Inventory(Base):
@@ -24,16 +24,17 @@ class Inventory(Base):
     )
 
     def to_dict(self, cascade_fields: list[str] = ("rack", "product")):
-        inventory = SessionMaker().query(Inventory).filter(Inventory.inventory_id == self.inventory_id).first()
-        return {
-            "inventory_id": self.inventory_id,
-            "rack": inventory.rack.to_dict(cascade_fields=[]) if "rack" in cascade_fields else self.rack_id,
-            "product": inventory.product.to_dict(cascade_fields=[]) if "product" in cascade_fields else self.product_id,
-            "quantity": self.quantity,
-            "total_volume": self.total_volume,
-            "arrival_date": self.arrival_date,
-            "expiry_date": self.expiry_date
-        }
+        with get_session() as session:
+            inventory = session.query(Inventory).filter(Inventory.inventory_id == self.inventory_id).first()
+            return {
+                "inventory_id": self.inventory_id,
+                "rack": inventory.rack.to_dict(cascade_fields=[]) if "rack" in cascade_fields else self.rack_id,
+                "product": inventory.product.to_dict(cascade_fields=[]) if "product" in cascade_fields else self.product_id,
+                "quantity": self.quantity,
+                "total_volume": self.total_volume,
+                "arrival_date": self.arrival_date,
+                "expiry_date": self.expiry_date
+            }
 
 
 # Event listeners (like triggers in SQL)

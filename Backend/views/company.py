@@ -1,4 +1,4 @@
-from db_config import SessionMaker
+from db_config import get_session
 from models import Company, User
 from utilities import is_email_valid, is_instance_already_exists, decode_token
 from services import check_allowed_methods_middleware,  view_function_middleware, check_allowed_roles_middleware
@@ -39,18 +39,19 @@ class CompanyView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        company_email = self.body.get("company_email")
-        owner_id = decode_token(self.headers["token"])
-        company = SessionMaker().query(User).filter_by(user_id=owner_id).first().company
+        with get_session() as session:
+            company_email = self.body.get("company_email")
+            owner_id = decode_token(self.headers["token"])
+            company = session.query(User).filter_by(user_id=owner_id).first().company
 
-        if company.company_id != self.instance.company_id:
-            raise ValidationError(status_code=403, message="You are not allowed to update this company.")
+            if company.company_id != self.instance.company_id:
+                raise ValidationError(status_code=403, message="You are not allowed to update this company.")
 
-        if company_email:
-            if not is_email_valid(company_email):
-                raise ValidationError("Invalid email address")
+            if company_email:
+                if not is_email_valid(company_email):
+                    raise ValidationError("Invalid email address")
 
-            if is_instance_already_exists(Company, company_email=company_email):
-                raise DatabaseError("Company with this email already exists")
+                if is_instance_already_exists(Company, company_email=company_email):
+                    raise DatabaseError("Company with this email already exists")
 
-        return super().update(request=request)
+            return super().update(request=request)

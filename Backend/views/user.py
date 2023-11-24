@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 
 from models import User, Company
-from db_config import get_session, SessionMaker
+from db_config import get_session
 from utilities import (
     hash_password, is_email_valid, is_phone_valid, create_token, check_password, decode_token,
     is_instance_already_exists, extract_id_from_url
@@ -167,21 +167,22 @@ class UserView(GenericView):
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
     def update(self, request: dict) -> dict:
-        # Check if requested user is the same as the one that should be updated or if the requester is owner of the
-        # company where user is located
-        requester_id = decode_token(self.headers.get("token"))
-        requester = SessionMaker().query(User).filter_by(user_id=requester_id).first()
+        with get_session() as session:
+            # Check if requested user is the same as the one that should be updated or if the requester is owner of the
+            # company where user is located
+            requester_id = decode_token(self.headers.get("token"))
+            requester = session.query(User).filter_by(user_id=requester_id).first()
 
-        if self.instance_id != requester_id and (
-                self.instance.company_id != requester.company_id or requester.user_role != UserRole.MANAGER.value["name"]
-        ):
-            raise ValidationError(status_code=401, message="You can not update data of this user.")
+            if self.instance_id != requester_id and (
+                    self.instance.company_id != requester.company_id or requester.user_role != UserRole.MANAGER.value["name"]
+            ):
+                raise ValidationError(status_code=401, message="You can not update data of this user.")
 
-        # Remove password if it was passed
-        if "user_password" in self.body:
-            del self.body["user_password"]
+            # Remove password if it was passed
+            if "user_password" in self.body:
+                del self.body["user_password"]
 
-        return super().update(request=request)
+            return super().update(request=request)
 
     @view_function_middleware
     @check_allowed_roles_middleware([UserRole.MANAGER.value["code"]])
@@ -192,48 +193,48 @@ class UserView(GenericView):
         :param request: dictionary containing url, method and body
         :return: dictionary containing status_code and response body
         """
+        with get_session() as session:
+            # Get owner id from token and retrieve owner`s company
+            owner_id = decode_token(self.headers.get("token"))
+            company = session.query(User).filter_by(user_id=owner_id).first().company
+            company_id = company.company_id
+            company_name = company.company_name
 
-        # Get owner id from token and retrieve owner`s company
-        owner_id = decode_token(self.headers.get("token"))
-        company = SessionMaker().query(User).filter_by(user_id=owner_id).first().company
-        company_id = company.company_id
-        company_name = company.company_name
+            # Autogenerate password from data
+            employee_name = self.body["user_name"]
+            employee_email = self.body["user_email"]
+            employee_surname = self.body["user_surname"]
+            employee_phone = self.body["user_phone"]
+            employee_role = self.body["user_role"]
+            password = f"{company_name[0]}{employee_name[0]}{employee_surname[0]}{employee_phone[1:5]}"
 
-        # Autogenerate password from data
-        employee_name = self.body["user_name"]
-        employee_email = self.body["user_email"]
-        employee_surname = self.body["user_surname"]
-        employee_phone = self.body["user_phone"]
-        employee_role = self.body["user_role"]
-        password = f"{company_name[0]}{employee_name[0]}{employee_surname[0]}{employee_phone[1:5]}"
+            # Validating fields
+            if employee_role not in (UserRole.SUPERVISOR.value["name"]):
+                raise ValidationError("Only managers can be added to the company.")
 
-        # Validating fields
-        if employee_role not in (UserRole.SUPERVISOR.value["name"]):
-            raise ValidationError("Only managers can be added to the company.")
+            if not is_email_valid(employee_email):
+                raise ValidationError("Invalid email address.")
 
-        if not is_email_valid(employee_email):
-            raise ValidationError("Invalid email address.")
+            if not is_phone_valid(employee_phone):
+                raise ValidationError("Invalid phone number.")
 
-        if not is_phone_valid(employee_phone):
-            raise ValidationError("Invalid phone number.")
+            # Checking if user already exists or not
+            if is_instance_already_exists(User, user_email=self.body["user_email"]):
+                raise DatabaseError("User email is already registered.")
 
-        # Checking if user already exists or not
-        if is_instance_already_exists(User, user_email=self.body["user_email"]):
-            raise DatabaseError("User email is already registered.")
+            new_body = dict(
+                user_name=employee_name,
+                user_surname=employee_surname,
+                user_email=employee_email,
+                user_role=employee_role,
+                user_phone=employee_phone,
+                user_password=hash_password(password).decode("utf8"),
+                company_id=company_id
+            )
+            self.body = new_body
+            request["body"] = new_body
 
-        new_body = dict(
-            user_name=employee_name,
-            user_surname=employee_surname,
-            user_email=employee_email,
-            user_role=employee_role,
-            user_phone=employee_phone,
-            user_password=hash_password(password).decode("utf8"),
-            company_id=company_id
-        )
-        self.body = new_body
-        request["body"] = new_body
-
-        return super().create(request=request)
+            return super().create(request=request)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.DELETE.value])
@@ -244,30 +245,31 @@ class UserView(GenericView):
         :return: dictionary containing status_code and response body
         """
 
-        # define objects
-        id_to_del = extract_id_from_url(request["url"], "user")
-        user_to_del = SessionMaker().query(User).filter_by(user_id=id_to_del).first()
-        user_id = decode_token(self.headers.get("token"))
-        user = SessionMaker().query(User).filter_by(user_id=user_id).first()
-        user_role = user.user_role
+        with get_session() as session:
+            # define objects
+            id_to_del = extract_id_from_url(request["url"], "user")
+            user_to_del = session.query(User).filter_by(user_id=id_to_del).first()
+            user_id = decode_token(self.headers.get("token"))
+            user = session.query(User).filter_by(user_id=user_id).first()
+            user_role = user.user_role
 
-        # check if user is owner
-        if user_role != UserRole.MANAGER.value["name"]:
-            raise ValidationError("Forbidden", 403)
+            # check if user is owner
+            if user_role != UserRole.MANAGER.value["name"]:
+                raise ValidationError("Forbidden", 403)
 
-        # check if there is user_to_be_deleted in DB and
-        # is from the same company as the user who wants to delete
-        if not user_to_del or user_to_del.company_id != user.company_id:
-            raise ValidationError("User Not Found", 404)
+            # check if there is user_to_be_deleted in DB and
+            # is from the same company as the user who wants to delete
+            if not user_to_del or user_to_del.company_id != user.company_id:
+                raise ValidationError("User Not Found", 404)
 
-        # set null if manager has warehouse
-        elif user_to_del.user_role == UserRole.SUPERVISOR.value["name"]:
-            for warehouse in user_to_del.warehouses:
-                warehouse.manager = None
-            user_to_del.warehouses = []
-            SessionMaker().commit()
+            # set null if manager has warehouse
+            elif user_to_del.user_role == UserRole.SUPERVISOR.value["name"]:
+                for warehouse in user_to_del.warehouses:
+                    warehouse.manager = None
+                user_to_del.warehouses = []
+                session.commit()
 
-        # empty body
-        request["body"] = self.body = dict()
+            # empty body
+            request["body"] = self.body = dict()
 
-        return super().delete(request=request)
+            return super().delete(request=request)

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class Vendor(Base):
@@ -30,11 +30,12 @@ class Vendor(Base):
     )
 
     def to_dict(self, cascade_fields: list[str] = ("vendor_owner",)):
-        vendor = SessionMaker().query(Vendor).filter(Vendor.vendor_id == self.vendor_id).first()
-        return {
-            "vendor_id": self.vendor_id,
-            "vendor_owner": vendor.vendor_owner.to_dict(cascade_fields=[]) if "vendor_owner" in cascade_fields else self.vendor_id,
-            "vendor_name": self.vendor_name,
-            "vendor_address": self.vendor_address,
-            "is_government": self.is_government
-        }
+        with get_session() as session:
+            vendor = session.query(Vendor).filter(Vendor.vendor_id == self.vendor_id).first()
+            return {
+                "vendor_id": self.vendor_id,
+                "vendor_owner": vendor.vendor_owner.to_dict(cascade_fields=[]) if "vendor_owner" in cascade_fields else self.vendor_id,
+                "vendor_name": self.vendor_name,
+                "vendor_address": self.vendor_address,
+                "is_government": self.is_government
+            }

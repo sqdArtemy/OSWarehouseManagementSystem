@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import relationship
-from db_config import Base, SessionMaker, get_session
+from db_config import Base, get_session
 
 
 class User(Base):

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, Enum, ForeignKey, CheckConstraint, DateTime, Boolean, Numeric, func
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class Transaction(Base):
@@ -31,10 +31,11 @@ class Transaction(Base):
     )
 
     def to_dict(self, cascade_filters: list[str] = ("supplier", "recipient_warehouse")):
-        transaction = SessionMaker().query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
-        return {
-            "transaction_id": self.transaction_id,
-            "supplier": transaction.supplier.to_dict(cascade_filters=[]) if "supplier" in cascade_filters else self.supplier_id,
-            "recipient_warehouse": transaction.recipient_warehouse.to_dict(cascade_filters=[]) if "recipient_warehouse" in cascade_filters else self.recipient_id,
-            "status": self.status
-        }
+        with get_session() as session:
+            transaction = session.query(Transaction).filter(Transaction.transaction_id == self.transaction_id).first()
+            return {
+                "transaction_id": self.transaction_id,
+                "supplier": transaction.supplier.to_dict(cascade_filters=[]) if "supplier" in cascade_filters else self.supplier_id,
+                "recipient_warehouse": transaction.recipient_warehouse.to_dict(cascade_filters=[]) if "recipient_warehouse" in cascade_filters else self.recipient_id,
+                "status": self.status
+            }
