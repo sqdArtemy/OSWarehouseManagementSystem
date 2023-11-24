@@ -22,7 +22,7 @@ export class WarehouseApi implements IWarehouse {
   }
 
   public async addWarehouse(body: IAddWarehouse): Promise<ApiResponse> {
-    const url = '/warehouse/warehouses';
+    const url = '/warehouses';
     const method = 'POST';
     const headers = {};
 
@@ -39,7 +39,7 @@ export class WarehouseApi implements IWarehouse {
   }
 
   public async getAllWarehouses(filters: IWarehouseFilters): Promise<ApiResponse> {
-    const url = '/warehouse/warehouses';
+    const url = '/warehouses';
     const method = 'GET';
     const headers = { filters };
     const body = {};
