@@ -15,7 +15,7 @@ class Company(Base):
     users = relationship("User", back_populates="company")
     warehouses = relationship("Warehouse", back_populates="company")
 
-    def to_dict(self, cascade_fields: list[str]):
+    def to_dict(self, cascade_fields: list[str] = []):
         return {
             "company_id": self.company_id,
             "company_name": self.company_name,
