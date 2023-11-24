@@ -60,7 +60,7 @@ export default function AddWarehouse({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {

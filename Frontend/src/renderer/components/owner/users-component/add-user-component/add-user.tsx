@@ -46,7 +46,7 @@ export default function AddUser({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
@@ -56,12 +56,6 @@ export default function AddUser({
       if (newUserData[key]) {
         check = true;
       }
-    }
-    if (!check) {
-      hidePopup();
-      handleReset();
-    } else {
-      hidePopup();
     }
 
     const response = await userApi.addUser({
@@ -74,6 +68,12 @@ export default function AddUser({
 
     if (response.success) {
       onAddUserSuccess();
+      if (!check) {
+        hidePopup();
+        handleReset();
+      } else {
+        hidePopup();
+      }
     } else {
       console.log('response', response.message);
       showError(response.message);

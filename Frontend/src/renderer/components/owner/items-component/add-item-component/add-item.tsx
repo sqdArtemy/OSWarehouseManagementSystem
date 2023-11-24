@@ -52,12 +52,6 @@ export default function AddItem({
         check = true;
       }
     }
-    if (!check) {
-      hidePopup();
-      handleReset();
-    } else {
-      hidePopup();
-    }
 
     const typeMapping = {
       'perishable-refrigerator': 'refrigerated',
@@ -79,6 +73,12 @@ export default function AddItem({
 
     if (response.success) {
       onAddItemSuccess();
+      if (!check) {
+        hidePopup();
+        handleReset();
+      } else {
+        hidePopup();
+      }
     } else {
       showError(response.message);
     }
@@ -87,7 +87,7 @@ export default function AddItem({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const handleReset = () => {

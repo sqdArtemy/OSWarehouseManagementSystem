@@ -53,12 +53,11 @@ export default function EditUser({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
     const newUserData = formRef.current?.getFieldsValue();
-    hidePopup();
 
     const response = await userApi.updateUser(
       {
@@ -73,6 +72,7 @@ export default function EditUser({
 
     if (response?.success) {
       onEditUserSuccess();
+      hidePopup();
     } else {
       showError(response.message);
     }
