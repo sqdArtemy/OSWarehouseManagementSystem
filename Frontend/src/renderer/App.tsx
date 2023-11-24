@@ -18,6 +18,9 @@ import Profile from './components/owner/profile-component/profile';
 import Warehouses from './components/owner/warehouses-component/warehouses';
 // import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 import { ErrorProvider } from './components/error-component/error-context';
+import Vendors from './components/vendor/vendors-component/vendors';
+import VendorOrders from './components/vendor/vendor-orders-component/vendor-orders';
+import { VendorLayout } from './components/vendor/vendor-layout-component/vendor-layout';
 
 export default function App() {
   return (
@@ -37,8 +40,18 @@ export default function App() {
             <Route path="users" element={<Users />} />
             <Route path="warehouses" element={<Warehouses />} />
             <Route path="items" element={<Items />} />
-            {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
             <Route path="profile" element={<Profile />} />
+            {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
+          </Route>
+          <Route path="vendor/*" element={<VendorLayout />}>
+            <Route
+              path="./"
+              element={<Navigate to="/vendor/vendors" replace />}
+            />
+            <Route path="vendors" element={<Vendors />} />
+            <Route path="orders" element={<VendorOrders />} />
+            <Route path="profile" element={<Profile />} />
+            {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
           </Route>
         </Routes>
       </Router>
