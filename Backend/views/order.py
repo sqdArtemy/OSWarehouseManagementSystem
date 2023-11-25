@@ -165,3 +165,50 @@ class OrderView(GenericView):
             self.response.status_code = 200
             self.response.data = order.to_dict(cascade_fields=("transport",))
             return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.PUT.value])
+    def cancel(self, request: dict) -> dict:
+        """
+        Change status of an order to cancelled in the database.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+
+        order = self.instance
+        requester_role = self.requester_role
+        requester_id = self.requester_id
+
+        with get_session() as session:
+            if requester_role == UserRole.VENDOR.value["code"]:
+                requester_vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester_id).all()
+                requester_vendors = [vendor[0] for vendor in requester_vendors]
+            elif requester_role == UserRole.MANAGER.value["code"]:
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester_id).all()
+                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+
+            if requester_role == UserRole.SUPERVISOR.value["code"] or (
+                    (
+                    requester_role == UserRole.VENDOR.value["code"] and (
+                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
+                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                       )
+                    ) or (
+                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                       )
+                    )
+            ):
+                raise ValidationError("Order not found.", 404)
+
+        if order.order_status != "new":
+            raise ValidationError(f"You can not delete order in status '{order.order_status}'", 403)
+
+        order.order_status = "cancelled"
+        order.updated_at = datetime.now()
+        session.commit()
+
+        self.response.status_code = 200
+        self.response.data = order.to_dict(cascade_fields=())
+        return self.response.create_response()

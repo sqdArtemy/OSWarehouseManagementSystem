@@ -104,6 +104,8 @@ def controller(request: dict) -> dict:
             elif method == Method.PUT.value:
                 if "/confirm" in url:
                     return order_view.confirm(request=request)
+                if "/cancel" in url:
+                    return order_view.cancel(request=request)
                 return order_view.update(request=request)
 
         # OrderItem`s endpoints
