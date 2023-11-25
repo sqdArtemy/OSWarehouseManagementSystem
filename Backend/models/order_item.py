@@ -27,6 +27,6 @@ class OrderItem(Base):
             return {
                 "order_item_id": self.order_item_id,
                 "order": order_item.order.to_dict(cascade_fields=[]) if "order" in cascade_fields else self.order_id,
-                "product": order_item.product.to_dict(cscade_fields=[]) if "product" in cascade_fields else self.product_id,
+                "product": order_item.product.to_dict(cascade_fields=[]) if "product" in cascade_fields else self.product_id,
                 "quantity": self.quantity
             }

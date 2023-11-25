@@ -283,7 +283,6 @@ class WarehouseView(GenericView):
                 raise ValidationError("Items are required", 400)
             else:
                 main_product_type = session.query(Product.product_type).filter_by(product_id=products[0]["product_id"]).scalar()
-                product_types = []
                 for product in products:
                     product_id, quantity = product.get("product_id"), product.get("quantity")
 
@@ -294,10 +293,8 @@ class WarehouseView(GenericView):
                     total_volume += product.volume * quantity
                     products_to_order[product_id] = quantity
                     product_ids.append(product_id)
-                    product_types.append(product.product_type)
 
-                for product_type in product_types:
-                    if product_type != main_product_type:
+                    if product.product_type != main_product_type:
                         raise ValidationError("All products must be of the same type", 400)
 
             # Get all warehouses of the company according to the product type

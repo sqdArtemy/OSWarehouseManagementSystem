@@ -62,7 +62,7 @@ class Order(Base):
         CheckConstraint("total_price > 0", name="check_total_price"),
     )
 
-    def to_dict(self, cascade_fields: list[str] = ("supplier", "recipient")):
+    def to_dict(self, cascade_fields: list[str] = ("supplier", "recipient", "transport")):
         with get_session() as session:
             order = session.query(Order).filter(Order.order_id == self.order_id).first()
             supplier = order.supplier_warehouse if order.order_type == "from_warehouse" else order.supplier_vendor
@@ -74,5 +74,6 @@ class Order(Base):
                 "total_price": self.total_price,
                 "created_at": self.created_at,
                 "updated_at": self.updated_at,
-                "order_status": self.order_status
+                "order_status": self.order_status,
+                "transport": self.transport.to_dict() if "transport" in cascade_fields else self.transport_id,
             }
