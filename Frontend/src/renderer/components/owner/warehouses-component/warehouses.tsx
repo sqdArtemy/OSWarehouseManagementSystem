@@ -12,6 +12,7 @@ import debounce from 'lodash.debounce';
 import AddWarehouse from './add-warehouse-component/add-warehouse';
 import EditWarehouse from './edit-warehouse-component/edit-warehouse';
 import { IWarehouseFilters } from '../../../services/interfaces/warehouseInterface';
+import { useError } from '../../error-component/error-context';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -33,6 +34,7 @@ export default function Warehouses() {
   const [isAddWarehouseVisible, setIsAddWarehouseVisible] = useState(false);
   const [isEditWarehouseVisible, setIsEditWarehouseVisible] = useState(false);
   const [warehouseData, setWarehouseData] = useState({});
+  const { showError } = useError();
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -49,33 +51,18 @@ export default function Warehouses() {
     // }
     if (record) {
       console.log('delete', record);
-      await userApi.deleteUser(record.user_id);
+      const response = await warehouseApi.deleteWarehouse(record.warehouse_id);
+      if(!response.success) {
+        showError(response.message);
+      }
     }
   };
 
   const debouncedSearch = debounce(async (filters) => {
-    // const response = await userApi.getAllUsers(filters);
-    // const users = response?.data?.body;
-    // const dataItems = [];
-    //
-    // if (users?.length) {
-    //   for (let i = 0; i < users.length; i++) {
-    //     dataItems.push({
-    //       key: (i + 1).toString(),
-    //       fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //       role: users[i].user_role,
-    //       phoneNumber: users[i].user_phone,
-    //       email: users[i].user_phone,
-    //       user_id: users[i].user_id,
-    //     });
-    //   }
-    //
-    //   setDataSource(dataItems);
-    // } else {
-    setDataSource([]);
+    await getAllWarehouses(filters);
     // }
   }, 1000);
-
+  let filters: IWarehouseFilters = {};
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
@@ -84,7 +71,7 @@ export default function Warehouses() {
       }
     }, 100);
 
-    const filters: IWarehouseFilters = {};
+
     if (selectedType) {
       filters.warehouse_type = selectedType.toLowerCase();
     }
@@ -137,9 +124,13 @@ export default function Warehouses() {
     setIsEditWarehouseVisible(false);
   };
 
+  const onAddWarehouseSuccess = async () => {
+    await getAllWarehouses(filters);
+  }
+
   const getAllWarehouses = async (filters: IWarehouseFilters) => {
     const response = await warehouseApi.getAllWarehouses(filters);
-      const warehouses = result.data?.body;
+      const warehouses = response.data?.body;
       if (warehouses?.length) {
         for (let i = 0; i < warehouses.length; i++) {
           data.push({
@@ -301,41 +292,6 @@ export default function Warehouses() {
       }
     });
 
-    setDataSource([
-      {
-        key: '1',
-        warehouseName: 'John Brown',
-        supervisor: '32',
-        address: 'New York No. 1 Lake Park',
-        type: 'Freezer',
-        capacity: 1000,
-      },
-      {
-        key: '2',
-        warehouseName: 'Jim Green',
-        supervisor: '42',
-        address: 'London No. 1 Lake Park',
-        type: 'Refrigerator',
-        capacity: 1000,
-      },
-      {
-        key: '3',
-        warehouseName: 'Joe Black',
-        supervisor: '32',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Dry',
-        capacity: 1000,
-      },
-      {
-        key: '4',
-        warehouseName: 'Disabled User',
-        supervisor: '99',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Hazardous',
-        capacity: 1000,
-      },
-    ]);
-
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
@@ -391,6 +347,7 @@ export default function Warehouses() {
                 warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
+              onAddWarehouseSuccess={ onAddWarehouseSuccess }
             />
             <EditWarehouse
               hidePopup={hideEditWarehouse}

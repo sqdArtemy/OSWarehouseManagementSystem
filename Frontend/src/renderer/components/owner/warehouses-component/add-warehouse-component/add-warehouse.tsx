@@ -94,7 +94,7 @@ export default function AddWarehouse({
       supervisor_id: newWarehouseData['Supervisor'],
       warehouse_type: typeMapping[newWarehouseData['Type']]
     });
-
+    console.log(response);
     if(response.success){
       onAddWarehouseSuccess();
     } else {
