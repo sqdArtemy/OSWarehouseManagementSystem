@@ -19,8 +19,6 @@ class TransportView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
-
         # check if the user is admin
         if self.requester_role != UserRole.ADMIN.value["code"]:
             raise ValidationError("Access forbidden", 403)
