@@ -97,6 +97,8 @@ def controller(request: dict) -> dict:
             elif method == Method.DELETE.value:
                 return order_view.delete(request=request)
             elif method == Method.PUT.value:
+                if "/confirm" in url:
+                    return order_view.confirm(request=request)
                 return order_view.update(request=request)
         elif "/orders" in url:
             if method == Method.GET.value:
