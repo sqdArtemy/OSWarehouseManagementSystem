@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import func
+from sqlalchemy import func, or_, and_
 
 from db_config import get_session
-from models import Order, Transport, OrderItem, Product, Vendor, Warehouse
+from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities import ValidationError, is_instance_already_exists
@@ -67,6 +67,45 @@ class OrderView(GenericView):
             ]
 
             return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict, **kwargs) -> dict:
+        """
+        Get all orders from the database depending on requester`s role.
+        :param request: dictionary containing url, method, body and headers
+        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
+        :return: dictionary containing status_code and response body with list of dictionaries of order`s data
+        """
+        if self.requester_role == UserRole.ADMIN.value["code"]:
+            return super().get_list(request=request, **kwargs)
+
+        with get_session() as session:
+            requester = session.query(User).filter_by(user_id=self.requester_id).first()
+            orders = None
+
+            if self.requester_role in (UserRole.SUPERVISOR.value["code"], UserRole.MANAGER.value["code"]):
+                warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester.user_id).all()
+                warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+
+                orders = session.query(Order).filter(
+                    or_(
+                        and_(Order.order_type == "from_warehouse", Order.supplier_id.in_(warehouse_ids)),
+                        and_(Order.order_type == "to_warehouse", Order.recipient_id.in_(warehouse_ids))
+                    )
+                )
+
+            elif self.requester_role == UserRole.VENDOR.value["code"]:
+                vendor_ids = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester.user_id).all()
+                vendor_ids = [vendor[0] for vendor in vendor_ids]
+
+                orders = session.query(Order).filter(
+                    or_(
+                        and_(Order.order_type == "to_warehouse", Order.supplier_id.in_(vendor_ids)),
+                        and_(Order.order_type == "from_warehouse", Order.recipient_id.in_(vendor_ids))
+                    )
+                )
+            return super().get_list(request=request, pre_selected_query=orders, **kwargs)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])

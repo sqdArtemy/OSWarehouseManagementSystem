@@ -91,6 +91,11 @@ def controller(request: dict) -> dict:
                 return inventory_view.create(request=request)
 
         # Order`s endpoints
+        elif "/orders" in url:
+            if method == Method.GET.value:
+                return order_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return order_view.create(request=request)
         elif "/order" in url:
             if method == Method.GET.value:
                 return order_view.get(request=request)
@@ -100,11 +105,6 @@ def controller(request: dict) -> dict:
                 if "/confirm" in url:
                     return order_view.confirm(request=request)
                 return order_view.update(request=request)
-        elif "/orders" in url:
-            if method == Method.GET.value:
-                return order_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return order_view.create(request=request)
 
         # OrderItem`s endpoints
         elif "/order_item" in url:
