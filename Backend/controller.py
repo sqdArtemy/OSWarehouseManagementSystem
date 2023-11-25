@@ -207,6 +207,11 @@ def controller(request: dict) -> dict:
                 return warehouse_view.update(request=request)
 
         # Transport`s endpoints
+        elif "/transports" in url:
+            if method == Method.GET.value:
+                return transport_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return transport_view.create(request=request)
         elif "/transport" in url:
             if method == Method.GET.value:
                 return transport_view.get(request=request)
@@ -214,11 +219,6 @@ def controller(request: dict) -> dict:
                 return transport_view.delete(request=request)
             elif method == Method.PUT.value:
                 return transport_view.update(request=request)
-        elif "/transports" in url:
-            if method == Method.GET.value:
-                return transport_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return transport_view.create(request=request)
 
         # In case of no route found
         else:
