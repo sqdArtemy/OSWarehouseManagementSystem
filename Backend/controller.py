@@ -77,6 +77,11 @@ def controller(request: dict) -> dict:
                 return company_view.create(request=request)
 
         # Inventory`s endpoints
+        elif "/inventories" in url:
+            if method == Method.GET.value:
+                return inventory_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return inventory_view.create(request=request)
         elif "/inventory" in url:
             if method == Method.GET.value:
                 return inventory_view.get(request=request)
@@ -84,11 +89,6 @@ def controller(request: dict) -> dict:
                 return inventory_view.delete(request=request)
             elif method == Method.PUT.value:
                 return inventory_view.update(request=request)
-        elif "/inventories" in url:
-            if method == Method.GET.value:
-                return inventory_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return inventory_view.create(request=request)
 
         # Order`s endpoints
         elif "/orders" in url:
