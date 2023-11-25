@@ -85,6 +85,6 @@ def view_function_middleware(function):
             ).first() if instance.instance_id is not None else None
             instance.response = ResponseFactory(400, {}, "", instance.headers)
 
-        return function(*args, **kwargs)
+            return function(*args, **kwargs)
 
     return wrapper

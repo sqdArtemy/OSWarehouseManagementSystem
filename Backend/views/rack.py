@@ -1,7 +1,7 @@
 from sqlalchemy import func
 
 from db_config import get_session
-from models import Rack, User, Warehouse
+from models import Rack, User, Warehouse, Inventory, Product
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities import decode_token, ValidationError, extract_id_from_url
@@ -93,7 +93,7 @@ class RackView(GenericView):
 
             rack_position = self.body.get("rack_position")
             rack_check = session.query(Rack.rack_id).filter_by(rack_position=rack_position,
-                                                                      warehouse_id=rack.warehouse_id).scalar()
+                                                               warehouse_id=rack.warehouse_id).scalar()
             if rack_check and rack_check != rack_id:
                 raise ValidationError("The current position is already used by another rack", 404)
 
@@ -116,3 +116,85 @@ class RackView(GenericView):
             self.body["remaining_capacity"] = rack.remaining_capacity + capacity_change
 
             return super().update(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.POST.value])
+    def multiple(self, request: dict) -> dict:
+        """
+        Get information about a warehouse including details about its racks.
+        :param request: dictionary containing url, method, and headers
+        :return: dictionary containing status_code and response body
+        """
+        with get_session() as session:
+
+            warehouse_id = self.body.get("warehouse_id")
+            creator = decode_token(self.headers.get("token"))
+            company_id = session.query(User.company_id).filter_by(user_id=creator).scalar()
+            warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
+            if not warehouse:
+                raise ValidationError("Warehouse Not Found", 404)
+
+            rack_positions = self.body.get("rack_positions")
+            for rack_position in rack_positions:
+                rack = session.query(Rack).filter_by(rack_position=rack_position, warehouse_id=warehouse_id).first()
+                if rack:
+                    raise ValidationError("At least one rack with the specified positions already exists", 404)
+
+            fixed_total_capacity = self.body.get("fixed_total_capacity")
+            racks_sum = session.query(func.sum(Rack.overall_capacity)).filter_by(warehouse_id=warehouse_id).scalar()
+
+            if racks_sum is None:
+                racks_sum = 0
+            if float(racks_sum) + fixed_total_capacity > warehouse.overall_capacity:
+                raise ValidationError(
+                    "The overall capacity of all racks cannot exceed the maximum capacity in the warehouse", 404)
+
+            remaining_capacity_check = session.query(Warehouse.remaining_capacity).filter_by(
+                warehouse_id=warehouse_id).scalar()
+            if float(remaining_capacity_check) < float(fixed_total_capacity):
+                raise ValidationError(
+                    "The overall capacity of all racks cannot exceed the maximum capacity in the warehouse", 404)
+
+            overall_capacity = fixed_total_capacity / len(rack_positions)
+
+            for rack_position in rack_positions:
+                new_warehouse = Rack(
+                    warehouse_id=warehouse_id,
+                    rack_position=rack_position,
+                    overall_capacity=overall_capacity,
+                    remaining_capacity=overall_capacity,
+                )
+                session.add(new_warehouse)
+
+            session.commit()
+
+            warehouse_info = {
+                "warehouse_id": warehouse.warehouse_id,
+                "supervisor_id": warehouse.supervisor_id,
+                "warehouse_name": warehouse.warehouse_name,
+                "warehouse_address": warehouse.warehouse_address,
+                "overall_capacity": warehouse.overall_capacity,
+                "remaining_capacity": warehouse.remaining_capacity,
+                "warehouse_type": warehouse.warehouse_type,
+                "racks": []
+            }
+
+            # Get details about racks in the warehouse
+            racks = session.query(Rack).filter_by(warehouse_id=warehouse_id).all()
+
+            for rack in racks:
+                rack_info = {
+                    "rack_id": rack.rack_id,
+                    "rack_position": rack.rack_position,
+                    "overall_capacity": rack.overall_capacity,
+                    "remaining_capacity": rack.remaining_capacity,
+                    "ratio": (rack.remaining_capacity / rack.overall_capacity) * 100
+                }
+                warehouse_info["racks"].append(rack_info)
+
+            response_data = {
+                "status": 201,
+                "data": warehouse_info,
+                "headers": self.headers
+            }
+            return response_data

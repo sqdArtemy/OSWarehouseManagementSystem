@@ -145,6 +145,9 @@ def controller(request: dict) -> dict:
                 return rack_view.delete(request=request)
             elif method == Method.PUT.value:
                 return rack_view.update(request=request)
+            elif method == Method.POST.value:
+                if "/multiple" in url:
+                    return rack_view.multiple(request=request)
 
         # Vendor`s endpoints
         elif "/vendors" in url:
