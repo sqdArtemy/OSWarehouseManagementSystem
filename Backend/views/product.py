@@ -2,6 +2,7 @@ from db_config import get_session
 from models import Product, User
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
+from utilities.enums.data_related_enums import UserRole
 from utilities.enums.method import Method
 from utilities.exceptions import ValidationError
 from utilities import decode_token
@@ -27,6 +28,27 @@ class ProductView(GenericView):
                 raise ValidationError("Product Not Found", 404)
 
             return super().get(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict, **kwargs) -> dict:
+        """
+        Get all instances of model.
+        :param request: dictionary containing url, method and body
+        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
+        :return: dictionary containing status_code and response body with list of dictionaries of products
+        """
+        # check if the user is from the same company as product
+        with get_session() as session:
+            requester_id = decode_token(self.headers.get("token"))
+            requester = session.query(User).filter(User.user_id == requester_id).first()
+            company = requester.company
+
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                return super().get_list(request=request, **kwargs)
+            else:
+                query = session.query(Product).filter(Product.company_id == company.company_id)
+                return super().get_list(request=request, pre_selected_query=query, **kwargs)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.DELETE.value])

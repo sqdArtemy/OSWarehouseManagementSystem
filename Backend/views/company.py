@@ -13,6 +13,16 @@ class CompanyView(GenericView):
     model_name = "company"
 
     @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict, **kwargs) -> dict:
+        """
+        Get all instances of companies.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body with list of dictionaries of companies
+        """
+        return super().get_list(request=request, cascade_fields=["warehouses"], **kwargs)
+
+    @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
     def create(self, request: dict) -> dict:
         """
