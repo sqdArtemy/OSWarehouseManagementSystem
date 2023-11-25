@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import func, or_, and_
 
 from db_config import get_session
-from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User
+from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User, Inventory, Rack
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities import ValidationError, is_instance_already_exists
@@ -62,7 +62,7 @@ class OrderView(GenericView):
             self.response.status_code = 200
             self.response.data = order.to_dict(cascade_fields=())
             self.response.data["total_volume"] = total_volume
-            self.response.data["order_items"] = [
+            self.response.data["items"] = [
                 order_item.to_dict(cascade_fields=()) for order_item in order.ordered_items
             ]
 
@@ -115,8 +115,113 @@ class OrderView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
-        return super().create(request=request)
+        requester_role = self.requester_role
+        order_items = self.body.get("items")
+        order_type = self.body.get("order_type")
+        vendor_id = self.body.get("vendor_id")
+        warehouse_id = self.body.get("warehouse_id")
+        total_volume = 0
+        total_price = 0
+        products_to_order = {}
+        product_ids = []
+
+        if requester_role not in (UserRole.ADMIN.value["code"], UserRole.VENDOR.value["code"]):
+            raise ValidationError("Only vendor can create an order.", 403)
+
+        if order_type not in ("from_warehouse", "to_warehouse"):
+            raise ValidationError("Order type must be 'from_warehouse' or 'to_warehouse'.", 400)
+
+        if len(order_items) == 0:
+            raise ValidationError("Order must contain at least one item.", 400)
+
+        if not is_instance_already_exists(Vendor, vendor_id=vendor_id):
+            raise ValidationError(f"Vendor with id {vendor_id} does not exist.", 404)
+
+        if not is_instance_already_exists(Warehouse, warehouse_id=warehouse_id):
+            raise ValidationError(f"Warehouse with id {warehouse_id} does not exist.", 404)
+
+        with get_session() as session:
+            vendor = session.query(Vendor).filter_by(vendor_id=vendor_id).first()
+            main_product_type = session.query(Product.product_type). \
+                filter_by(product_id=order_items[0]["product_id"]).scalar()
+
+            for item in order_items:
+                product_id, quantity = item.get("product_id"), item.get("quantity")
+
+                if not is_instance_already_exists(Product, product_id=product_id):
+                    raise ValidationError(f"Product with id {product_id} does not exist", 404)
+
+                product = session.query(Product).filter_by(product_id=product_id).first()
+                total_volume += product.volume * quantity
+                products_to_order[product_id] = quantity
+                product_ids.append(product_id)
+
+                if not vendor.is_government:
+                    total_price += product.price * quantity
+
+                if product.product_type != main_product_type:
+                    raise ValidationError("All products must be of the same type", 400)
+
+            if order_type == "to_warehouse":
+                remaining_volume = (
+                    session.query(
+                        Warehouse.remaining_capacity -
+                        func.sum(OrderItem.quantity * Product.volume)
+                    )
+                    .join(Order, Order.recipient_id == Warehouse.warehouse_id)
+                    .join(OrderItem, OrderItem.order_id == Order.order_id)
+                    .join(Product, Product.product_id == OrderItem.product_id)
+                    .filter(Order.status.in_(["processing", "delivered", "submitted"]))
+                    .filter(Warehouse.warehouse_id == warehouse_id)
+                    .group_by(Warehouse.warehouse_id)
+                ).scalar()
+                if remaining_volume < total_volume:
+                    raise ValidationError("Warehouse capacity is not enough.", 400)
+            elif order_type == "from_warehouse":
+                remaining_products = (
+                    session.query(
+                        Inventory.product_id,
+                        func.sum(Inventory.quantity).label('remaining_quantity')
+                    )
+                    .join(Rack, Inventory.rack_id == Rack.rack_id)
+                    .filter(Rack.warehouse_id == warehouse_id)
+                    .group_by(Inventory.product_id)
+                ).all()
+
+                for product_id, quantity in products_to_order.items():
+                    for remaining_product in remaining_products:
+                        if product_id == remaining_product[0]:
+                            if quantity > remaining_product[1]:
+                                raise ValidationError("Warehouse does not have enough products.", 400)
+
+            order = Order(
+                supplier_id=vendor_id if order_type == "to_warehouse" else warehouse_id,
+                recipient_id=warehouse_id if order_type == "to_warehouse" else vendor_id,
+                order_type=order_type,
+                order_status="new",
+                total_price=total_price,
+                created_at=datetime.now())
+
+            session.add(order)
+            session.flush()
+
+            for product_id, quantity in products_to_order.items():
+                order_item = OrderItem(
+                    order_id=order.order_id,
+                    product_id=product_id,
+                    quantity=quantity
+                )
+                session.add(order_item)
+            session.commit()
+
+            self.response.status_code = 201
+            self.response.data = order.to_dict(cascade_fields=())
+            self.response.data["items"] = [
+                order_item.to_dict(cascade_fields=()) for order_item in order.ordered_items
+            ]
+            self.response.data["total_volume"] = total_volume
+
+            return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
@@ -126,7 +231,9 @@ class OrderView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
+        if self.requester_role == UserRole.ADMIN.value["code"]:
+            return super().update(request=request)
+
         return super().update(request=request)
 
     @view_function_middleware
