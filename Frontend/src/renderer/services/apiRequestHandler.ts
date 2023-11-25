@@ -9,7 +9,6 @@ export interface ApiResponse{
 
 export async function handleApiRequest(data: ISendData): Promise<ApiResponse> {
   try {
-    console.log(data);
     const request = await apiClient.send({
       headers: data.headers,
       method: data.method,

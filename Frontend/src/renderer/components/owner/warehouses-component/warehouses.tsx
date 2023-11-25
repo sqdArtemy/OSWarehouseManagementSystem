@@ -111,7 +111,7 @@ export default function Warehouses() {
   };
 
   const handleEditWarehouse = (record) => {
-    console.log('edit', record);
+    // console.log('edit', record);
     setWarehouseData(record);
     setIsEditWarehouseVisible(true);
   };
@@ -131,12 +131,15 @@ export default function Warehouses() {
   const getAllWarehouses = async (filters: IWarehouseFilters) => {
     const response = await warehouseApi.getAllWarehouses(filters);
       const warehouses = response.data?.body;
+      const data = [];
+      const allUsers = (await userApi.getAllUsers({})).data.body;
       if (warehouses?.length) {
         for (let i = 0; i < warehouses.length; i++) {
+          const user = allUsers?.find(user => user.user_id = warehouses[i].supervisor);
           data.push({
             key: (i + 1).toString(),
             warehouseName: warehouses[i].warehouse_name,
-            supervisor: warehouses[i].supervisor_id,
+            supervisor: user.user_name + ' ' + user.user_surname,
             address: warehouses[i].warehouse_address,
             type: warehouses[i].warehouse_type,
             capacity: warehouses[i].remaining_capacity + '/' + warehouses[i].overall_capacity,
@@ -145,7 +148,9 @@ export default function Warehouses() {
             remaining_capacity: warehouses[i].remaining_capacity,
           });
         }
-        setDataSource(warehouses);
+        setDataSource(data);
+      } else {
+        setDataSource([]);
       }
   };
 
@@ -272,14 +277,16 @@ export default function Warehouses() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    warehouseApi.getAllWarehouses({}).then((result) => {
+    warehouseApi.getAllWarehouses({}).then(async (result) => {
       const warehouses = result.data?.body;
       if (warehouses?.length) {
+        const allUsers = (await userApi.getAllUsers({})).data.body;
         for (let i = 0; i < warehouses.length; i++) {
+          const user = allUsers?.find(user => user.user_id = warehouses[i].supervisor);
           data.push({
             key: (i + 1).toString(),
             warehouseName: warehouses[i].warehouse_name,
-            supervisor: warehouses[i].supervisor_id,
+            supervisor: user.user_name + ' ' + user.user_surname,
             address: warehouses[i].warehouse_address,
             type: warehouses[i].warehouse_type,
             capacity: warehouses[i].remaining_capacity + '/' + warehouses[i].overall_capacity,
