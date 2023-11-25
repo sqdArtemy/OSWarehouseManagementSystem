@@ -10,10 +10,10 @@ export interface IVendor {
 
 
 export interface IAddVendor {
-  vendor_name: string,
-  vendor_address: string,
-  vendor_owner_id: number,
-  is_government: number | boolean;
+  vendor_name?: string,
+  vendor_address?: string,
+  vendor_owner_id?: number,
+  is_government?: number | boolean;
 }
 
 export interface IVendorFilters {

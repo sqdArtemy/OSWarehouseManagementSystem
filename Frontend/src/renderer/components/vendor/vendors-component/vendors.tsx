@@ -11,7 +11,7 @@ import { vendorApi } from '../../../index'; // Import your vendor API
 import { IVendorFilters } from '../../../services/interfaces/vendorInterface'; // Import the vendor interface
 import debounce from 'lodash.debounce';
 import AddVendor from './add-vendor-component/add-vendor'; // Create an AddVendor component similar to AddItem
-// import EditVendor from './edit-vendor-component/edit-vendor'; // Create an EditVendor component similar to EditItem
+import EditVendor from './edit-vendor-component/edit-vendor'; // Create an EditVendor component similar to EditItem
 import { useError } from '../../error-component/error-context';
 
 export default function Vendors() {
@@ -291,15 +291,15 @@ export default function Vendors() {
               vendorData={{ newVendorData, setNewVendorData }}
               onAddVendorSuccess={handleAddVendorSuccess}
             />
-            {/*<EditVendor*/}
-            {/*  hidePopup={hideEditPopup}*/}
-            {/*  isEditPopupVisible={isEditPopupVisible}*/}
-            {/*  vendorData={{*/}
-            {/*    editVendorData: newVendorData,*/}
-            {/*    setEditVendorData: setNewVendorData,*/}
-            {/*  }}*/}
-            {/*  onEditVendorSuccess={handleEditVendorSuccess}*/}
-            {/*/>*/}
+            <EditVendor
+              hidePopup={hideEditPopup}
+              isEditPopupVisible={isEditPopupVisible}
+              vendorData={{
+                editVendorData: newVendorData,
+                setEditVendorData: setNewVendorData,
+              }}
+              onEditVendorSuccess={handleEditVendorSuccess}
+            />
           </div>
         </div>
         <Table
