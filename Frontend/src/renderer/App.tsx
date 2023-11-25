@@ -23,7 +23,7 @@ import AdminWarehouses from './components/admin/warehouses-component/warehouses'
 import AdminItems from './components/admin/items-component/items';
 import AdminUsers from './components/admin/users-component/users';
 import AdminDashboard from './components/admin/dashboard-component/dashboard';
-import AdminAddWarehouses from './components/admin/warehouses-component/add-warehouse-component/add-warehouse';
+import AdminTransport from './components/admin/transport-component/transport';
 import { ErrorProvider } from './components/error-component/error-context';
 
 export default function App() {
@@ -56,7 +56,7 @@ export default function App() {
             <Route path="users" element={<AdminUsers />} />
             <Route path="warehouses" element={<AdminWarehouses />} />
             <Route path="items" element={<AdminItems />} />
-            {/*<Route path="warehouses-add" element={<AdminAddWarehouse />} />*/}
+            <Route path="transport" element={<AdminTransport />} />
             <Route path="profile" element={<AdminProfile />} />
           </Route>
         </Routes>

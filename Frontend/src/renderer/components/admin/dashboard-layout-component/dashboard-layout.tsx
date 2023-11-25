@@ -5,6 +5,7 @@ import DashboardIcon from '../../../../../assets/icons/dashboard-icon.png';
 import UsersIcon from '../../../../../assets/icons/dashboard-users-icon.png';
 import WarehousesIcon from '../../../../../assets/icons/dashboard-warehouses-icon.png';
 import ItemsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
+import TransportIcon from '../../../../../assets/icons/dashboard-transport-icon.png'
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 
@@ -15,7 +16,8 @@ export function AdminDashboardLayout() {
     { iconSrc: DashboardIcon, text: 'Dashboard' },
     { iconSrc: WarehousesIcon, text: 'Warehouses' },
     { iconSrc: UsersIcon, text: 'Users' },
-    { iconSrc: ItemsIcon, text: 'Items' },
+    { iconSrc: ItemsIcon, text: 'Vendors' },
+    { iconSrc: TransportIcon, text: 'Transport'},
   ];
 
   const handleSideBarElementClick = (
