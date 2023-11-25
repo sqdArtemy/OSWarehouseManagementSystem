@@ -10,7 +10,7 @@ import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { vendorApi } from '../../../index'; // Import your vendor API
 import { IVendorFilters } from '../../../services/interfaces/vendorInterface'; // Import the vendor interface
 import debounce from 'lodash.debounce';
-// import AddVendor from './add-vendor-component/add-vendor'; // Create an AddVendor component similar to AddItem
+import AddVendor from './add-vendor-component/add-vendor'; // Create an AddVendor component similar to AddItem
 // import EditVendor from './edit-vendor-component/edit-vendor'; // Create an EditVendor component similar to EditItem
 import { useError } from '../../error-component/error-context';
 
@@ -53,7 +53,7 @@ export default function Vendors() {
     setSearchVendorName(e.target.value);
   };
 
-  const handleSearchVendorClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSearchVendorClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
@@ -68,8 +68,7 @@ export default function Vendors() {
     }
 
     console.log(filters);
-    debouncedSearch(filters);
-    console.log('search', searchVendorName);
+    await debouncedSearch(filters);
   };
 
   const handleRowSelectionChange = (selectedRowKeys, selectedRows) => {
@@ -122,10 +121,10 @@ export default function Vendors() {
           vendor_name: vendors[i].vendor_name,
           vendor_address: vendors[i].vendor_address,
           is_government: vendors[i].is_government,
+          is_government_display: vendors[i].is_government ? 'Government' : 'Private',
           vendor_id: vendors[i].vendor_id,
         });
       }
-
       setDataSource(dataItems);
     } else {
       setDataSource([]);
@@ -153,6 +152,7 @@ export default function Vendors() {
       vendor_name: '',
       vendor_address: '',
       is_government: '',
+      is_government_display: '',
     }),
   );
 
@@ -193,9 +193,9 @@ export default function Vendors() {
       key: 'vendor_address',
     },
     {
-      title: 'Is Government',
-      dataIndex: 'is_government',
-      key: 'is_government',
+      title: 'Vendor Type',
+      dataIndex: 'is_government_display',
+      key: 'is_government_display',
     },
   ];
 
@@ -241,6 +241,7 @@ export default function Vendors() {
             vendor_address: vendors[i].vendor_address,
             is_government: vendors[i].is_government,
             vendor_id: vendors[i].vendor_id,
+            is_government_display: vendors[i].is_government ? 'Government' : 'Private'
           });
         }
 
@@ -284,12 +285,12 @@ export default function Vendors() {
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add Vendor</span>
             </button>
-            {/*<AddVendor*/}
-            {/*  hidePopup={hideAddPopup}*/}
-            {/*  isPopupVisible={isPopupVisible}*/}
-            {/*  vendorData={{ newVendorData, setNewVendorData }}*/}
-            {/*  onAddVendorSuccess={handleAddVendorSuccess}*/}
-            {/*/>*/}
+            <AddVendor
+              hidePopup={hideAddPopup}
+              isPopupVisible={isPopupVisible}
+              vendorData={{ newVendorData, setNewVendorData }}
+              onAddVendorSuccess={handleAddVendorSuccess}
+            />
             {/*<EditVendor*/}
             {/*  hidePopup={hideEditPopup}*/}
             {/*  isEditPopupVisible={isEditPopupVisible}*/}
