@@ -502,15 +502,10 @@ class OrderView(GenericView):
                 if total_quantity != 0:
                     raise ValidationError('Could not send order', 404)
 
-            response_data = {
-                "status": 200,
-                "data": {
-                    "filled_inventories": filled_inventories
-                },
-                "headers": self.headers
-            }
+            self.response.status_code = 200
+            self.response.data["filled_inventories"] = filled_inventories
 
-            return response_data
+            return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
@@ -565,10 +560,6 @@ class OrderView(GenericView):
 
             session.commit()
 
-            response_data = {
-                "status": 200,
-                "data": order.to_dict(cascade_fields=()),
-                "headers": self.headers
-            }
-
-            return response_data
+            self.response.status_code = 200
+            self.response.data = order.to_dict(cascade_fields=())
+            return self.response.create_response()
