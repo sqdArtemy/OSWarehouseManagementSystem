@@ -1,0 +1,12 @@
+.selected-products-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.selected-product {
+  background-color: #f0f0f0;
+  padding: 8px;
+  border-radius: 4px;
+}

@@ -1,20 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import './vendor-orders.scss';
 import { Table } from 'antd';
-import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import { orderApi } from '../../../index';
 import { IOrderFilters } from '../../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
-import AddOrder from './create-order-component/create-order';
+import { useNavigate } from 'react-router-dom';
 
 export default function Orders() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [currentOrders, setCurrentOrders] = useState([]);
   const [finishedOrders, setFinishedOrders] = useState([]);
-  const [isPopupVisible, setIsPopupVisible] = useState(false);
-  const [isAddOrderPopupVisible, setIsAddOrderPopupVisible] = useState(false)
-
+  const navigate = useNavigate();
   let filters: IOrderFilters = {};
 
   const getAllOrders = async (filters: IOrderFilters) => {
@@ -59,12 +56,9 @@ export default function Orders() {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    setIsPopupVisible(true);
+    navigate('/vendor/orders-add');
   };
 
-  const hideAddPopup = () => {
-    setIsPopupVisible(false);
-  };
 
   const placeholderRowCount = 5;
 
@@ -178,14 +172,6 @@ export default function Orders() {
           />
         </div>
       </div>
-      <AddOrder
-        isPopupVisible={isPopupVisible}
-        hidePopup={hideAddPopup}
-        onAddOrderSuccess={() => {
-          setIsPopupVisible(false);
-          getAllOrders(filters);
-        }}
-      />
     </div>
   );
 }

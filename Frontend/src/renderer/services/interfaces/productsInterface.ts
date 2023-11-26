@@ -26,6 +26,6 @@ export interface IProductFilters {
   price_gte?: number,
   price_lte?: number,
   weight_gte?: number,
-  weight_lte?: number
-
+  weight_lte?: number,
+  company_id?: number,
 }
