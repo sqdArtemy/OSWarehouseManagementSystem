@@ -87,7 +87,7 @@ export default function AdminAddWarehouse({
         {...layout}
         labelAlign={'left'}
         ref={formRef}
-        name="add-user"
+        name="add-warehouse"
         size={'middle'}
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}

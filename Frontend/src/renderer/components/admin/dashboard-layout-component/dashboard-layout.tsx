@@ -18,6 +18,10 @@ export function AdminDashboardLayout() {
     { iconSrc: UsersIcon, text: 'Users' },
     { iconSrc: ItemsIcon, text: 'Vendors' },
     { iconSrc: TransportIcon, text: 'Transport'},
+    { iconSrc: TransportIcon, text: 'Transport'},
+    { iconSrc: TransportIcon, text: 'Transport'},
+    { iconSrc: TransportIcon, text: 'Transport'},
+    { iconSrc: TransportIcon, text: 'Transport'},
   ];
 
   const handleSideBarElementClick = (

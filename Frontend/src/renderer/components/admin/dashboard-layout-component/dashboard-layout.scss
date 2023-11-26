@@ -14,7 +14,7 @@
       min-height: 70%;
       display: flex;
       flex-direction: column;
-      gap: 3vw;
+      gap: 0.5vw;
 
       .side-bar-top-header-container {
         padding-top: 2vw;
@@ -48,19 +48,19 @@
             flex-direction: row;
             align-items: center;
             width: 100%;
-            gap: 0.7vw;
+            gap: 0.5vw;
             cursor: pointer;
             transition: background-color 0.3s;
             padding-left: 1vw;
-            padding-top: 1vw;
-            padding-bottom: 1vw;
+            padding-top: 0.5vw;
+            padding-bottom: 0.5vw;
 
             .side-bar-top-content-element-icon{
-              width: 2.5vw;
+              width: 2.3vw;
             }
 
             .side-bar-top-content-element-text {
-              font-size: 1.7vw;
+              font-size: 1.3vw;
             }
 
             &:hover {
@@ -72,7 +72,7 @@
     }
 
     .side-bar-bottom {
-      min-height: 30%;
+      min-height: 20%;
       width: 100%;
       border-top: 1.5px solid #FFFFFF;
       display: flex;
@@ -90,7 +90,7 @@
         cursor: pointer;
 
         .side-bar-bottom-profile-name {
-          font-size: 1.5vw;
+          font-size: 1vw;
 
         }
       }

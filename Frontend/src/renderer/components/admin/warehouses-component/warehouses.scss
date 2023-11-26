@@ -1,11 +1,11 @@
-.warehouses-container {
+.admin-warehouses-container {
   display: flex;
   flex-direction: row;
   width: 85%;
   min-height: 100vh;
   align-items: center;
 
-  .warehouses-table-container {
+  .admin-warehouses-table-container {
     display: flex;
     flex-direction: column;
     gap: 2.5vw;
@@ -15,47 +15,54 @@
     padding-left: 3vw;
 
 
-    .warehouses-table-header-container {
+    .admin-warehouses-table-header-container {
       display: flex;
       flex-direction: column;
       gap: 3vw;
 
-      .warehouses-table-header {
+      .admin-warehouses-table-header {
         font-size: 3vw;
       }
 
-      .options-container {
+      .admin-options-container {
         display: flex;
         flex-direction: row;
-        gap: 10vw;
+        gap: 7vw;
         width: 100%;
-        align-items: center;
+        align-items: end;
 
 
-        .search-bar-container {
+        .admin-search-bar-container {
           display: flex;
           flex-direction: row;
-
-          .search-bar-dropdown-container {
+          align-items: end;
+          .admin-warehouse-filter{
+            display: flex;
+            flex-direction: column;
+            .admin-warehouse-filter-labels{
+              width: 8vw;
+              text-align: center;
+              font-size:1vw;
+            }
+          }
+          .admin-search-bar-dropdown-container {
             min-height: 3vw;
-            width: 10vw;
+            width: 8vw;
             font-size: 1vw;
             border: 0.5px solid #000000;
-            border-right: 0;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-
-
+            margin-right: 2vw;
           }
 
 
-          .search-bar-input {
-            width: 30vw;
+          .admin-search-bar-input {
+            width: 20vw;
             min-height: 3vw;
             border: 0.5px solid #000000;
+            border-bottom-left-radius: 1vw;
+            border-top-left-radius: 1vw;
           }
 
-          .search-bar-button {
+          .admin-search-bar-button {
             width: 3vw;
             min-height: 3vw;
             background: #5564B2;
@@ -79,12 +86,12 @@
           }
         }
 
-        .delete-btn {
+        .admin-delete-btn {
           width: 2.2vw;
           min-height: 2.2vw;
         }
 
-        .add-btn {
+        .admin-add-btn {
           display: flex;
           flex-direction: row;
           align-items: center;
@@ -102,7 +109,7 @@
 
           cursor: pointer;
 
-          .add-btn-text {
+          .admin-add-btn-text {
             font-size: 1.3vw;
             white-space: nowrap;
             overflow: hidden;
@@ -121,7 +128,7 @@
       }
     }
 
-    .warehouses-table {
+    .admin-warehouses-table {
       width: 85%;
       min-height: 70%;
 
@@ -129,7 +136,7 @@
 
   }
 
-  .warehouses-form {
+  .admin-warehouses-form {
     min-height: 100vh;
     width: 40%;
   }

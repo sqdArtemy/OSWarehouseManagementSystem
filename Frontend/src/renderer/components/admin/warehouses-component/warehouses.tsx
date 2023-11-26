@@ -23,7 +23,8 @@ export interface IWarehouseData {
 }
 
 export default function AdminWarehouses() {
-  const [selectedType, setSelectedType] = useState('All');
+  const [selectedType, setSelectedType] = useState('ALL');
+  const [selectedCompany, setSelectedCompany] = useState('ALL');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -37,6 +38,12 @@ export default function AdminWarehouses() {
     console.log('click', e);
     setSelectedType(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedType;
+  };
+  const handleMenuCompanyClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    console.log(e.domEvent.target.innerText)
+    setSelectedCompany(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectedCompany;
   };
 
   const handeDeleteWarehouse = async (record?) => {
@@ -214,7 +221,7 @@ export default function AdminWarehouses() {
     },
   ];
 
-  const items = [
+  const types = [
     {
       label: 'Freezer',
     },
@@ -230,17 +237,20 @@ export default function AdminWarehouses() {
   ];
   const companys = [
     {
-      lable: 'Cock.inc',
-    }
+      label: 'Cock.inc',
+    },
+    {
+      label: 'SOmething',
+    },
   ]
 
   const menuProps = {
-    items,
+    items: types,
     onClick: handleMenuClick,
   };
-  const compnayProps = {
-    companys,
-    onClick: handleMenuClick,
+  const menuCompanyProps = {
+    items: companys,
+    onClick: handleMenuCompanyClick,
   }
 
   const rowSelection = {
@@ -334,20 +344,31 @@ export default function AdminWarehouses() {
   }, []);
 
   return (
-    <div className="warehouses-container">
-      <div className={'warehouses-table-container'}>
-        <div className={'warehouses-table-header-container'}>
-          <span className={'warehouses-table-header'}>WAREHOUSES</span>
-          <div className={'options-container'}>
-            <div className="search-bar-container">
-              <Select
-                className={'search-bar-dropdown-container'}
-              >
-                <Option value="0"> something</Option>
-              </Select>
+    <div className="admin-warehouses-container">
+      <div className={'admin-warehouses-table-container'}>
+        <div className={'admin-warehouses-table-header-container'}>
+          <span className={'admin-warehouses-table-header'}>WAREHOUSES</span>
+          <div className={'admin-options-container'}>
+            <div className="admin-search-bar-container">
+              <div className="admin-warehouse-filter">
+                <label className="admin-warehouse-filter-labels">Company</label>
+                <Dropdown
+                  menu={menuCompanyProps}
+                  className={'admin-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedCompany}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
+              <div className="admin-warehouse-filter">
+              <label className="admin-warehouse-filter-labels">Type</label>
               <Dropdown
                 menu={menuProps}
-                className={'search-bar-dropdown-container'}
+                className={'admin-search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
@@ -356,32 +377,33 @@ export default function AdminWarehouses() {
                   </Space>
                 </Button>
               </Dropdown>
+              </div>
               <input
                 type=""
-                className="search-bar-input"
+                className="admin-search-bar-input"
                 onChange={(e) => {
                   setSearchValue(e.target.value);
                 }}
               />
               <button
-                className="search-bar-button"
+                className="admin-search-bar-button"
                 onClick={(e) => handleSearchClick(e)}
               >
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
             <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={'admin-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handeDeleteWarehouse()}
             ></img>
             <button
-              className={'add-btn'}
+              className={'admin-add-btn'}
               onClick={(e) => handleAddWarehouse(e)}
             >
               <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Warehouse</span>
+              <span className={'admin-add-btn-text'}>Add Warehouse</span>
             </button>
             <AddWarehouse
               hidePopup={hideAddWarehouse}
@@ -410,7 +432,7 @@ export default function AdminWarehouses() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'warehouses-table'}
+          className={'admin-warehouses-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}

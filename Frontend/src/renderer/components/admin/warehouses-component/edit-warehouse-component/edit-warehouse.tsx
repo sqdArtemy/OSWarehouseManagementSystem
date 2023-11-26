@@ -82,7 +82,7 @@ export default function EditWarehouse({
         {...layout}
         labelAlign={'left'}
         ref={formRef}
-        name="edit-user"
+        name="edit-warehouse"
         size={'middle'}
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
