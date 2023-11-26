@@ -98,7 +98,11 @@ def controller(request: dict) -> dict:
                 return order_view.create(request=request)
         elif "/order" in url:
             if method == Method.GET.value:
+                if "/send" in url:
+                    if "/preview" in url:
+                        return order_view.send_preview(request=request)
                 return order_view.get(request=request)
+
             elif method == Method.DELETE.value:
                 return order_view.delete(request=request)
             elif method == Method.PUT.value:

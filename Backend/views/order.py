@@ -1,4 +1,6 @@
 from datetime import datetime
+from math import floor
+from typing import Dict, List, Any
 
 from sqlalchemy import func, or_, and_
 
@@ -6,7 +8,7 @@ from db_config import get_session
 from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User, Inventory, Rack
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
-from utilities import ValidationError, is_instance_already_exists
+from utilities import ValidationError, is_instance_already_exists, extract_id_from_url, decode_token
 from utilities.enums.data_related_enums import UserRole
 from utilities.enums.method import Method
 
@@ -102,15 +104,18 @@ class OrderView(GenericView):
 
             if requester_role != UserRole.ADMIN.value["code"] and (
                     (
-                    requester_role == UserRole.VENDOR.value["code"] and (
-                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
-                       )
+                            requester_role == UserRole.VENDOR.value["code"] and (
+                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
+                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                    )
                     ) or (
-                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                       )
+                            (requester_role in (
+                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    (
+                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                                    (
+                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            )
                     )
             ):
                 raise ValidationError("You are not allowed to see this order.", 403)
@@ -372,7 +377,7 @@ class OrderView(GenericView):
 
         with get_session() as session:
             transport_capacity = \
-            session.query(Transport.transport_capacity).filter_by(transport_id=transport_id).first()[0]
+                session.query(Transport.transport_capacity).filter_by(transport_id=transport_id).first()[0]
             order_capacity = session.query(func.sum(OrderItem.quantity * Product.volume)). \
                 join(Product, OrderItem.product_id == Product.product_id). \
                 filter(OrderItem.order_id == order.order_id).scalar()
@@ -413,15 +418,18 @@ class OrderView(GenericView):
 
             if requester_role == UserRole.SUPERVISOR.value["code"] or (
                     (
-                    requester_role == UserRole.VENDOR.value["code"] and (
-                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
-                       )
+                            requester_role == UserRole.VENDOR.value["code"] and (
+                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
+                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                    )
                     ) or (
-                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                       )
+                            (requester_role in (
+                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    (
+                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                                    (
+                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            )
                     )
             ):
                 raise ValidationError("Order not found.", 404)
@@ -436,3 +444,71 @@ class OrderView(GenericView):
         self.response.status_code = 200
         self.response.data = order.to_dict(cascade_fields=())
         return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def send_preview(self, request: dict, **kwargs) -> dict:
+        """
+        Showing the preview from what racks products will be retrieved.
+        :param request: dictionary containing url, method, headers
+        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
+        :return: dictionary containing status_code and response body with list of dictionaries
+        """
+        order_id = extract_id_from_url(request["url"], "order")
+        creator_id = decode_token(self.headers.get("token"))
+        with get_session() as session:
+
+            warehouse_id = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=creator_id).scalar()
+            order = session.query(Order).filter_by(order_id=order_id, supplier_id=warehouse_id).first()
+            if not order:
+                raise ValidationError("Order Not Found", 404)
+            if order.order_status != 'submitted':
+                raise ValidationError("You cannot send orders that are not submitted", 404)
+
+            filled_inventories = []
+
+            order_items = session.query(OrderItem).filter_by(order_id=order_id).all()
+
+            for order_item in order_items:
+                product = session.query(Product).filter_by(product_id=order_item.product_id).first()
+                overall_volume = product.volume * order_item.quantity
+                total_quantity = order_item.quantity
+
+                inventories = session.query(Inventory
+                                            ).join(Rack, Rack.rack_id == Inventory.rack_id
+                                                   ).filter(Inventory.product_id == product.product_id).order_by(Rack.rack_position).all()
+
+                for inventory in inventories:
+                    if overall_volume < inventory.total_volume:
+                        max_volume = overall_volume
+                    else:
+                        max_volume = inventory.total_volume
+
+                    real_quantity = floor(max_volume / product.volume)
+
+                    filled_inventories.append({
+                        'product_id': order_item.product_id,
+                        'rack_id': inventory.rack_id,
+                        'real_quantity': real_quantity
+                    })
+
+                    total_quantity -= real_quantity
+                    overall_volume = total_quantity * product.volume
+
+                    if total_quantity == 0:
+                        break
+
+                if total_quantity != 0:
+                    raise ValidationError('Could not send order', 404)
+
+            response_data = {
+                "status": 200,
+                "data": {
+                    "filled_inventories": filled_inventories
+                },
+                "headers": self.headers
+            }
+
+            return response_data
+
+
