@@ -15,11 +15,11 @@ import EditTransport from './edit-transport-component/edit-transport';
 // import EditUser from './edit-user-component/edit-user';
 
 export interface IWarehouseData {
-  warehouseName: string;
+  transportID: string;
   capacity: string;
-  supervisor: string;
+  maxSpeed: string;
+  'price/weight': string;
   type: string;
-  address: number;
 }
 
 export default function AdminWarehouses() {
@@ -142,10 +142,10 @@ export default function AdminWarehouses() {
     { length: placeholderRowCount },
     (_, index) => ({
       key: (index + 1).toString(),
-      address: '',
+      transportID: '',
       capacity: '',
-      warehouseName: '',
-      supervisor: '',
+      maxSpeed: '',
+      'price/weight': '',
       type: '',
     }),
   );
@@ -177,27 +177,9 @@ export default function AdminWarehouses() {
         ) : null,
     },
     {
-      title: 'Warehouse name',
-      dataIndex: 'warehouseName',
-      key: 'warehouseName',
-      align: 'center',
-    },
-    {
-      title: 'Address',
-      dataIndex: 'address',
-      key: 'address',
-      align: 'center',
-    },
-    {
-      title: 'Suprevisor',
-      dataIndex: 'supervisor',
-      key: 'supervisor',
-      align: 'center',
-    },
-    {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
+      title: 'Transport ID',
+      dataIndex: 'transportID',
+      key: 'transportID',
       align: 'center',
     },
     {
@@ -206,20 +188,35 @@ export default function AdminWarehouses() {
       key: 'capacity',
       align: 'center',
     },
+    {
+      title: 'Max Speed',
+      dataIndex: 'maxSpeed',
+      key: 'maxSpeed',
+      align: 'center',
+    },
+    {
+      title: 'Price/weight',
+      dataIndex: 'price/weight',
+      key: 'price/weight',
+      align: 'center',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      align: 'type',
+    },
   ];
 
   const items = [
     {
-      label: 'Freezer',
+      label: 'Truck',
     },
     {
-      label: 'Refrigerator',
+      label: 'Van',
     },
     {
-      label: 'Dry',
-    },
-    {
-      label: 'Hazardous',
+      label: 'Car',
     },
   ];
 
@@ -279,35 +276,35 @@ export default function AdminWarehouses() {
     setDataSource([
       {
         key: '1',
-        warehouseName: 'John Brown',
-        supervisor: '32',
-        address: 'New York No. 1 Lake Park',
-        type: 'Freezer',
-        capacity: 1000,
+        transportID: 'John Brown',
+        capacity: '32',
+        maxSpeed: 'New York No. 1 Lake Park',
+        'price/weight': 'Freezer',
+        type: 1000,
       },
       {
         key: '2',
-        warehouseName: 'Jim Green',
-        supervisor: '42',
-        address: 'London No. 1 Lake Park',
-        type: 'Refrigerator',
-        capacity: 1000,
+        transportID: 'John Brown',
+        capacity: '32',
+        maxSpeed: 'New York No. 1 Lake Park',
+        'price/weight': 'Freezer',
+        type: 1000,
       },
       {
         key: '3',
-        warehouseName: 'Joe Black',
-        supervisor: '32',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Dry',
-        capacity: 1000,
+        transportID: 'John Brown',
+        capacity: '32',
+        maxSpeed: 'New York No. 1 Lake Park',
+        'price/weight': 'Freezer',
+        type: 1000,
       },
       {
         key: '4',
-        warehouseName: 'Disabled User',
-        supervisor: '99',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Hazardous',
-        capacity: 1000,
+        transportID: 'John Brown',
+        capacity: '32',
+        maxSpeed: 'New York No. 1 Lake Park',
+        'price/weight': 'Freezer',
+        type: 1000,
       },
     ]);
 

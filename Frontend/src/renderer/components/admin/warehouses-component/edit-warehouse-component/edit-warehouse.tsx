@@ -71,7 +71,7 @@ export default function EditWarehouse({
 
   return (
     <Modal
-      title={<p style={{ fontSize: '1.2vw' }}>Edit User</p>}
+      title={<p style={{ fontSize: '1.2vw' }}>Edit Warehouse</p>}
       open={isPopupVisible}
       onOk={onFinish}
       onCancel={onCancel}
