@@ -11,6 +11,7 @@ import { userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddWarehouse from './add-warehouse-component/add-warehouse';
 import EditWarehouse from './edit-warehouse-component/edit-warehouse';
+import { useNavigate } from 'react-router-dom';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -20,9 +21,11 @@ export interface IWarehouseData {
   supervisor: string;
   type: string;
   address: number;
+  warehouse_id?: number;
 }
 
 export default function Warehouses() {
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
@@ -147,6 +150,7 @@ export default function Warehouses() {
       warehouseName: '',
       supervisor: '',
       type: '',
+      warehouse_id: -1,
     }),
   );
 
@@ -156,6 +160,12 @@ export default function Warehouses() {
   }
 
   const columns = [
+    // {
+    //   dataIndex: 'warehouse_id',
+    //   key: 'warehouse_id',
+    //   width: '0',
+    //   render: () => null,
+    // },
     {
       title: 'Action',
       dataIndex: 'action',
@@ -238,6 +248,16 @@ export default function Warehouses() {
     }),
   };
 
+  const handleOnRowClick = (e, record: IWarehouseData, rowIndex) => {
+    console.log('row', e, record, rowIndex);
+    if (record.warehouse_id !== -1)
+      navigate(`/owner/warehouses/${record.warehouse_id}`, {
+        state: {
+          locWarehouseData: record,
+        },
+      });
+  };
+
   let data = [];
   useEffect(() => {
     const calculateScrollSize = () => {
@@ -284,6 +304,7 @@ export default function Warehouses() {
         address: 'New York No. 1 Lake Park',
         type: 'Freezer',
         capacity: 1000,
+        warehouse_id: 1,
       },
       {
         key: '2',
@@ -292,6 +313,7 @@ export default function Warehouses() {
         address: 'London No. 1 Lake Park',
         type: 'Refrigerator',
         capacity: 1000,
+        warehouse_id: 2,
       },
       {
         key: '3',
@@ -300,6 +322,7 @@ export default function Warehouses() {
         address: 'Sidney No. 1 Lake Park',
         type: 'Dry',
         capacity: 1000,
+        warehouse_id: 3,
       },
       {
         key: '4',
@@ -308,6 +331,7 @@ export default function Warehouses() {
         address: 'Sidney No. 1 Lake Park',
         type: 'Hazardous',
         capacity: 1000,
+        warehouse_id: 4,
       },
     ]);
 
@@ -389,7 +413,16 @@ export default function Warehouses() {
           className={'warehouses-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
-          rowClassName={'highlight-bottom-border highlight-left-border'}
+          onRow={(record, rowIndex) => {
+            return {
+              onClick: (event) => handleOnRowClick(event, record, rowIndex), // click row
+            };
+          }}
+          rowClassName={(record) =>
+            record.warehouseName
+              ? 'highlight-bottom-border highlight-left-border selectable'
+              : 'highlight-bottom-border highlight-left-border'
+          }
         />
       </div>
     </div>

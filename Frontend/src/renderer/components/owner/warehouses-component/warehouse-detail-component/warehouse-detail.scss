@@ -1,0 +1,74 @@
+
+.warehouse-detail-container {
+  display: flex;
+  flex-direction: column;
+  width: 85vw;
+  min-height: 100vh;
+
+  padding-top: 3vw;
+  padding-left: 3vw;
+
+
+  .warehouse-detail-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1vw;
+    width: 60%;
+
+    .warehouse-detail-header {
+      display: flex;
+      flex-direction: column;
+      gap: 1vw;
+      font-size: 3vw;
+      align-items: center;
+      align-self: flex-start;
+
+      .warehouse-detail-header-name {
+        font-size: 3vw;
+      }
+
+      .warehouse-detail-header-type {
+        font-size: 2vw;
+      }
+    }
+
+    .warehouse-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr); /* 10 columns */
+      grid-template-rows: repeat(10, 1fr); /* 10 rows */
+      width: 35vw;
+      height: 35vw;
+
+      .warehouse-detail-grid-row {
+        display: contents; /* This helps to align cells properly in the grid */
+
+
+        .warehouse-detail-grid-cell {
+          background-color: #f0f0f0; /* Light grey background */
+          aspect-ratio: 1; /* Ensures cells are square */
+          border: 1px solid #d9d9d9; /* Light border for cells */
+          border-radius: 0.5vw; /* Rounded corners for cells */
+          height: 3vw;
+          cursor: pointer;
+        }
+
+
+      }
+
+
+    }
+
+  }
+
+  .warehouse-detail-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1vw;
+    width: 40%;
+  }
+
+
+}
+
+
+
