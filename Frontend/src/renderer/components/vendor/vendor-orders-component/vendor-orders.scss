@@ -1,0 +1,128 @@
+.orders-container {
+  display: flex;
+  flex-direction: row;
+  width: 50%; /* Adjusted width */
+  min-height: 100vh;
+  align-items: center;
+
+  .orders-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5vw;
+    min-height: 100vh;
+    width: 100%; /* Adjusted width */
+    padding-top: 3vw;
+    padding-left: 3vw;
+
+    .orders-table-header-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3vw;
+
+      .orders-table-header {
+        font-size: 3vw;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: row;
+        gap: 7vw;
+        width: 100%;
+        height: 2vw;
+        align-items: center;
+
+        .search-bar-container {
+          /* ... (rest of the styles remain unchanged) ... */
+        }
+
+        .delete-btn {
+          width: 2.2vw;
+          min-height: 2.2vw;
+        }
+
+        .add-btn {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5vw;
+          width: 10vw;
+          min-height: 2.2vw;
+          border: 0.5px solid #000000;
+          color: #FFFFFF;
+          background-color: #378BA4;
+          border-radius: 0.3rem;
+          cursor: pointer;
+
+          .add-btn-text {
+            font-size: 1.3vw;
+          }
+
+          &:hover {
+            background-color: #2C7A8B;
+          }
+
+          &:focus {
+            background-color: #2C7A8B;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+          }
+        }
+      }
+    }
+
+    .orders-table {
+      width: 100%; /* Adjusted width */
+      min-height: 70%;
+    }
+  }
+
+  .users-separator-line {
+    width: 2px;
+    height: 80%;
+    background-color: #000000;
+  }
+
+  .warehouses-form {
+    min-height: 100vh;
+    width: 30%; /* Adjusted width */
+  }
+}
+
+.highlight-bottom-border > td {
+  border-bottom: solid 1px black !important;
+}
+
+.highlight-left-border > td {
+  border-left: solid 1px black !important;
+}
+
+.enabled {
+  cursor: pointer;
+}
+
+.custom-table-header {
+  font-size: 1.3em; /* Adjust the font size as needed */
+  padding: 1.3em;
+}
+
+.table-actions-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  align-items: center;
+  justify-content: center;
+
+  .delete-icon {
+    display: block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ff0000;
+  }
+}
+
+.delete-icon-light {
+  color: #ff8080;
+  display: block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}

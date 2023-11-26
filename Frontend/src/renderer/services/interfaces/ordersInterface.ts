@@ -24,11 +24,11 @@ export interface IAddOrder {
 }
 
 export interface IOrderFilters {
-  order_status: 'new' | 'processing' | 'submitted' | 'finished' | 'cancelled' | 'delivered' | 'lost' | 'damaged',
-  created_at_gte: Date,
-  created_at_lte: Date,
-  order_type: 'from_warehouse' | 'to_warehouse',
-  transport_id: number
+  order_status?: 'new' | 'processing' | 'submitted' | 'finished' | 'cancelled' | 'delivered' | 'lost' | 'damaged',
+  created_at_gte?: Date,
+  created_at_lte?: Date,
+  order_type?: 'from_warehouse' | 'to_warehouse',
+  transport_id?: number
 }
 
 export interface IFilledInventory {
