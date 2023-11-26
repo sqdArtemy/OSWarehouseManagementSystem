@@ -177,6 +177,12 @@ export default function AdminWarehouses() {
         ) : null,
     },
     {
+      title: 'Company name',
+      dataIndex: 'companyName',
+      key: 'companyName',
+      align: 'center',
+    },
+    {
       title: 'Warehouse name',
       dataIndex: 'warehouseName',
       key: 'warehouseName',
@@ -189,7 +195,7 @@ export default function AdminWarehouses() {
       align: 'center',
     },
     {
-      title: 'Suprevisor',
+      title: 'Supervisor',
       dataIndex: 'supervisor',
       key: 'supervisor',
       align: 'center',
@@ -279,6 +285,7 @@ export default function AdminWarehouses() {
     setDataSource([
       {
         key: '1',
+        companyName: 'Cock.inc',
         warehouseName: 'John Brown',
         supervisor: '32',
         address: 'New York No. 1 Lake Park',
@@ -287,6 +294,7 @@ export default function AdminWarehouses() {
       },
       {
         key: '2',
+        companyName: 'Cock.inc',
         warehouseName: 'Jim Green',
         supervisor: '42',
         address: 'London No. 1 Lake Park',
@@ -295,6 +303,7 @@ export default function AdminWarehouses() {
       },
       {
         key: '3',
+        companyName: 'Cock.inc',
         warehouseName: 'Joe Black',
         supervisor: '32',
         address: 'Sidney No. 1 Lake Park',
@@ -303,6 +312,7 @@ export default function AdminWarehouses() {
       },
       {
         key: '4',
+        companyName: 'Cock.inc',
         warehouseName: 'Disabled User',
         supervisor: '99',
         address: 'Sidney No. 1 Lake Park',

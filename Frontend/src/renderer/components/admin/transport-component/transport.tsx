@@ -163,7 +163,7 @@ export default function AdminWarehouses() {
       width: '10%',
       align: 'center',
       render: (_, record) =>
-        record.warehouseName ? (
+        record.transportID ? (
           <span className={'table-actions-container'}>
             <EditOutlined
               onClick={() => handleEditWarehouse(record)}

@@ -20,7 +20,7 @@ import OwnerWarehouses from './components/owner/warehouses-component/warehouses'
 import { AdminDashboardLayout } from './components/admin/dashboard-layout-component/dashboard-layout';
 import AdminProfile from './components/admin/profile-component/profile';
 import AdminWarehouses from './components/admin/warehouses-component/warehouses';
-import AdminItems from './components/admin/items-component/items';
+import AdminItems from './components/admin/vendor-component/vendor';
 import AdminUsers from './components/admin/users-component/users';
 import AdminDashboard from './components/admin/dashboard-component/dashboard';
 import AdminTransport from './components/admin/transport-component/transport';
@@ -72,7 +72,7 @@ export default function App() {
             />
             <Route path="vendors" element={<Vendors />} />
             <Route path="orders" element={<VendorOrders />} />
-            <Route path="profile" element={<Profile />} />
+            {/* <Route path="profile" element={<Profile />} /> */}
             {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
           </Route>
         </Routes>

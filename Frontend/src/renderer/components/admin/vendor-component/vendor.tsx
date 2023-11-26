@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './items.scss';
+import './vendor.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
