@@ -43,11 +43,11 @@ export function SignIn() {
     }
     startLoading();
     const response = await userApi.signIn(email, password);
-
+    console.log('response', response);
     if (response.success) {
+      stopLoading();
       switch (response.data?.user_role) {
         case 'manager':
-          stopLoading();
           navigate('/owner');
           break;
         case 'vendor':
