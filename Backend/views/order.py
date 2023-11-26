@@ -110,7 +110,7 @@ class OrderView(GenericView):
                     )
                     ) or (
                             (requester_role in (
-                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
                                     (
                                             order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
                                     (
@@ -424,7 +424,7 @@ class OrderView(GenericView):
                     )
                     ) or (
                             (requester_role in (
-                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
                                     (
                                             order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
                                     (
@@ -476,7 +476,8 @@ class OrderView(GenericView):
 
                 inventories = session.query(Inventory
                                             ).join(Rack, Rack.rack_id == Inventory.rack_id
-                                                   ).filter(Inventory.product_id == product.product_id).order_by(Rack.rack_position).all()
+                                                   ).filter(Inventory.product_id == product.product_id
+                                                            ).order_by(Rack.rack_position).all()
 
                 for inventory in inventories:
                     if overall_volume < inventory.total_volume:
@@ -511,4 +512,63 @@ class OrderView(GenericView):
 
             return response_data
 
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.PUT.value])
+    def send(self, request: dict) -> dict:
+        """
+        Sending the order.
+        :param request: dictionary containing url, method, headers
+        :return: dictionary containing status_code and response body
+        """
+        order_id = extract_id_from_url(request["url"], "order")
+        creator_id = decode_token(self.headers.get("token"))
+        with get_session() as session:
 
+            warehouse_id = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=creator_id).scalar()
+            order = session.query(Order).filter_by(order_id=order_id, supplier_id=warehouse_id).first()
+            if not order:
+                raise ValidationError("Order Not Found", 404)
+            if order.order_status != 'submitted':
+                raise ValidationError("You cannot send orders that are not submitted", 404)
+
+            filled_inventories = self.body.get("filled_inventories")
+
+            for filled_inventory in filled_inventories:
+                product_id = filled_inventory['product_id']
+                rack_id = filled_inventory['rack_id']
+                quantity = filled_inventory['real_quantity']
+
+                product = session.query(Product).filter_by(product_id=product_id).first()
+                inventory = session.query(Inventory).filter_by(product_id=product_id, rack_id=rack_id).first()
+
+                diff = inventory.quantity - quantity
+                changed_volume = product.volume * quantity
+                if diff == 0:
+                    session.delete(inventory)
+                else:
+                    session.query(Inventory).filter_by(rack_id=rack_id, product_id=product_id
+                                                       ).update({"quantity": diff,
+                                                                 "total_volume": inventory.total_volume - changed_volume})
+
+                session.flush()
+
+                rack = session.query(Rack).filter_by(rack_id=rack_id).first()
+                session.query(Rack).filter_by(rack_id=rack_id).update(
+                    {"remaining_capacity": rack.remaining_capacity + changed_volume})
+
+                warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse_id).first()
+                session.query(Warehouse).filter_by(warehouse_id=warehouse.warehouse_id).update(
+                    {"remaining_capacity": warehouse.remaining_capacity + changed_volume})
+
+            session.query(Order).filter_by(order_id=order_id).update(
+                    {"order_status": "processing", "updated_at": datetime.now()})
+
+            session.commit()
+
+            response_data = {
+                "status": 200,
+                "data": order.to_dict(cascade_fields=()),
+                "headers": self.headers
+            }
+
+            return response_data

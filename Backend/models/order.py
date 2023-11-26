@@ -72,8 +72,8 @@ class Order(Base):
                 "supplier": supplier.to_dict(cascade_fields=[]) if "supplier" in cascade_fields else self.supplier_id,
                 "recipient": recipient.to_dict(cascade_fields=[]) if "recipient" in cascade_fields else self.recipient_id,
                 "total_price": self.total_price,
-                "created_at": self.created_at,
-                "updated_at": self.updated_at,
+                "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "updated_at": self.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "order_status": self.order_status,
-                "transport": self.transport.to_dict() if "transport" in cascade_fields else self.transport_id,
+                "transport": self.transport.to_dict() if "transport" in cascade_fields else (self.transport_id if self.transport_id is not None else ""),
             }

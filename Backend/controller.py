@@ -110,6 +110,8 @@ def controller(request: dict) -> dict:
                     return order_view.confirm(request=request)
                 if "/cancel" in url:
                     return order_view.cancel(request=request)
+                if "/send":
+                    return order_view.send(request=request)
                 return order_view.update(request=request)
 
         # OrderItem`s endpoints
