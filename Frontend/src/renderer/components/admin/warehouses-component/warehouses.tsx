@@ -235,7 +235,7 @@ export default function AdminWarehouses() {
       label: 'Hazardous',
     },
   ];
-  const companys = [
+  const companies = [
     {
       label: 'Cock.inc',
     },
@@ -249,7 +249,7 @@ export default function AdminWarehouses() {
     onClick: handleMenuClick,
   };
   const menuCompanyProps = {
-    items: companys,
+    items: companies,
     onClick: handleMenuCompanyClick,
   }
 

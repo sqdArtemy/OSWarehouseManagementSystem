@@ -22,6 +22,7 @@ export interface IUserData {
 
 export default function AdminUsers() {
   const [selectedRole, setSelectedRole] = useState('All');
+  const [selectedCompany, setSelectedCompany] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -36,6 +37,11 @@ export default function AdminUsers() {
     console.log('click', e);
     setSelectedRole(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedRole;
+  };
+  const handleMenuCompanyClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    setSelectedCompany(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectedCompany;
   };
 
   const handleDeleteUser = async (record?) => {
@@ -175,7 +181,7 @@ export default function AdminUsers() {
       align: 'center',
       render: (_, record) =>
         record.fullName ? (
-          <span className={'table-actions-container'}>
+          <span className={'admin-table-actions-container'}>
             <EditOutlined
               onClick={() => handleEditUser(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
@@ -186,6 +192,12 @@ export default function AdminUsers() {
             />
           </span>
         ) : null,
+    },
+    {
+      title: 'Company',
+      dataIndex: 'company',
+      key: 'company',
+      align: 'center',
     },
     {
       title: 'Full name',
@@ -221,11 +233,20 @@ export default function AdminUsers() {
       label: 'Manager',
     },
   ];
+  const companies = [
+    {
+      label: 'dick.inc',
+    }
+  ]
 
   const menuProps = {
-    items,
+    items: items,
     onClick: handleMenuClick,
   };
+  const companyProps = {
+    items: companies,
+    onClick: handleMenuCompanyClick,
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -266,6 +287,7 @@ export default function AdminUsers() {
         for (let i = 0; i < users.length; i++) {
           dataItems.push({
             key: (i + 1).toString(),
+            //company:
             fullName: users[i].user_name + ' ' + users[i].user_surname,
             role: users[i].user_role,
             phoneNumber: users[i].user_phone,
@@ -284,44 +306,61 @@ export default function AdminUsers() {
   }, []);
 
   return (
-    <div className="warehouses-container">
-      <div className={'warehouses-table-container'}>
-        <div className={'warehouses-table-header-container'}>
-          <span className={'warehouses-table-header'}>USERS</span>
-          <div className={'options-container'}>
-            <div className="search-bar-container">
-              <Dropdown
-                menu={menuProps}
-                className={'search-bar-dropdown-container'}
-              >
-                <Button>
-                  <Space>
-                    {selectedRole}
-                    <DownOutlined />
-                  </Space>
-                </Button>
-              </Dropdown>
+    <div className="admin-users-container">
+      <div className={'admin-users-table-container'}>
+        <div className={'admin-users-table-header-container'}>
+          <span className={'admin-users-table-header'}>USERS</span>
+          <div className={'admin-users-options-container'}>
+            <div className="admin-users-search-bar-container">
+              <div className="admin-users-filter">
+                <label className="admin-users-filter-labels">Company</label>
+                <Dropdown
+                  menu={companyProps}
+                  className={'admin-users-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedCompany}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
+              <div className="admin-users-filter">
+                <label className="admin-users-filter-labels">Role</label>
+                <Dropdown
+                  menu={menuProps}
+                  className={'admin-users-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedRole}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
               <input
                 type=""
-                className="search-bar-input"
+                className="admin-users-search-bar-input"
                 onChange={(e) => {
                   setSearchValue(e.target.value);
                 }}
               />
               <button
-                className="search-bar-button"
+                className="admin-users-search-bar-button"
                 onClick={(e) => handleSearchClick(e)}
               >
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
             <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={'admin-users-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handleDeleteUser()}
             ></img>
-            <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
+            <button className={'admin-users-add-btn'} onClick={(e) => handleAddUser(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add User</span>
             </button>
@@ -348,7 +387,7 @@ export default function AdminUsers() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'warehouses-table'}
+          className={'admin-users-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}
