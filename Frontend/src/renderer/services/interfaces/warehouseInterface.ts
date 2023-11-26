@@ -6,6 +6,7 @@ export interface IWarehouse {
   updateWarehouse(body: IAddWarehouse, id: number): Promise<ApiResponse>;
   getWarehouse(id: number): Promise<ApiResponse>;
   getAllWarehouses(filters: IWarehouseFilters): Promise<ApiResponse>;
+  findSuitableWarehousesForOrders(body: IFindWarehousesRequest): Promise<ApiResponse>
 }
 
 
@@ -21,4 +22,15 @@ export interface IAddWarehouse {
 export interface IWarehouseFilters {
   warehouse_name_like?: string,
   warehouse_type?: string,
+}
+
+export interface IFindWarehousesRequest {
+  company_id?: number;
+  order_type: "to_warehouse" | "from_warehouse";
+  items: IItem[];
+}
+
+export interface IItem {
+  quantity: number;
+  product_id: number;
 }

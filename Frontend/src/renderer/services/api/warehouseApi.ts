@@ -1,4 +1,4 @@
-import { IAddWarehouse, IWarehouse, IWarehouseFilters } from '../interfaces/warehouseInterface';
+import { IAddWarehouse, IFindWarehousesRequest, IWarehouse, IWarehouseFilters } from '../interfaces/warehouseInterface';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 import { userApi } from '../../index';
 import { ISendData } from '../sendDataInterface';
@@ -59,6 +59,14 @@ export class WarehouseApi implements IWarehouse {
   public async updateWarehouse(body: IAddWarehouse, id: number): Promise<ApiResponse> {
     const url = '/warehouse/' + id;
     const method = 'PUT';
+    const headers = {};
+
+    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  }
+
+  public async findSuitableWarehousesForOrders(body: IFindWarehousesRequest): Promise<ApiResponse> {
+    const url = '/warehouse/suitable-warehouses-for-orders';
+    const method = 'GET';
     const headers = {};
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
