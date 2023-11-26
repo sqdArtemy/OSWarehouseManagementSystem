@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import './add-warehouse.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { userApi } from '../../../../index';
+import { userApi, warehouseApi } from '../../../../index';
 
 import { useError } from '../../../error-component/error-context';
 import { useLoading } from '../../../loading-component/loading';
@@ -23,6 +23,7 @@ export default function AddWarehouse({
   isPopupVisible,
   hidePopup,
   warehouseData,
+  onAddWarehouseSuccess
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -30,6 +31,7 @@ export default function AddWarehouse({
     warehouseData: INewWarehouseData;
     setWarehouseData: (userData: unknown) => void;
   };
+  onAddWarehouseSuccess: () => void
 }) {
   const formRef = React.useRef<FormInstance>(null);
   const { startLoading, stopLoading } = useLoading();
@@ -93,7 +95,6 @@ export default function AddWarehouse({
         check = true;
       }
     }
-    console.log('new', newWarehouseData);
     if (!check) {
       hidePopup();
       handleReset();
@@ -109,6 +110,20 @@ export default function AddWarehouse({
     //   user_role: newUserData['Role'],
     // });
 
+
+    const response = await warehouseApi.addWarehouse({
+      warehouse_address: newWarehouseData['Address'],
+      warehouse_name: newWarehouseData['Warehouse Name'],
+      overall_capacity: newWarehouseData['Capacity'],
+      supervisor_id: newWarehouseData['Supervisor'].supervisor_id,
+      warehouse_type: newWarehouseData['Type']
+    });
+
+    if(response.success){
+      onAddWarehouseSuccess();
+    } else {
+      showError(response.message);
+    }
     warehouseData.setWarehouseData(newWarehouseData);
   };
 
@@ -165,8 +180,6 @@ export default function AddWarehouse({
             style={{ minHeight: '2vw' }}
             value={supervisor ? supervisor : undefined}
             onChange={(value, option) => {
-              console.log('value', value);
-              console.log('option', option);
               const supervisorObj = {
                 supervisor_id: option?.value,
                 fullName: option?.label,
