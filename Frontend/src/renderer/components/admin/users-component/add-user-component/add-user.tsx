@@ -98,6 +98,13 @@ export default function AddUser({
         onFinish={onFinish}
       >
         <Form.Item
+          name="Company"
+          label={<p style={{ fontSize: '1vw' }}>Company</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
           name="First Name"
           label={<p style={{ fontSize: '1vw' }}>First Name</p>}
           rules={[{ required: true }]}
@@ -107,6 +114,13 @@ export default function AddUser({
         <Form.Item
           name="Last Name"
           label={<p style={{ fontSize: '1vw' }}>Last Name</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
+          name="Role"
+          label={<p style={{ fontSize: '1vw' }}>Role</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

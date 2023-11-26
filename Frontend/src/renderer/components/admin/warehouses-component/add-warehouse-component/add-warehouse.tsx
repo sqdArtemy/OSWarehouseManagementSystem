@@ -93,8 +93,15 @@ export default function AdminAddWarehouse({
         onFinish={onFinish}
       >
         <Form.Item
+          name="Company Warehouse Name"
+          label={<p style={{ fontSize: '1vw' }}>Company Name</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
           name="Warehouse Name"
-          label={<p style={{ fontSize: '1vw' }}>Name</p>}
+          label={<p style={{ fontSize: '1vw' }}>Warehouse Name</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

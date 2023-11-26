@@ -88,6 +88,13 @@ export default function EditWarehouse({
         onFinish={onFinish}
       >
         <Form.Item
+          name="Company Warehouse Name"
+          label={<p style={{ fontSize: '1vw' }}>Company name</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
           name="Warehouse Name"
           label={<p style={{ fontSize: '1vw' }}>Name</p>}
           rules={[{ required: true }]}
@@ -120,7 +127,7 @@ export default function EditWarehouse({
           label={<p style={{ fontSize: '1vw' }}>Type</p>}
           rules={[{ required: true }]}
         >
-          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button type="primary" htmlType="submit">
