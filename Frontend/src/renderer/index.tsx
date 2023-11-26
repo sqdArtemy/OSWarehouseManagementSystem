@@ -10,6 +10,7 @@ import { RackApi } from './services/api/rackApi';
 import { TransportApi } from './services/api/transportApi';
 import { OrderApi } from './services/api/orderApi';
 import { InventoryApi } from './services/api/inventoryApi';
+import { CompanyApi } from './services/api/companyApi';
 
 const container = document.getElementById('root') as HTMLElement;
 const root = createRoot(container);
@@ -36,6 +37,7 @@ export const rackApi = new RackApi();
 export const transportApi = new TransportApi();
 export const orderApi = new OrderApi();
 export const inventoryApi = new InventoryApi();
+export const companyApi = new CompanyApi();
 // // calling IPC exposed from preload script
 // window.electron.ipcRenderer.once('ipc-example', (arg) => {
 //   // eslint-disable-next-line no-console

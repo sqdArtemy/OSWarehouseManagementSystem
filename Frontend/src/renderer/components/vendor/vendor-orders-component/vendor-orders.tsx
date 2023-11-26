@@ -6,12 +6,14 @@ import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import { orderApi } from '../../../index';
 import { IOrderFilters } from '../../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
+import AddOrder from './create-order-component/create-order';
 
 export default function Orders() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [currentOrders, setCurrentOrders] = useState([]);
   const [finishedOrders, setFinishedOrders] = useState([]);
   const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [isAddOrderPopupVisible, setIsAddOrderPopupVisible] = useState(false)
 
   let filters: IOrderFilters = {};
 
@@ -64,7 +66,7 @@ export default function Orders() {
     setIsPopupVisible(false);
   };
 
-  const placeholderRowCount = 4;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
@@ -162,15 +164,6 @@ export default function Orders() {
             rowClassName={'highlight-bottom-border highlight-left-border'}
           />
         </div>
-        <div className={'orders-table-header-container'}>
-          <div className={'options-container'}>
-            <button className={'add-btn'} onClick={(e) => handleAddOrder(e)}>
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>View All</span>
-            </button>
-            {/* AddOrder component and related logic */}
-          </div>
-        </div>
         <div className="orders-table">
           <span className="custom-table-header">Finished Orders</span>
           <Table
@@ -184,16 +177,15 @@ export default function Orders() {
             rowClassName={'highlight-bottom-border highlight-left-border'}
           />
         </div>
-        <div className={'orders-table-header-container'}>
-          <div className={'options-container'}>
-            <button className={'add-btn'} onClick={(e) => handleAddOrder(e)}>
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>View All</span>
-            </button>
-            {/* AddOrder component and related logic */}
-          </div>
-        </div>
       </div>
+      <AddOrder
+        isPopupVisible={isPopupVisible}
+        hidePopup={hideAddPopup}
+        onAddOrderSuccess={() => {
+          setIsPopupVisible(false);
+          getAllOrders(filters);
+        }}
+      />
     </div>
   );
 }
