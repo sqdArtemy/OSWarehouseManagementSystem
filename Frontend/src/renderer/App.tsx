@@ -61,7 +61,7 @@ export default function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="warehouses" element={<AdminWarehouses />} />
-            <Route path="items" element={<AdminItems />} />
+            <Route path="vendors" element={<AdminItems />} />
             <Route path="transport" element={<AdminTransport />} />
             <Route path="profile" element={<AdminProfile />} />
           </Route>

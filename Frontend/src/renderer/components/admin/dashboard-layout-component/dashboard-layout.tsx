@@ -13,7 +13,7 @@ export function AdminDashboardLayout() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const sideBarElements = [
-    { iconSrc: DashboardIcon, text: 'Dashboard' },
+    { iconSrc: DashboardIcon, text: 'Companies' },
     { iconSrc: WarehousesIcon, text: 'Warehouses' },
     { iconSrc: UsersIcon, text: 'Users' },
     { iconSrc: ItemsIcon, text: 'Vendors' },

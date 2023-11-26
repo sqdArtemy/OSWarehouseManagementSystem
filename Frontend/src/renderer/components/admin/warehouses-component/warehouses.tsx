@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './warehouses.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
-import { Button, Dropdown, Space, Table } from 'antd';
+import { Button, Dropdown, Select, Space, Table } from "antd";
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
@@ -228,11 +228,20 @@ export default function AdminWarehouses() {
       label: 'Hazardous',
     },
   ];
+  const companys = [
+    {
+      lable: 'Cock.inc',
+    }
+  ]
 
   const menuProps = {
     items,
     onClick: handleMenuClick,
   };
+  const compnayProps = {
+    companys,
+    onClick: handleMenuClick,
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -331,6 +340,11 @@ export default function AdminWarehouses() {
           <span className={'warehouses-table-header'}>WAREHOUSES</span>
           <div className={'options-container'}>
             <div className="search-bar-container">
+              <Select
+                className={'search-bar-dropdown-container'}
+              >
+                <Option value="0"> something</Option>
+              </Select>
               <Dropdown
                 menu={menuProps}
                 className={'search-bar-dropdown-container'}
