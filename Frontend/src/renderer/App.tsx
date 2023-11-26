@@ -22,7 +22,7 @@ import AdminProfile from './components/admin/profile-component/profile';
 import AdminWarehouses from './components/admin/warehouses-component/warehouses';
 import AdminItems from './components/admin/vendor-component/vendor';
 import AdminUsers from './components/admin/users-component/users';
-import AdminDashboard from './components/admin/dashboard-component/dashboard';
+import AdminCompanies from './components/admin/companies-component/companies';
 import AdminTransport from './components/admin/transport-component/transport';
 import { ErrorProvider } from './components/error-component/error-context';
 import { LoadingProvider } from './components/loading-component/loading';
@@ -37,7 +37,7 @@ export default function App() {
       <LoadingProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/admin/companies" replace />} />
           <Route path="sign-in" element={<SignIn />} />
           <Route path="sign-up" element={<SignUp />} />
           <Route path="sign-up-details" element={<SignUpDetails />} />
@@ -58,7 +58,7 @@ export default function App() {
               path="./"
               element={<Navigate to="/admin/dashboard" replace />}
             />
-            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="companies" element={<AdminCompanies />} />
             <Route path="users" element={<AdminUsers />} />
             <Route path="warehouses" element={<AdminWarehouses />} />
             <Route path="vendors" element={<AdminItems />} />

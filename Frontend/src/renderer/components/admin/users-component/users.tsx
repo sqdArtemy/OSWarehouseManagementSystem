@@ -232,6 +232,12 @@ export default function AdminUsers() {
     {
       label: 'Manager',
     },
+    {
+      label: 'Admin',
+    },
+    {
+      label: 'Vendor',
+    },
   ];
   const companies = [
     {

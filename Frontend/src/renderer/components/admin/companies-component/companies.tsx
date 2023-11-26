@@ -1,5 +1,5 @@
 import React from 'react';
-import './dashboard.scss';
+import './companies.scss';
 
 export default function AdminDashboard() {
   return <div className="dashboard-container">

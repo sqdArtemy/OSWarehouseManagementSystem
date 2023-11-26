@@ -183,7 +183,7 @@ export default function AdminItems() {
       name: '',
       volume: '',
       weight: '',
-      'expiry-duration': ''
+      'expiry-duration': '',
     }),
   );
 
@@ -217,26 +217,31 @@ export default function AdminItems() {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      align: 'center',
     },
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      align: 'center',
     },
     {
       title: 'Volume (m^3)',
       dataIndex: 'volume',
       key: 'volume',
+      align: 'center',
     },
     {
       title: 'Weight (kg)',
       dataIndex: 'weight',
       key: 'weight',
+      align: 'center',
     },
     {
       title: 'Expiry duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
+      align: 'center',
     },
   ];
 
