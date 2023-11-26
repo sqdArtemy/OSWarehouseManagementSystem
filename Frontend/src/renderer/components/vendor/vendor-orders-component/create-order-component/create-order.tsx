@@ -1,11 +1,7 @@
-// CreateOrder.tsx
-
 import React, { useEffect, useState } from 'react';
-import { Button, Form, FormInstance, Select } from 'antd';
+import { Button, Form, FormInstance, Select, Tag, InputNumber } from 'antd';
 import { vendorApi, companyApi, warehouseApi, productApi } from '../../../../index';
 import { useError } from '../../../error-component/error-context';
-import { useLoading } from '../../../loading-component/loading';
-import { Tag, InputNumber } from 'antd';
 import './create-order.scss';
 
 export default function CreateOrder({
@@ -27,9 +23,15 @@ export default function CreateOrder({
     >([]);
 
   const handleProductSelect = (value, option) => {
-    // Update the selected products state when a product is selected
-    const newSelectedProduct = { product: option, quantity: 1 };
-    setSelectedProducts([...selectedProducts, newSelectedProduct]);
+    const isProductAlreadySelected = selectedProducts.some(
+      (item) => item.product.value === option.value
+    );
+
+    // If the product is not in the array, add it
+    if (!isProductAlreadySelected) {
+      const newSelectedProduct = { product: option, quantity: 1 };
+      setSelectedProducts([...selectedProducts, newSelectedProduct]);
+    }
   };
 
   const handleQuantityChange = (productId, quantity) => {
@@ -51,17 +53,19 @@ export default function CreateOrder({
     const mapToOptions = (data) => {
       return data.map((item) => ({
         value: item.product_id,
-        label: `${item.product_name} (${item.weight} kg)`,
+        label: item.product_name,
+        volume: item.volume,
+        weight: item.weight
       }));
     };
 
     const fakeData = [
-      { product_id: 1, product_name: 'banana', weight: 2 },
-      { product_id: 2, product_name: 'apple', weight: 1.5 },
-      { product_id: 3, product_name: 'orange', weight: 2.3 },
-    ]
+      { product_id: 1, product_name: 'banana', weight: 2, volume: 10 },
+      { product_id: 2, product_name: 'apple', weight: 1.5, volume: 25 },
+      { product_id: 3, product_name: 'orange', weight: 2.3, volume: 50 },
+    ];
     setProducts(mapToOptions(fakeData));
-  }
+  };
 
   const fetchProducts = async () => {
     const companyId = formRef.current?.getFieldValue(['Company'] as any);
@@ -74,11 +78,12 @@ export default function CreateOrder({
     // Fetch data for vendors and companies
     const warehouses: Select['OptionType'][] = [
       { value: 'to_warehouse', label: 'To Warehouse' },
-      { value: 'from_warehouse', label: 'From Warehouse'},
+      { value: 'from_warehouse', label: 'From Warehouse' },
     ];
 
     setWarehouses(warehouses);
-    vendorApi.getAllVendors({})
+    vendorApi
+      .getAllVendors({})
       .then((data) => {
         const mapToOptions = (data) => {
           return data.map((item) => ({
@@ -87,18 +92,18 @@ export default function CreateOrder({
           }));
         };
         setVendors(mapToOptions(data.data.body));
-      }).then(async () => {
-      const companies = await companyApi.getAll();
-      const mapToOptions = (data) => {
-        return data.map((item) => ({
-          value: item.company_id,
-          label: item.company_name,
-        }));
-      };
-      setCompanies(mapToOptions(companies.data.body));
-    })
+      })
+      .then(async () => {
+        const companies = await companyApi.getAll();
+        const mapToOptions = (data) => {
+          return data.map((item) => ({
+            value: item.company_id,
+            label: item.company_name,
+          }));
+        };
+        setCompanies(mapToOptions(companies.data.body));
+      });
   }, []);
-
 
   const layout = {
     labelCol: {
@@ -113,13 +118,22 @@ export default function CreateOrder({
 
   const onFinish = async () => {
     const newOrderData = formRef.current?.getFieldsValue();
+    const items = [];
+
+    for (let product of selectedProducts){
+      items.push({
+        quantity: product.quantity,
+        product_id: product.product.value
+      })
+    }
 
     const response = await warehouseApi.findSuitableWarehousesForOrders({
       order_type: newOrderData['Warehouse'],
       company_id: newOrderData['Company'],
-      items: [],
+      items,
     });
 
+    console.log(response);
     if (response.success) {
       onAddOrderSuccess();
     } else {
@@ -150,31 +164,21 @@ export default function CreateOrder({
           label={<p className="form-label">Select Warehouse</p>}
           rules={[{ required: true }]}
         >
-          <Select
-            options={warehouses}
-            className="form-input"
-          />
+          <Select options={warehouses} className="form-input" />
         </Form.Item>
         <Form.Item
           name="Vendor"
           label={<p className="form-label">Select Vendor</p>}
           rules={[{ required: true }]}
         >
-          <Select
-            options={vendors}
-            className="form-input"
-          />
+          <Select options={vendors} className="form-input" />
         </Form.Item>
         <Form.Item
           name="Company"
           label={<p className="form-label">Select Company</p>}
           rules={[{ required: true }]}
         >
-          <Select
-            options={companies}
-            className="form-input"
-            onChange={fetchProducts}
-          />
+          <Select options={companies} className="form-input" onChange={fetchProducts} />
         </Form.Item>
         <Form.Item
           name="Product"
@@ -182,12 +186,55 @@ export default function CreateOrder({
           rules={[{ required: true }]}
         >
           <Select
+            showSearch={}
+            filterOption={(input, option) =>
+              option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            }
             options={products}
             className="form-input"
             onSelect={handleProductSelect}
           />
         </Form.Item>
         {/* Add other order-related form fields */}
+        {/* Display selected products and quantity controls */}
+        <div className="selected-products-container">
+          {selectedProducts.length > 0 && (
+            <table className="selected-products-table">
+              <thead>
+              <tr>
+                <th>Name</th>
+                <th>Volume</th>
+                <th>Weight</th>
+                <th>Quantity</th>
+                <th>Action</th>
+              </tr>
+              </thead>
+              <tbody>
+              {selectedProducts.map((item) => (
+                <tr key={item.product.value}>
+                  <td>{item.product.label}</td>
+                  {/* Assuming that volume and weight are available as separate properties */}
+                  <td>{item.product.volume} m^3</td>
+                  <td>{item.product.weight} kg</td>
+                  <td>
+                    <InputNumber
+                      min={1}
+                      value={item.quantity}
+                      onChange={(value) => handleQuantityChange(item.product.value, value)}
+                    />
+                  </td>
+                  <td>
+                    <Button type="link" onClick={() => handleRemoveProduct(item.product.value)}>
+                      Remove
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
         <Form.Item
           {...tailLayout}
           labelAlign={'right'}
@@ -206,21 +253,6 @@ export default function CreateOrder({
           </Button>
         </Form.Item>
       </Form>
-      {/* Display selected products and quantity controls */}
-      <div className="selected-products-container">
-        {selectedProducts.map((item) => (
-          <div key={item.product.value} className="selected-product">
-            <Tag closable onClose={() => handleRemoveProduct(item.product.value)}>
-              {`${item.product.label} - Quantity: `}
-              <InputNumber
-                min={1}
-                value={item.quantity}
-                onChange={(value) => handleQuantityChange(item.product.value, value)}
-              />
-            </Tag>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
