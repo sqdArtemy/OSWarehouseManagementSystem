@@ -1,13 +1,9 @@
-import {
-  IAddProduct,
-  IProduct,
-  IProductFilters,
-} from '../interfaces/productsInterface';
+import { IAddWarehouse, IWarehouse, IWarehouseFilters } from '../interfaces/warehouseInterface';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 import { userApi } from '../../index';
 import { ISendData } from '../sendDataInterface';
 
-export class ProductApi implements IProduct {
+export class WarehouseApi implements IWarehouse {
   private readonly token: string;
   constructor() {
     this.token = userApi.getToken;
@@ -25,16 +21,16 @@ export class ProductApi implements IProduct {
     });
   }
 
-  public async addProduct(body: IAddProduct): Promise<ApiResponse> {
-    const url = '/products';
+  public async addWarehouse(body: IAddWarehouse): Promise<ApiResponse> {
+    const url = '/warehouses';
     const method = 'POST';
     const headers = {};
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async deleteProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async deleteWarehouse(id: number): Promise<ApiResponse> {
+    const url = '/warehouse/' + id;
     const method = 'DELETE';
     const headers = {};
     const body = {};
@@ -42,8 +38,8 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async getAllProducts(filters: IProductFilters): Promise<ApiResponse> {
-    const url = '/products';
+  public async getAllWarehouses(filters: IWarehouseFilters): Promise<ApiResponse> {
+    const url = '/warehouses';
     const method = 'GET';
     const headers = { filters };
     const body = {};
@@ -51,8 +47,8 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async getProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async getWarehouse(id: number): Promise<ApiResponse> {
+    const url = '/warehouse/' + id;
     const method = 'GET';
     const headers = {};
     const body = {};
@@ -60,14 +56,12 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async updateProduct(
-    body: IAddProduct,
-    id: number,
-  ): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async updateWarehouse(body: IAddWarehouse, id: number): Promise<ApiResponse> {
+    const url = '/warehouse/' + id;
     const method = 'PUT';
     const headers = {};
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
+
 }

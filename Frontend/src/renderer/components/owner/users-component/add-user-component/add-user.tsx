@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './add-user.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { userApi } from '../../../../index';
+import { useError } from '../../../error-component/error-context';
 
 export interface INewUserData {
   'First Name'?: string;
@@ -14,7 +15,8 @@ export interface INewUserData {
 export default function AddUser({
   isPopupVisible,
   hidePopup,
-  userData, onAddUserSuccess,
+  userData,
+  onAddUserSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -25,6 +27,7 @@ export default function AddUser({
   onAddUserSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   const layout = {
     labelCol: {
@@ -43,7 +46,7 @@ export default function AddUser({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
@@ -54,12 +57,6 @@ export default function AddUser({
         check = true;
       }
     }
-    if (!check) {
-      hidePopup();
-      handleReset();
-    } else {
-      hidePopup();
-    }
 
     const response = await userApi.addUser({
       user_name: newUserData['First Name'],
@@ -68,9 +65,18 @@ export default function AddUser({
       user_phone: newUserData['Phone'],
       user_role: 'supervisor',
     });
-    console.log(response);
-    if(response.success){
+
+    if (response.success) {
       onAddUserSuccess();
+      if (!check) {
+        hidePopup();
+        handleReset();
+      } else {
+        hidePopup();
+      }
+    } else {
+      console.log('response', response.message);
+      showError(response.message);
     }
     userData.setUserData(newUserData);
   };

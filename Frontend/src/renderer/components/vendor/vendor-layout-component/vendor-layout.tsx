@@ -1,23 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import './dashboard-layout.scss';
+import './vendor-layout.scss';
 import DashboardProfileIcon from '../../../../../assets/icons/dashboard-profile-icon.png';
 import DashboardIcon from '../../../../../assets/icons/dashboard-icon.png';
-import UsersIcon from '../../../../../assets/icons/dashboard-users-icon.png';
-import WarehousesIcon from '../../../../../assets/icons/dashboard-warehouses-icon.png';
 import ItemsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { userApi } from '../../../index';
 
-export function OwnerDashboardLayout() {
+export function VendorLayout() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [name, setName] = useState('Gentlemanbek');
   const sideBarElements = [
-    { iconSrc: DashboardIcon, text: 'Dashboard' },
-    { iconSrc: WarehousesIcon, text: 'Warehouses' },
-    { iconSrc: UsersIcon, text: 'Users' },
-    { iconSrc: ItemsIcon, text: 'Items' },
+    { iconSrc: DashboardIcon, text: 'Orders' },
+    { iconSrc: ItemsIcon, text: 'Vendors' },
   ];
 
   const handleSideBarElementClick = (
@@ -27,7 +23,7 @@ export function OwnerDashboardLayout() {
     const textElement: HTMLSpanElement = event.currentTarget
       .childNodes[1] as HTMLSpanElement;
     setSelected(index);
-    navigate(`/owner/${textElement.innerText.toLowerCase()}`);
+    navigate(`/vendor/${textElement.innerText.toLowerCase()}`);
   };
 
 
@@ -36,7 +32,7 @@ export function OwnerDashboardLayout() {
   })
 
   return (
-    <div className="dashboard-layout-container">
+    <div className="vendor-layout-container">
       <div className="side-bar">
         <div className="side-bar-top">
           <div className={'side-bar-top-header-container'}>
@@ -75,7 +71,7 @@ export function OwnerDashboardLayout() {
             className="side-bar-bottom-profile"
             onClick={() => {
               setSelected(null);
-              navigate('/owner/profile');
+              navigate('/vendor/profile');
             }}
           >
             <span className="side-bar-bottom-profile-icon">

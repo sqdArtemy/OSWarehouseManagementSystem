@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './sign-up-details.scss';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../../index';
-import { Tooltip } from 'antd';
+import { Button, Tooltip } from 'antd';
+import { useError } from '../../error-component/error-context';
 
 export function SignUpDetails() {
   const location = useLocation();
   const { state } = location;
   const {
-    name: companyName,
-    email: companyEmail,
-    address: companyAddress,
+    locName: companyName,
+    locEmail: companyEmail,
+    locAddress: companyAddress,
+    locLoginEmail,
+    locLoginPassword,
+    locRole,
   } = state || {};
 
   const navigate = useNavigate();
@@ -20,6 +24,18 @@ export function SignUpDetails() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
+  const { showError } = useError();
+
+  useEffect(() => {
+    if (state) {
+      setUserName(state.locFirstName || '');
+      setLastName(state.locLastName || '');
+      setUserEmail(state.locUserEmail || '');
+      setPhoneNumber(state.locPhoneNumber || '');
+      setPassword(state.locPassword || '');
+      setRePassword(state.locRePassword || '');
+    }
+  }, [state]);
 
   const handleSignUp = async () => {
     const response = await userApi.signUp({
@@ -32,7 +48,7 @@ export function SignUpDetails() {
       password,
       confirm_password: rePassword,
       user_surname: lastName,
-      user_role: 'manager',
+      user_role: locRole,
     });
 
     if (response.success) {
@@ -40,11 +56,14 @@ export function SignUpDetails() {
         case 'manager':
           navigate('/owner');
           break;
+        case 'vendor':
+          navigate('/vendor');
+          break;
         default:
           break;
       }
     } else {
-      console.log(response.message);
+      showError(response.message);
       // some error message
     }
   };
@@ -64,7 +83,24 @@ export function SignUpDetails() {
                 className="disabled"
                 id="login"
                 onClick={() => {
-                  navigate('/sign-in');
+                  console.log('locLoginEmail', locLoginEmail);
+                  console.log('locLoginPassword', locLoginPassword);
+                  navigate('/sign-in', {
+                    state: {
+                      locLoginEmail: locLoginEmail,
+                      locLoginPassword: locLoginPassword,
+                      locName: companyName,
+                      locEmail: companyEmail,
+                      locAddress: companyAddress,
+                      locFirstName: userName,
+                      locLastName: lastName,
+                      locUserEmail: userEmail,
+                      locPhoneNumber: phoneNumber,
+                      locPassword: password,
+                      locRePassword: rePassword,
+                      locRole: locRole,
+                    },
+                  });
                 }}
               >
                 Login
@@ -125,9 +161,41 @@ export function SignUpDetails() {
                 onChange={(e) => setRePassword(e.target.value)}
               />
             </Tooltip>
-            <button type="button" onClick={async () => handleSignUp()}>
-              SIGN UP
-            </button>
+
+            <span className={'form-btn-container'}>
+              <Button
+                onClick={() => {
+                  console.log('name', companyName);
+                  console.log('email', companyEmail);
+                  console.log('address', companyAddress);
+                  navigate('/sign-up', {
+                    state: {
+                      locName: companyName,
+                      locEmail: companyEmail,
+                      locAddress: companyAddress,
+                      locFirstName: userName,
+                      locLastName: lastName,
+                      locUserEmail: userEmail,
+                      locPhoneNumber: phoneNumber,
+                      locPassword: password,
+                      locRePassword: rePassword,
+                      locLoginEmail: locLoginEmail,
+                      locLoginPassword: locLoginPassword,
+                      locRole: locRole,
+                    },
+                  });
+                }}
+              >
+                Back
+              </Button>
+              <Button
+                type="primary"
+                onClick={async () => handleSignUp()}
+                className={'sign-up-btn'}
+              >
+                SIGN UP
+              </Button>
+            </span>
           </form>
         </div>
       </div>

@@ -1,15 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './add-warehouse.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { userApi } from '../../../../index';
+
+import { useError } from '../../../error-component/error-context';
+import { useLoading } from '../../../loading-component/loading';
 
 export interface INewWarehouseData {
   'Warehouse Name'?: string;
   Capacity?: string;
   Address?: string;
   Type?: string;
-  Supervisor?: string;
+  Supervisor?: string[];
 }
+
+// const options: Select['OptionType'][] = [
+//   { value: 'manager', label: 'Manager' },
+//   { value: 'vendor', label: 'Vendor' },
+// ];
 
 export default function AddWarehouse({
   isPopupVisible,
@@ -24,6 +32,35 @@ export default function AddWarehouse({
   };
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { startLoading, stopLoading } = useLoading();
+  const { showError } = useError();
+  const [options, setOptions] = React.useState<Select['OptionType'][]>([]);
+  const [supervisor, setSupervisor] = React.useState<Select['ValueType']>({});
+
+  useEffect(() => {
+    if (isPopupVisible && warehouseData.warehouseData && formRef.current) {
+      startLoading();
+      userApi.getAllUsers({ user_role: 'supervisor' }).then((res) => {
+        console.log('supervisors', res.data.body);
+
+        setOptions(
+          res.data.body.map((val) => {
+            return {
+              value: val.user_id,
+              label: val.user_name + ' ' + val.user_surname,
+            };
+          }),
+        );
+
+        setSupervisor(formRef.current.getFieldsValue()['Supervisor']);
+
+        stopLoading();
+        if (!res.success) {
+          showError(res.message);
+        }
+      });
+    }
+  }, [warehouseData]);
 
   const layout = {
     labelCol: {
@@ -36,16 +73,19 @@ export default function AddWarehouse({
     wrapperCol: { offset: 13, span: 17 },
   };
 
-  function onRoleChange() {
+  function onTypeChange() {
     console.log('change');
   }
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
+    formRef.current.setFieldsValue({
+      Supervisor: supervisor,
+    });
     const newWarehouseData = formRef.current?.getFieldsValue();
     let check = false;
     for (let key in newWarehouseData) {
@@ -53,12 +93,14 @@ export default function AddWarehouse({
         check = true;
       }
     }
+    console.log('new', newWarehouseData);
     if (!check) {
       hidePopup();
       handleReset();
     } else {
       hidePopup();
     }
+
     // await userApi.addUser({
     //   user_name: newUserData['First Name'],
     //   user_surname: newUserData['Last Name'],
@@ -118,7 +160,21 @@ export default function AddWarehouse({
           label={<p style={{ fontSize: '1vw' }}>Supervisor</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select
+            placeholder={'Select a Supervisor'}
+            style={{ minHeight: '2vw' }}
+            value={supervisor ? supervisor : undefined}
+            onChange={(value, option) => {
+              console.log('value', value);
+              console.log('option', option);
+              const supervisorObj = {
+                supervisor_id: option?.value,
+                fullName: option?.label,
+              };
+              setSupervisor(supervisorObj);
+            }}
+            options={options}
+          ></Select>
         </Form.Item>
         <Form.Item
           name="Type"
@@ -127,13 +183,13 @@ export default function AddWarehouse({
         >
           <Select
             placeholder={'Select a Type'}
-            onChange={onRoleChange}
+            onChange={onTypeChange}
             style={{ minHeight: '2vw' }}
           >
-            <Select.Option value="manager">Freezer</Select.Option>
-            <Select.Option value="shipper">Refrigerator</Select.Option>
-            <Select.Option value="manager">Dry</Select.Option>
-            <Select.Option value="shipper">Hazardous</Select.Option>
+            <Select.Option value="freezer">Freezer</Select.Option>
+            <Select.Option value="refrigerator">Refrigerator</Select.Option>
+            <Select.Option value="dry">Dry</Select.Option>
+            <Select.Option value="hazardous">Hazardous</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item

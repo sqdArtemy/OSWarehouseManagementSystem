@@ -1,18 +1,69 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './sign-up.scss';
-import { useNavigate } from 'react-router-dom';
-import { Tooltip } from 'antd';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Button, Select, Tooltip } from 'antd';
+
+const roles: Select['OptionType'][] = [
+  { value: 'manager', label: 'Manager' },
+  { value: 'vendor', label: 'Vendor' },
+];
 
 export function SignUp() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [role, setRole] = useState<Select['ValueType']>(' ');
+  const {
+    locLoginEmail,
+    locLoginPassword,
+    locName,
+    locEmail,
+    locAddress,
+    locFirstName,
+    locLastName,
+    locUserEmail,
+    locPhoneNumber,
+    locPassword,
+    locRePassword,
+    locRole,
+  } = location.state || {};
 
   const handleContinue = () => {
+    console.log('name', name);
+    console.log('email', email);
+    console.log('address', address);
     navigate('/sign-up-details', {
-      state: { name, email, address },
+      state: {
+        locLoginEmail: locLoginEmail,
+        locLoginPassword: locLoginPassword,
+        locName: name,
+        locEmail: email,
+        locAddress: address,
+        locFirstName: locFirstName,
+        locLastName: locLastName,
+        locUserEmail: locUserEmail,
+        locPhoneNumber: locPhoneNumber,
+        locPassword: locPassword,
+        locRePassword: locRePassword,
+        locRole: role,
+      },
     });
+  };
+
+  useEffect(() => {
+    console.log('locName', locName);
+    console.log('locEmail', locEmail);
+    console.log('locAddress', locAddress);
+    setName(locName || '');
+    setEmail(locEmail || '');
+    setAddress(locAddress || '');
+    setRole(locRole || '');
+  }, [locName, locEmail, locAddress]);
+
+  const onRoleChange = (value) => {
+    setRole(value);
   };
 
   return (
@@ -30,7 +81,22 @@ export function SignUp() {
                 className="disabled"
                 id="login"
                 onClick={() => {
-                  navigate('/sign-in');
+                  navigate('/sign-in', {
+                    state: {
+                      locLoginEmail: locLoginEmail,
+                      locLoginPassword: locLoginPassword,
+                      locName: name,
+                      locEmail: email,
+                      locAddress: address,
+                      locFirstName: locFirstName,
+                      locLastName: locLastName,
+                      locUserEmail: locUserEmail,
+                      locPhoneNumber: locPhoneNumber,
+                      locPassword: locPassword,
+                      locRePassword: locRePassword,
+                      locRole: role,
+                    },
+                  });
                 }}
               >
                 Login
@@ -40,6 +106,20 @@ export function SignUp() {
           </div>
 
           <form>
+            <Tooltip title={'Select a Role'} placement={'topLeft'}>
+              <Select
+                className={'sign-up-select-role'}
+                placeholder={'Select a Role'}
+                value={role ? role : undefined}
+                onChange={(value) => onRoleChange(value)}
+                style={{
+                  minHeight: '2vw',
+                  marginBottom: '1vw',
+                  fontSize: '1.3vw',
+                }}
+                options={roles}
+              ></Select>
+            </Tooltip>
             <Tooltip title={'Input Name of Company'} placement={'topLeft'}>
               <input
                 id="name"
@@ -65,9 +145,9 @@ export function SignUp() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Tooltip>
-            <button type="button" onClick={handleContinue}>
+            <Button type="primary" onClick={handleContinue}>
               Continue
-            </button>
+            </Button>
           </form>
         </div>
       </div>

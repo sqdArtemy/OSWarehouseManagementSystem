@@ -1,13 +1,9 @@
-import {
-  IAddProduct,
-  IProduct,
-  IProductFilters,
-} from '../interfaces/productsInterface';
+import { IAddVendor, IVendor, IVendorFilters } from '../interfaces/VendorInterface';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 import { userApi } from '../../index';
 import { ISendData } from '../sendDataInterface';
 
-export class ProductApi implements IProduct {
+export class VendorApi implements IVendor {
   private readonly token: string;
   constructor() {
     this.token = userApi.getToken;
@@ -25,16 +21,16 @@ export class ProductApi implements IProduct {
     });
   }
 
-  public async addProduct(body: IAddProduct): Promise<ApiResponse> {
-    const url = '/products';
+  public async addVendor(body: IAddVendor): Promise<ApiResponse> {
+    const url = '/vendors';
     const method = 'POST';
     const headers = {};
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async deleteProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async deleteVendor(id: number): Promise<ApiResponse> {
+    const url = '/vendor/' + id;
     const method = 'DELETE';
     const headers = {};
     const body = {};
@@ -42,8 +38,8 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async getAllProducts(filters: IProductFilters): Promise<ApiResponse> {
-    const url = '/products';
+  public async getAllVendors(filters: IVendorFilters): Promise<ApiResponse> {
+    const url = '/vendors';
     const method = 'GET';
     const headers = { filters };
     const body = {};
@@ -51,8 +47,8 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async getProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async getVendor(id: number): Promise<ApiResponse> {
+    const url = '/vendor/' + id;
     const method = 'GET';
     const headers = {};
     const body = {};
@@ -60,14 +56,12 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async updateProduct(
-    body: IAddProduct,
-    id: number,
-  ): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async updateVendor(body: IAddVendor, id: number): Promise<ApiResponse> {
+    const url = '/vendor/' + id;
     const method = 'PUT';
     const headers = {};
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
+
 }

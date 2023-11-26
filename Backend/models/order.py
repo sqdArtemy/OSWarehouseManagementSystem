@@ -1,5 +1,5 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Integer, Column, Enum, Numeric, CheckConstraint, DateTime, func
+from sqlalchemy import Integer, Column, Enum, Numeric, CheckConstraint, DateTime, func, ForeignKey
 from db_config import Base, SessionMaker
 
 
@@ -9,6 +9,7 @@ class Order(Base):
     order_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     supplier_id = Column(Integer, nullable=False)
     recipient_id = Column(Integer, nullable=False)
+    transport_id = Column(ForeignKey("transports.transport_id"), nullable=True)
     total_price = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
     created_at = Column(DateTime, default=func.now(), nullable=False)
     updated_at = Column(DateTime, onupdate=func.now(), nullable=True)
@@ -24,6 +25,7 @@ class Order(Base):
 
     # Relationships with other tables
     ordered_items = relationship("OrderItem", back_populates="order")
+    transport = relationship("Transport", back_populates="orders")
     supplier_warehouse = relationship(
         "Warehouse",
         back_populates="supplied_orders",
@@ -60,14 +62,14 @@ class Order(Base):
         CheckConstraint("total_price > 0", name="check_total_price"),
     )
 
-    def to_dict(self):
+    def to_dict(self, cascade_fields: list[str] = ("supplier", "recipient")):
         order = SessionMaker().query(Order).filter(Order.order_id == self.order_id).first()
         supplier = order.supplier_warehouse if order.order_type == "from_warehouse" else order.supplier_vendor
         recipient = order.recipient_warehouse if order.order_type == "to_warehouse" else order.recipient_vendor
         return {
             "order_id": self.order_id,
-            "supplier": supplier.to_dict() if supplier else {},
-            "recipient": recipient.to_dict() if recipient else {},
+            "supplier": supplier.to_dict(cascade_fields=[]) if "supplier" in cascade_fields else self.supplier_id,
+            "recipient": recipient.to_dict(cascade_fields=[]) if "recipient" in cascade_fields else self.recipient_id,
             "total_price": self.total_price,
             "created_at": self.created_at,
             "updated_at": self.updated_at,

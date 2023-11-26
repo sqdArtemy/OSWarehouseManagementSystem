@@ -25,10 +25,16 @@ import AdminUsers from './components/admin/users-component/users';
 import AdminDashboard from './components/admin/dashboard-component/dashboard';
 import AdminTransport from './components/admin/transport-component/transport';
 import { ErrorProvider } from './components/error-component/error-context';
+import { LoadingProvider } from './components/loading-component/loading';
+import Vendors from './components/vendor/vendors-component/vendors';
+import VendorOrders from './components/vendor/vendor-orders-component/vendor-orders';
+import { VendorLayout } from './components/vendor/vendor-layout-component/vendor-layout';
+
 
 export default function App() {
   return (
     <ErrorProvider>
+      <LoadingProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
@@ -59,8 +65,19 @@ export default function App() {
             <Route path="transport" element={<AdminTransport />} />
             <Route path="profile" element={<AdminProfile />} />
           </Route>
+          <Route path="vendor/*" element={<VendorLayout />}>
+            <Route
+              path="./"
+              element={<Navigate to="/vendor/vendors" replace />}
+            />
+            <Route path="vendors" element={<Vendors />} />
+            <Route path="orders" element={<VendorOrders />} />
+            <Route path="profile" element={<Profile />} />
+            {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
+          </Route>
         </Routes>
       </Router>
+      </LoadingProvider>
     </ErrorProvider>
   );
 }

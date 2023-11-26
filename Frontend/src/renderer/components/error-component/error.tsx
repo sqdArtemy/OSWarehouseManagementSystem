@@ -4,14 +4,17 @@ import './error.scss';
 
 const ErrorPopup = ({ isVisible, content, handleClose }) => {
   return (
-    <Modal
-      open={isVisible}
-      onCancel={handleClose}
-      footer={null}
-      className={'error-popup'}
-    >
-      {content}
-    </Modal>
+    <div style={{ position: 'absolute', zIndex: '9999' }}>
+      <Modal
+        open={isVisible}
+        onCancel={handleClose}
+        footer={null}
+        className={'error-popup'}
+        styles={{ zIndex: 9999 }}
+      >
+        {content}
+      </Modal>
+    </div>
   );
 };
 

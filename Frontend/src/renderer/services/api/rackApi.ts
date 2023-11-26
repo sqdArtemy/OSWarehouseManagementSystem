@@ -1,13 +1,12 @@
 import {
-  IAddProduct,
-  IProduct,
-  IProductFilters,
-} from '../interfaces/productsInterface';
+  IAddRack,
+  IRack,
+} from '../interfaces/rackInterface';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 import { userApi } from '../../index';
 import { ISendData } from '../sendDataInterface';
 
-export class ProductApi implements IProduct {
+export class RackApi implements IRack {
   private readonly token: string;
   constructor() {
     this.token = userApi.getToken;
@@ -25,16 +24,16 @@ export class ProductApi implements IProduct {
     });
   }
 
-  public async addProduct(body: IAddProduct): Promise<ApiResponse> {
-    const url = '/products';
+  public async addRack(body: IAddRack): Promise<ApiResponse> {
+    const url = '/racks';
     const method = 'POST';
     const headers = {};
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async deleteProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async deleteRack(id: number): Promise<ApiResponse> {
+    const url = '/rack/' + id;
     const method = 'DELETE';
     const headers = {};
     const body = {};
@@ -42,17 +41,8 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async getAllProducts(filters: IProductFilters): Promise<ApiResponse> {
-    const url = '/products';
-    const method = 'GET';
-    const headers = { filters };
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
-  }
-
-  public async getProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
+  public async getRack(id: number): Promise<ApiResponse> {
+    const url = '/rack/' + id;
     const method = 'GET';
     const headers = {};
     const body = {};
@@ -60,11 +50,11 @@ export class ProductApi implements IProduct {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async updateProduct(
-    body: IAddProduct,
+  public async updateRack(
+    body: IAddRack,
     id: number,
   ): Promise<ApiResponse> {
-    const url = '/product/' + id;
+    const url = '/rack/' + id;
     const method = 'PUT';
     const headers = {};
 

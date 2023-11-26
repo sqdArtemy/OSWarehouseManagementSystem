@@ -51,7 +51,7 @@ export default function EditWarehouse({
 
   const onCancel = () => {
     hidePopup();
-    handleReset();
+    // handleReset();
   };
 
   const onFinish = async () => {
