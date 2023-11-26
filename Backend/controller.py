@@ -91,18 +91,22 @@ def controller(request: dict) -> dict:
                 return inventory_view.create(request=request)
 
         # Order`s endpoints
+        elif "/orders" in url:
+            if method == Method.GET.value:
+                return order_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return order_view.create(request=request)
         elif "/order" in url:
             if method == Method.GET.value:
                 return order_view.get(request=request)
             elif method == Method.DELETE.value:
                 return order_view.delete(request=request)
             elif method == Method.PUT.value:
+                if "/confirm" in url:
+                    return order_view.confirm(request=request)
+                if "/cancel" in url:
+                    return order_view.cancel(request=request)
                 return order_view.update(request=request)
-        elif "/orders" in url:
-            if method == Method.GET.value:
-                return order_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return order_view.create(request=request)
 
         # OrderItem`s endpoints
         elif "/order_item" in url:
@@ -196,14 +200,20 @@ def controller(request: dict) -> dict:
                 return warehouse_view.create(request=request)
         elif "/warehouse" in url:
             if method == Method.GET.value:
+                if "/suitable-warehouses-for-orders" in url:
+                    return warehouse_view.suitable_for_order(request=request)
                 return warehouse_view.get(request=request)
             elif method == Method.DELETE.value:
                 return warehouse_view.delete(request=request)
             elif method == Method.PUT.value:
                 return warehouse_view.update(request=request)
 
-
         # Transport`s endpoints
+        elif "/transports" in url:
+            if method == Method.GET.value:
+                return transport_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return transport_view.create(request=request)
         elif "/transport" in url:
             if method == Method.GET.value:
                 return transport_view.get(request=request)
@@ -211,11 +221,6 @@ def controller(request: dict) -> dict:
                 return transport_view.delete(request=request)
             elif method == Method.PUT.value:
                 return transport_view.update(request=request)
-        elif "/transports" in url:
-            if method == Method.GET.value:
-                return transport_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return transport_view.create(request=request)
 
         # In case of no route found
         else:

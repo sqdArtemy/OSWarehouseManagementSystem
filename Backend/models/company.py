@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String
-from db_config import Base
+from db_config import Base, get_session
 
 
 class Company(Base):
@@ -15,9 +15,12 @@ class Company(Base):
     users = relationship("User", back_populates="company")
     warehouses = relationship("Warehouse", back_populates="company")
 
-    def to_dict(self, cascade_fields: list[str] = None):
-        return {
-            "company_id": self.company_id,
-            "company_name": self.company_name,
-            "company_email": self.company_email
-        }
+    def to_dict(self, cascade_fields: list[str] = ()):
+        with get_session() as session:
+            company = session.query(Company).filter(Company.company_id == self.company_id).first()
+            return {
+                "company_id": self.company_id,
+                "company_name": self.company_name,
+                "company_email": self.company_email,
+                "warehouses": [warehouse.to_dict() for warehouse in company.warehouses] if "warehouses" in cascade_fields else self.warehouses,
+            }

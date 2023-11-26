@@ -1,13 +1,13 @@
-from decimal import Decimal
 from sqlite3 import IntegrityError
 
 from sqlalchemy import func
 
-from db_config import get_session, SessionMaker
-from models import Warehouse, User, Rack
+from db_config import get_session
+from models import Warehouse, User, Rack, Product, Inventory
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
-from utilities import ValidationError, DatabaseError, decode_token, extract_id_from_url
+from utilities import ValidationError, DatabaseError, decode_token, extract_id_from_url, is_instance_already_exists
+from utilities.enums.data_related_enums import UserRole
 from utilities.enums.method import Method
 
 
@@ -93,48 +93,49 @@ class WarehouseView(GenericView):
         :return: dictionary containing status_code and response body
         """
 
-        # id of warehouse to be modified
-        warehouse_id = extract_id_from_url(request["url"], "warehouse")
+        with get_session() as session:
+            # id of warehouse to be modified
+            warehouse_id = extract_id_from_url(request["url"], "warehouse")
 
-        updator = decode_token(self.headers.get("token"))
-        company_id = SessionMaker().query(User.company_id).filter_by(user_id=updator).scalar()
-        supervisor_id = self.body.get("supervisor_id")
-        supervisor = SessionMaker().query(User).filter_by(user_id=supervisor_id,
-                                                          user_role='supervisor',
-                                                          company_id=company_id).first()
-        if not supervisor:
-            raise ValidationError("supervisor not found", 404)
+            updator = decode_token(self.headers.get("token"))
+            company_id = session.query(User.company_id).filter_by(user_id=updator).scalar()
+            supervisor_id = self.body.get("supervisor_id")
+            supervisor = session.query(User).filter_by(user_id=supervisor_id,
+                                                              user_role='supervisor',
+                                                              company_id=company_id).first()
+            if not supervisor:
+                raise ValidationError("supervisor not found", 404)
 
-        existing_warehouse = SessionMaker().query(Warehouse).filter(
-            Warehouse.supervisor_id == supervisor_id,
-            Warehouse.warehouse_id != warehouse_id
-        ).first()
-        if existing_warehouse:
-            raise ValidationError("The specified supervisor is already assigned to another warehouse", 400)
+            existing_warehouse = session.query(Warehouse).filter(
+                Warehouse.supervisor_id == supervisor_id,
+                Warehouse.warehouse_id != warehouse_id
+            ).first()
+            if existing_warehouse:
+                raise ValidationError("The specified supervisor is already assigned to another warehouse", 400)
 
-        # Check if the warehouse exists and belongs to the same company
-        warehouse = SessionMaker().query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
+            # Check if the warehouse exists and belongs to the same company
+            warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
 
-        if not warehouse:
-            raise ValidationError("Warehouse Not Found", 404)
+            if not warehouse:
+                raise ValidationError("Warehouse Not Found", 404)
 
-        overall_capacity = self.body.get("overall_capacity")
+            overall_capacity = self.body.get("overall_capacity")
 
-        # Calculate the change in capacity
-        capacity_change = float(warehouse.overall_capacity) - float(overall_capacity)
+            # Calculate the change in capacity
+            capacity_change = float(warehouse.overall_capacity) - float(overall_capacity)
 
-        # Check if the overall capacity is being reduced
-        if overall_capacity < warehouse.overall_capacity:
-            racks_sum = SessionMaker().query(
-                func.sum(Rack.overall_capacity),
-                func.sum(Rack.remaining_capacity)
-            ).filter_by(warehouse_id=warehouse_id).first()
-            if racks_sum[0] is not None and overall_capacity < racks_sum[0]:
-                raise ValidationError("Overall capacity cannot be less than the overall capacity in racks", 400)
-            elif racks_sum[1] is not None and overall_capacity < racks_sum[1]:
-                raise ValidationError("Overall capacity cannot be less than the remaining capacity in racks", 400)
-            elif capacity_change > warehouse.remaining_capacity:
-                raise ValidationError("Overall capacity cannot be less than the remaining capacity", 400)
+            # Check if the overall capacity is being reduced
+            if overall_capacity < warehouse.overall_capacity:
+                racks_sum = session.query(
+                    func.sum(Rack.overall_capacity),
+                    func.sum(Rack.remaining_capacity)
+                ).filter_by(warehouse_id=warehouse_id).first()
+                if racks_sum[0] is not None and overall_capacity < racks_sum[0]:
+                    raise ValidationError("Overall capacity cannot be less than the overall capacity in racks", 400)
+                elif racks_sum[1] is not None and overall_capacity < racks_sum[1]:
+                    raise ValidationError("Overall capacity cannot be less than the remaining capacity in racks", 400)
+                elif capacity_change > warehouse.remaining_capacity:
+                    raise ValidationError("Overall capacity cannot be less than the remaining capacity", 400)
 
         # Update warehouse information
         self.body["remaining_capacity"] = warehouse.remaining_capacity - capacity_change
@@ -151,13 +152,13 @@ class WarehouseView(GenericView):
         :return: dictionary containing status_code and response body
         """
 
-        # id of warehouse to be deleted
-        warehouse_id = extract_id_from_url(request["url"], "warehouse")
-
-        deleter = decode_token(self.headers.get("token"))
-        company_id = SessionMaker().query(User.company_id).filter_by(user_id=deleter).scalar()
-
         with get_session() as session:
+            # id of warehouse to be deleted
+            warehouse_id = extract_id_from_url(request["url"], "warehouse")
+
+            deleter = decode_token(self.headers.get("token"))
+            company_id = session.query(User.company_id).filter_by(user_id=deleter).scalar()
+
             warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
 
             if not warehouse:
@@ -191,48 +192,49 @@ class WarehouseView(GenericView):
         :param request: dictionary containing url, method, and headers
         :return: dictionary containing status_code and response body
         """
-        # id of the warehouse to be retrieved
-        warehouse_id = extract_id_from_url(request["url"], "warehouse")
+        with get_session() as session:
+            # id of the warehouse to be retrieved
+            warehouse_id = extract_id_from_url(request["url"], "warehouse")
 
-        retriever = decode_token(self.headers.get("token"))
-        company_id = SessionMaker().query(User.company_id).filter_by(user_id=retriever).scalar()
+            retriever = decode_token(self.headers.get("token"))
+            company_id = session.query(User.company_id).filter_by(user_id=retriever).scalar()
 
-        warehouse = SessionMaker().query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
+            warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse_id, company_id=company_id).first()
 
-        if not warehouse:
-            raise ValidationError("Warehouse Not Found", 404)
+            if not warehouse:
+                raise ValidationError("Warehouse Not Found", 404)
 
-        # Get details about the warehouse
-        warehouse_info = {
-            "warehouse_id": warehouse.warehouse_id,
-            "supervisor_id": warehouse.supervisor_id,
-            "warehouse_name": warehouse.warehouse_name,
-            "warehouse_address": warehouse.warehouse_address,
-            "overall_capacity": warehouse.overall_capacity,
-            "remaining_capacity": warehouse.remaining_capacity,
-            "warehouse_type": warehouse.warehouse_type,
-            "racks": []
-        }
-
-        # Get details about racks in the warehouse
-        racks = SessionMaker().query(Rack).filter_by(warehouse_id=warehouse_id).all()
-
-        for rack in racks:
-            rack_info = {
-                "rack_id": rack.rack_id,
-                "rack_position": rack.rack_position,
-                "overall_capacity": rack.overall_capacity,
-                "remaining_capacity": rack.remaining_capacity,
-                "ratio": (rack.remaining_capacity / rack.overall_capacity) * 100
+            # Get details about the warehouse
+            warehouse_info = {
+                "warehouse_id": warehouse.warehouse_id,
+                "supervisor_id": warehouse.supervisor_id,
+                "warehouse_name": warehouse.warehouse_name,
+                "warehouse_address": warehouse.warehouse_address,
+                "overall_capacity": warehouse.overall_capacity,
+                "remaining_capacity": warehouse.remaining_capacity,
+                "warehouse_type": warehouse.warehouse_type,
+                "racks": []
             }
-            warehouse_info["racks"].append(rack_info)
 
-        response_data = {
-            "status": 201,
-            "data": warehouse_info,
-            "headers": self.headers
-        }
-        return response_data
+            # Get details about racks in the warehouse
+            racks = session.query(Rack).filter_by(warehouse_id=warehouse_id).all()
+
+            for rack in racks:
+                rack_info = {
+                    "rack_id": rack.rack_id,
+                    "rack_position": rack.rack_position,
+                    "overall_capacity": rack.overall_capacity,
+                    "remaining_capacity": rack.remaining_capacity,
+                    "ratio": (rack.remaining_capacity / rack.overall_capacity) * 100
+                }
+                warehouse_info["racks"].append(rack_info)
+
+            response_data = {
+                "status": 201,
+                "data": warehouse_info,
+                "headers": self.headers
+            }
+            return response_data
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
@@ -242,5 +244,83 @@ class WarehouseView(GenericView):
         :param request: dictionary containing url, method, headers, and filters
         :return: dictionary containing status_code and response body
         """
+        with get_session() as session:
+            requester_id = decode_token(self.headers.get("token"))
+            requester = session.query(User).filter(User.user_id == requester_id).first()
+            company = requester.company
 
-        return super().get_list(request=request, **kwargs)
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                return super().get_list(request=request, **kwargs)
+            else:
+                query = session.query(Warehouse).filter(Warehouse.company_id == company.company_id)
+                return super().get_list(request=request, pre_selected_query=query, **kwargs)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def suitable_for_order(self, request: dict, **kwargs) -> dict:
+        """
+        Returns a list of warehouses that are suitable for the order according to the order`s items.
+        :param request: dictionary containing url, method, headers, and filters
+        :return: response with list of available warehouses
+        """
+        if self.requester_role != UserRole.VENDOR.value["code"]:
+            raise ValidationError("You are not allowed to perform this action", 403)
+
+        company_id = self.body.get("company_id", None)
+        order_type = self.body.get("order_type", None)
+        products = self.body.get("items", [])
+        products_to_order = {}
+        main_product_type = None
+        product_ids = []
+        total_volume = 0
+
+        with get_session() as session:
+            if not company_id:
+                raise ValidationError("Company id is required", 400)
+            if order_type not in ["from_warehouse", "to_warehouse"]:
+                raise ValidationError("Invalid order type", 400)
+            if len(products) == 0:
+                raise ValidationError("Items are required", 400)
+            else:
+                main_product_type = session.query(Product.product_type).filter_by(product_id=products[0]["product_id"]).scalar()
+                for product in products:
+                    product_id, quantity = product.get("product_id"), product.get("quantity")
+
+                    if not is_instance_already_exists(Product, product_id=product_id):
+                        raise ValidationError(f"Product with id {product_id} does not exist", 404)
+
+                    product = session.query(Product).filter_by(product_id=product_id).first()
+                    total_volume += product.volume * quantity
+                    products_to_order[product_id] = quantity
+                    product_ids.append(product_id)
+
+                    if product.product_type != main_product_type:
+                        raise ValidationError("All products must be of the same type", 400)
+
+            # Get all warehouses of the company according to the product type
+            warehouses = session.query(Warehouse).filter(
+                Warehouse.company_id == company_id, Warehouse.warehouse_type == main_product_type
+            )
+
+            # Filter warehouses by order type
+            if order_type == "from_warehouse":
+                warehouses = warehouses.join(Rack).join(Inventory).filter(Inventory.product_id.in_(product_ids)).\
+                    with_entities(
+                        Warehouse,
+                        Inventory.product_id,
+                        func.sum(Inventory.quantity).label('total_quantity')
+                    ).group_by(Warehouse.warehouse_id, Inventory.product_id).all()
+
+                warehouses = [
+                    w[0] for w in warehouses if w[2] >= products_to_order[w[1]]
+                ]
+
+            elif order_type == "to_warehouse":
+                warehouses = warehouses.filter(Warehouse.remaining_capacity >= total_volume).all()
+
+            # Create response
+            body = [warehouse.to_dict() for warehouse in warehouses]
+            self.response.status_code = 200
+            self.response.data = body
+            return self.response.create_response()
+

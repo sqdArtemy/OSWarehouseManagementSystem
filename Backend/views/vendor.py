@@ -1,3 +1,4 @@
+from db_config import get_session
 from models import Vendor, User
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
@@ -20,15 +21,16 @@ class VendorView(GenericView):
         :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body with list of dictionaries of vendors
         """
-        # get owner_id from token and filter vendors by it
-        owner_id = decode_token(self.headers.get("token"))
-        vendors = self.session.query(Vendor).filter(Vendor.vendor_owner_id == owner_id)
+        with get_session() as session:
+            # get owner_id from token and filter vendors by it
+            owner_id = decode_token(self.headers.get("token"))
+            vendors = session.query(Vendor).filter(Vendor.vendor_owner_id == owner_id)
 
-        # create response
-        instances = vendors.all()
-        body = [instance.to_dict() for instance in instances]
-        self.response.status_code = 200
-        self.response.data = body
+            # create response
+            instances = vendors.all()
+            body = [instance.to_dict() for instance in instances]
+            self.response.status_code = 200
+            self.response.data = body
 
         return self.response.create_response()
 
@@ -40,13 +42,14 @@ class VendorView(GenericView):
         :param request: dictionary containing url, method and body
         :return: dictionary containing status_code and response body
         """
-        # check id user_id from token and vendor_owner_id are the same
-        user_id = decode_token(self.headers.get("token"))
-        vendor = self.session.query(Vendor).filter(Vendor.vendor_owner_id == user_id).first()
-        if self.instance is not None and vendor.vendor_owner_id != self.instance.vendor_owner_id:
-            raise ValidationError("Vendor with given id does not exist.", 404)
+        with get_session() as session:
+            # check id user_id from token and vendor_owner_id are the same
+            user_id = decode_token(self.headers.get("token"))
+            vendor = session.query(Vendor).filter(Vendor.vendor_owner_id == user_id).first()
+            if self.instance is not None and vendor.vendor_owner_id != self.instance.vendor_owner_id:
+                raise ValidationError("Vendor with given id does not exist.", 404)
 
-        return super().get(request=request)
+            return super().get(request=request)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
@@ -56,33 +59,33 @@ class VendorView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
+        with get_session() as session:
+            user_id = decode_token(self.headers.get("token"))
 
-        user_id = decode_token(self.headers.get("token"))
+            # get the role for  user_id
+            user = session.query(User).filter(User.user_id == user_id).first()
 
-        # get the role for  user_id
-        user = self.session.query(User).filter(User.user_id == user_id).first()
+            # if role is not vendor then return 403
+            if user.user_role != UserRole.VENDOR.value["name"]:
+                self.response.status_code = 403
+                self.response.message = "Ebanmisan? San vendor emassan"
+                return self.response.create_response()
 
-        # if role is not vendor then return 403
-        if user.user_role != UserRole.VENDOR.value["name"]:
-            self.response.status_code = 403
-            self.response.message = "Ebanmisan? San vendor emassan"
-            return self.response.create_response()
+            # If the vendor_name of this vendor owner already exists
+            vendor_name = self.body.get("vendor_name")
 
-        # If the vendor_name of this vendor owner already exists
-        vendor_name = self.body.get("vendor_name")
+            query = session.query(Vendor).filter(Vendor.vendor_owner_id == user_id)
+            query = query.filter(Vendor.vendor_name == vendor_name)
+            if query.first() is not None:
+                self.response.status_code = 400
+                self.response.message = "The store point already exists for this vendor"
+                return self.response.create_response()
 
-        query = self.session.query(Vendor).filter(Vendor.vendor_owner_id == user_id)
-        query = query.filter(Vendor.vendor_name == vendor_name)
-        if query.first() is not None:
-            self.response.status_code = 400
-            self.response.message = "The store point already exists for this vendor"
-            return self.response.create_response()
+            # else just add owner_id to the body
+            else:
+                self.body["vendor_owner_id"] = user_id
 
-        # else just add owner_id to the body
-        else:
-            self.body["vendor_owner_id"] = user_id
-
-        return super().create(request=request)
+            return super().create(request=request)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.PUT.value])
@@ -92,42 +95,41 @@ class VendorView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: Add checkers and validations
+        with get_session() as session:
+            # check id user_id from token and vendor_owner_id are the same
+            user_id = decode_token(self.headers.get("token"))
+            vendor = session.query(Vendor).filter(Vendor.vendor_owner_id == user_id).first()
+            if self.instance is not None and vendor.vendor_owner_id != self.instance.vendor_owner_id:
+                raise ValidationError("Store point not found", 404)
 
-        # check id user_id from token and vendor_owner_id are the same
-        user_id = decode_token(self.headers.get("token"))
-        vendor = self.session.query(Vendor).filter(Vendor.vendor_owner_id == user_id).first()
-        if self.instance is not None and vendor.vendor_owner_id != self.instance.vendor_owner_id:
-            raise ValidationError("Store point not found", 404)
+            # if vendor has orders with status cancelled, finished, damaged, lost
+            # 400 ‘You cannot update the store point during active orders’
+            for order in vendor.received_orders + vendor.supplied_orders:
+                if order.order_status not in ["cancelled", "finished", "damaged", "lost"]:
+                    self.response.status_code = 400
+                    self.response.message = "You cannot update the store point during active orders"
+                    return self.response.create_response()
 
-        # if vendor has orders with status cancelled, finished, damaged, lost
-        # 400 ‘You cannot update the store point during active orders’
-        for order in vendor.received_orders + vendor.supplied_orders:
-            if order.order_status not in ["cancelled", "finished", "damaged", "lost"]:
-                self.response.status_code = 400
-                self.response.message = "You cannot update the store point during active orders"
+            # get the role for user_id
+            user = session.query(User).filter(User.user_id == user_id).first()
+
+            # if role is not vendor then return 403
+            if user.user_role != UserRole.VENDOR.value["name"]:
+                self.response.status_code = 403
+                self.response.message = "You are not allowed to update this vendor"
                 return self.response.create_response()
 
-        # get the role for user_id
-        user = self.session.query(User).filter(User.user_id == user_id).first()
+            # If the vendor_name of this vendor owner already exists
+            vendor_name = self.body.get("vendor_name")
 
-        # if role is not vendor then return 403
-        if user.user_role != UserRole.VENDOR.value["name"]:
-            self.response.status_code = 403
-            self.response.message = "Ebanmisan? San vendor emassan"
-            return self.response.create_response()
+            query = session.query(Vendor).filter(Vendor.vendor_owner_id == user_id)
+            query = query.filter(Vendor.vendor_name == vendor_name)
+            if query.first() is not None:
+                self.response.status_code = 400
+                self.response.message = "The store point already exists for this vendor"
+                return self.response.create_response()
 
-        # If the vendor_name of this vendor owner already exists
-        vendor_name = self.body.get("vendor_name")
-
-        query = self.session.query(Vendor).filter(Vendor.vendor_owner_id == user_id)
-        query = query.filter(Vendor.vendor_name == vendor_name)
-        if query.first() is not None:
-            self.response.status_code = 400
-            self.response.message = "The store point already exists for this vendor"
-            return self.response.create_response()
-
-        return super().update(request=request)
+            return super().update(request=request)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.DELETE.value])
@@ -137,14 +139,15 @@ class VendorView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        vendor = self.session.query(Vendor).filter(Vendor.vendor_id == self.instance_id).first()
+        with get_session() as session:
+            vendor = session.query(Vendor).filter(Vendor.vendor_id == self.instance_id).first()
 
-        # if vendor has orders with status cancelled, finished, damaged, lost
-        # 400 ‘You cannot update the store point during active orders’
-        for order in vendor.received_orders + vendor.supplied_orders:
-            if order.order_status not in ["cancelled", "finished", "damaged", "lost"]:
-                self.response.status_code = 400
-                self.response.message = "You cannot update the store point during active orders"
-                return self.response.create_response()
+            # if vendor has orders with status cancelled, finished, damaged, lost
+            # 400 ‘You cannot update the store point during active orders’
+            for order in vendor.received_orders + vendor.supplied_orders:
+                if order.order_status not in ["cancelled", "finished", "damaged", "lost"]:
+                    self.response.status_code = 400
+                    self.response.message = "You cannot update the store point during active orders"
+                    return self.response.create_response()
 
-        return super().delete(request=request)
+            return super().delete(request=request)

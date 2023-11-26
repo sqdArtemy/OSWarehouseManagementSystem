@@ -1,7 +1,7 @@
 import bcrypt
 import re
 
-from db_config import SessionMaker
+from db_config import get_session
 from models import User
 from utilities.exceptions import ValidationError
 
@@ -42,17 +42,18 @@ def decode_token(token: str) -> int:
     :param token: encoded token.
     :return: id of the user from database
     """
-    if token is None:
-        raise ValidationError("Token is not provided.")
-    if not token.isalnum():
-        raise ValidationError("Token is not valid.")
+    with get_session() as session:
+        if token is None:
+            raise ValidationError("Token is not provided.")
+        if not token.isalnum():
+            raise ValidationError("Token is not valid.")
 
-    user_id = (int(token[1:]) - 420) // 69
+        user_id = (int(token[1:]) - 420) // 69
 
-    if SessionMaker().query(User).filter_by(user_id=user_id).first() is None:
-        raise ValidationError("User with this token does not exist.")
+        if session.query(User).filter_by(user_id=user_id).first() is None:
+            raise ValidationError("User with this token does not exist.")
 
-    return user_id
+        return user_id
 
 
 def extract_id_from_url(url: str, model_name: str) -> int | None:

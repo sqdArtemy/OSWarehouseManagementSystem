@@ -1,4 +1,5 @@
-from utilities import extract_id_from_url
+from db_config import get_session
+from utilities import extract_id_from_url, decode_token
 from utilities.templates import ResponseFactory
 
 
@@ -70,16 +71,20 @@ def view_function_middleware(function):
         request = kwargs["request"]
         instance.request = request
         instance.headers = request.get("headers", {})
+        token = instance.headers.get("token", None)
+        instance.requester_id = decode_token(token) if token else None
+        instance.requester_role = instance.headers.get("token", " ")[0]
         instance.body = request.get("body", {})
         instance.url = request.get("url", "")
         instance.method = request.get("method", "")
         instance.instance_id = extract_id_from_url(instance.url, instance.model_name)
 
-        instance.instance = instance.session.query(instance.model).filter(
-            getattr(instance.model, f"{instance.model_name}_id") == instance.instance_id
-        ).first() if instance.instance_id is not None else None
-        instance.response = ResponseFactory(400, {}, "", instance.headers)
+        with get_session() as session:
+            instance.instance = session.query(instance.model).filter(
+                getattr(instance.model, f"{instance.model_name}_id") == instance.instance_id
+            ).first() if instance.instance_id is not None else None
+            instance.response = ResponseFactory(400, {}, "", instance.headers)
 
-        return function(*args, **kwargs)
+            return function(*args, **kwargs)
 
     return wrapper

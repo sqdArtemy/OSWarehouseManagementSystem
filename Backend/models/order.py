@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Integer, Column, Enum, Numeric, CheckConstraint, DateTime, func, ForeignKey
-from db_config import Base, SessionMaker
+from db_config import Base, get_session
 
 
 class Order(Base):
@@ -62,16 +62,18 @@ class Order(Base):
         CheckConstraint("total_price > 0", name="check_total_price"),
     )
 
-    def to_dict(self, cascade_fields: list[str] = ("supplier", "recipient")):
-        order = SessionMaker().query(Order).filter(Order.order_id == self.order_id).first()
-        supplier = order.supplier_warehouse if order.order_type == "from_warehouse" else order.supplier_vendor
-        recipient = order.recipient_warehouse if order.order_type == "to_warehouse" else order.recipient_vendor
-        return {
-            "order_id": self.order_id,
-            "supplier": supplier.to_dict(cascade_fields=[]) if "supplier" in cascade_fields else self.supplier_id,
-            "recipient": recipient.to_dict(cascade_fields=[]) if "recipient" in cascade_fields else self.recipient_id,
-            "total_price": self.total_price,
-            "created_at": self.created_at,
-            "updated_at": self.updated_at,
-            "order_status": self.order_status
-        }
+    def to_dict(self, cascade_fields: list[str] = ("supplier", "recipient", "transport")):
+        with get_session() as session:
+            order = session.query(Order).filter(Order.order_id == self.order_id).first()
+            supplier = order.supplier_warehouse if order.order_type == "from_warehouse" else order.supplier_vendor
+            recipient = order.recipient_warehouse if order.order_type == "to_warehouse" else order.recipient_vendor
+            return {
+                "order_id": self.order_id,
+                "supplier": supplier.to_dict(cascade_fields=[]) if "supplier" in cascade_fields else self.supplier_id,
+                "recipient": recipient.to_dict(cascade_fields=[]) if "recipient" in cascade_fields else self.recipient_id,
+                "total_price": self.total_price,
+                "created_at": self.created_at,
+                "updated_at": self.updated_at,
+                "order_status": self.order_status,
+                "transport": self.transport.to_dict() if "transport" in cascade_fields else self.transport_id,
+            }
