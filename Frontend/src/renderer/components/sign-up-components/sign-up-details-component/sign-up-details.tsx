@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../../index';
 import { Button, Tooltip } from 'antd';
 import { useError } from '../../error-component/error-context';
+import { useLoading } from '../../loading-component/loading';
 
 export function SignUpDetails() {
   const location = useLocation();
@@ -25,6 +26,7 @@ export function SignUpDetails() {
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
   const { showError } = useError();
+  const { startLoading, stopLoading } = useLoading();
 
   useEffect(() => {
     if (state) {
@@ -38,6 +40,7 @@ export function SignUpDetails() {
   }, [state]);
 
   const handleSignUp = async () => {
+    startLoading();
     const response = await userApi.signUp({
       company_address: companyAddress,
       company_email: companyEmail,
@@ -52,6 +55,7 @@ export function SignUpDetails() {
     });
 
     if (response.success) {
+      stopLoading();
       switch (response.data?.user_role) {
         case 'manager':
           navigate('/owner');
@@ -63,6 +67,7 @@ export function SignUpDetails() {
           break;
       }
     } else {
+      stopLoading();
       showError(response.message);
       // some error message
     }
