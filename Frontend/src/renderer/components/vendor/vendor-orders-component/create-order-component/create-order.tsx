@@ -68,7 +68,8 @@ export default function CreateOrder({
         value: item.product_id,
         label: item.product_name,
         volume: item.volume,
-        weight: item.weight
+        weight: item.weight,
+        price: item.price
       }));
     };
 
@@ -144,11 +145,13 @@ export default function CreateOrder({
     const newOrderData = formRef.current?.getFieldsValue();
     const items = [];
 
+    let totalPrice = 0;
     for (let product of selectedProducts){
       items.push({
         quantity: product.quantity,
         product_id: product.product.value
       })
+      totalPrice += Number(product.quantity) * Number(product.product.price);
     }
 
     const response = await warehouseApi.findSuitableWarehousesForOrders({
@@ -157,8 +160,18 @@ export default function CreateOrder({
       items,
     });
 
+
     if (response.success) {
-      setNewOrderData(response.data.body);
+      const data = {
+        warehouses: response.data.body,
+        totalPrice,
+        orderDetails: {  // Include the order details here
+          vendor_id: newOrderData['Vendor'],
+          items,
+          order_type: newOrderData['Warehouse'],
+        },
+      };
+      setNewOrderData(data);
       setIsPopupVisible(true);
     } else {
       showError(response.message);
@@ -185,7 +198,7 @@ export default function CreateOrder({
       >
         <Form.Item
           name="Warehouse"
-          label={<p className="form-label">Select Warehouse</p>}
+          label={<p className="form-label">To Warehouse or From Warehouse?</p>}
           rules={[{ required: true }]}
         >
           <Select options={warehouses} className="form-input" />
@@ -236,6 +249,7 @@ export default function CreateOrder({
                 <th>Name</th>
                 <th>Volume</th>
                 <th>Weight</th>
+                <th>Price per 1 unit</th>
                 <th>Quantity</th>
                 <th>Action</th>
               </tr>
@@ -247,6 +261,7 @@ export default function CreateOrder({
                   {/* Assuming that volume and weight are available as separate properties */}
                   <td>{item.product.volume} m^3</td>
                   <td>{item.product.weight} kg</td>
+                  <td>{item.product.price} kg</td>
                   <td>
                     <InputNumber
                       min={1}
