@@ -31,6 +31,6 @@ class User(Base):
                 "user_surname": self.user_surname,
                 "user_phone": self.user_phone,
                 "user_email": self.user_email,
-                "user_address": self.user_address,
+                "user_address": self.user_address if self.user_address is not None else "",
                 "user_role": self.user_role
             }
