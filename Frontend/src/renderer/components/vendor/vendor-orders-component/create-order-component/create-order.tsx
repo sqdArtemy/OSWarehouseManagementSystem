@@ -4,6 +4,9 @@ import { vendorApi, companyApi, warehouseApi, productApi } from '../../../../ind
 import { useError } from '../../../error-component/error-context';
 import './create-order.scss';
 import { IProductFilters } from '../../../../services/interfaces/productsInterface';
+import { Modal } from 'antd';
+import AddVendor from '../../vendors-component/add-vendor-component/add-vendor';
+import CreateOrderDetails from './create-order-details';
 
 export default function CreateOrder({
                                       onAddOrderSuccess,
@@ -24,6 +27,13 @@ export default function CreateOrder({
     { product: Select['OptionType']; quantity: number }[]
     >([]);
 
+  const [isPopupVisible, setIsPopupVisible] = useState(false);
+  const [newOrderData, setNewOrderData] = useState({});
+
+
+  const hideAddPopup = () => {
+    setIsPopupVisible(false);
+  };
   const handleProductSelect = (value, option) => {
     const isProductAlreadySelected = selectedProducts.some(
       (item) => item.product.value === option.value
@@ -147,9 +157,9 @@ export default function CreateOrder({
       items,
     });
 
-    console.log(response);
     if (response.success) {
-
+      setNewOrderData(response.data.body);
+      setIsPopupVisible(true);
     } else {
       showError(response.message);
     }
@@ -274,6 +284,20 @@ export default function CreateOrder({
           </Button>
         </Form.Item>
       </Form>
+      <Modal
+        title="Order Details"
+        visible={isPopupVisible}
+        onCancel={hideAddPopup}
+        footer={null}
+      >
+        {newOrderData && (
+          <CreateOrderDetails
+            orderDetails={newOrderData}
+            hidePopup={hideAddPopup}
+            isPopupVisible={isPopupVisible}
+          />
+        )}
+      </Modal>
     </div>
   );
 }
