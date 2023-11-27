@@ -34,6 +34,7 @@ export default function Warehouses() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
+  const [actionClicked, setActionClicked] = useState(false);
   const [isAddWarehouseVisible, setIsAddWarehouseVisible] = useState(false);
   const [isEditWarehouseVisible, setIsEditWarehouseVisible] = useState(false);
   const [warehouseData, setWarehouseData] = useState({});
@@ -55,9 +56,11 @@ export default function Warehouses() {
     if (record) {
       console.log('delete', record);
       const response = await warehouseApi.deleteWarehouse(record.warehouse_id);
-      if(!response.success) {
+      if (!response.success) {
         showError(response.message);
+        return;
       }
+      setDataSource(dataSource.filter((item) => item.key !== record.key));
     }
   };
 
@@ -73,7 +76,6 @@ export default function Warehouses() {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-
 
     if (selectedType) {
       filters.warehouse_type = selectedType.toLowerCase();
@@ -129,32 +131,37 @@ export default function Warehouses() {
 
   const onAddWarehouseSuccess = async () => {
     await getAllWarehouses(filters);
-  }
+  };
 
   const getAllWarehouses = async (filters: IWarehouseFilters) => {
     const response = await warehouseApi.getAllWarehouses(filters);
-      const warehouses = response.data?.body;
-      const data = [];
-      const allUsers = (await userApi.getAllUsers({})).data.body;
-      if (warehouses?.length) {
-        for (let i = 0; i < warehouses.length; i++) {
-          const user = allUsers?.find(user => user.user_id = warehouses[i].supervisor);
-          data.push({
-            key: (i + 1).toString(),
-            warehouseName: warehouses[i].warehouse_name,
-            supervisor: user.user_name + ' ' + user.user_surname,
-            address: warehouses[i].warehouse_address,
-            type: warehouses[i].warehouse_type,
-            capacity: warehouses[i].remaining_capacity + '/' + warehouses[i].overall_capacity,
-            warehouse_id: warehouses[i].warehouse_id,
-            overall_capacity: warehouses[i].overall_capacity,
-            remaining_capacity: warehouses[i].remaining_capacity,
-          });
-        }
-        setDataSource(data);
-      } else {
-        setDataSource([]);
+    const warehouses = response.data?.body;
+    const data = [];
+    const allUsers = (await userApi.getAllUsers({})).data.body;
+    if (warehouses?.length) {
+      for (let i = 0; i < warehouses.length; i++) {
+        const user = allUsers?.find(
+          (user) => (user.user_id = warehouses[i].supervisor),
+        );
+        data.push({
+          key: (i + 1).toString(),
+          warehouseName: warehouses[i].warehouse_name,
+          supervisor: user.user_name + ' ' + user.user_surname,
+          address: warehouses[i].warehouse_address,
+          type: warehouses[i].warehouse_type,
+          capacity:
+            warehouses[i].remaining_capacity +
+            '/' +
+            warehouses[i].overall_capacity,
+          warehouse_id: warehouses[i].warehouse_id,
+          overall_capacity: warehouses[i].overall_capacity,
+          remaining_capacity: warehouses[i].remaining_capacity,
+        });
       }
+      setDataSource(data);
+    } else {
+      setDataSource([]);
+    }
   };
 
   const placeholderRowCount = 30;
@@ -268,12 +275,24 @@ export default function Warehouses() {
 
   const handleOnRowClick = (e, record: IWarehouseData, rowIndex) => {
     console.log('row', e, record, rowIndex);
-    if (record.warehouse_id !== -1)
-      navigate(`/owner/warehouses/${record.warehouse_id}`, {
-        state: {
-          locWarehouseData: record,
-        },
-      });
+    console.dir(e.target);
+    if (
+      e.target.tagName === 'TD' &&
+      e.target.children.length > 0 &&
+      e.target.children[0].classList.contains('table-actions-container')
+    ) {
+      return;
+    } else {
+      console.log('check');
+      if (!Boolean(e.target.closest('.table-actions-container'))) {
+        if (record.warehouse_id !== -1)
+          navigate(`/owner/warehouses/${record.warehouse_id}`, {
+            state: {
+              locWarehouseData: record,
+            },
+          });
+      }
+    }
   };
 
   let data = [];
@@ -302,14 +321,19 @@ export default function Warehouses() {
       if (warehouses?.length) {
         const allUsers = (await userApi.getAllUsers({})).data.body;
         for (let i = 0; i < warehouses.length; i++) {
-          const user = allUsers?.find(user => user.user_id = warehouses[i].supervisor);
+          const user = allUsers?.find(
+            (user) => (user.user_id = warehouses[i].supervisor),
+          );
           data.push({
             key: (i + 1).toString(),
             warehouseName: warehouses[i].warehouse_name,
             supervisor: user.user_name + ' ' + user.user_surname,
             address: warehouses[i].warehouse_address,
             type: warehouses[i].warehouse_type,
-            capacity: warehouses[i].remaining_capacity + '/' + warehouses[i].overall_capacity,
+            capacity:
+              warehouses[i].remaining_capacity +
+              '/' +
+              warehouses[i].overall_capacity,
             warehouse_id: warehouses[i].warehouse_id,
             overall_capacity: warehouses[i].overall_capacity,
             remaining_capacity: warehouses[i].remaining_capacity,
@@ -374,7 +398,7 @@ export default function Warehouses() {
                 warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
-              onAddWarehouseSuccess={ onAddWarehouseSuccess }
+              onAddWarehouseSuccess={onAddWarehouseSuccess}
             />
             <EditWarehouse
               hidePopup={hideEditWarehouse}
