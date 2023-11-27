@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import './vendor-orders.scss';
 import { Table } from 'antd';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { orderApi } from '../../../index';
+import { orderApi, vendorApi, warehouseApi } from '../../../index';
 import { IOrderFilters } from '../../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
+import { IWarehouseData } from '../../owner/warehouses-component/warehouses';
 
 export default function Orders() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
@@ -58,7 +59,25 @@ export default function Orders() {
     navigate('/vendor/orders-add');
   };
 
+  const handleOnCurrentRowClick = (e, record: IWarehouseData, rowIndex) => {
+    console.log('row', e, record, rowIndex);
+    if (record.order_id && record.order_id !== -1)
+      navigate(`/vendor/orders/active/${record.order_id}`, {
+        state: {
+          locWarehouseData: record,
+        },
+      });
+  };
 
+  const handleOnFinishRowClick = (e, record: IWarehouseData, rowIndex) => {
+    console.log('row', e, record, rowIndex);
+    if (record.order_id && record.order_id !== -1)
+      navigate(`/vendor/orders/finish/${record.order_id}`, {
+        state: {
+          locWarehouseData: record,
+        },
+      });
+  };
   const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
@@ -126,17 +145,26 @@ export default function Orders() {
     const finishedItems = [];
     const activeItems = [];
 
+    const vendorsResponse = await vendorApi.getAllVendors({});
+    const warehouseResponse = await warehouseApi.getAllWarehouses({});
+    const vendors = vendorsResponse.data.body;
+    const warehouses = warehouseResponse.data.body;
 
     if (orders?.length) {
       for (let i = 0; i < orders.length; i++) {
+        const vendor = vendors.find(vendor => vendor.vendor_id = orders[i].supplier);
+        const warehouse = warehouses.find(warehouse => warehouse.warehouse_id = orders[i].recipient);
+
         const orderItem = {
           key: (i + 1).toString(),
           order_status: orders[i].order_status,
           order_type: orders[i].order_type,
-          createdAt: orders[i].createdAt, // Change to your actual createdAt field
+          createdAt: orders[i].created_at,
           order_id: orders[i].order_id,
-          vendor: orders[i].vendor, // Specify vendor data
-          warehouse: orders[i].warehouse, // Specify warehouse data
+          vendor: vendor?.vendor_name,
+          vendor_id: vendor?.vendor_id,
+          warehouse: orders[i].recipient,
+          warehouse_id: warehouse?.warehouse_id
         };
 
 
@@ -146,7 +174,6 @@ export default function Orders() {
           finishedItems.push(orderItem)
         }
       }
-      console.log(finishedItems, activeItems)
       setFinishedOrders(finishedItems);
       setCurrentOrders(activeItems);
     }
@@ -179,6 +206,11 @@ export default function Orders() {
             size={'small'}
             bordered={true}
             rowClassName={'highlight-bottom-border highlight-left-border'}
+            onRow={(record, rowIndex) => {
+              return {
+                onClick: (event) => handleOnCurrentRowClick(event, record, rowIndex), // click row
+              };
+            }}
           />
         </div>
         <div className="orders-table">
@@ -192,6 +224,11 @@ export default function Orders() {
             size={'small'}
             bordered={true}
             rowClassName={'highlight-bottom-border highlight-left-border'}
+            onRow={(record, rowIndex) => {
+              return {
+                onClick: (event) => handleOnFinishRowClick(event, record, rowIndex), // click row
+              };
+            }}
           />
         </div>
       </div>
