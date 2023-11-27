@@ -87,35 +87,9 @@ class InventoryView(GenericView):
 
             session.commit()
 
-            rack_info = {
-                "warehouse_id": warehouse.warehouse_id,
-                "rack_id": rack.rack_id,
-                "rack_position": rack.rack_position,
-                "overall_capacity": rack.overall_capacity,
-                "remaining_capacity": rack.remaining_capacity,
-                "inventories": []
-            }
-
-            inventories = session.query(Inventory, Product).filter(Inventory.product_id == Product.product_id, Inventory.rack_id == rack_id).all()
-
-            for inventory, product in inventories:
-                inventory_info = {
-                    "inventory_id": inventory.inventory_id,
-                    "product_id": inventory.product_id,
-                    "product_name": product.product_name,
-                    "quantity": inventory.quantity,
-                    "total_volume": (product.volume * inventory.quantity),
-                    "arrival_date": inventory.arrival_date.strftime("%Y-%m-%d"),
-                    "expiry_date": inventory.expiry_date.strftime("%Y-%m-%d"),
-                }
-                rack_info["inventories"].append(inventory_info)
-
-            response_data = {
-                "status": 201,
-                "data": rack_info,
-                "headers": self.headers
-            }
-            return response_data
+            self.response.status_code = 201
+            self.response.data = rack.to_dict()
+            return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.DELETE.value])
@@ -170,32 +144,6 @@ class InventoryView(GenericView):
 
             session.commit()
 
-            rack_info = {
-                "warehouse_id": warehouse.warehouse_id,
-                "rack_id": rack.rack_id,
-                "rack_position": rack.rack_position,
-                "overall_capacity": rack.overall_capacity,
-                "remaining_capacity": rack.remaining_capacity,
-                "inventories": []
-            }
-
-            inventories = session.query(Inventory, Product).filter(Inventory.product_id == Product.product_id, Inventory.rack_id == rack_id).all()
-
-            for inventory, product in inventories:
-                inventory_info = {
-                    "inventory_id": inventory.inventory_id,
-                    "product_id": inventory.product_id,
-                    "product_name": product.product_name,
-                    "quantity": inventory.quantity,
-                    "total_volume": (product.volume * inventory.quantity),
-                    "arrival_date": inventory.arrival_date.strftime("%Y-%m-%d"),
-                    "expiry_date": inventory.expiry_date.strftime("%Y-%m-%d"),
-                }
-                rack_info["inventories"].append(inventory_info)
-
-            response_data = {
-                "status": 201,
-                "data": rack_info,
-                "headers": self.headers
-            }
-            return response_data
+            self.response.status_code = 200
+            self.response.data = rack.to_dict()
+            return self.response.create_response()
