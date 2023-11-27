@@ -23,7 +23,7 @@ export default function AddWarehouse({
   isPopupVisible,
   hidePopup,
   warehouseData,
-  onAddWarehouseSuccess
+  onAddWarehouseSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -31,7 +31,7 @@ export default function AddWarehouse({
     warehouseData: INewWarehouseData;
     setWarehouseData: (userData: unknown) => void;
   };
-  onAddWarehouseSuccess: () => void
+  onAddWarehouseSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
   const { startLoading, stopLoading } = useLoading();
@@ -110,20 +110,23 @@ export default function AddWarehouse({
     //   user_role: newUserData['Role'],
     // });
 
-
+    startLoading();
     const response = await warehouseApi.addWarehouse({
       warehouse_address: newWarehouseData['Address'],
       warehouse_name: newWarehouseData['Warehouse Name'],
       overall_capacity: newWarehouseData['Capacity'],
       supervisor_id: newWarehouseData['Supervisor'].supervisor_id,
-      warehouse_type: newWarehouseData['Type']
+      warehouse_type: newWarehouseData['Type'],
     });
 
-    if(response.success){
+    if (response.success) {
+      stopLoading();
       onAddWarehouseSuccess();
     } else {
+      stopLoading();
       showError(response.message);
     }
+
     warehouseData.setWarehouseData(newWarehouseData);
   };
 
