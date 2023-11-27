@@ -22,5 +22,5 @@ class Company(Base):
                 "company_id": self.company_id,
                 "company_name": self.company_name,
                 "company_email": self.company_email,
-                "warehouses": [warehouse.to_dict() for warehouse in company.warehouses] if "warehouses" in cascade_fields else self.warehouses,
+                "warehouses": [warehouse.to_dict() for warehouse in company.warehouses] if "warehouses" in cascade_fields else [w.warehouse_id for w in company.warehouses],
             }

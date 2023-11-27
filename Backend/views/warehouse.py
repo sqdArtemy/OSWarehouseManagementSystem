@@ -69,12 +69,14 @@ class WarehouseView(GenericView):
                 )
 
                 session.add(new_warehouse)
+                session.flush()
+
                 session.commit()
 
                 # Build the response
                 response_data = {
                     "status": 201,
-                    "data": new_warehouse.to_dict(),
+                    "data": new_warehouse.to_dict(cascade_fields=()),
                     "headers": self.headers
                 }
 
