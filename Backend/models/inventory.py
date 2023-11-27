@@ -32,8 +32,8 @@ class Inventory(Base):
                 "product": inventory.product.to_dict(cascade_fields=[]) if "product" in cascade_fields else self.product_id,
                 "quantity": self.quantity,
                 "total_volume": self.total_volume,
-                "arrival_date": self.arrival_date,
-                "expiry_date": self.expiry_date
+                "arrival_date": self.arrival_date.strftime("%Y-%m-%d"),
+                "expiry_date": self.expiry_date.strftime("%Y-%m-%d")
             }
 
 

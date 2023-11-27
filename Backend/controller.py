@@ -77,6 +77,11 @@ def controller(request: dict) -> dict:
                 return company_view.create(request=request)
 
         # Inventory`s endpoints
+        elif "/inventories" in url:
+            if method == Method.GET.value:
+                return inventory_view.get_list(request=request, **filters)
+            elif method == Method.POST.value:
+                return inventory_view.create(request=request)
         elif "/inventory" in url:
             if method == Method.GET.value:
                 return inventory_view.get(request=request)
@@ -84,11 +89,6 @@ def controller(request: dict) -> dict:
                 return inventory_view.delete(request=request)
             elif method == Method.PUT.value:
                 return inventory_view.update(request=request)
-        elif "/inventories" in url:
-            if method == Method.GET.value:
-                return inventory_view.get_list(request=request, **filters)
-            elif method == Method.POST.value:
-                return inventory_view.create(request=request)
 
         # Order`s endpoints
         elif "/orders" in url:
@@ -98,7 +98,11 @@ def controller(request: dict) -> dict:
                 return order_view.create(request=request)
         elif "/order" in url:
             if method == Method.GET.value:
+                if "/send" in url:
+                    if "/preview" in url:
+                        return order_view.send_preview(request=request)
                 return order_view.get(request=request)
+
             elif method == Method.DELETE.value:
                 return order_view.delete(request=request)
             elif method == Method.PUT.value:
@@ -106,6 +110,8 @@ def controller(request: dict) -> dict:
                     return order_view.confirm(request=request)
                 if "/cancel" in url:
                     return order_view.cancel(request=request)
+                if "/send":
+                    return order_view.send(request=request)
                 return order_view.update(request=request)
 
         # OrderItem`s endpoints
@@ -149,6 +155,9 @@ def controller(request: dict) -> dict:
                 return rack_view.delete(request=request)
             elif method == Method.PUT.value:
                 return rack_view.update(request=request)
+            elif method == Method.POST.value:
+                if "/multiple" in url:
+                    return rack_view.multiple(request=request)
 
         # Vendor`s endpoints
         elif "/vendors" in url:
