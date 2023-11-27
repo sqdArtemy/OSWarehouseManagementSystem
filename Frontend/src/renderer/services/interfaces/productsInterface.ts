@@ -28,4 +28,5 @@ export interface IProductFilters {
   weight_gte?: number,
   weight_lte?: number,
   company_id?: number,
+  product_type?: 'freezer' | 'refrigerated' |'dry' | 'hazardous';
 }

@@ -3,6 +3,7 @@ import { Button, Form, FormInstance, Select, Tag, InputNumber } from 'antd';
 import { vendorApi, companyApi, warehouseApi, productApi } from '../../../../index';
 import { useError } from '../../../error-component/error-context';
 import './create-order.scss';
+import { IProductFilters } from '../../../../services/interfaces/productsInterface';
 
 export default function CreateOrder({
                                       onAddOrderSuccess,
@@ -17,6 +18,7 @@ export default function CreateOrder({
   const [vendors, setVendors] = useState<Select['OptionType'][]>([]);
   const [companies, setCompanies] = useState<Select['OptionType'][]>([]);
   const [warehouses, setWarehouses] = useState<Select['OptionType'][]>([]);
+  const [productTypes, setProductTypes] = useState<Select['OptionType'][]>([]);
   const [products, setProducts] = useState<Select['OptionType'][]>([]);
   const [selectedProducts, setSelectedProducts] = useState<
     { product: Select['OptionType']; quantity: number }[]
@@ -48,8 +50,9 @@ export default function CreateOrder({
     setSelectedProducts(updatedProducts);
   };
 
-  const getProducts = async (companyId: number) => {
-    const products = await productApi.getAllProducts({ company_id: companyId });
+  const getProducts = async (filters: IProductFilters) => {
+    console.log(filters);
+    const products = await productApi.getAllProducts(filters);
     const mapToOptions = (data) => {
       return data.map((item) => ({
         value: item.product_id,
@@ -59,18 +62,20 @@ export default function CreateOrder({
       }));
     };
 
-    const fakeData = [
-      { product_id: 1, product_name: 'banana', weight: 2, volume: 10 },
-      { product_id: 2, product_name: 'apple', weight: 1.5, volume: 25 },
-      { product_id: 3, product_name: 'orange', weight: 2.3, volume: 50 },
-    ];
-    setProducts(mapToOptions(fakeData));
+    // const fakeData = [
+    //   { product_id: 1, product_name: 'banana', weight: 2, volume: 10 },
+    //   { product_id: 2, product_name: 'apple', weight: 1.5, volume: 25 },
+    //   { product_id: 3, product_name: 'orange', weight: 2.3, volume: 50 },
+    // ];
+    setProducts(mapToOptions(products.data.body));
   };
 
   const fetchProducts = async () => {
     const companyId = formRef.current?.getFieldValue(['Company'] as any);
-    if (companyId) {
-      await getProducts(companyId as number);
+    const productType = formRef.current.getFieldsValue(['Type'] as any).Type;
+    setSelectedProducts([]);
+    if (companyId && productTypes) {
+      await getProducts({ company_id: companyId, product_type: productType});
     }
   };
 
@@ -81,7 +86,16 @@ export default function CreateOrder({
       { value: 'from_warehouse', label: 'From Warehouse' },
     ];
 
+    const productTypes: Select['OptionType'][] = [
+      { value: 'freezer', label: 'Freezer required' },
+      { value: 'refrigerated', label: 'Refrigerated required' },
+      { value: 'dry', label: 'Non-perishable' },
+      { value: 'hazardous', label: 'Hazardous' },
+    ];
+
     setWarehouses(warehouses);
+    setProductTypes(productTypes);
+
     vendorApi
       .getAllVendors({})
       .then((data) => {
@@ -135,7 +149,7 @@ export default function CreateOrder({
 
     console.log(response);
     if (response.success) {
-      onAddOrderSuccess();
+
     } else {
       showError(response.message);
     }
@@ -179,6 +193,13 @@ export default function CreateOrder({
           rules={[{ required: true }]}
         >
           <Select options={companies} className="form-input" onChange={fetchProducts} />
+        </Form.Item>
+        <Form.Item
+          name="Type"
+          label={<p className="form-label">Select type of products</p>}
+          rules={[{ required: true }]}
+        >
+          <Select options={productTypes} className="form-input" onChange={fetchProducts} />
         </Form.Item>
         <Form.Item
           name="Product"

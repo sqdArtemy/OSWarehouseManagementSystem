@@ -48,6 +48,10 @@ export default function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="users" element={<Users />} />
             <Route path="warehouses" element={<Warehouses />} />
+            <Route
+              path="warehouses/:warehouse_id"
+              element={<WarehouseDetail />}
+            />
             <Route path="items" element={<Items />} />
             {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
             <Route path="profile" element={<Profile />} />
