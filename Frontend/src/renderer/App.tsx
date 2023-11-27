@@ -28,10 +28,10 @@ import CreateOrder from './components/vendor/vendor-orders-component/create-orde
 
 
 import WarehouseDetail from './components/owner/warehouses-component/warehouse-detail-component/warehouse-detail';
-import { ActiveOrderDetail } from './components/vendor/vendor-orders-component/order-detail-component/active-order-detail';
 import {
   FinishOrderDetail
 } from './components/vendor/vendor-orders-component/order-detail-component/finished-order-detail';
+import ActiveOrderDetail from './components/vendor/vendor-orders-component/order-detail-component/active-order-detail';
 
 
 export default function App() {
