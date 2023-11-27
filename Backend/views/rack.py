@@ -168,20 +168,9 @@ class RackView(GenericView):
 
             session.commit()
 
-            warehouse_info = {
-                "warehouse_id": warehouse.warehouse_id,
-                "supervisor_id": warehouse.supervisor_id,
-                "warehouse_name": warehouse.warehouse_name,
-                "warehouse_address": warehouse.warehouse_address,
-                "overall_capacity": warehouse.overall_capacity,
-                "remaining_capacity": warehouse.remaining_capacity,
-                "warehouse_type": warehouse.warehouse_type,
-                "racks": []
-            }
-
             # Get details about racks in the warehouse
             racks = session.query(Rack).filter_by(warehouse_id=warehouse_id).all()
-
+            new_racks = []
             for rack in racks:
                 rack_info = {
                     "rack_id": rack.rack_id,
@@ -190,11 +179,9 @@ class RackView(GenericView):
                     "remaining_capacity": rack.remaining_capacity,
                     "ratio": (rack.remaining_capacity / rack.overall_capacity) * 100
                 }
-                warehouse_info["racks"].append(rack_info)
+                new_racks.append(rack_info)
 
-            response_data = {
-                "status": 201,
-                "data": warehouse_info,
-                "headers": self.headers
-            }
-            return response_data
+            self.response.status_code = 201
+            self.response.data = warehouse.to_dict(cascade_fields=())
+            self.response.data["racks"] = new_racks
+            return self.response.create_response()
