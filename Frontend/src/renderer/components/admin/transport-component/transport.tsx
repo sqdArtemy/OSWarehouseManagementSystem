@@ -14,7 +14,7 @@ import EditTransport from './edit-transport-component/edit-transport';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
-export interface IWarehouseData {
+export interface ITransportData {
   transportID: string;
   capacity: string;
   maxSpeed: string;
@@ -22,16 +22,16 @@ export interface IWarehouseData {
   type: string;
 }
 
-export default function AdminWarehouses() {
+export default function AdminTransport() {
   const [selectedType, setSelectedType] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
-  const [isAddWarehouseVisible, setIsAddWarehouseVisible] = useState(false);
-  const [isEditWarehouseVisible, setIsEditWarehouseVisible] = useState(false);
-  const [warehouseData, setWarehouseData] = useState({});
+  const [isAddTransportVisible, setIsAddTransportVisible] = useState(false);
+  const [isEditTransportVisible, setIsEditTransportVisible] = useState(false);
+  const [transportData, setTransportData] = useState({});
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -39,7 +39,7 @@ export default function AdminWarehouses() {
     e.domEvent.target.innerText = selectedType;
   };
 
-  const handeDeleteWarehouse = async (record?) => {
+  const handeDeleteTransport = async (record?) => {
     // if (selectedRows.length > 0) {
     //   console.log('delete', selectedRows);
     //   for (let user of selectedRows) {
@@ -112,28 +112,28 @@ export default function AdminWarehouses() {
     }
   };
 
-  const handleAddWarehouse = (e) => {
+  const handleAddTransport = (e) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    setIsAddWarehouseVisible(true);
+    setIsAddTransportVisible(true);
   };
 
-  const handleEditWarehouse = (record) => {
+  const handleEditTransport = (record) => {
     console.log('edit', record);
-    setWarehouseData(record);
-    setIsEditWarehouseVisible(true);
+    setTransportData(record);
+    setIsEditTransportVisible(true);
   };
 
-  const hideAddWarehouse = () => {
-    setIsAddWarehouseVisible(false);
+  const hideAddTransport = () => {
+    setIsAddTransportVisible(false);
   };
 
-  const hideEditWarehouse = () => {
-    setIsEditWarehouseVisible(false);
+  const hideEditTransport = () => {
+    setIsEditTransportVisible(false);
   };
 
   const placeholderRowCount = 30;
@@ -166,11 +166,11 @@ export default function AdminWarehouses() {
         record.transportID ? (
           <span className={'table-actions-container'}>
             <EditOutlined
-              onClick={() => handleEditWarehouse(record)}
+              onClick={() => handleEditTransport(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
             />
             <DeleteOutlined
-              onClick={() => handeDeleteWarehouse(record)}
+              onClick={() => handeDeleteTransport(record)}
               style={{ color: 'red', cursor: 'pointer' }}
             />
           </span>
@@ -196,8 +196,8 @@ export default function AdminWarehouses() {
     },
     {
       title: 'Price/weight',
-      dataIndex: 'price/weight',
-      key: 'price/weight',
+      dataIndex: 'price_weight',
+      key: 'price_weight',
       align: 'center',
     },
     {
@@ -221,7 +221,7 @@ export default function AdminWarehouses() {
   ];
 
   const menuProps = {
-    items,
+    items: items,
     onClick: handleMenuClick,
   };
 
@@ -279,7 +279,7 @@ export default function AdminWarehouses() {
         transportID: 'John Brown',
         capacity: '32',
         maxSpeed: 'New York No. 1 Lake Park',
-        'price/weight': 'Freezer',
+        price_weight: 'Freezer',
         type: 1000,
       },
       {
@@ -287,7 +287,7 @@ export default function AdminWarehouses() {
         transportID: 'John Brown',
         capacity: '32',
         maxSpeed: 'New York No. 1 Lake Park',
-        'price/weight': 'Freezer',
+        price_weight: 'Freezer',
         type: 1000,
       },
       {
@@ -295,7 +295,7 @@ export default function AdminWarehouses() {
         transportID: 'John Brown',
         capacity: '32',
         maxSpeed: 'New York No. 1 Lake Park',
-        'price/weight': 'Freezer',
+        price_weight: 'Freezer',
         type: 1000,
       },
       {
@@ -303,7 +303,7 @@ export default function AdminWarehouses() {
         transportID: 'John Brown',
         capacity: '32',
         maxSpeed: 'New York No. 1 Lake Park',
-        'price/weight': 'Freezer',
+        price_weight: 'Freezer',
         type: 1000,
       },
     ]);
@@ -312,15 +312,15 @@ export default function AdminWarehouses() {
   }, []);
 
   return (
-    <div className="warehouses-container">
-      <div className={'warehouses-table-container'}>
-        <div className={'warehouses-table-header-container'}>
-          <span className={'warehouses-table-header'}>Transport</span>
-          <div className={'options-container'}>
-            <div className="search-bar-container">
+    <div className="admin-transport-container">
+      <div className={'admin-transport-table-container'}>
+        <div className={'admin-transport-table-header-container'}>
+          <span className={'admin-transport-table-header'}>Transport</span>
+          <div className={'admin-transport-options-container'}>
+            <div className="admin-transport-search-bar-container">
               <Dropdown
                 menu={menuProps}
-                className={'search-bar-dropdown-container'}
+                className={'admin-transport-search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
@@ -331,45 +331,45 @@ export default function AdminWarehouses() {
               </Dropdown>
               <input
                 type=""
-                className="search-bar-input"
+                className="admin-transport-search-bar-input"
                 onChange={(e) => {
                   setSearchValue(e.target.value);
                 }}
               />
               <button
-                className="search-bar-button"
+                className="admin-transport-search-bar-button"
                 onClick={(e) => handleSearchClick(e)}
               >
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
             <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={'admin-transport-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
-              onClick={() => handeDeleteWarehouse()}
+              onClick={() => handeDeleteTransport()}
             ></img>
             <button
-              className={'add-btn'}
-              onClick={(e) => handleAddWarehouse(e)}
+              className={'admin-transport-add-btn'}
+              onClick={(e) => handleAddTransport(e)}
             >
               <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Warehouse</span>
+              <span className={'admin-transport-add-btn-text'}>Add Transport</span>
             </button>
             <AddTransport
-              hidePopup={hideAddWarehouse}
-              isPopupVisible={isAddWarehouseVisible}
+              hidePopup={hideAddTransport}
+              isPopupVisible={isAddTransportVisible}
               warehouseData={{
-                warehouseData: warehouseData,
-                setWarehouseData: setWarehouseData,
+                transportData: transportData,
+                setTransportData: setTransportData,
               }}
             />
             <EditTransport
-              hidePopup={hideEditWarehouse}
-              isPopupVisible={isEditWarehouseVisible}
-              warehouseData={{
-                warehouseData: warehouseData,
-                setWarehouseData: setWarehouseData,
+              hidePopup={hideEditTransport}
+              isPopupVisible={isEditTransportVisible}
+              transportData={{
+                transportData: transportData,
+                setTransportData: setTransportData,
               }}
             />
           </div>
@@ -383,7 +383,7 @@ export default function AdminWarehouses() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'warehouses-table'}
+          className={'admin-transport-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}

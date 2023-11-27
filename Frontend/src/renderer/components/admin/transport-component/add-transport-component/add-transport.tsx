@@ -3,15 +3,15 @@ import './add-transport.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { userApi } from '../../../../index';
 
-export interface INewWarehouseData {
-  'Warehouse Name'?: string;
+export interface INewTransportData {
+  TransportID?: string;
   Capacity?: string;
-  Address?: string;
+  'Max Speed'?: string;
   Type?: string;
-  Supervisor?: string;
+  Price_weight?: string;
 }
 
-export default function AdminAddWarehouse({
+export default function AdminAddTransport({
   isPopupVisible,
   hidePopup,
   warehouseData,
@@ -19,8 +19,8 @@ export default function AdminAddWarehouse({
   isPopupVisible: boolean;
   hidePopup: () => void;
   warehouseData: {
-    warehouseData: INewWarehouseData;
-    setWarehouseData: (userData: unknown) => void;
+    transportData: INewTransportData;
+    setTransportData: (userData: unknown) => void;
   };
 }) {
   const formRef = React.useRef<FormInstance>(null);
@@ -46,10 +46,10 @@ export default function AdminAddWarehouse({
   };
 
   const onFinish = async () => {
-    const newWarehouseData = formRef.current?.getFieldsValue();
+    const newTransportData = formRef.current?.getFieldsValue();
     let check = false;
-    for (let key in newWarehouseData) {
-      if (newWarehouseData[key]) {
+    for (let key in newTransportData) {
+      if (newTransportData[key]) {
         check = true;
       }
     }
@@ -67,7 +67,7 @@ export default function AdminAddWarehouse({
     //   user_role: newUserData['Role'],
     // });
 
-    warehouseData.setWarehouseData(newWarehouseData);
+    warehouseData.setTransportData(newTransportData);
   };
 
   const handleReset = () => {
@@ -93,8 +93,8 @@ export default function AdminAddWarehouse({
         onFinish={onFinish}
       >
         <Form.Item
-          name="Warehouse Name"
-          label={<p style={{ fontSize: '1vw' }}>Name</p>}
+          name="TransportID"
+          label={<p style={{ fontSize: '1vw' }}>Transport ID</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
@@ -107,15 +107,15 @@ export default function AdminAddWarehouse({
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="Address"
-          label={<p style={{ fontSize: '1vw' }}>Address</p>}
+          name="Max Speed"
+          label={<p style={{ fontSize: '1vw' }}>Max Speed</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="Supervisor"
-          label={<p style={{ fontSize: '1vw' }}>Supervisor</p>}
+          name="Price_weight"
+          label={<p style={{ fontSize: '1vw' }}>Price/weight</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
@@ -130,10 +130,9 @@ export default function AdminAddWarehouse({
             onChange={onRoleChange}
             style={{ minHeight: '2vw' }}
           >
-            <Select.Option value="manager">Freezer</Select.Option>
-            <Select.Option value="shipper">Refrigerator</Select.Option>
-            <Select.Option value="manager">Dry</Select.Option>
-            <Select.Option value="shipper">Hazardous</Select.Option>
+            <Select.Option value="track">Track</Select.Option>
+            <Select.Option value="van">Van</Select.Option>
+            <Select.Option value="car">Car</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item

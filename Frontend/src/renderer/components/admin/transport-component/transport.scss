@@ -1,11 +1,11 @@
-.warehouses-container {
+.admin-transport-container {
   display: flex;
   flex-direction: row;
   width: 85%;
   min-height: 100vh;
   align-items: center;
 
-  .warehouses-table-container {
+  .admin-transport-table-container {
     display: flex;
     flex-direction: column;
     gap: 2.5vw;
@@ -15,16 +15,16 @@
     padding-left: 3vw;
 
 
-    .warehouses-table-header-container {
+    .admin-transport-table-header-container {
       display: flex;
       flex-direction: column;
       gap: 3vw;
 
-      .warehouses-table-header {
+      .admin-transport-table-header {
         font-size: 3vw;
       }
 
-      .options-container {
+      .admin-transport-options-container {
         display: flex;
         flex-direction: row;
         gap: 10vw;
@@ -32,11 +32,11 @@
         align-items: center;
 
 
-        .search-bar-container {
+        .admin-transport-search-bar-container {
           display: flex;
           flex-direction: row;
 
-          .search-bar-dropdown-container {
+          .admin-transport-search-bar-dropdown-container {
             min-height: 3vw;
             width: 10vw;
             font-size: 1vw;
@@ -49,13 +49,13 @@
           }
 
 
-          .search-bar-input {
+          .admin-transport-search-bar-input {
             width: 30vw;
             min-height: 3vw;
             border: 0.5px solid #000000;
           }
 
-          .search-bar-button {
+          .admin-transport-search-bar-button {
             width: 3vw;
             min-height: 3vw;
             background: #5564B2;
@@ -79,12 +79,12 @@
           }
         }
 
-        .delete-btn {
+        .admin-transport-delete-btn {
           width: 2.2vw;
           min-height: 2.2vw;
         }
 
-        .add-btn {
+        .admin-transport-add-btn {
           display: flex;
           flex-direction: row;
           align-items: center;
@@ -102,7 +102,7 @@
 
           cursor: pointer;
 
-          .add-btn-text {
+          .admin-transport-add-btn-text {
             font-size: 1.3vw;
             white-space: nowrap;
             overflow: hidden;
@@ -121,7 +121,7 @@
       }
     }
 
-    .warehouses-table {
+    .admin-transport-table {
       width: 85%;
       min-height: 70%;
 
@@ -129,7 +129,7 @@
 
   }
 
-  .warehouses-form {
+  .admin-transport-form {
     min-height: 100vh;
     width: 40%;
   }

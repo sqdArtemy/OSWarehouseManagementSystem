@@ -2,39 +2,38 @@ import React, { useEffect } from 'react';
 import './edit-transport.scss';
 import { Button, Form, FormInstance, Input, Modal } from 'antd';
 import { userApi } from '../../../../index';
-import { INewWarehouseData } from '../add-warehouse-component/add-warehouse';
-import { IWarehouseData } from '../warehouses';
+import { INewTransportData } from '../add-transport-component/add-transport';
+import { ITransportData } from '../transport';
 
-export default function EditWarehouse({
+export default function EditTransport({
   isPopupVisible,
   hidePopup,
-  warehouseData,
+  transportData,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
-  warehouseData: {
-    warehouseData: INewWarehouseData | IWarehouseData;
-    setWarehouseData: (warehouseData: unknown) => void;
+  transportData: {
+    transportData: INewTransportData | ITransportData;
+    setTransportData: (transportData: unknown) => void;
   };
 }) {
-  console.log(warehouseData.warehouseData);
+  console.log(transportData.transportData);
   const formRef = React.useRef<FormInstance>(null);
 
   useEffect(() => {
-    if (isPopupVisible && warehouseData.warehouseData && formRef.current) {
-      const { warehouseName, capacity, supervisor, type, address } =
-        warehouseData.warehouseData;
-      // const [firstName, lastName] = warehouseName.split(' ');
+    if (isPopupVisible && transportData.transportData && formRef.current) {
+      const { transportID, capacity, maxSpeed, price_weight, type } =
+        transportData.transportData;
 
       formRef.current.setFieldsValue({
-        'Warehouse Name': warehouseName,
+        transportID: transportID,
         Type: type,
-        Supervisor: supervisor,
+        maxSpeed: maxSpeed,
         Capacity: capacity,
-        Address: address,
+        price_weight: price_weight,
       });
     }
-  }, [warehouseData]);
+  }, [transportData]);
 
   const layout = {
     labelCol: { span: 8 },
@@ -66,12 +65,12 @@ export default function EditWarehouse({
     //   user_role: newUserData['Role'],
     // });
 
-    warehouseData.setWarehouseData(newWarehouseData);
+    transportData.setTransportData(newWarehouseData);
   };
 
   return (
     <Modal
-      title={<p style={{ fontSize: '1.2vw' }}>Edit User</p>}
+      title={<p style={{ fontSize: '1.2vw' }}>Edit Transport</p>}
       open={isPopupVisible}
       onOk={onFinish}
       onCancel={onCancel}
@@ -82,14 +81,14 @@ export default function EditWarehouse({
         {...layout}
         labelAlign={'left'}
         ref={formRef}
-        name="edit-user"
+        name="edit-transport"
         size={'middle'}
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
       >
         <Form.Item
-          name="Warehouse Name"
-          label={<p style={{ fontSize: '1vw' }}>Name</p>}
+          name="transportID"
+          label={<p style={{ fontSize: '1vw' }}>Transport ID</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
@@ -102,15 +101,15 @@ export default function EditWarehouse({
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="Address"
-          label={<p style={{ fontSize: '1vw' }}>Address</p>}
+          name="maxSpeed"
+          label={<p style={{ fontSize: '1vw' }}>Max Speed</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="Supervisor"
-          label={<p style={{ fontSize: '1vw' }}>Supervisor</p>}
+          name="price_weight"
+          label={<p style={{ fontSize: '1vw' }}>Price/weight</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />
@@ -120,7 +119,7 @@ export default function EditWarehouse({
           label={<p style={{ fontSize: '1vw' }}>Type</p>}
           rules={[{ required: true }]}
         >
-          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
+          <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button type="primary" htmlType="submit">

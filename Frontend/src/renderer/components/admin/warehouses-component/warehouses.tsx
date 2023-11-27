@@ -409,7 +409,7 @@ export default function AdminWarehouses() {
               hidePopup={hideAddWarehouse}
               isPopupVisible={isAddWarehouseVisible}
               warehouseData={{
-                warehouseData: warehouseData,
+                transportData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
             />
@@ -417,7 +417,7 @@ export default function AdminWarehouses() {
               hidePopup={hideEditWarehouse}
               isPopupVisible={isEditWarehouseVisible}
               warehouseData={{
-                warehouseData: warehouseData,
+                transportData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
             />
