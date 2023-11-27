@@ -59,7 +59,7 @@ export default function CreateOrderDetails({ orderDetails, hidePopup }) {
         const response = await orderApi.addOrder(orderData);
         if(response.success) {
           hidePopup();
-          navigate('/vendor')
+          navigate('/vendor/orders')
         } else {
           showError(response.message);
         }

@@ -25,13 +25,8 @@ import { VendorLayout } from './components/vendor/vendor-layout-component/vendor
 
 import AddOrderModal from './components/vendor/vendor-orders-component/create-order-component/create-order';
 import CreateOrder from './components/vendor/vendor-orders-component/create-order-component/create-order';
-
-
 import WarehouseDetail from './components/owner/warehouses-component/warehouse-detail-component/warehouse-detail';
-import {
-  FinishOrderDetail
-} from './components/vendor/vendor-orders-component/order-detail-component/finished-order-detail';
-import ActiveOrderDetail from './components/vendor/vendor-orders-component/order-detail-component/active-order-detail';
+
 
 
 export default function App() {
@@ -69,14 +64,6 @@ export default function App() {
             <Route path="orders" element={<VendorOrders />} />
             <Route path="orders-add" element={<CreateOrder />} />
             <Route path="profile" element={<Profile />} />
-            <Route
-              path="orders/active/:order_id"
-              element={<ActiveOrderDetail />}
-            />
-            <Route
-              path="orders/finish/:order_id"
-              element={<FinishOrderDetail />}
-            />
             {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
           </Route>
         </Routes>

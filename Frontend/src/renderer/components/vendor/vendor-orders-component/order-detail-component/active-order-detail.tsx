@@ -1,82 +1,109 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Button, Table } from 'antd';
-import { orderApi } from '../../../../index';
+import { Modal, Form, Table, Button } from 'antd';
+import { orderApi, productApi, vendorApi } from '../../../../index';
+import './active-order-detail.scss';
 
-const ActiveOrderDetail = () => {
-  const { order_id } = useParams();
-  const [orderDetails, setOrderDetails] = useState(null);
+interface OrderActiveDetailsProps {
+  id: string;
+  onClose: () => void;
+  isActiveOrderVisible: boolean;
+}
+
+const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, isActiveOrderVisible }) => {
+  const [orderDetails, setOrderDetails] = useState<any>(null);
 
   useEffect(() => {
-    const fetchOrderDetails = async () => {
-      const response = await orderApi.getOrder(Number(order_id));
-      if (response.success) {
-        setOrderDetails(response.data.body);
-      } else {
-        console.error(response.message);
-      }
-    };
+    orderApi.getOrder(Number(id)).then(async (data) => {
+      const productsResponse = await productApi.getAllProducts({});
+      const vendorsResponse = await vendorApi.getAllVendors({});
+      const products = productsResponse.data?.body;
+      const vendors = vendorsResponse.data?.body;
 
-    fetchOrderDetails();
-  }, [order_id]);
+      const items = data.data?.body?.items;
+      const orderDetails = data.data?.body;
+      const orderItems = [];
+
+
+      for (let item of items){
+        const product = products?.find(product => { return product.product_id == item.product});
+
+        if(product) {
+          orderItems.push({
+            product_name: product?.product_name,
+            quantity: item.quantity
+          })
+        }
+      }
+
+      const vendor = vendors?.find(vendor => vendor.vendor_id == orderDetails.supplier);
+      console.log(orderDetails);
+      orderDetails.items = orderItems;
+      orderDetails.vendor = vendor?.vendor_name;
+      setOrderDetails(data.data?.body);
+    });
+  }, [id]);
 
   const columns = [
-    {
-      title: 'Product ID',
-      dataIndex: 'product_id',
-      key: 'product_id',
-    },
-    {
-      title: 'Quantity',
-      dataIndex: 'quantity',
-      key: 'quantity',
-    },
+    { title: 'Product Name', dataIndex: 'product_name', key: 'product_name' },
+    { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
   ];
 
-  const dataSource = orderDetails?.items || [];
+  const layout = {
+    labelCol: { span: 8 },
+    wrapperCol: { span: 16 },
+  };
+
+  const handleEditOrder = () => {
+    // Define the behavior for editing the order
+    console.log('Edit Order clicked');
+  };
+
+  const handleCancelOrder = () => {
+    // Define the behavior for canceling the order
+    console.log('Cancel Order clicked');
+  };
 
   return (
-    <div>
-      {orderDetails && (
-        <>
-          <h2>Order Details</h2>
-          <p>Created At: {orderDetails.created_at}</p>
-          <p>Vendor: {orderDetails.vendor}</p>
-          <p>Order Status: {orderDetails.order_status}</p>
+    <Modal
+      title="Order Active Details"
+      visible={isActiveOrderVisible}
+      onCancel={onClose}
+      footer={null} // Remove the default footer
+    >
+      <Form {...layout} initialValues={orderDetails} colon={false}>
+        <Form.Item label="Created At" name="created_at">
+          <span className="form-value">{orderDetails?.created_at}</span>
+        </Form.Item>
+        <Form.Item label="Vendor Name" name="vendor">
+          <span className="form-value">{orderDetails?.vendor}</span>
+        </Form.Item>
+        <Form.Item label="Order Status" name="order_status">
+          <span className="form-value">{orderDetails?.order_status}</span>
+        </Form.Item>
+        <Form.Item label="Total Price" name="total_price">
+          <span className="form-value">{orderDetails?.total_price}</span>
+        </Form.Item>
+        <Form.Item label="Total Volume" name="total_volume">
+          <span className="form-value">{orderDetails?.total_volume}</span>
+        </Form.Item>
+      </Form>
 
-          {orderDetails.order_status === 'new' && (
-            <Button type="danger" onClick={() => handleCancelOrder(order_id)}>
-              Cancel Order
-            </Button>
-          )}
+        <Table pagination={false} dataSource={orderDetails?.items} columns={columns} />
 
-          <h3>Product Details</h3>
-          <p>Total Price: {orderDetails.total_price}</p>
-          <p>Total Volume: {orderDetails.total_volume}</p>
-
-          <Table dataSource={dataSource} columns={columns} pagination={false} />
-
-          {/* Add any other information or components as needed */}
-        </>
-      )}
-    </div>
+        {/* Buttons at the bottom */}
+        <div style={{ textAlign: 'right', marginTop: '16px' }}>
+          <Button type="primary" onClick={handleEditOrder}>
+            Edit Order
+          </Button>
+          <Button danger onClick={handleCancelOrder} style={{ marginLeft: '8px' }}>
+            Cancel Order
+          </Button>
+          <Button onClick={onClose} style={{ marginLeft: '8px' }}>
+            Close
+          </Button>
+        </div>
+    </Modal>
   );
 };
 
-const handleCancelOrder = async (orderId) => {
-  try {
-    const response = await orderApi.cancelOrder(orderId);
-    if (response.success) {
-      // Handle successful cancellation
-      console.log('Order canceled successfully');
-    } else {
-      // Handle cancellation failure
-      console.error(response.message);
-    }
-  } catch (error) {
-    // Handle error
-    console.error(error);
-  }
-};
-
-export default ActiveOrderDetail;
+export default OrderActiveDetails;

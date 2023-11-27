@@ -7,13 +7,21 @@ import { IOrderFilters } from '../../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
 import { IWarehouseData } from '../../owner/warehouses-component/warehouses';
+import OrderActiveDetails from './order-detail-component/active-order-detail';
 
 export default function Orders() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [currentOrders, setCurrentOrders] = useState([]);
   const [finishedOrders, setFinishedOrders] = useState([]);
+  const [activeOrderId, setActiveOrderId] = useState<string | null>(null); // Track active order id
+  const [isOrderDetailsVisible, setOrderDetailsVisible] = useState(false);
+
   const navigate = useNavigate();
   let filters: IOrderFilters = {};
+
+  const hideOrderDetailsPopup = () => {
+    setOrderDetailsVisible(false);
+  };
 
   const getAllOrders = async (filters: IOrderFilters) => {
     const result = await orderApi.getAllOrders(filters);
@@ -60,23 +68,14 @@ export default function Orders() {
   };
 
   const handleOnCurrentRowClick = (e, record: IWarehouseData, rowIndex) => {
-    console.log('row', e, record, rowIndex);
-    if (record.order_id && record.order_id !== -1)
-      navigate(`/vendor/orders/active/${record.order_id}`, {
-        state: {
-          locWarehouseData: record,
-        },
-      });
+    if (record.order_id && record.order_id !== -1) {
+      setActiveOrderId(record.order_id); // Set active order id
+      setOrderDetailsVisible(true); // Show the order details modal
+    }
   };
 
   const handleOnFinishRowClick = (e, record: IWarehouseData, rowIndex) => {
     console.log('row', e, record, rowIndex);
-    if (record.order_id && record.order_id !== -1)
-      navigate(`/vendor/orders/finish/${record.order_id}`, {
-        state: {
-          locWarehouseData: record,
-        },
-      });
   };
   const placeholderRowCount = 5;
 
@@ -232,6 +231,13 @@ export default function Orders() {
           />
         </div>
       </div>
+      {activeOrderId && (
+        <OrderActiveDetails
+          id={activeOrderId}
+          onClose={() => setOrderDetailsVisible(false)}
+          isActiveOrderVisible={isOrderDetailsVisible}
+        />
+      )}
     </div>
   );
 }
