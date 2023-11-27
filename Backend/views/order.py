@@ -104,18 +104,15 @@ class OrderView(GenericView):
 
             if requester_role != UserRole.ADMIN.value["code"] and (
                     (
-                            requester_role == UserRole.VENDOR.value["code"] and (
-                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
-                    )
+                    requester_role == UserRole.VENDOR.value["code"] and (
+                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
+                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                       )
                     ) or (
-                            (requester_role in (
-                                    UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                                    (
-                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                                    (
-                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                            )
+                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                       )
                     )
             ):
                 raise ValidationError("You are not allowed to see this order.", 403)
@@ -418,18 +415,15 @@ class OrderView(GenericView):
 
             if requester_role == UserRole.SUPERVISOR.value["code"] or (
                     (
-                            requester_role == UserRole.VENDOR.value["code"] and (
-                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
-                    )
+                    requester_role == UserRole.VENDOR.value["code"] and (
+                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
+                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                       )
                     ) or (
-                            (requester_role in (
-                                    UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                                    (
-                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                                    (
-                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                            )
+                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                       )
                     )
             ):
                 raise ValidationError("Order not found.", 404)
