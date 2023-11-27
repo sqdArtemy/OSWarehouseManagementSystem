@@ -2,7 +2,7 @@ from datetime import datetime
 from math import floor
 from typing import Dict, List, Any
 
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func, or_, and_, desc
 
 from db_config import get_session
 from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User, Inventory, Rack
@@ -167,7 +167,7 @@ class OrderView(GenericView):
                         and_(Order.order_type == "from_warehouse", Order.recipient_id.in_(vendor_ids))
                     )
                 )
-            return super().get_list(request=request, pre_selected_query=orders, **kwargs)
+            return super().get_list(request=request, pre_selected_query=orders.order_by(desc(Order.created_at)), **kwargs)
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
