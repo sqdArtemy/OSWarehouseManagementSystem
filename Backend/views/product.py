@@ -44,7 +44,7 @@ class ProductView(GenericView):
             requester = session.query(User).filter(User.user_id == requester_id).first()
             company = requester.company
 
-            if self.requester_role == UserRole.ADMIN.value["code"]:
+            if self.requester_role in (UserRole.ADMIN.value["code"], UserRole.VENDOR.value["code"]):
                 return super().get_list(request=request, **kwargs)
             else:
                 query = session.query(Product).filter(Product.company_id == company.company_id)
