@@ -14,7 +14,7 @@ import debounce from 'lodash.debounce';
 import EditUser from '../users-component/edit-user-component/edit-user';
 import EditItem from './edit-user-component/edit-item';
 
-export default function AdminItems() {
+export default function AdminVendors() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -327,7 +327,7 @@ export default function AdminItems() {
     <div className="items-container">
       <div className={'items-table-container'}>
         <div className={'items-table-header-container'}>
-          <span className={'items-table-header'}>ITEMS</span>
+          <span className={'items-table-header'}>VENDORS</span>
           <div className={'options-container'}>
             <div className="search-bar-container">
               <Dropdown

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './transport.scss';
+import './orders.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -9,8 +9,8 @@ import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import { userApi } from '../../../index';
 import debounce from 'lodash.debounce';
-import AddTransport from './add-transport-component/add-transport';
-import EditTransport from './edit-transport-component/edit-transport';
+import AddOrders from './add-orders-component/add-orders';
+import EditOrders from './edit-orders-component/edit-orders';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -22,7 +22,7 @@ export interface ITransportData {
   type: string;
 }
 
-export default function AdminTransport() {
+export default function AdminOrders() {
   const [selectedType, setSelectedType] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
@@ -315,7 +315,7 @@ export default function AdminTransport() {
     <div className="admin-transport-container">
       <div className={'admin-transport-table-container'}>
         <div className={'admin-transport-table-header-container'}>
-          <span className={'admin-transport-table-header'}>TRANSPORT</span>
+          <span className={'admin-transport-table-header'}>ORDERS</span>
           <div className={'admin-transport-options-container'}>
             <div className="admin-transport-search-bar-container">
               <Dropdown
@@ -356,7 +356,7 @@ export default function AdminTransport() {
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'admin-transport-add-btn-text'}>Add Transport</span>
             </button>
-            <AddTransport
+            <AddOrders
               hidePopup={hideAddTransport}
               isPopupVisible={isAddTransportVisible}
               warehouseData={{
@@ -364,7 +364,7 @@ export default function AdminTransport() {
                 setTransportData: setTransportData,
               }}
             />
-            <EditTransport
+            <EditOrders
               hidePopup={hideEditTransport}
               isPopupVisible={isEditTransportVisible}
               transportData={{
