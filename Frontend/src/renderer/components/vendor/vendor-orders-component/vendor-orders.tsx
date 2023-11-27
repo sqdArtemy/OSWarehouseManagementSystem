@@ -18,7 +18,6 @@ export default function Orders() {
     const result = await orderApi.getAllOrders(filters);
     const orders = result.data?.body;
     const dataItems = [];
-
     if (orders?.length) {
       for (let i = 0; i < orders.length; i++) {
         const orderItem = {
@@ -86,11 +85,6 @@ export default function Orders() {
 
   const columns = [
     {
-      title: 'Order Type',
-      dataIndex: 'order_type',
-      key: 'order_type',
-    },
-    {
       title: 'Order Date',
       dataIndex: 'createdAt',
       key: 'createdAt',
@@ -127,7 +121,36 @@ export default function Orders() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    getAllOrders(filters);
+    orderApi.getAllOrders(filters).then(async (data) => {
+    const orders = data.data?.body;
+    const finishedItems = [];
+    const activeItems = [];
+
+
+    if (orders?.length) {
+      for (let i = 0; i < orders.length; i++) {
+        const orderItem = {
+          key: (i + 1).toString(),
+          order_status: orders[i].order_status,
+          order_type: orders[i].order_type,
+          createdAt: orders[i].createdAt, // Change to your actual createdAt field
+          order_id: orders[i].order_id,
+          vendor: orders[i].vendor, // Specify vendor data
+          warehouse: orders[i].warehouse, // Specify warehouse data
+        };
+
+
+        if (!['finished', 'lost', 'damaged'].includes(orderItem.order_status)) {
+          activeItems.push(orderItem);
+        } else {
+          finishedItems.push(orderItem)
+        }
+      }
+      console.log(finishedItems, activeItems)
+      setFinishedOrders(finishedItems);
+      setCurrentOrders(activeItems);
+    }
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
