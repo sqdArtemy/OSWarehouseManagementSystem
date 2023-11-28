@@ -1,28 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import './orders.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
-import { Button, Dropdown, Space, Table } from 'antd';
+import { Button, Dropdown, Space, Table, DatePicker } from 'antd';
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
-import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import { userApi } from '../../../index';
 import debounce from 'lodash.debounce';
-import AddOrders from './add-orders-component/add-orders';
 import EditOrders from './edit-orders-component/edit-orders';
-// import AddUser from './add-user-component/add-user';
-// import EditUser from './edit-user-component/edit-user';
 
-export interface ITransportData {
-  transportID: string;
-  capacity: string;
-  maxSpeed: string;
-  'price/weight': string;
-  type: string;
+export interface IOrderData {
+  fromWarehouse: string;
+  toWarehouse: string;
+  amount: string;
+  price: string;
+  created_at: string;
+  transport_type: string;
+  status: string;
 }
 
 export default function AdminOrders() {
+  const [selectedTransportType, setSelectedTransportType] = useState('All');
+  const [selectedStatus, setSelectedStatus] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
@@ -31,15 +31,25 @@ export default function AdminOrders() {
   const [dataSource, setDataSource] = useState([]);
   const [isAddTransportVisible, setIsAddTransportVisible] = useState(false);
   const [isEditTransportVisible, setIsEditTransportVisible] = useState(false);
-  const [transportData, setTransportData] = useState({});
+  const [orderData, setOrdersData] = useState({});
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    setSelectedTransportType(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectedTransportType;
+  };
+  const handleStatusClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    setSelectedStatus(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectedStatus;
+  };
+  const handleFromToWarehouseClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
     setSelectedType(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedType;
   };
 
-  const handeDeleteTransport = async (record?) => {
+  const handeDeleteOrder = async (record?) => {
     // if (selectedRows.length > 0) {
     //   console.log('delete', selectedRows);
     //   for (let user of selectedRows) {
@@ -84,11 +94,11 @@ export default function AdminOrders() {
     }, 100);
 
     const filters = {};
-    if (selectedType) {
-      filters.user_role = selectedType.toLowerCase();
+    if (selectedTransportType) {
+      filters.user_role = selectedTransportType.toLowerCase();
     }
 
-    if (selectedType === 'All' && filters.user_role) {
+    if (selectedTransportType === 'All' && filters.user_role) {
       delete filters.user_role;
     }
 
@@ -112,19 +122,10 @@ export default function AdminOrders() {
     }
   };
 
-  const handleAddTransport = (e) => {
-    setTimeout(() => {
-      if (e.target instanceof HTMLButtonElement) e.target.blur();
-      else {
-        (e.target as HTMLImageElement).parentElement?.blur();
-      }
-    }, 100);
-    setIsAddTransportVisible(true);
-  };
 
-  const handleEditTransport = (record) => {
+  const handleEditOrder = (record) => {
     console.log('edit', record);
-    setTransportData(record);
+    setOrdersData(record);
     setIsEditTransportVisible(true);
   };
 
@@ -142,11 +143,13 @@ export default function AdminOrders() {
     { length: placeholderRowCount },
     (_, index) => ({
       key: (index + 1).toString(),
-      transportID: '',
-      capacity: '',
-      maxSpeed: '',
-      'price/weight': '',
-      type: '',
+      fromWarehouse: '',
+      toWarehouse: '',
+      amount: '',
+      price: '',
+      created_at: '',
+      transport_type: '',
+      status: '',
     }),
   );
 
@@ -163,52 +166,58 @@ export default function AdminOrders() {
       width: '10%',
       align: 'center',
       render: (_, record) =>
-        record.transportID ? (
+        record.status ? (
           <span className={'table-actions-container'}>
             <EditOutlined
-              onClick={() => handleEditTransport(record)}
+              onClick={() => handleEditOrder(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
             />
             <DeleteOutlined
-              onClick={() => handeDeleteTransport(record)}
+              onClick={() => handeDeleteOrder(record)}
               style={{ color: 'red', cursor: 'pointer' }}
             />
           </span>
         ) : null,
     },
     {
-      title: 'Transport ID',
-      dataIndex: 'transportID',
-      key: 'transportID',
+      title: 'From',
+      dataIndex: 'fromWarehouse',
+      key: 'fromWarehouse',
       align: 'center',
     },
     {
-      title: 'Capacity',
-      dataIndex: 'capacity',
-      key: 'capacity',
+      title: 'To',
+      dataIndex: 'toWarehouse',
+      key: 'toWarehouse',
       align: 'center',
     },
     {
-      title: 'Max Speed',
-      dataIndex: 'maxSpeed',
-      key: 'maxSpeed',
+      title: 'Price',
+      dataIndex: 'price',
+      key: 'price',
       align: 'center',
     },
     {
-      title: 'Price/weight',
-      dataIndex: 'price_weight',
-      key: 'price_weight',
+      title: 'Date(created)',
+      dataIndex: 'created_at',
+      key: 'created_at',
       align: 'center',
     },
     {
-      title: 'Type',
-      dataIndex: 'type',
-      key: 'type',
-      align: 'type',
+      title: 'Transport',
+      dataIndex: 'transport_type',
+      key: 'transport_type',
+      align: 'center',
+    },
+    {
+      title: 'Status',
+      dataIndex: 'status',
+      key: 'status',
+      align: 'center',
     },
   ];
 
-  const items = [
+  const transport_types = [
     {
       label: 'Truck',
     },
@@ -219,11 +228,53 @@ export default function AdminOrders() {
       label: 'Car',
     },
   ];
+  const order_statuses = [
+    {
+      label: 'Lost',
+    },
+    {
+      label: 'Damaged',
+    },
+    {
+      label: 'New',
+    },
+    {
+      label: 'Processing',
+    },
+    {
+      label: 'Delivered',
+    },
+    {
+      label: 'Submitted',
+    },
+    {
+      label: 'Finished',
+    },
+    {
+      label: 'Cancelled',
+    },
+  ]
+  const fromToWarehouse = [
+    {
+      label: 'From Warehouse',
+    },
+    {
+      label: 'To Warehouse'
+    }
+  ]
 
-  const menuProps = {
-    items: items,
+  const transportTypesProps = {
+    items: transport_types,
     onClick: handleMenuClick,
   };
+  const orderStatusProps = {
+    items: order_statuses,
+    onClick: handleStatusClick,
+  }
+  const orderTypeProps = {
+    items: fromToWarehouse,
+    onClick: handleFromToWarehouseClick,
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -276,35 +327,13 @@ export default function AdminOrders() {
     setDataSource([
       {
         key: '1',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
-      },
-      {
-        key: '2',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
-      },
-      {
-        key: '3',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
-      },
-      {
-        key: '4',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
+        fromWarehouse: 'Dick.inc',
+        toWarehouse: 'Cock.inc',
+        amount: '6969',
+        price: '9696',
+        created_at: '2023-12-31',
+        transport_type: 'Van',
+        status: 'Finished',
       },
     ]);
 
@@ -312,64 +341,83 @@ export default function AdminOrders() {
   }, []);
 
   return (
-    <div className="admin-transport-container">
-      <div className={'admin-transport-table-container'}>
-        <div className={'admin-transport-table-header-container'}>
-          <span className={'admin-transport-table-header'}>ORDERS</span>
-          <div className={'admin-transport-options-container'}>
-            <div className="admin-transport-search-bar-container">
-              <Dropdown
-                menu={menuProps}
-                className={'admin-transport-search-bar-dropdown-container'}
-              >
-                <Button>
-                  <Space>
-                    {selectedType}
-                    <DownOutlined />
-                  </Space>
-                </Button>
-              </Dropdown>
-              <input
-                type=""
-                className="admin-transport-search-bar-input"
-                onChange={(e) => {
-                  setSearchValue(e.target.value);
-                }}
-              />
-              <button
-                className="admin-transport-search-bar-button"
-                onClick={(e) => handleSearchClick(e)}
-              >
-                <img src={SearchIcon} alt={'Search Bar'}></img>
-              </button>
+    <div className="admin-orders-container">
+      <div className={'admin-orders-table-container'}>
+        <div className={'admin-orders-table-header-container'}>
+          <span className={'admin-orders-table-header'}>ORDERS</span>
+          <div className={'admin-orders-options-container'}>
+            <div className="admin-orders-search-bar-container">
+              <div className="admin-orders-filter">
+                <label className="admin-orders-filter-labels">Status</label>
+                <Dropdown
+                  menu={orderStatusProps}
+                  className={'admin-orders-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedStatus}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
+              <div className="admin-orders-filter">
+                <label className="admin-orders-filter-labels">Transport</label>
+                <Dropdown
+                  menu={transportTypesProps}
+                  className={'admin-orders-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedTransportType}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
+              <div className="admin-orders-filter">
+                <label className="admin-orders-filter-labels">Type</label>
+                <Dropdown
+                  menu={orderTypeProps}
+                  className={'admin-orders-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedType}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
+              <div className="admin-orders-filter">
+                <label className="admin-orders-filter-duration-labels">Date From</label>
+                <DatePicker
+                  className={'admin-orders-datepicker'}
+                  size={'small'}
+                  bordered={true}
+                />
+              </div>
+              <div className="admin-orders-filter">
+                <label className="admin-orders-filter-duration-labels">Date To</label>
+                <DatePicker
+                  className={'admin-orders-datepicker'}
+                  size={'small'}
+                  bordered={true}
+                />
+              </div>
             </div>
             <img
-              className={'admin-transport-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={'admin-orders-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
-              onClick={() => handeDeleteTransport()}
+              onClick={() => handeDeleteOrder()}
             ></img>
-            <button
-              className={'admin-transport-add-btn'}
-              onClick={(e) => handleAddTransport(e)}
-            >
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'admin-transport-add-btn-text'}>Add Transport</span>
-            </button>
-            <AddOrders
-              hidePopup={hideAddTransport}
-              isPopupVisible={isAddTransportVisible}
-              warehouseData={{
-                transportData: transportData,
-                setTransportData: setTransportData,
-              }}
-            />
             <EditOrders
               hidePopup={hideEditTransport}
               isPopupVisible={isEditTransportVisible}
-              transportData={{
-                transportData: transportData,
-                setTransportData: setTransportData,
+              orderData={{
+                ordersData: orderData,
+                setOrdersData: setOrdersData,
               }}
             />
           </div>
@@ -383,7 +431,7 @@ export default function AdminOrders() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'admin-transport-table'}
+          className={'admin-orders-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}

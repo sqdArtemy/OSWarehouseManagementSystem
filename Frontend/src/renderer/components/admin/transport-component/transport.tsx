@@ -204,7 +204,7 @@ export default function AdminTransport() {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      align: 'type',
+      align: 'center',
     },
   ];
 

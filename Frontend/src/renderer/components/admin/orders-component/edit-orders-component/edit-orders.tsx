@@ -2,38 +2,39 @@ import React, { useEffect } from 'react';
 import './edit-orders.scss';
 import { Button, Form, FormInstance, Input, Modal } from 'antd';
 import { userApi } from '../../../../index';
-import { INewTransportData } from '../add-transport-component/add-transport';
-import { ITransportData } from '../orders';
+import { IOrderData } from '../orders';
 
 export default function EditOrders({
   isPopupVisible,
   hidePopup,
-  transportData,
+  orderData,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
-  transportData: {
-    transportData: INewTransportData | ITransportData;
-    setTransportData: (transportData: unknown) => void;
+  orderData: {
+    ordersData: IOrderData;
+    setOrdersData: (orderData: unknown) => void;
   };
 }) {
-  console.log(transportData.transportData);
+  console.log(orderData.ordersData);
   const formRef = React.useRef<FormInstance>(null);
 
   useEffect(() => {
-    if (isPopupVisible && transportData.transportData && formRef.current) {
-      const { transportID, capacity, maxSpeed, price_weight, type } =
-        transportData.transportData;
+    if (isPopupVisible && orderData.ordersData && formRef.current) {
+      const { fromWarehouse, toWarehouse, amount, price,created_at,transport_type, status } =
+        orderData.ordersData;
 
       formRef.current.setFieldsValue({
-        transportID: transportID,
-        Type: type,
-        maxSpeed: maxSpeed,
-        Capacity: capacity,
-        price_weight: price_weight,
+        fromWarehouse: fromWarehouse,
+        toWarehouse: toWarehouse,
+        amount: amount,
+        price: price,
+        created_at: created_at,
+        transport_type: transport_type,
+        status: status,
       });
     }
-  }, [transportData]);
+  }, [orderData]);
 
   const layout = {
     labelCol: { span: 8 },
@@ -54,7 +55,7 @@ export default function EditOrders({
   };
 
   const onFinish = async () => {
-    const newWarehouseData = formRef.current?.getFieldsValue();
+    const newOrderData = formRef.current?.getFieldsValue();
     hidePopup();
 
     // await userApi.addUser({
@@ -65,12 +66,12 @@ export default function EditOrders({
     //   user_role: newUserData['Role'],
     // });
 
-    transportData.setTransportData(newWarehouseData);
+    orderData.setOrdersData(newOrderData);
   };
 
   return (
     <Modal
-      title={<p style={{ fontSize: '1.2vw' }}>Edit Transport</p>}
+      title={<p style={{ fontSize: '1.2vw' }}>Edit Order</p>}
       open={isPopupVisible}
       onOk={onFinish}
       onCancel={onCancel}
@@ -81,42 +82,56 @@ export default function EditOrders({
         {...layout}
         labelAlign={'left'}
         ref={formRef}
-        name="edit-transport"
+        name="edit-order"
         size={'middle'}
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
       >
         <Form.Item
-          name="transportID"
-          label={<p style={{ fontSize: '1vw' }}>Transport ID</p>}
-          rules={[{ required: true }]}
+          name="fromWarehouse"
+          label={<p style={{ fontSize: '1vw' }}>From </p>}
+
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="Capacity"
-          label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
-          rules={[{ required: true }]}
+          name="toWarehouse"
+          label={<p style={{ fontSize: '1vw' }}>To </p>}
+
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="maxSpeed"
-          label={<p style={{ fontSize: '1vw' }}>Max Speed</p>}
-          rules={[{ required: true }]}
+          name="amount"
+          label={<p style={{ fontSize: '1vw' }}>Total Volume </p>}
+
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="price_weight"
-          label={<p style={{ fontSize: '1vw' }}>Price/weight</p>}
-          rules={[{ required: true }]}
+          name="price"
+          label={<p style={{ fontSize: '1vw' }}>Price </p>}
+
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="Type"
-          label={<p style={{ fontSize: '1vw' }}>Type</p>}
+          name="created_at"
+          label={<p style={{ fontSize: '1vw' }}>Date </p>}
+
+        >
+          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
+          name="transport_type"
+          label={<p style={{ fontSize: '1vw' }}>Transport </p>}
+
+        >
+          <Input disabled={true} style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
+          name="status"
+          label={<p style={{ fontSize: '1vw' }}>Status </p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

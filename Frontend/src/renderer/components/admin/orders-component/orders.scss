@@ -1,11 +1,11 @@
-.admin-transport-container {
+.admin-orders-container {
   display: flex;
   flex-direction: row;
   width: 85%;
   min-height: 100vh;
   align-items: center;
 
-  .admin-transport-table-container {
+  .admin-orders-table-container {
     display: flex;
     flex-direction: column;
     gap: 2.5vw;
@@ -15,16 +15,16 @@
     padding-left: 3vw;
 
 
-    .admin-transport-table-header-container {
+    .admin-orders-table-header-container {
       display: flex;
       flex-direction: column;
       gap: 3vw;
 
-      .admin-transport-table-header {
+      .admin-orders-table-header {
         font-size: 3vw;
       }
 
-      .admin-transport-options-container {
+      .admin-orders-options-container {
         display: flex;
         flex-direction: row;
         gap: 10vw;
@@ -32,59 +32,45 @@
         align-items: center;
 
 
-        .admin-transport-search-bar-container {
+        .admin-orders-search-bar-container {
           display: flex;
           flex-direction: row;
-
-          .admin-transport-search-bar-dropdown-container {
+          align-items: end;
+          .admin-orders-filter {
+            display: flex;
+            flex-direction: column;
+            margin-right: 1.5vw;
+            .admin-orders-filter-labels {
+              width: 10vw;
+              text-align: center;
+              font-size: 1vw;
+            }
+            .admin-orders-filter-duration-labels {
+              width: 7vw;
+              text-align: center;
+              font-size: 1vw;
+            }
+          }
+          .admin-orders-search-bar-dropdown-container {
             min-height: 3vw;
             width: 10vw;
             font-size: 1vw;
             border: 0.5px solid #000000;
-            border-right: 0;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-
-
           }
-
-
-          .admin-transport-search-bar-input {
-            width: 30vw;
+          .admin-orders-datepicker{
             min-height: 3vw;
+            width: 7vw;
+            font-size: 1.5vw;
             border: 0.5px solid #000000;
-          }
-
-          .admin-transport-search-bar-button {
-            width: 3vw;
-            min-height: 3vw;
-            background: #5564B2;
-            display: inline-block;
-            border: 2px solid transparent;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border-bottom-right-radius: 1vw;
-            border-top-right-radius: 1vw;
-
-            &:hover {
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-              border-color: #007bff;
-            }
-
-            &:focus {
-              box-shadow: inset 0 0 0 1px #007bff;
-            }
-
           }
         }
 
-        .admin-transport-delete-btn {
+        .admin-orders-delete-btn {
           width: 2.2vw;
           min-height: 2.2vw;
         }
 
-        .admin-transport-add-btn {
+        .admin-orders-add-btn {
           display: flex;
           flex-direction: row;
           align-items: center;
@@ -102,7 +88,7 @@
 
           cursor: pointer;
 
-          .admin-transport-add-btn-text {
+          .admin-orders-add-btn-text {
             font-size: 1.3vw;
             white-space: nowrap;
             overflow: hidden;
@@ -121,7 +107,7 @@
       }
     }
 
-    .admin-transport-table {
+    .admin-orders-table {
       width: 85%;
       min-height: 70%;
 
@@ -129,7 +115,7 @@
 
   }
 
-  .admin-transport-form {
+  .admin-orders-form {
     min-height: 100vh;
     width: 40%;
   }
