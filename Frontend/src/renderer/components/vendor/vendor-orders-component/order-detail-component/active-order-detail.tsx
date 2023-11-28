@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Form, Table, Button } from 'antd';
 import { orderApi, productApi, vendorApi } from '../../../../index';
 import './active-order-detail.scss';
+import { useNavigate } from 'react-router-dom';
+import { useError } from '../../../error-component/error-context';
 
 interface OrderActiveDetailsProps {
   id: string;
@@ -9,15 +11,16 @@ interface OrderActiveDetailsProps {
   isActiveOrderVisible: boolean;
 }
 
-const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, isActiveOrderVisible }) => {
+const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, isActiveOrderVisible, onCancelSuccess }) => {
   const [orderDetails, setOrderDetails] = useState<any>(null);
+  const navigate = useNavigate();
+  const { showError } = useError();
+
 
   useEffect(() => {
     orderApi.getOrder(Number(id)).then(async (data) => {
       const productsResponse = await productApi.getAllProducts({});
-      const vendorsResponse = await vendorApi.getAllVendors({});
       const products = productsResponse.data?.body;
-      const vendors = vendorsResponse.data?.body;
 
       const items = data.data?.body?.items;
       const orderDetails = data.data?.body;
@@ -35,10 +38,15 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         }
       }
 
-      const vendor = vendors?.find(vendor => vendor.vendor_id == orderDetails.supplier);
-      console.log(orderDetails);
+      const vendor = orderDetails.order_type === 'to_warehouse' ?
+        orderDetails.supplier : orderDetails.recipient;
+
+      const warehouse = orderDetails.order_type === 'from_warehouse'
+        ? orderDetails.supplier : orderDetails.recipient;
+
       orderDetails.items = orderItems;
-      orderDetails.vendor = vendor?.vendor_name;
+      orderDetails.vendor = vendor;
+      orderDetails.warehouse = warehouse;
       setOrderDetails(data.data?.body);
     });
   }, [id]);
@@ -54,13 +62,18 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   };
 
   const handleEditOrder = () => {
-    // Define the behavior for editing the order
     console.log('Edit Order clicked');
   };
 
-  const handleCancelOrder = () => {
-    // Define the behavior for canceling the order
-    console.log('Cancel Order clicked');
+  const handleCancelOrder = async () => {
+    const response = await orderApi.cancelOrder(Number(id));
+    if(response.success){
+      onCancelSuccess();
+      onClose();
+    }
+    else {
+      showError(response?.message);
+    }
   };
 
   return (
@@ -74,7 +87,13 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         <Form.Item label="Created At" name="created_at">
           <span className="form-value">{orderDetails?.created_at}</span>
         </Form.Item>
+        <Form.Item label="Destination" name="order_type">
+          <span className="form-value">{String(orderDetails?.order_type).replace(/_/g, ' ')}</span>
+        </Form.Item>
         <Form.Item label="Vendor Name" name="vendor">
+          <span className="form-value">{orderDetails?.vendor}</span>
+        </Form.Item>
+        <Form.Item label="Warehouse Name" name="vendor">
           <span className="form-value">{orderDetails?.vendor}</span>
         </Form.Item>
         <Form.Item label="Order Status" name="order_status">
@@ -92,12 +111,16 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
         {/* Buttons at the bottom */}
         <div style={{ textAlign: 'right', marginTop: '16px' }}>
-          <Button type="primary" onClick={handleEditOrder}>
-            Edit Order
-          </Button>
-          <Button danger onClick={handleCancelOrder} style={{ marginLeft: '8px' }}>
-            Cancel Order
-          </Button>
+            {orderDetails?.order_status === 'new' && (
+              <>
+                <Button type="primary" onClick={handleEditOrder}>
+                  Edit Order
+                </Button>
+                <Button danger onClick={handleCancelOrder} style={{ marginLeft: '8px' }}>
+                  Cancel Order
+                </Button>
+              </>
+            )}
           <Button onClick={onClose} style={{ marginLeft: '8px' }}>
             Close
           </Button>

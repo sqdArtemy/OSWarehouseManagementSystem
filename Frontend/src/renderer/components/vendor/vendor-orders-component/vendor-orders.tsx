@@ -28,25 +28,35 @@ export default function Orders() {
     const orders = result.data?.body;
     const dataItems = [];
     if (orders?.length) {
+      const finishedItems = [];
+      const activeItems = [];
       for (let i = 0; i < orders.length; i++) {
+        let order = orders[i];
+        const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
+
+        const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
+
         const orderItem = {
           key: (i + 1).toString(),
           order_status: orders[i].order_status,
           order_type: orders[i].order_type,
-          createdAt: orders[i].createdAt, // Change to your actual createdAt field
+          createdAt: orders[i].created_at,
           order_id: orders[i].order_id,
-          vendor: orders[i].vendor, // Specify vendor data
-          warehouse: orders[i].warehouse, // Specify warehouse data
+          vendor: vendor?.vendor_name,
+          vendor_id: vendor?.vendor_id,
+          warehouse: warehouse?.warehouse_name,
+          warehouse_id: warehouse?.warehouse_id
         };
 
-        dataItems.push(orderItem);
 
-        if (orderItem.order_status === 'finished') {
-          setFinishedOrders((prevFinishedOrders) => [...prevFinishedOrders, orderItem]);
+        if (!['finished', 'cancelled'].includes(orderItem.order_status)) {
+          activeItems.push(orderItem);
         } else {
-          setCurrentOrders((prevCurrentOrders) => [...prevCurrentOrders, orderItem]);
+          finishedItems.push(orderItem)
         }
       }
+      setFinishedOrders(finishedItems);
+      setCurrentOrders(activeItems);
     } else {
       setCurrentOrders([]);
       setFinishedOrders([]);
@@ -77,6 +87,10 @@ export default function Orders() {
   const handleOnFinishRowClick = (e, record: IWarehouseData, rowIndex) => {
     console.log('row', e, record, rowIndex);
   };
+
+  const handleCancelSuccess = async () => {
+    await getAllOrders(filters);
+  }
   const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
@@ -117,6 +131,11 @@ export default function Orders() {
       dataIndex: 'warehouse',
       key: 'warehouse',
     },
+    {
+      title: 'status',
+      dataIndex: 'order_status',
+      key: 'order_status',
+    }
   ];
 
   useEffect(() => {
@@ -144,15 +163,13 @@ export default function Orders() {
     const finishedItems = [];
     const activeItems = [];
 
-    const vendorsResponse = await vendorApi.getAllVendors({});
-    const warehouseResponse = await warehouseApi.getAllWarehouses({});
-    const vendors = vendorsResponse.data.body;
-    const warehouses = warehouseResponse.data.body;
 
     if (orders?.length) {
       for (let i = 0; i < orders.length; i++) {
-        const vendor = vendors.find(vendor => vendor.vendor_id = orders[i].supplier);
-        const warehouse = warehouses.find(warehouse => warehouse.warehouse_id = orders[i].recipient);
+        let order = orders[i];
+        const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
+
+        const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
 
         const orderItem = {
           key: (i + 1).toString(),
@@ -162,12 +179,12 @@ export default function Orders() {
           order_id: orders[i].order_id,
           vendor: vendor?.vendor_name,
           vendor_id: vendor?.vendor_id,
-          warehouse: orders[i].recipient,
+          warehouse: warehouse?.warehouse_name,
           warehouse_id: warehouse?.warehouse_id
         };
 
 
-        if (!['finished', 'lost', 'damaged'].includes(orderItem.order_status)) {
+        if (!['finished', 'cancelled'].includes(orderItem.order_status)) {
           activeItems.push(orderItem);
         } else {
           finishedItems.push(orderItem)
@@ -236,6 +253,7 @@ export default function Orders() {
           id={activeOrderId}
           onClose={() => setOrderDetailsVisible(false)}
           isActiveOrderVisible={isOrderDetailsVisible}
+          onCancelSuccess={handleCancelSuccess}
         />
       )}
     </div>
