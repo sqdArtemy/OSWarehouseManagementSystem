@@ -12,6 +12,7 @@ import {
   ChartData,
 } from 'chart.js';
 import { Table } from 'antd';
+import Inventory from './inventory-component/inventory';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -20,6 +21,8 @@ export default function WarehouseDetail() {
   const location = useLocation();
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [dataSource, setDataSource] = useState([]);
+  const [isInventoryPopupVisible, setIsInventoryPopupVisible] = useState(false);
+  const [inventoryData, setInventoryData] = useState({});
   const { state } = location;
   const warehouseData: IWarehouseData = state.locWarehouseData;
 
@@ -121,10 +124,10 @@ export default function WarehouseDetail() {
     { length: placeholderRowCount },
     (_, index) => ({
       key: (index + 1).toString(),
-      itemName: '',
-      itemWeight: '',
-      itemVolume: '',
-      itemCount: '',
+      itemName: 'Ravshanbek',
+      itemWeight: '65 kg',
+      itemVolume: '60 m3',
+      itemCount: '1',
     }),
   );
 
@@ -132,6 +135,16 @@ export default function WarehouseDetail() {
   if (tableData.length < placeholderRowCount) {
     tableData = [...tableData, ...placeholderData.slice(tableData.length + 1)];
   }
+
+  const hidePopup = () => {
+    setIsInventoryPopupVisible(false);
+  };
+
+  const handleRackClick = (record) => {
+    console.log(record);
+    setInventoryData(record);
+    setIsInventoryPopupVisible(true);
+  };
 
   return (
     <div className={'warehouse-detail-container'}>
@@ -144,7 +157,12 @@ export default function WarehouseDetail() {
             {warehouseData.warehouseName} {warehouse_id}
           </span>
         </span>
-        <RacksGrid />
+        <RacksGrid handleCellClick={handleRackClick} />
+        <Inventory
+          isInventoryPopupVisible={isInventoryPopupVisible}
+          hidePopup={hidePopup}
+          inventoryData={{ inventoryData, setInventoryData }}
+        />
       </div>
       <div className={'warehouse-detail-right'}>
         <div className={'warehouse-detail-doughnut-chart'}>
