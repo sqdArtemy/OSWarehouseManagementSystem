@@ -37,7 +37,8 @@
       grid-template-columns: repeat(10, 1fr); /* 10 columns */
       grid-template-rows: repeat(10, 1fr); /* 10 rows */
       width: 35vw;
-      height: 35vw;
+      height: 50vh;
+      gap: 0.7vw;
 
       .warehouse-detail-grid-row {
         display: contents; /* This helps to align cells properly in the grid */
