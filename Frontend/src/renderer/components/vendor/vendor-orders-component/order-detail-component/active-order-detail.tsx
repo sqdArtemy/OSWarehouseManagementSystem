@@ -15,6 +15,8 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
   const { showError } = useError();
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showCancelConfirmationModal, setShowCancelConfirmationModal] = useState(false);
 
   useEffect(() => {
     orderApi.getOrder(Number(id)).then(async (data) => {
@@ -127,12 +129,17 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   };
 
   const handleCancelOrder = async () => {
+    setShowCancelConfirmationModal(true);
+  };
+
+  const handleConfirmCancelOrder = async () => {
+    setShowCancelConfirmationModal(false)
     const response = await orderApi.cancelOrder(Number(id));
     if (response.success) {
       onCancelSuccess();
       onClose();
     } else {
-      showError(response?.message);
+      showError(response.message);
     }
   };
 
@@ -149,6 +156,14 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
     });
   };
 
+  const handleConfirmDelivery = async () => {
+    const response = await orderApi.changeStatusOfOrder(Number(id), 'finished');
+    if(response.success) {
+      setShowConfirmationModal(false);
+    } else {
+      showError(response.message)
+    }
+  };
   return (
     <Modal
       title={`Order Active Details ${editMode ? '(Editing)' : ''}`}
@@ -204,11 +219,37 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
             </Button>
           </>
         )}
-        {!editMode && (< Button onClick={onClose} style={{marginLeft: '8px'}}>
+        {orderDetails?.order_status === 'processing' && orderDetails?.order_type === 'from_warehouse' && (
+          <>
+            <span style={{ marginRight: '8px', color: 'red' }}>Confirm order when it's delivered.</span>
+            <Button type="primary" onClick={() => setShowConfirmationModal(true)}>
+              Confirm Delivery
+            </Button>
+          </>
+        )}
+        {!editMode && (
+          < Button onClick={onClose} style={{marginLeft: '8px'}}>
           Close
           </Button>)
         }
       </div>
+      <Modal
+        title="Confirm Delivery"
+        visible={showConfirmationModal}
+        onOk={handleConfirmDelivery}
+        onCancel={() => setShowConfirmationModal(false)}
+      >
+        <p>Are you sure you want to confirm delivery?</p>
+      </Modal>
+
+      <Modal
+        title="Confirm Cancel Order"
+        visible={showCancelConfirmationModal}
+        onOk={handleConfirmCancelOrder}
+        onCancel={() => setShowCancelConfirmationModal(false)}
+      >
+        <p>Are you sure you want to cancel this order?</p>
+      </Modal>
     </Modal>
   );
 };
