@@ -98,12 +98,14 @@
   },
   "dependencies": {
     "antd": "^5.11.1",
+    "chart.js": "^4.4.0",
     "dotenv": "^16.3.1",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-updater": "^6.1.4",
     "lodash.debounce": "^4.0.8",
     "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.16.0"
   },
