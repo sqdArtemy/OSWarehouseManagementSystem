@@ -105,8 +105,8 @@ class OrderView(GenericView):
             if requester_role != UserRole.ADMIN.value["code"] and (
                     (
                     requester_role == UserRole.VENDOR.value["code"] and (
-                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                    (order.order_type == "from_warehouse" and order.recipient_id not in requester_vendors) or
+                    (order.order_type == "to_warehouse" and order.supplier_id not in requester_vendors)
                        )
                     ) or (
                     (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (

@@ -20,6 +20,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   useEffect(() => {
     orderApi.getOrder(Number(id)).then(async (data) => {
+      console.log(data.message);
       const productsResponse = await productApi.getAllProducts({});
       const products = productsResponse.data?.body;
 
@@ -27,17 +28,19 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       const orderDetails = data.data?.body;
       const orderItems = [];
 
-      for (let item of items) {
-        const product = products?.find((product) => {
-          return product.product_id == item.product;
-        });
-
-        if (product) {
-          orderItems.push({
-            product_name: product?.product_name,
-            product_id: item.product,
-            quantity: item.quantity,
+      if(items) {
+        for (let item of items) {
+          const product = products?.find((product) => {
+            return product.product_id == item.product;
           });
+
+          if (product) {
+            orderItems.push({
+              product_name: product?.product_name,
+              product_id: item.product,
+              quantity: item.quantity,
+            });
+          }
         }
       }
 
@@ -45,7 +48,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       const warehouse =
         orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
 
-      orderDetails.items = orderItems;
+      orderDetails.items = orderItems ?? [];
       orderDetails.vendor = vendor;
       orderDetails.warehouse = warehouse;
       setOrderDetails(data.data?.body);
