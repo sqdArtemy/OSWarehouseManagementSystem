@@ -17,9 +17,9 @@ export interface IOrder {
 
 
 export interface IAddOrder {
-  order_type: 'to_warehouse' | 'from_warehouse';
-  warehouse_id: number;
-  vendor_id: number;
+  order_type?: 'to_warehouse' | 'from_warehouse';
+  warehouse_id?: number;
+  vendor_id?: number;
   items: IItem[];
 }
 

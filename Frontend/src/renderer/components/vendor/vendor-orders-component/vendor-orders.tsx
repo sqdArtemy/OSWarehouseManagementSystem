@@ -26,7 +26,7 @@ export default function Orders() {
   const getAllOrders = async (filters: IOrderFilters) => {
     const result = await orderApi.getAllOrders(filters);
     const orders = result.data?.body;
-    const dataItems = [];
+
     if (orders?.length) {
       const finishedItems = [];
       const activeItems = [];
@@ -85,7 +85,10 @@ export default function Orders() {
   };
 
   const handleOnFinishRowClick = (e, record: IWarehouseData, rowIndex) => {
-    console.log('row', e, record, rowIndex);
+    if (record.order_id && record.order_id !== -1) {
+      setActiveOrderId(record.order_id); // Set active order id
+      setOrderDetailsVisible(true); // Show the order details modal
+    }
   };
 
   const handleCancelSuccess = async () => {

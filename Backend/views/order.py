@@ -25,8 +25,7 @@ class OrderView(GenericView):
         with get_session() as session:
             remaining_volume = (
                 session.query(
-                    func.coalesce(
-                        Warehouse.remaining_capacity -
+                    Warehouse.remaining_capacity - func.coalesce(
                         func.sum(OrderItem.quantity * Product.volume),
                         0
                     )
@@ -34,10 +33,9 @@ class OrderView(GenericView):
                 .join(Order, Order.recipient_id == Warehouse.warehouse_id)
                 .join(OrderItem, OrderItem.order_id == Order.order_id)
                 .join(Product, Product.product_id == OrderItem.product_id)
-                .filter(Order.status.in_(["processing", "delivered", "submitted"]))
+                .filter(Order.order_status.in_(["processing", "delivered", "submitted"]))
                 .filter(Warehouse.warehouse_id == warehouse_id)
             ).scalar()
-
             return remaining_volume
 
     @staticmethod

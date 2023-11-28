@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Table, Button } from 'antd';
-import { orderApi, productApi, vendorApi } from '../../../../index';
+import { Modal, Form, Table, Button, InputNumber, Space } from 'antd';
+import { orderApi, productApi } from '../../../../index';
 import './active-order-detail.scss';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../../error-component/error-context';
@@ -13,9 +13,8 @@ interface OrderActiveDetailsProps {
 
 const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, isActiveOrderVisible, onCancelSuccess }) => {
   const [orderDetails, setOrderDetails] = useState<any>(null);
-  const navigate = useNavigate();
+  const [editMode, setEditMode] = useState(false);
   const { showError } = useError();
-
 
   useEffect(() => {
     orderApi.getOrder(Number(id)).then(async (data) => {
@@ -26,23 +25,23 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       const orderDetails = data.data?.body;
       const orderItems = [];
 
+      for (let item of items) {
+        const product = products?.find((product) => {
+          return product.product_id == item.product;
+        });
 
-      for (let item of items){
-        const product = products?.find(product => { return product.product_id == item.product});
-
-        if(product) {
+        if (product) {
           orderItems.push({
             product_name: product?.product_name,
-            quantity: item.quantity
-          })
+            product_id: item.product,
+            quantity: item.quantity,
+          });
         }
       }
 
-      const vendor = orderDetails.order_type === 'to_warehouse' ?
-        orderDetails.supplier : orderDetails.recipient;
-
-      const warehouse = orderDetails.order_type === 'from_warehouse'
-        ? orderDetails.supplier : orderDetails.recipient;
+      const vendor = orderDetails.order_type === 'to_warehouse' ? orderDetails.supplier : orderDetails.recipient;
+      const warehouse =
+        orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
 
       orderDetails.items = orderItems;
       orderDetails.vendor = vendor;
@@ -53,7 +52,34 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   const columns = [
     { title: 'Product Name', dataIndex: 'product_name', key: 'product_name' },
-    { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
+    {
+      title: 'Quantity',
+      dataIndex: 'quantity',
+      key: 'quantity',
+      render: (text, record) => {
+        return editMode ? (
+          <InputNumber
+            value={text}
+            onChange={(value) => handleQuantityChange(record.product_name, value)}
+          />
+        ) : (
+          text
+        );
+      },
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (text, record) => (
+        <Space size="middle">
+          {editMode && (
+            <Button type="link" onClick={() => handleRemoveItem(record.product_name)}>
+              Remove
+            </Button>
+          )}
+        </Space>
+      ),
+    },
   ];
 
   const layout = {
@@ -62,26 +88,73 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   };
 
   const handleEditOrder = () => {
+    setEditMode(true);
     console.log('Edit Order clicked');
+  };
+
+  const handleUpdateOrder = async () => {
+    const items = [];
+    for (let item of orderDetails.items){
+      items.push({
+        product_id: item.product_id,
+        quantity: item.quantity
+      })
+    }
+
+    const response = await orderApi.updateOrder({ items, vendor_id: orderDetails.vendor }, Number(id));
+    if (response.success) {
+      onCancelSuccess();
+      onClose();
+    } else {
+      showError(response?.message);
+    }
+    setEditMode(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+  };
+
+  const handleRemoveItem = (productName) => {
+    setOrderDetails((prevOrderDetails) => {
+      const updatedItems = prevOrderDetails.items.filter((item) => item.product_name !== productName);
+
+      return {
+        ...prevOrderDetails,
+        items: updatedItems,
+      };
+    });
   };
 
   const handleCancelOrder = async () => {
     const response = await orderApi.cancelOrder(Number(id));
-    if(response.success){
+    if (response.success) {
       onCancelSuccess();
       onClose();
-    }
-    else {
+    } else {
       showError(response?.message);
     }
   };
 
+  const handleQuantityChange = (productName, value) => {
+    setOrderDetails((prevOrderDetails) => {
+      const updatedItems = prevOrderDetails.items.map((item) =>
+        item.product_name === productName ? { ...item, quantity: value } : item
+      );
+
+      return {
+        ...prevOrderDetails,
+        items: updatedItems,
+      };
+    });
+  };
+
   return (
     <Modal
-      title="Order Active Details"
+      title={`Order Active Details ${editMode ? '(Editing)' : ''}`}
       visible={isActiveOrderVisible}
       onCancel={onClose}
-      footer={null} // Remove the default footer
+      footer={null}
     >
       <Form {...layout} initialValues={orderDetails} colon={false}>
         <Form.Item label="Created At" name="created_at">
@@ -93,8 +166,8 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         <Form.Item label="Vendor Name" name="vendor">
           <span className="form-value">{orderDetails?.vendor}</span>
         </Form.Item>
-        <Form.Item label="Warehouse Name" name="vendor">
-          <span className="form-value">{orderDetails?.vendor}</span>
+        <Form.Item label="Warehouse Name" name="warehouse">
+          <span className="form-value">{orderDetails?.warehouse}</span>
         </Form.Item>
         <Form.Item label="Order Status" name="order_status">
           <span className="form-value">{orderDetails?.order_status}</span>
@@ -107,24 +180,35 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         </Form.Item>
       </Form>
 
-        <Table pagination={false} dataSource={orderDetails?.items} columns={columns} />
+      <Table pagination={false} dataSource={orderDetails?.items} columns={columns} />
 
-        {/* Buttons at the bottom */}
-        <div style={{ textAlign: 'right', marginTop: '16px' }}>
-            {orderDetails?.order_status === 'new' && (
-              <>
-                <Button type="primary" onClick={handleEditOrder}>
-                  Edit Order
-                </Button>
-                <Button danger onClick={handleCancelOrder} style={{ marginLeft: '8px' }}>
-                  Cancel Order
-                </Button>
-              </>
-            )}
-          <Button onClick={onClose} style={{ marginLeft: '8px' }}>
-            Close
-          </Button>
-        </div>
+      {editMode && (
+        <>
+        <Button type="primary" onClick={handleUpdateOrder} style={{ marginTop: '16px' }}>
+          Update Order
+        </Button>
+        < Button onClick={handleCancelEdit} style={{marginLeft: '8px'}}>
+        Cancel update
+        </Button>
+        </>
+      )}
+
+      <div style={{ textAlign: 'right', marginTop: '16px' }}>
+        {orderDetails?.order_status === 'new' && !editMode && (
+          <>
+            <Button type="primary" onClick={handleEditOrder}>
+              Edit Order
+            </Button>
+            <Button danger onClick={handleCancelOrder} style={{ marginLeft: '8px' }}>
+              Cancel Order
+            </Button>
+          </>
+        )}
+        {!editMode && (< Button onClick={onClose} style={{marginLeft: '8px'}}>
+          Close
+          </Button>)
+        }
+      </div>
     </Modal>
   );
 };
