@@ -15,7 +15,7 @@ import Items from './components/owner/items-component/items';
 import { SignUp } from './components/sign-up-components/sign-up-component/sign-up';
 import { SignUpDetails } from './components/sign-up-components/sign-up-details-component/sign-up-details';
 import Profile from './components/owner/profile-component/profile';
-import Warehouses from './components/owner/warehouses-component/warehouses';
+import OwnerWarehouses from './components/owner/warehouses-component/warehouses';
 // import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 import { ErrorProvider } from './components/error-component/error-context';
 import { LoadingProvider } from './components/loading-component/loading';
@@ -23,6 +23,7 @@ import Vendors from './components/vendor/vendors-component/vendors';
 import VendorOrders from './components/vendor/vendor-orders-component/vendor-orders';
 import { VendorLayout } from './components/vendor/vendor-layout-component/vendor-layout';
 import WarehouseDetail from './components/owner/warehouses-component/warehouse-detail-component/warehouse-detail';
+import SupervisorWarehouses from './components/supervisor/warehouses-component/warehouses';
 
 export default function App() {
   return (
@@ -41,7 +42,7 @@ export default function App() {
               />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="users" element={<Users />} />
-              <Route path="warehouses" element={<Warehouses />} />
+              <Route path="warehouses" element={<OwnerWarehouses />} />
               <Route
                 path="warehouses/:warehouse_id"
                 element={<WarehouseDetail />}
@@ -59,6 +60,16 @@ export default function App() {
               <Route path="orders" element={<VendorOrders />} />
               <Route path="profile" element={<Profile />} />
               {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
+            </Route>
+            <Route path="supervisor/*" element={<VendorLayout />}>
+              <Route
+                path="./"
+                element={<Navigate to="/supervisor/warehouses" replace />}
+              />
+              <Route
+                path="warehouses/:warehouse_id"
+                element={<SupervisorWarehouses />}
+              />
             </Route>
           </Routes>
         </Router>

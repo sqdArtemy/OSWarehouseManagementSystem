@@ -1,0 +1,110 @@
+
+.generalized-detail-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 85vw;
+  min-height: 100vh;
+
+
+  padding-top: 3vw;
+  padding-left: 3vw;
+
+
+  .generalized-detail-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1vw;
+    width: 50%;
+
+    .generalized-detail-header {
+      display: flex;
+      flex-direction: column;
+      gap: 1vw;
+      font-size: 3vw;
+      align-items: flex-start;
+      align-self: flex-start;
+
+      .generalized-detail-header-name {
+        font-size: 3vw;
+      }
+
+      .generalized-detail-header-type {
+        font-size: 2vw;
+      }
+
+      .generalized-detail-header-btns {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1vw;
+
+        button {
+          font-size: 1vw;
+          width:13vw;
+          height:2.5vw;
+          text-align: center;
+        }
+      }
+
+    }
+
+    .generalized-detail-footer-btns {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      gap: 1vw;
+      top: 16vw;
+
+      button {
+        font-size: 1vw;
+        width:10vw;
+        height:2.5vw;
+      }
+    }
+
+  }
+
+  .generalized-detail-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-right: 2rem;
+    gap: 3vw;
+    width: 50%;
+
+    .generalized-detail-doughnut-chart {
+      width: 18vw;
+      height: 18vw;
+
+    }
+
+    .generalized-detail-items-table-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.5vw;
+      min-height: 50%;
+
+      .generalized-detail-items-table-header {
+        font-size: 1.5vw;
+      }
+
+      .generalized-detail-items-table {
+        width: 40vw;
+        height: 25vh;
+      }
+    }
+
+
+  }
+
+
+}
+
+
+
