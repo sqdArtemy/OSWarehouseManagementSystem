@@ -32,33 +32,6 @@
       }
     }
 
-    .warehouse-detail-grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr); /* 10 columns */
-      grid-template-rows: repeat(10, 1fr); /* 10 rows */
-      width: 35vw;
-      height: 50vh;
-      gap: 0.7vw;
-
-      .warehouse-detail-grid-row {
-        display: contents; /* This helps to align cells properly in the grid */
-
-
-        .warehouse-detail-grid-cell {
-          background-color: #f0f0f0; /* Light grey background */
-          aspect-ratio: 1; /* Ensures cells are square */
-          border: 1px solid #d9d9d9; /* Light border for cells */
-          border-radius: 0.5vw; /* Rounded corners for cells */
-          height: 3vw;
-          cursor: pointer;
-        }
-
-
-      }
-
-
-    }
-
   }
 
   .warehouse-detail-right {

@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import './warehouse-detail.scss';
 import { IWarehouseData } from '../warehouses';
+import RacksGrid from '../../../racks-grid-component/racks-grid';
 
 export default function WarehouseDetail() {
   const { warehouse_id } = useParams();
@@ -10,18 +11,6 @@ export default function WarehouseDetail() {
   const warehouseData: IWarehouseData = state.locWarehouseData;
   console.log('warehouseData', warehouseData);
   // Use warehouse_id to fetch or display warehouse details
-
-  // Create an array of 10 rows, each with 10 cells
-  const rows = Array.from({ length: 10 }, (_, rowIndex) => (
-    <div className="warehouse-detail-grid-row" key={`row-${rowIndex}`}>
-      {Array.from({ length: 10 }, (_, cellIndex) => (
-        <div
-          className="warehouse-detail-grid-cell"
-          key={`cell-${rowIndex}-${cellIndex}`}
-        />
-      ))}
-    </div>
-  ));
 
   return (
     <div className={'warehouse-detail-container'}>
@@ -34,7 +23,7 @@ export default function WarehouseDetail() {
             {warehouseData.warehouseName} {warehouse_id}
           </span>
         </span>
-        <div className="warehouse-detail-grid">{rows}</div>
+        <RacksGrid />
       </div>
       <div className={'warehouse-detail-right'}></div>
     </div>
