@@ -1,14 +1,31 @@
 import React from 'react';
 import './racks-grid.scss';
 
-export default function RacksGrid() {
-  const rows = Array.from({ length: 10 }, (_, rowIndex) => (
-    <div className="grid-row" key={`row-${rowIndex}`}>
-      {Array.from({ length: 10 }, (_, cellIndex) => (
-        <div className="grid-cell" key={`cell-${rowIndex}-${cellIndex}`} />
-      ))}
-    </div>
-  ));
+export default function RacksGrid({ gridData }) {
+  gridData = [
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  ];
 
-  return <div className={'grid-container'}>{rows}</div>;
+  const renderGrid = () => {
+    return gridData.map((row, rowIndex) => (
+      <div className="grid-row" key={`row-${rowIndex}`}>
+        {row.map((cell, cellIndex) => (
+          <div className="grid-cell" key={`cell-${rowIndex}-${cellIndex}`}>
+            {/*{cell}*/}
+          </div>
+        ))}
+      </div>
+    ));
+  };
+
+  return <div className={'grid-container'}>{renderGrid()}</div>;
 }

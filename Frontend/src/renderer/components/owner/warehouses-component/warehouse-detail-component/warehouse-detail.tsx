@@ -10,7 +10,6 @@ export default function WarehouseDetail() {
   const { state } = location;
   const warehouseData: IWarehouseData = state.locWarehouseData;
   console.log('warehouseData', warehouseData);
-  // Use warehouse_id to fetch or display warehouse details
 
   return (
     <div className={'warehouse-detail-container'}>
