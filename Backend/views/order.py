@@ -25,15 +25,17 @@ class OrderView(GenericView):
         with get_session() as session:
             remaining_volume = (
                 session.query(
-                    Warehouse.remaining_capacity -
-                    func.sum(OrderItem.quantity * Product.volume)
+                    func.coalesce(
+                        Warehouse.remaining_capacity -
+                        func.sum(OrderItem.quantity * Product.volume),
+                        0
+                    )
                 )
                 .join(Order, Order.recipient_id == Warehouse.warehouse_id)
                 .join(OrderItem, OrderItem.order_id == Order.order_id)
                 .join(Product, Product.product_id == OrderItem.product_id)
                 .filter(Order.status.in_(["processing", "delivered", "submitted"]))
                 .filter(Warehouse.warehouse_id == warehouse_id)
-                .group_by(Warehouse.warehouse_id)
             ).scalar()
 
             return remaining_volume
@@ -125,7 +127,7 @@ class OrderView(GenericView):
             self.response.data = order.to_dict(cascade_fields=())
             self.response.data["total_volume"] = total_volume
             self.response.data["items"] = [
-                order_item.to_dict(cascade_fields=()) for order_item in order.ordered_items
+                order_item.to_dict(cascade_fields=("supplier", "recipient")) for order_item in order.ordered_items
             ]
 
             return self.response.create_response()
@@ -140,7 +142,7 @@ class OrderView(GenericView):
         :return: dictionary containing status_code and response body with list of dictionaries of order`s data
         """
         if self.requester_role == UserRole.ADMIN.value["code"]:
-            return super().get_list(request=request, **kwargs)
+            return super().get_list(request=request, cascade_fields=("supplier", "recipient"), **kwargs)
 
         with get_session() as session:
             requester = session.query(User).filter_by(user_id=self.requester_id).first()
@@ -167,7 +169,10 @@ class OrderView(GenericView):
                         and_(Order.order_type == "from_warehouse", Order.recipient_id.in_(vendor_ids))
                     )
                 )
-            return super().get_list(request=request, pre_selected_query=orders.order_by(desc(Order.created_at)), **kwargs)
+            return super().get_list(
+                request=request, cascade_fields=("supplier", "recipient"),
+                pre_selected_query=orders.order_by(desc(Order.created_at)), **kwargs
+            )
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])

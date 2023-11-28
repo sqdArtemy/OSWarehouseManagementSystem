@@ -75,5 +75,6 @@ class Order(Base):
                 "created_at": self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
                 "updated_at": self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
                 "order_status": self.order_status,
+                "order_type": self.order_type,
                 "transport": self.transport.to_dict() if "transport" in cascade_fields else self.transport_id,
             }
