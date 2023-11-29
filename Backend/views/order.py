@@ -25,8 +25,7 @@ class OrderView(GenericView):
         with get_session() as session:
             remaining_volume = (
                 session.query(
-                    func.coalesce(
-                        Warehouse.remaining_capacity -
+                    Warehouse.remaining_capacity - func.coalesce(
                         func.sum(OrderItem.quantity * Product.volume),
                         0
                     )
@@ -34,7 +33,7 @@ class OrderView(GenericView):
                 .join(Order, Order.recipient_id == Warehouse.warehouse_id)
                 .join(OrderItem, OrderItem.order_id == Order.order_id)
                 .join(Product, Product.product_id == OrderItem.product_id)
-                .filter(Order.status.in_(["processing", "delivered", "submitted"]))
+                .filter(Order.order_status.in_(["processing", "delivered", "submitted"]))
                 .filter(Warehouse.warehouse_id == warehouse_id)
             ).scalar()
 
@@ -106,15 +105,15 @@ class OrderView(GenericView):
 
             if requester_role != UserRole.ADMIN.value["code"] and (
                     (
-                    requester_role == UserRole.VENDOR.value["code"] and (
-                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
-                       )
+                            requester_role == UserRole.VENDOR.value["code"] and (
+                            (order.order_type == "from_warehouse" and order.recipient_id not in requester_vendors) or
+                            (order.order_type == "to_warehouse" and order.supplier_id not in requester_vendors)
+                    )
                     ) or (
-                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                       )
+                            (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            )
                     )
             ):
                 raise ValidationError("You are not allowed to see this order.", 403)
@@ -124,10 +123,10 @@ class OrderView(GenericView):
                 filter(OrderItem.order_id == order.order_id).scalar()
 
             self.response.status_code = 200
-            self.response.data = order.to_dict(cascade_fields=())
+            self.response.data = order.to_dict(cascade_fields=("supplier", "recipient"))
             self.response.data["total_volume"] = total_volume
             self.response.data["items"] = [
-                order_item.to_dict(cascade_fields=("supplier", "recipient")) for order_item in order.ordered_items
+                order_item.to_dict(cascade_fields=()) for order_item in order.ordered_items
             ]
 
             return self.response.create_response()
