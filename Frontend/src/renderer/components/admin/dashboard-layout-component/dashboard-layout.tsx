@@ -7,6 +7,7 @@ import WarehousesIcon from '../../../../../assets/icons/dashboard-warehouses-ico
 import ItemsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
 import TransportIcon from '../../../../../assets/icons/dashboard-transport-icon.png'
 import OrdersIcon from '../../../../../assets/icons/dashboard-orders-icon.png'
+import RacksIcon from '../../../../../assets/icons/dashboard-racks-icon.png'
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 
@@ -20,7 +21,7 @@ export function AdminDashboardLayout() {
     { iconSrc: ItemsIcon, text: 'Vendors' },
     { iconSrc: TransportIcon, text: 'Transport'},
     { iconSrc: OrdersIcon, text: 'Orders'},
-    { iconSrc: TransportIcon, text: 'Racks'},
+    { iconSrc: RacksIcon, text: 'Racks'},
     { iconSrc: TransportIcon, text: 'Transport'},
     { iconSrc: TransportIcon, text: 'Transport'},
   ];

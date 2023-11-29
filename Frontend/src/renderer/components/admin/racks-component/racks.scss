@@ -1,0 +1,167 @@
+.admin-racks-container {
+  display: flex;
+  flex-direction: row;
+  width: 85%;
+  min-height: 100vh;
+  align-items: center;
+
+  .admin-racks-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5vw;
+    min-height: 100vh;
+    width: 100%;
+    padding-top: 3vw;
+    padding-left: 3vw;
+
+
+    .admin-racks-table-header-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3vw;
+
+      .admin-racks-table-header {
+        font-size: 3vw;
+      }
+
+      .admin-racks-options-container {
+        display: flex;
+        flex-direction: row;
+        gap: 7vw;
+        width: 100%;
+        align-items: end;
+
+
+        .admin-racks-search-bar-container {
+          display: flex;
+          flex-direction: row;
+          align-items: end;
+
+          .admin-racks-filter{
+            display: flex;
+            flex-direction: column;
+
+            .admin-racks-filter-labels{
+              width: 8vw;
+              text-align: center;
+              font-size:1vw;
+            }
+          }
+
+          .admin-racks-search-bar-dropdown-container {
+            min-height: 3vw;
+            width: 8vw;
+            font-size: 1vw;
+            border: 0.5px solid #000000;
+            margin-right: 2vw;
+          }
+
+
+          .admin-racks-search-bar-input {
+            width: 20vw;
+            min-height: 3vw;
+            border: 0.5px solid #000000;
+            border-bottom-left-radius: 1vw;
+            border-top-left-radius: 1vw;
+          }
+
+          .admin-racks-search-bar-button {
+            width: 3vw;
+            min-height: 3vw;
+            background: #5564B2;
+            display: inline-block;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-bottom-right-radius: 1vw;
+            border-top-right-radius: 1vw;
+
+            &:hover {
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+              border-color: #007bff;
+            }
+
+            &:focus {
+              box-shadow: inset 0 0 0 1px #007bff;
+            }
+
+          }
+        }
+
+        .admin-racks-delete-btn {
+          width: 2.2vw;
+          min-height: 2.2vw;
+        }
+
+        .admin-racks-add-btn {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5vw;
+
+          width: 10vw;
+          min-height: 2.2vw;
+          border: 0.5px solid #000000;
+
+
+          color: #FFFFFF;
+          background-color: #378BA4;
+          border-radius: 0.3rem;
+
+          cursor: pointer;
+
+          .admin-racks-add-btn-text {
+            font-size: 1.3vw;
+          }
+
+          &:hover {
+            background-color: #2C7A8B;
+          }
+
+          &:focus {
+            background-color: #2C7A8B;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+          }
+        }
+      }
+    }
+
+    .admin-racks-table {
+      width: 85%;
+      min-height: 70%;
+
+    }
+
+  }
+
+
+  .admin-racks-form {
+    min-height: 100vh;
+    width: 40%;
+  }
+}
+
+.highlight-bottom-border > td {
+  border-bottom: solid 1px black !important
+}
+
+.highlight-left-border > td {
+  border-left: solid 1px black !important
+}
+
+.enabled {
+  cursor: pointer;
+}
+
+.table-actions-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.ant-table table { font-size: 1vw; }

@@ -25,6 +25,7 @@ import AdminUsers from './components/admin/users-component/users';
 import AdminCompanies from './components/admin/companies-component/companies';
 import AdminTransport from './components/admin/transport-component/transport';
 import AdminOrders from './components/admin/orders-component/orders';
+import AdminRacks from './components/admin/racks-component/racks'
 import { ErrorProvider } from './components/error-component/error-context';
 import { LoadingProvider } from './components/loading-component/loading';
 import Vendors from './components/vendor/vendors-component/vendors';
@@ -66,6 +67,7 @@ export default function App() {
             <Route path="transport" element={<AdminTransport />} />
             <Route path="profile" element={<AdminProfile />} />
             <Route path="orders" element={<AdminOrders />} />
+            <Route path="racks" element={<AdminRacks />} />
           </Route>
           <Route path="vendor/*" element={<VendorLayout />}>
             <Route
