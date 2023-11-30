@@ -20,7 +20,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   useEffect(() => {
     orderApi.getOrder(Number(id)).then(async (data) => {
-      console.log(data.message);
+      console.log(data.data?.body);
       const productsResponse = await productApi.getAllProducts({});
       const products = productsResponse.data?.body;
 
@@ -49,8 +49,9 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
 
       orderDetails.items = orderItems ?? [];
-      orderDetails.vendor = vendor;
-      orderDetails.warehouse = warehouse;
+      orderDetails.vendor = vendor?.vendor_name;
+      orderDetails.vendor_id = vendor?.vendor_id;
+      orderDetails.warehouse = warehouse?.warehouse_name;
       setOrderDetails(data.data?.body);
     });
   }, [id]);
@@ -106,7 +107,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       })
     }
 
-    const response = await orderApi.updateOrder({ items, vendor_id: orderDetails.vendor }, Number(id));
+    const response = await orderApi.updateOrder({ items, vendor_id: orderDetails.vendor_id }, Number(id));
     if (response.success) {
       onCancelSuccess();
       onClose();
