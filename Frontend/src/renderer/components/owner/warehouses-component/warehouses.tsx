@@ -322,7 +322,7 @@ export default function Warehouses() {
         const allUsers = (await userApi.getAllUsers({})).data.body;
         for (let i = 0; i < warehouses.length; i++) {
           const user = allUsers?.find(
-            (user) => (user.user_id = warehouses[i].supervisor),
+            (user) => (user.user_id === warehouses[i].supervisor),
           );
           data.push({
             key: (i + 1).toString(),
