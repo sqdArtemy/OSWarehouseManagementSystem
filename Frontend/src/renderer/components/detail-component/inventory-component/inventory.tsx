@@ -131,7 +131,7 @@ export default function Inventory({
       onCancel={hidePopup}
       cancelButtonProps={{ style: { display: 'none' } }}
       okButtonProps={{ style: { display: 'none' } }}
-      width={800}
+      width={'60vw'}
     >
       <Table
         columns={columns as []}

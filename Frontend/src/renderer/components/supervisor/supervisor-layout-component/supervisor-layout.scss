@@ -1,49 +1,46 @@
-.vendor-layout-container {
+.supervisor-layout-container {
   display: flex;
   flex-direction: row;
   min-height: 100%;
   width: 100%;
   position: absolute;
 
-  .side-bar {
+  .supervisor-side-bar {
     width: 15%;
     background-color: #5564B2;
     color: #FFFFFF;
 
-    .side-bar-top {
+    .supervisor-side-bar-top {
       min-height: 70%;
       display: flex;
       flex-direction: column;
       gap: 3vw;
 
-      .side-bar-top-header-container {
+      .supervisor-side-bar-top-header-container {
         padding-top: 2vw;
         min-height: 10%;
         width: 100%;
         padding-left: 2vw;
         padding-right: 2vw;
 
-        .side-bar-top-header {
+        .supervisor-side-bar-top-header {
           text-align: center;
           width: 100%;
           font-size: 1.8vw;
         }
       }
 
-
-      .side-bar-top-content {
+      .supervisor-side-bar-top-content {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
 
-
-        .side-bar-top-content-elements-container {
+        .supervisor-side-bar-top-content-elements-container {
           display: flex;
           flex-direction: column;
           width: 100%;
 
-
-          .side-bar-top-content-element {
+          .supervisor-side-bar-top-content-element {
             display: flex;
             flex-direction: row;
             align-items: center;
@@ -55,11 +52,11 @@
             padding-top: 1vw;
             padding-bottom: 1vw;
 
-            .side-bar-top-content-element-icon {
+            .supervisor-side-bar-top-content-element-icon {
               width: 2.5vw;
             }
 
-            .side-bar-top-content-element-text {
+            .supervisor-side-bar-top-content-element-text {
               font-size: 1.7vw;
             }
 
@@ -71,7 +68,7 @@
       }
     }
 
-    .side-bar-bottom {
+    .supervisor-side-bar-bottom {
       min-height: 30%;
       width: 100%;
       border-top: 1.5px solid #FFFFFF;
@@ -82,20 +79,19 @@
       padding-top: 2vw;
       gap: 1vw;
 
-      .side-bar-bottom-profile {
+      .supervisor-side-bar-bottom-profile {
         display: flex;
         flex-direction: column;
         width: 100%;
         align-items: center;
         cursor: pointer;
 
-        .side-bar-bottom-profile-icon {
+        .supervisor-side-bar-bottom-profile-icon {
           width: 4vw;
         }
 
-        .side-bar-bottom-profile-name {
+        .supervisor-side-bar-bottom-profile-name {
           font-size: 1.5vw;
-
         }
       }
 
@@ -119,10 +115,8 @@
       }
     }
   }
-
-
 }
 
-.selected {
+.supervisor-selected {
   background-color: #8F37FF;
 }

@@ -1,23 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import './dashboard-layout.scss';
-import DashboardProfileIcon from '../../../../../assets/icons/dashboard-profile-icon.png';
-import DashboardIcon from '../../../../../assets/icons/dashboard-icon.png';
-import UsersIcon from '../../../../../assets/icons/dashboard-users-icon.png';
-import WarehousesIcon from '../../../../../assets/icons/dashboard-warehouses-icon.png';
-import ItemsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
+import './supervisor-layout.scss';
+import ProfileIcon from '../../../../../assets/icons/dashboard-profile-icon.png';
+import RequestIcon from '../../../../../assets/icons/dashboard-icon.png';
+import WarehouseIcon from '../../../../../assets/icons/dashboard-warehouses-icon.png';
+import TransactionsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import { userApi } from '../../../index';
 
-export function DashboardLayout() {
+export function SupervisorLayout() {
   const navigate = useNavigate();
   const [selected, setSelected] = useState(null);
   const [name, setName] = useState('Gentlemanbek');
+
   const sideBarElements = [
-    { iconSrc: DashboardIcon, text: 'Dashboard' },
-    { iconSrc: WarehousesIcon, text: 'Warehouses' },
-    { iconSrc: UsersIcon, text: 'Users' },
-    { iconSrc: ItemsIcon, text: 'Items' },
+    { iconSrc: RequestIcon, text: 'Requests' },
+    { iconSrc: WarehouseIcon, text: 'Warehouses' },
+    { iconSrc: TransactionsIcon, text: 'Transactions' },
   ];
 
   const handleSideBarElementClick = (
@@ -27,7 +26,7 @@ export function DashboardLayout() {
     const textElement: HTMLSpanElement = event.currentTarget
       .childNodes[1] as HTMLSpanElement;
     setSelected(index);
-    navigate(`/owner/${textElement.innerText.toLowerCase()}`);
+    navigate(`/supervisor/${textElement.innerText.toLowerCase()}`);
   };
 
   useEffect(() => {
@@ -37,33 +36,33 @@ export function DashboardLayout() {
   });
 
   return (
-    <div className="dashboard-layout-container">
-      <div className="side-bar">
-        <div className="side-bar-top">
-          <div className={'side-bar-top-header-container'}>
-            <div className="side-bar-top-header">
+    <div className="supervisor-layout-container">
+      <div className="supervisor-side-bar">
+        <div className="supervisor-side-bar-top">
+          <div className={'supervisor-side-bar-top-header-container'}>
+            <div className="supervisor-side-bar-top-header">
               Warehouse Management System
             </div>
           </div>
 
-          <div className="side-bar-top-content">
-            <div className="side-bar-top-content-elements-container">
+          <div className="supervisor-side-bar-top-content">
+            <div className="supervisor-side-bar-top-content-elements-container">
               {sideBarElements.map((element, index) => (
                 <span
                   key={index}
-                  className={`side-bar-top-content-element ${
-                    selected === index ? 'selected' : ''
+                  className={`supervisor-side-bar-top-content-element ${
+                    selected === index ? 'supervisor-selected' : ''
                   }`}
                   onClick={(event) => handleSideBarElementClick(event, index)}
                 >
                   <span>
                     <img
-                      className="side-bar-top-content-element-icon"
+                      className="supervisor-side-bar-top-content-element-icon"
                       src={element.iconSrc}
                       alt={`${element.text} Icon`}
                     />
                   </span>
-                  <span className="side-bar-top-content-element-text">
+                  <span className="supervisor-side-bar-top-content-element-text">
                     {element.text}
                   </span>
                 </span>
@@ -71,26 +70,28 @@ export function DashboardLayout() {
             </div>
           </div>
         </div>
-        <div className="side-bar-bottom">
+        <div className="supervisor-side-bar-bottom">
           <div
-            className="side-bar-bottom-profile"
+            className="supervisor-side-bar-bottom-profile"
             onClick={() => {
               setSelected(null);
-              navigate('/owner/profile');
+              navigate('/supervisor/profile');
             }}
           >
             <span>
               <img
-                className="side-bar-bottom-profile-icon"
-                src={DashboardProfileIcon}
+                className="supervisor-side-bar-bottom-profile-icon"
+                src={ProfileIcon}
                 alt={'Dashboard Profile Icon'}
               />
             </span>
-            <span className="side-bar-bottom-profile-name">{name}</span>
+            <span className="supervisor-side-bar-bottom-profile-name">
+              {name}
+            </span>
           </div>
 
           <button
-            className="side-bar-bottom-logout"
+            className="supervisor-side-bar-bottom-logout"
             onClick={() => {
               navigate('/sign-in');
             }}
@@ -99,7 +100,6 @@ export function DashboardLayout() {
           </button>
         </div>
       </div>
-
       <Outlet />
     </div>
   );

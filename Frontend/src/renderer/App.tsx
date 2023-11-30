@@ -24,6 +24,7 @@ import VendorOrders from './components/vendor/vendor-orders-component/vendor-ord
 import { VendorLayout } from './components/vendor/vendor-layout-component/vendor-layout';
 import WarehouseDetail from './components/owner/warehouses-component/warehouse-detail-component/warehouse-detail';
 import SupervisorWarehouses from './components/supervisor/warehouses-component/warehouses';
+import { SupervisorLayout } from './components/supervisor/supervisor-layout-component/supervisor-layout';
 
 export default function App() {
   return (
@@ -61,7 +62,7 @@ export default function App() {
               <Route path="profile" element={<Profile />} />
               {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
             </Route>
-            <Route path="supervisor/*" element={<VendorLayout />}>
+            <Route path="supervisor/*" element={<SupervisorLayout />}>
               <Route
                 path="./"
                 element={<Navigate to="/supervisor/warehouses" replace />}
