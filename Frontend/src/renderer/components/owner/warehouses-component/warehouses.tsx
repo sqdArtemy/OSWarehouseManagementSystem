@@ -327,7 +327,7 @@ export default function Warehouses() {
           data.push({
             key: (i + 1).toString(),
             warehouseName: warehouses[i].warehouse_name,
-            supervisor: user.user_name + ' ' + user.user_surname,
+            supervisor: user ? user.user_name + ' ' + user.user_surname : '',
             address: warehouses[i].warehouse_address,
             type: warehouses[i].warehouse_type,
             capacity:

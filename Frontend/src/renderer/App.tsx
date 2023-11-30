@@ -46,6 +46,7 @@ export default function App() {
                 element={<Navigate to="/owner/dashboard" replace />}
               />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="orders" element={<VendorOrders />} />
               <Route path="users" element={<Users />} />
               <Route path="warehouses" element={<OwnerWarehouses />} />
               <Route

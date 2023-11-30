@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './vendor-orders.scss';
 import { Table } from 'antd';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { orderApi, vendorApi, warehouseApi } from '../../../index';
+import { orderApi, userApi, vendorApi, warehouseApi } from '../../../index';
 import { IOrderFilters } from '../../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
@@ -97,6 +97,7 @@ export default function Orders() {
   const handleCancelSuccess = async () => {
     await getAllOrders(filters);
   }
+
   const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
@@ -166,6 +167,7 @@ export default function Orders() {
 
     orderApi.getAllOrders(filters).then(async (data) => {
     const orders = data.data?.body;
+    console.log(orders);
 
     if (orders?.length) {
         const finishedItems = [];
@@ -215,10 +217,10 @@ export default function Orders() {
         <div className={'orders-table-header-container'}>
           <span className={'orders-table-header'}>ORDERS</span>
           <div className={'options-container'}>
-            <button className={'add-btn'} onClick={(e) => handleAddOrder(e)}>
+            { userApi.getUserData.user_role === 'vendor' && (<button className={'add-btn'} onClick={(e) => handleAddOrder(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add Order</span>
-            </button>
+            </button>)}
             {/* AddOrder component and related logic */}
           </div>
         </div>
