@@ -22,8 +22,13 @@ import { LoadingProvider } from './components/loading-component/loading';
 import Vendors from './components/vendor/vendors-component/vendors';
 import VendorOrders from './components/vendor/vendor-orders-component/vendor-orders';
 import { VendorLayout } from './components/vendor/vendor-layout-component/vendor-layout';
+
+import AddOrderModal from './components/vendor/vendor-orders-component/create-order-component/create-order';
+import CreateOrder from './components/vendor/vendor-orders-component/create-order-component/create-order';
 import WarehouseDetail from './components/owner/warehouses-component/warehouse-detail-component/warehouse-detail';
 import SupervisorWarehouses from './components/supervisor/warehouses-component/warehouses';
+
+
 
 export default function App() {
   return (
@@ -58,6 +63,7 @@ export default function App() {
               />
               <Route path="vendors" element={<Vendors />} />
               <Route path="orders" element={<VendorOrders />} />
+              <Route path="orders-add" element={<CreateOrder />} />
               <Route path="profile" element={<Profile />} />
               {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
             </Route>
