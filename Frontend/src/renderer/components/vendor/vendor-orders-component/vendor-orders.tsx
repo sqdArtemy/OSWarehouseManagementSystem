@@ -30,14 +30,14 @@ export default function Orders() {
     if (orders?.length) {
       const finishedItems = [];
       const activeItems = [];
+      let activeKey = 0;
+      let finishKey = 0;
       for (let i = 0; i < orders.length; i++) {
         let order = orders[i];
         const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
-
         const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
 
         const orderItem = {
-          key: (i + 1).toString(),
           order_status: orders[i].order_status,
           order_type: orders[i].order_type,
           createdAt: orders[i].created_at,
@@ -50,11 +50,14 @@ export default function Orders() {
 
 
         if (!['finished', 'cancelled'].includes(orderItem.order_status)) {
+          orderItem.key = (activeKey++).toString();
           activeItems.push(orderItem);
         } else {
+          orderItem.key = (finishKey++).toString();
           finishedItems.push(orderItem)
         }
       }
+
       setFinishedOrders(finishedItems);
       setCurrentOrders(activeItems);
     } else {
@@ -163,39 +166,44 @@ export default function Orders() {
 
     orderApi.getAllOrders(filters).then(async (data) => {
     const orders = data.data?.body;
-    const finishedItems = [];
-    const activeItems = [];
-
 
     if (orders?.length) {
-      for (let i = 0; i < orders.length; i++) {
-        let order = orders[i];
-        const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
+        const finishedItems = [];
+        const activeItems = [];
+        let activeKey = 0;
+        let finishKey = 0;
+        for (let i = 0; i < orders.length; i++) {
+          let order = orders[i];
+          const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
+          const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
 
-        const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
-
-        const orderItem = {
-          key: (i + 1).toString(),
-          order_status: orders[i].order_status,
-          order_type: orders[i].order_type,
-          createdAt: orders[i].created_at,
-          order_id: orders[i].order_id,
-          vendor: vendor?.vendor_name,
-          vendor_id: vendor?.vendor_id,
-          warehouse: warehouse?.warehouse_name,
-          warehouse_id: warehouse?.warehouse_id
-        };
+          const orderItem = {
+            order_status: orders[i].order_status,
+            order_type: orders[i].order_type,
+            createdAt: orders[i].created_at,
+            order_id: orders[i].order_id,
+            vendor: vendor?.vendor_name,
+            vendor_id: vendor?.vendor_id,
+            warehouse: warehouse?.warehouse_name,
+            warehouse_id: warehouse?.warehouse_id
+          };
 
 
-        if (!['finished', 'cancelled'].includes(orderItem.order_status)) {
-          activeItems.push(orderItem);
-        } else {
-          finishedItems.push(orderItem)
+          if (!['finished', 'cancelled'].includes(orderItem.order_status)) {
+            orderItem.key = (activeKey++).toString();
+            activeItems.push(orderItem);
+          } else {
+            orderItem.key = (finishKey++).toString();
+            finishedItems.push(orderItem)
+          }
         }
+
+        setFinishedOrders(finishedItems);
+        setCurrentOrders(activeItems);
+      } else {
+        setCurrentOrders([]);
+        setFinishedOrders([]);
       }
-      setFinishedOrders(finishedItems);
-      setCurrentOrders(activeItems);
-    }
     });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
