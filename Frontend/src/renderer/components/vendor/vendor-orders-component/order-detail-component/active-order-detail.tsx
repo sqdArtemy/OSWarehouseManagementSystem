@@ -76,20 +76,22 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         );
       },
     },
-    {
+  ];
+
+  if (editMode) {
+    columns.push({
+      dataIndex: 'product_name',
       title: 'Action',
       key: 'action',
       render: (text, record) => (
         <Space size="middle">
-          {editMode && (
-            <Button type="link" onClick={() => handleRemoveItem(record.product_name)}>
-              Remove
-            </Button>
-          )}
+          <Button type="link" onClick={() => handleRemoveItem(record.product_name)}>
+            Remove
+          </Button>
         </Space>
-      ),
-    },
-  ];
+      )
+    });
+  }
 
   const layout = {
     labelCol: { span: 8 },
@@ -178,6 +180,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   };
 
   const handleRejectOrder = async () => {
+    setShowCancelConfirmationModal(true);
   };
 
   return (
@@ -236,7 +239,8 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
             </Button>
           </>
         )}
-        {orderDetails?.order_status === 'processing' && orderDetails?.order_type === 'from_warehouse' && (
+        {orderDetails?.order_status === 'processing' && orderDetails?.order_type === 'from_warehouse'
+          && userRole === 'vendor' && (
           <>
             <span style={{ marginRight: '8px', color: 'red' }}>Confirm order when it's delivered.</span>
             <Button type="primary" onClick={() => setShowConfirmationModal(true)}>
