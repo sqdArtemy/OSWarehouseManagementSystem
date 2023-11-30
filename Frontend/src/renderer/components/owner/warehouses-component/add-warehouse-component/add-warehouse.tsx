@@ -203,7 +203,7 @@ export default function AddWarehouse({
             style={{ minHeight: '2vw' }}
           >
             <Select.Option value="freezer">Freezer</Select.Option>
-            <Select.Option value="refrigerator">Refrigerator</Select.Option>
+            <Select.Option value="refrigerated">Refrigerator</Select.Option>
             <Select.Option value="dry">Dry</Select.Option>
             <Select.Option value="hazardous">Hazardous</Select.Option>
           </Select>
