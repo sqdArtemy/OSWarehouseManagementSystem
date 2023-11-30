@@ -3,7 +3,7 @@
   grid-template-columns: repeat(10, 1fr); /* 10 columns */
   grid-template-rows: repeat(10, 1fr); /* 10 rows */
   width: 35vw;
-  height: 50vh;
+  height: 30vh;
   gap: 0.7vw;
 
   .grid-row {
@@ -15,12 +15,15 @@
       aspect-ratio: 1; /* Ensures cells are square */
       border: 1px solid #d9d9d9; /* Light border for cells */
       border-radius: 0.5vw; /* Rounded corners for cells */
-      height: 3vw;
       cursor: pointer;
     }
-
-
   }
+}
 
+.grid-cell-height-small{
+  height: 2.5vw;
+}
 
+.grid-cell-height-high{
+  height: 3vw;
 }

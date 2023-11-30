@@ -1,7 +1,11 @@
 import React from 'react';
 import './racks-grid.scss';
 
-export default function RacksGrid({ gridData }) {
+export default function RacksGrid({
+  gridData,
+  handleCellClick,
+  isForSupervisor = false,
+}) {
   gridData = [
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -19,7 +23,16 @@ export default function RacksGrid({ gridData }) {
     return gridData.map((row, rowIndex) => (
       <div className="grid-row" key={`row-${rowIndex}`}>
         {row.map((cell, cellIndex) => (
-          <div className="grid-cell" key={`cell-${rowIndex}-${cellIndex}`}>
+          <div
+            className={
+              'grid-cell ' +
+              (isForSupervisor
+                ? 'grid-cell-height-small'
+                : 'grid-cell-height-high')
+            }
+            key={`cell-${rowIndex}-${cellIndex}`}
+            onClick={handleCellClick ? () => handleCellClick(cell) : null}
+          >
             {/*{cell}*/}
           </div>
         ))}
