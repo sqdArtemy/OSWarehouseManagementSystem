@@ -172,12 +172,6 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           hidePopup={hidePopup}
           inventoryData={{ inventoryData, setInventoryData }}
         />
-        {isForSupervisor ? (
-          <span className={'generalized-detail-footer-btns'}>
-            <Button type={'primary'}>Edit Rack</Button>
-            <Button danger>Delete Rack</Button>
-          </span>
-        ) : null}
       </div>
       <div className={'generalized-detail-right'}>
         <div className={'generalized-detail-doughnut-chart'}>

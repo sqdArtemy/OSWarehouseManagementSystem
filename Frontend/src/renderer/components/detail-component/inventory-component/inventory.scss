@@ -1,3 +1,11 @@
-.inventory-popup-container .ant-modal .ant-modal-content{
+.inventory-popup-container .ant-modal .ant-modal-content {
   width: 100vw;
+}
+
+.generalized-detail-footer-btns {
+  button {
+    font-size: 1.2vw;
+    width: 9vw;
+    height: 2.5vw;
+  }
 }
