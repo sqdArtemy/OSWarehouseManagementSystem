@@ -13,5 +13,6 @@ export interface IAddRack {
   rack_position: string;
   overall_capacity: number;
   remaining_capacity?: number;
+  rack_id?: number;
 }
 
