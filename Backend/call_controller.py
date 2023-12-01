@@ -7,6 +7,7 @@ import sys
 from controller import controller
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
 
 SERVER_IP = sys.argv[1]
 PORT = int(sys.argv[2])

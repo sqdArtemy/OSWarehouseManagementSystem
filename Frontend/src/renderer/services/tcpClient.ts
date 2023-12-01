@@ -70,15 +70,23 @@ export class TcpClient {
           reject(new Error('Request timed out'));
         }, 10000);
 
+        let accumulatedData = '';
         this.client.on('data', (data) => {
           clearTimeout(timer);
-          if (
-            data.toString() ===
-            'There is no connected backend side to the server'
-          ) {
-            reject('There is no connected backend side to the server');
+
+          accumulatedData += data.toString();
+
+          if (accumulatedData.includes('\n')) {
+            const messages = accumulatedData.split('\n');
+            accumulatedData = messages.pop();
+            messages.forEach((message) => {
+              if (message === 'There is no connected backend side to the server') {
+                reject('There is no connected backend side to the server');
+              } else {
+                resolve(message);
+              }
+            });
           }
-          resolve(data.toString());
         });
 
         this.client.on('error', (err) => {
