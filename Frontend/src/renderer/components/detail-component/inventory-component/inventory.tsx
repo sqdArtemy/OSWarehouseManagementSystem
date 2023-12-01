@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import './inventory.scss';
 import { Button, Modal, Space, Table } from 'antd';
-import { rackApi } from '../../../index';
+import { rackApi, userApi } from '../../../index';
 
 export default function Inventory({
   isInventoryPopupVisible,
@@ -104,8 +104,12 @@ export default function Inventory({
           size="middle"
           className={'generalized-detail-footer-btns'}
         >
-          <Button type={'primary'}>Edit Rack</Button>
-          <Button danger>Delete Rack</Button>
+          { userApi.getUserData.user_role === 'supervisor' && (
+            <>
+            <Button type={'primary'}>Edit Rack</Button>
+            <Button danger>Delete Rack</Button>
+            </>
+          )}
         </Space>
       </Space>
     </Modal>
