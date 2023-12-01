@@ -26,7 +26,7 @@ export const normalizeRacksForGrid = (racks: IAddRack[]) => {
   const finalGrid = [];
   for (let i =0; i < maxRows; i++){
     finalGrid.push([]);
-    for (let j =0; j < maxColumns; j++) {
+    for (let j =0; j <= maxColumns; j++) {
 
       const position = String.fromCharCode(i + 65) + String(j);
       finalGrid[i].push({

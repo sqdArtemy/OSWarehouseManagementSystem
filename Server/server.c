@@ -171,6 +171,9 @@ int main(int argc, char const* argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    int new_buffer_size = 1048576;
+    setsockopt(server_fd, SOL_SOCKET, SO_SNDBUF, &new_buffer_size, sizeof(new_buffer_size));
+
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr(ip);
     address.sin_port = htons(PORT);
