@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import { Button, Table } from 'antd';
 import Inventory from './inventory-component/inventory';
-import { warehouseApi } from '../../index';
+import { productApi, rackApi, warehouseApi } from '../../index';
 import { normalizeRacksForGrid } from '../../services/utils/normalizeRacksForGrid';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -24,7 +24,8 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [dataSource, setDataSource] = useState([]);
   const [isInventoryPopupVisible, setIsInventoryPopupVisible] = useState(false);
-  const [inventoryData, setInventoryData] = useState({});
+  const [rackData, setRackData] = useState({});
+  const [inventoryData, setInventoryData] = useState([]);
   const [gridData, setGridData] = useState([]);
   const { state } = location;
   const warehouseData: IWarehouseData = state.locWarehouseData;
@@ -122,9 +123,51 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     setIsInventoryPopupVisible(false);
   };
 
-  const handleRackClick = (record) => {
-    console.log(record);
-    setInventoryData(record);
+  const handleRackClick = async (record) => {
+    setRackData(record);
+    if(record && record.rack_id) {
+      const productsResponse = await productApi.getAllProducts({});
+      const products = productsResponse.success ? productsResponse.data?.body : [];
+      const result = await rackApi.getRack(record.rack_id);
+        if(result.success) {
+          const rack = result.data?.body;
+
+          if(rack){
+            const inventories = rack.inventories;
+            const data = [];
+            let index = 0;
+
+            for (let inventory of inventories){
+              const product = products.find(product => {
+                return product.product_id === inventory.product
+              });
+
+              let itemName = '', totalWeight = 0, itemType = '';
+
+              if(product){
+                itemName = product.product_name;
+                itemType = product.is_stackable ? 'Stackable' : 'Non stackable';
+                totalWeight = product.volume * inventory.quantity;
+              }
+
+              data.push({
+                key: (index++).toString(),
+                itemName: itemName,
+                totalWeight: totalWeight,
+                totalVolume: inventory.total_volume,
+                totalCount: inventory.quantity,
+                expiryDate: inventory.expiry_date,
+                itemType: itemType,
+              })
+            }
+            setInventoryData(data);
+          } else {
+            setInventoryData([]);
+          }
+        }
+    } else {
+      setInventoryData([]);
+    }
     setIsInventoryPopupVisible(true);
   };
 
@@ -153,7 +196,8 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         <Inventory
           isInventoryPopupVisible={isInventoryPopupVisible}
           hidePopup={hidePopup}
-          inventoryData={{ inventoryData, setInventoryData }}
+          rackData={{ rackData, setRackData }}
+          inventoryData={{inventoryData, setInventoryData}}
         />
       </div>
       <div className={'generalized-detail-right'}>
