@@ -26,10 +26,11 @@ export function VendorLayout() {
     navigate(`/vendor/${textElement.innerText.toLowerCase()}`);
   };
 
-
   useEffect(() => {
-    setName(userApi.getUserData.user_name + ' ' + userApi.getUserData.user_surname);
-  })
+    setName(
+      userApi.getUserData.user_name + ' ' + userApi.getUserData.user_surname,
+    );
+  });
 
   return (
     <div className="vendor-layout-container">
@@ -74,8 +75,12 @@ export function VendorLayout() {
               navigate('/vendor/profile');
             }}
           >
-            <span className="side-bar-bottom-profile-icon">
-              <img src={DashboardProfileIcon} alt={'Dashboard Profile Icon'} />
+            <span>
+              <img
+                className="side-bar-bottom-profile-icon"
+                src={DashboardProfileIcon}
+                alt={'Dashboard Profile Icon'}
+              />
             </span>
             <span className="side-bar-bottom-profile-name">{name}</span>
           </div>

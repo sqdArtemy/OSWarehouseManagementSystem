@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import './inventory.scss';
-import { Modal, Table } from 'antd';
+import { Button, Modal, Space, Table } from 'antd';
 
 export default function Inventory({
   isInventoryPopupVisible,
@@ -131,16 +131,26 @@ export default function Inventory({
       onCancel={hidePopup}
       cancelButtonProps={{ style: { display: 'none' } }}
       okButtonProps={{ style: { display: 'none' } }}
-      width={800}
+      width={'60vw'}
     >
-      <Table
-        columns={columns as []}
-        dataSource={tableData as []}
-        scroll={scrollSize}
-        pagination={false}
-        size={'small'}
-        bordered={true}
-      />
+      <Space direction="vertical" size="middle">
+        <Table
+          columns={columns as []}
+          dataSource={tableData as []}
+          scroll={scrollSize}
+          pagination={false}
+          size={'small'}
+          bordered={true}
+        />
+        <Space
+          direction="horizontal"
+          size="middle"
+          className={'generalized-detail-footer-btns'}
+        >
+          <Button type={'primary'}>Edit Rack</Button>
+          <Button danger>Delete Rack</Button>
+        </Space>
+      </Space>
     </Modal>
   );
 }
