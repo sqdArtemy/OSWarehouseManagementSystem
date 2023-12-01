@@ -15,6 +15,7 @@ export function DashboardLayout() {
   const [name, setName] = useState('Gentlemanbek');
   const sideBarElements = [
     { iconSrc: DashboardIcon, text: 'Dashboard' },
+    { iconSrc: ItemsIcon, text: 'Orders' },
     { iconSrc: WarehousesIcon, text: 'Warehouses' },
     { iconSrc: UsersIcon, text: 'Users' },
     { iconSrc: ItemsIcon, text: 'Items' },

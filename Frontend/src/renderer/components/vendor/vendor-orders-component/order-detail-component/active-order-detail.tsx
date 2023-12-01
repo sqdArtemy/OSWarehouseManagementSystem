@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Table, Button, InputNumber, Space } from 'antd';
-import { orderApi, productApi } from '../../../../index';
+import { orderApi, productApi, userApi } from '../../../../index';
 import './active-order-detail.scss';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../../error-component/error-context';
@@ -20,39 +20,42 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   useEffect(() => {
     orderApi.getOrder(Number(id)).then(async (data) => {
-      console.log(data.data?.body);
-      const productsResponse = await productApi.getAllProducts({});
-      const products = productsResponse.data?.body;
+      if(data.success) {
+        const productsResponse = await productApi.getAllProducts({});
+        const products = productsResponse.data?.body;
 
-      const items = data.data?.body?.items;
-      const orderDetails = data.data?.body;
-      const orderItems = [];
+        const items = data.data?.body?.items;
+        const orderDetails = data.data?.body;
+        const orderItems = [];
 
-      if(items) {
-        for (let item of items) {
-          const product = products?.find((product) => {
-            return product.product_id == item.product;
-          });
-
-          if (product) {
-            orderItems.push({
-              product_name: product?.product_name,
-              product_id: item.product,
-              quantity: item.quantity,
+        if (items) {
+          for (let item of items) {
+            const product = products?.find((product) => {
+              return product.product_id == item.product;
             });
+
+            if (product) {
+              orderItems.push({
+                product_name: product?.product_name,
+                product_id: item.product,
+                quantity: item.quantity,
+              });
+            }
           }
         }
+
+        const vendor = orderDetails.order_type === 'to_warehouse' ? orderDetails.supplier : orderDetails.recipient;
+        const warehouse =
+          orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
+
+        orderDetails.items = orderItems ?? [];
+        orderDetails.vendor = vendor?.vendor_name;
+        orderDetails.vendor_id = vendor?.vendor_id;
+        orderDetails.warehouse = warehouse?.warehouse_name;
+        setOrderDetails(data.data?.body);
+      } else {
+        showError(data.message);
       }
-
-      const vendor = orderDetails.order_type === 'to_warehouse' ? orderDetails.supplier : orderDetails.recipient;
-      const warehouse =
-        orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
-
-      orderDetails.items = orderItems ?? [];
-      orderDetails.vendor = vendor?.vendor_name;
-      orderDetails.vendor_id = vendor?.vendor_id;
-      orderDetails.warehouse = warehouse?.warehouse_name;
-      setOrderDetails(data.data?.body);
     });
   }, [id]);
 
@@ -73,20 +76,22 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         );
       },
     },
-    {
+  ];
+
+  if (editMode) {
+    columns.push({
+      dataIndex: 'product_name',
       title: 'Action',
       key: 'action',
       render: (text, record) => (
         <Space size="middle">
-          {editMode && (
-            <Button type="link" onClick={() => handleRemoveItem(record.product_name)}>
-              Remove
-            </Button>
-          )}
+          <Button type="link" onClick={() => handleRemoveItem(record.product_name)}>
+            Remove
+          </Button>
         </Space>
-      ),
-    },
-  ];
+      )
+    });
+  }
 
   const layout = {
     labelCol: { span: 8 },
@@ -168,6 +173,16 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       showError(response.message)
     }
   };
+
+  const userRole = userApi.getUserData.user_role;
+
+  const handleConfirmOrder = async () => {
+  };
+
+  const handleRejectOrder = async () => {
+    setShowCancelConfirmationModal(true);
+  };
+
   return (
     <Modal
       title={`Order Active Details ${editMode ? '(Editing)' : ''}`}
@@ -213,7 +228,8 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       )}
 
       <div style={{ textAlign: 'right', marginTop: '16px' }}>
-        {orderDetails?.order_status === 'new' && !editMode && (
+        {orderDetails?.order_status === 'new' && !editMode &&
+          userRole === 'vendor' && (
           <>
             <Button type="primary" onClick={handleEditOrder}>
               Edit Order
@@ -223,7 +239,8 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
             </Button>
           </>
         )}
-        {orderDetails?.order_status === 'processing' && orderDetails?.order_type === 'from_warehouse' && (
+        {orderDetails?.order_status === 'processing' && orderDetails?.order_type === 'from_warehouse'
+          && userRole === 'vendor' && (
           <>
             <span style={{ marginRight: '8px', color: 'red' }}>Confirm order when it's delivered.</span>
             <Button type="primary" onClick={() => setShowConfirmationModal(true)}>
@@ -231,11 +248,20 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
             </Button>
           </>
         )}
-        {!editMode && (
-          < Button onClick={onClose} style={{marginLeft: '8px'}}>
-          Close
-          </Button>)
-        }
+      </div>
+      <div style={{ textAlign: 'right', marginTop: '16px' }}>
+        {/* ... (existing buttons) */}
+        {userRole === 'manager' && orderDetails?.order_status === 'new' && !editMode && (
+          <>
+            <Button type="primary" onClick={handleConfirmOrder}>
+              Confirm Order
+            </Button>
+            <Button danger onClick={handleRejectOrder} style={{ marginLeft: '8px' }}>
+              Reject Order
+            </Button>
+          </>
+        )}
+        {/* ... (existing buttons) */}
       </div>
       <Modal
         title="Confirm Delivery"
@@ -255,6 +281,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         <p>Are you sure you want to cancel this order?</p>
       </Modal>
     </Modal>
+
   );
 };
 

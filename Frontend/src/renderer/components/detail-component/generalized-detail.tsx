@@ -13,6 +13,8 @@ import {
 } from 'chart.js';
 import { Button, Table } from 'antd';
 import Inventory from './inventory-component/inventory';
+import { warehouseApi } from '../../index';
+import { normalizeRacksForGrid } from '../../services/utils/normalizeRacksForGrid';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -23,6 +25,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   const [dataSource, setDataSource] = useState([]);
   const [isInventoryPopupVisible, setIsInventoryPopupVisible] = useState(false);
   const [inventoryData, setInventoryData] = useState({});
+  const [gridData, setGridData] = useState([]);
   const { state } = location;
   const warehouseData: IWarehouseData = state.locWarehouseData;
 
@@ -46,32 +49,11 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    // warehouseApi.getAllWarehouses({}).then(async (result) => {
-    //   const warehouses = result.data?.body;
-    //   if (warehouses?.length) {
-    //     const allUsers = (await userApi.getAllUsers({})).data.body;
-    //     for (let i = 0; i < warehouses.length; i++) {
-    //       const user = allUsers?.find(
-    //         (user) => (user.user_id = warehouses[i].supervisor),
-    //       );
-    //       data.push({
-    //         key: (i + 1).toString(),
-    //         warehouseName: warehouses[i].warehouse_name,
-    //         supervisor: user.user_name + ' ' + user.user_surname,
-    //         address: warehouses[i].warehouse_address,
-    //         type: warehouses[i].warehouse_type,
-    //         capacity:
-    //           warehouses[i].remaining_capacity +
-    //           '/' +
-    //           warehouses[i].overall_capacity,
-    //         warehouse_id: warehouses[i].warehouse_id,
-    //         overall_capacity: warehouses[i].overall_capacity,
-    //         remaining_capacity: warehouses[i].remaining_capacity,
-    //       });
-    //     }
-    //     setDataSource(data);
-    //   }
-    // });
+    warehouseApi.getWarehouse(Number(warehouse_id)).then((data) => {
+      if(data.success && data.data?.data){
+        setGridData(normalizeRacksForGrid(data.data.data.racks));
+      }
+    })
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -166,6 +148,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         <RacksGrid
           handleCellClick={handleRackClick}
           isForSupervisor={isForSupervisor}
+          gridData={gridData}
         />
         <Inventory
           isInventoryPopupVisible={isInventoryPopupVisible}

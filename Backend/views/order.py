@@ -96,12 +96,19 @@ class OrderView(GenericView):
             raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 404)
 
         with get_session() as session:
+            requester = session.query(User).filter_by(user_id=self.requester_id).first()
             if requester_role == UserRole.VENDOR.value["code"]:
                 requester_vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester_id).all()
                 requester_vendors = [vendor[0] for vendor in requester_vendors]
             elif requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"]):
-                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester_id).all()
-                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+
+                if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+                    requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester_id).all()
+                    requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+                else:
+                    requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(company_id=requester.company_id).all()
+                    requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+
 
             if requester_role != UserRole.ADMIN.value["code"] and (
                     (
@@ -148,8 +155,13 @@ class OrderView(GenericView):
             orders = None
 
             if self.requester_role in (UserRole.SUPERVISOR.value["code"], UserRole.MANAGER.value["code"]):
-                warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester.user_id).all()
-                warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+
+                if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester.user_id).all()
+                    warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+                else:
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(company_id=requester.company_id).all()
+                    warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
 
                 orders = session.query(Order).filter(
                     or_(
@@ -410,11 +422,12 @@ class OrderView(GenericView):
         requester_id = self.requester_id
 
         with get_session() as session:
+            requester = session.query(User).filter_by(user_id=self.requester_id).first()
             if requester_role == UserRole.VENDOR.value["code"]:
                 requester_vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester_id).all()
                 requester_vendors = [vendor[0] for vendor in requester_vendors]
             elif requester_role == UserRole.MANAGER.value["code"]:
-                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester_id).all()
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(company_id=requester.company_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
 
             if requester_role == UserRole.SUPERVISOR.value["code"] or (
