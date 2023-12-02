@@ -5,18 +5,28 @@ import {
   Navigate,
 } from 'react-router-dom';
 import { SignIn } from './components/sign-in-component/sign-in';
-import { DashboardLayout } from './components/owner/dashboard-layout-component/dashboard-layout';
+import { OwnerDashboardLayout } from './components/owner/dashboard-layout-component/dashboard-layout';
 import './App.css';
 import './normalize.css';
-import Users from './components/owner/users-component/users';
-import Dashboard from './components/owner/dashboard-component/dashboard';
+import OwnerUsers from './components/owner/users-component/users';
+import OwnerDashboard from './components/owner/dashboard-component/dashboard';
 // import AddWarehouses from './components/owner/warehouses-component/warehouses-add/warehouses-add';
-import Items from './components/owner/items-component/items';
+import OwnerItems from './components/owner/items-component/items';
 import { SignUp } from './components/sign-up-components/sign-up-component/sign-up';
 import { SignUpDetails } from './components/sign-up-components/sign-up-details-component/sign-up-details';
 import Profile from './components/owner/profile-component/profile';
+import OwnerProfile from './components/owner/profile-component/profile';
 import OwnerWarehouses from './components/owner/warehouses-component/warehouses';
 // import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
+import { AdminDashboardLayout } from './components/admin/dashboard-layout-component/dashboard-layout';
+import AdminProfile from './components/admin/profile-component/profile';
+import AdminWarehouses from './components/admin/warehouses-component/warehouses';
+import AdminVendors from './components/admin/vendor-component/vendor';
+import AdminUsers from './components/admin/users-component/users';
+import AdminCompanies from './components/admin/companies-component/companies';
+import AdminTransport from './components/admin/transport-component/transport';
+import AdminOrders from './components/admin/orders-component/orders';
+import AdminRacks from './components/admin/racks-component/racks'
 import { ErrorProvider } from './components/error-component/error-context';
 import { LoadingProvider } from './components/loading-component/loading';
 import Vendors from './components/vendor/vendors-component/vendors';
@@ -41,20 +51,20 @@ export default function App() {
             <Route path="sign-in" element={<SignIn />} />
             <Route path="sign-up" element={<SignUp />} />
             <Route path="sign-up-details" element={<SignUpDetails />} />
-            <Route path="owner/*" element={<DashboardLayout />}>
+            <Route path="owner/*" element={<OwnerDashboardLayout />}>
               <Route
                 path="./"
                 element={<Navigate to="/owner/dashboard" replace />}
               />
-              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="dashboard" element={<OwnerDashboard />} />
               <Route path="orders" element={<VendorOrders />} />
-              <Route path="users" element={<Users />} />
+              <Route path="users" element={<OwnerUsers />} />
               <Route path="warehouses" element={<OwnerWarehouses />} />
               <Route
                 path="warehouses/:warehouse_id"
                 element={<WarehouseDetail />}
               />
-              <Route path="items" element={<Items />} />
+              <Route path="items" element={<OwnerItems />} />
               {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
               <Route path="profile" element={<Profile />} />
             </Route>
@@ -79,9 +89,23 @@ export default function App() {
                 element={<SupervisorWarehouses />}
               />
             </Route>
+            <Route path="admin/*" element={<AdminDashboardLayout />}>
+              <Route
+                path="./"
+                element={<Navigate to="/admin/dashboard" replace />}
+              />
+              <Route path="companies" element={<AdminCompanies />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="warehouses" element={<AdminWarehouses />} />
+              <Route path="vendors" element={<AdminVendors />} />
+              <Route path="transport" element={<AdminTransport />} />
+              <Route path="profile" element={<AdminProfile />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="racks" element={<AdminRacks />} />
+            </Route>
           </Routes>
         </Router>
       </LoadingProvider>
     </ErrorProvider>
-  );
+  )
 }
