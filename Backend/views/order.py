@@ -98,7 +98,11 @@ class OrderView(GenericView):
         with get_session() as session:
             requester = session.query(User).filter_by(user_id=requester_id).first()
 
-            if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+            if requester_role == UserRole.VENDOR.value["code"]:
+                requester_vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester_id).all()
+                requester_vendors = [vendor[0] for vendor in requester_vendors]
+
+            elif self.requester_role == UserRole.SUPERVISOR.value["code"]:
                 requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
                     supervisor_id=requester_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
@@ -681,10 +685,12 @@ class OrderView(GenericView):
 
             # check if recipient has access to the order
             if order_type == "from_warehouse" and self.requester_role == UserRole.VENDOR.value["code"]:
-                vendor = session.query(Vendor).filter_by(vendor_owner_id=self.requester_id).first()
-                if vendor is None:
+                vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=self.requester_id).all()
+                vendors = [vendor[0] for vendor in vendors]
+
+                if vendors is None:
                     raise ValidationError("Order Not Found", 404)
-                order = order.filter(Order.recipient_id == vendor.vendor_id)
+                order = order.filter(Order.recipient_id.in_(vendors))
 
             elif order_type == "to_warehouse":
                 warehouse = order.first().recipient_warehouse
