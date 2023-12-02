@@ -1,22 +1,23 @@
 import React from 'react';
 import './add-transport.scss';
-import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
+import { Button, Form, FormInstance, Input, InputNumber, Modal, Select } from 'antd';
 import { transportApi, userApi } from '../../../../index';
+import { useError } from '../../../error-component/error-context';
 
 export interface INewTransportData {
   TransportID?: string;
   Capacity?: string;
-  'Max Speed'?: string;
+  'Max Speed'?: number;
   Type?: string;
-  Price_weight?: string;
+  Price_weight?: number;
 }
 
 export default function AdminAddTransport({
-  isPopupVisible,
-  hidePopup,
-  warehouseData,
-  onAddSuccess
-}: {
+                                            isPopupVisible,
+                                            hidePopup,
+                                            warehouseData,
+                                            onAddSuccess
+                                          }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   warehouseData: {
@@ -26,6 +27,7 @@ export default function AdminAddTransport({
   onAddSuccess: () => void
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   const layout = {
     labelCol: {
@@ -51,7 +53,7 @@ export default function AdminAddTransport({
     const newTransportData = formRef.current?.getFieldsValue();
     let check = false;
     for (let key in newTransportData) {
-      if (newTransportData[key]) {
+      if (newTransportData[key] !== undefined && newTransportData[key] !== null) {
         check = true;
       }
     }
@@ -66,6 +68,9 @@ export default function AdminAddTransport({
     if(response.success){
       onAddSuccess();
     }
+    else {
+      showError(response.message)
+    }
     warehouseData.setTransportData(newTransportData);
 
     if (!check) {
@@ -79,6 +84,7 @@ export default function AdminAddTransport({
   const handleReset = () => {
     formRef.current?.resetFields();
   };
+
   return (
     <Modal
       title={<p style={{ fontSize: '1.2vw' }}>Add New Warehouse</p>}
@@ -93,7 +99,7 @@ export default function AdminAddTransport({
         {...layout}
         labelAlign={'left'}
         ref={formRef}
-        name="add-user"
+        name="add-transport"
         size={'middle'}
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
@@ -103,21 +109,21 @@ export default function AdminAddTransport({
           label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
         </Form.Item>
         <Form.Item
           name="Max Speed"
           label={<p style={{ fontSize: '1vw' }}>Max Speed</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
         </Form.Item>
         <Form.Item
           name="Price_weight"
           label={<p style={{ fontSize: '1vw' }}>Price/weight</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
         </Form.Item>
         <Form.Item
           name="Type"

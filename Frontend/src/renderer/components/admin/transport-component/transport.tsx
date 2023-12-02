@@ -11,6 +11,7 @@ import { transportApi, userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddTransport from './add-transport-component/add-transport';
 import EditTransport from './edit-transport-component/edit-transport';
+import { useError } from '../../error-component/error-context';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -32,6 +33,7 @@ export default function AdminTransport() {
   const [isAddTransportVisible, setIsAddTransportVisible] = useState(false);
   const [isEditTransportVisible, setIsEditTransportVisible] = useState(false);
   const [transportData, setTransportData] = useState({});
+  const { showError } = useError();
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -43,13 +45,21 @@ export default function AdminTransport() {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
       for (let transport of selectedRows) {
-        await transportApi.deleteTransport(transport.transport_id);
+        const response = await transportApi.deleteTransport(transport.transportID);
+        if(!response.success){
+          showError(response.message);
+        }
       }
     }
     if (record) {
       console.log('delete', record);
-      await transportApi.deleteTransport(record.transport_id);
+      const response = await transportApi.deleteTransport(record.transportID);
+      if(!response.success){
+        showError(response.message);
+      }
     }
+
+    await debouncedSearch({});
   };
 
   const handleSuccessAdd = async () => {

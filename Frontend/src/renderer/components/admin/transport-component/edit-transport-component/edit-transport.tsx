@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import './edit-transport.scss';
-import { Button, Form, FormInstance, Input, Modal } from 'antd';
+import { Button, Form, FormInstance, InputNumber, Modal } from 'antd';
 import { transportApi } from '../../../../index';
 import { INewTransportData } from '../add-transport-component/add-transport';
 import { ITransportData } from '../transport';
+import { useError } from '../../../error-component/error-context';
 
 export default function EditTransport({
                                         isPopupVisible,
@@ -17,10 +18,11 @@ export default function EditTransport({
     transportData: INewTransportData | ITransportData;
     setTransportData: (transportData: unknown) => void;
   };
-  onEditSuccess: () => void
+  onEditSuccess: () => void;
 }) {
   console.log(transportData.transportData);
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   useEffect(() => {
     if (isPopupVisible && transportData.transportData && formRef.current) {
@@ -35,7 +37,7 @@ export default function EditTransport({
         price_weight: price_weight,
       });
     }
-  }, [transportData]);
+  }, [isPopupVisible, transportData]);
 
   const layout = {
     labelCol: { span: 8 },
@@ -60,15 +62,19 @@ export default function EditTransport({
     hidePopup();
 
     const response = await transportApi.editTransport(
-      newTransportData.transportID, {
-      transport_capacity: Number(newTransportData.Capacity),
-      transport_speed: Number(newTransportData.maxSpeed),
-      transport_type: newTransportData.Type,
-      price_per_weight: Number(newTransportData.price_weight)
-    });
+      Number(transportData.transportData?.transportID),
+      {
+        transport_capacity: Number(newTransportData.Capacity),
+        transport_speed: Number(newTransportData.maxSpeed),
+        transport_type: newTransportData.Type,
+        price_per_weight: Number(newTransportData.price_weight),
+      }
+    );
 
-    if(response.success){
+    if (response.success) {
       onEditSuccess();
+    } else {
+      showError(response.message)
     }
 
     transportData.setTransportData(newTransportData);
@@ -93,42 +99,55 @@ export default function EditTransport({
         onFinish={onFinish}
       >
         <Form.Item
-          name="transportID"
-          label={<p style={{ fontSize: '1vw' }}>Transport ID</p>}
-          rules={[{ required: true }]}
-        >
-          <Input style={{ fontSize: '0.9vw' }} />
-        </Form.Item>
-        <Form.Item
           name="Capacity"
           label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
-          rules={[{ required: true }]}
+          rules={[
+            { required: true },
+            { type: 'number', min: 0, message: 'Value must be greater than or equal to 0' },
+          ]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
         </Form.Item>
         <Form.Item
           name="maxSpeed"
           label={<p style={{ fontSize: '1vw' }}>Max Speed</p>}
-          rules={[{ required: true }]}
+          rules={[
+            { required: true },
+            { type: 'number', min: 0, message: 'Value must be greater than or equal to 0' },
+          ]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
         </Form.Item>
         <Form.Item
           name="price_weight"
           label={<p style={{ fontSize: '1vw' }}>Price/weight</p>}
-          rules={[{ required: true }]}
+          rules={[
+            { required: true },
+            { type: 'number', min: 0, message: 'Value must be greater than or equal to 0' },
+          ]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0} step="any" />
         </Form.Item>
         <Form.Item
           name="Type"
           label={<p style={{ fontSize: '1vw' }}>Type</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <InputNumber
+            style={{ fontSize: '0.9vw' }}
+            disabled
+            min={0}
+          />
         </Form.Item>
-        <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit">
+        <Form.Item
+          {...tailLayout}
+          labelAlign={'right'}
+          style={{ marginBottom: '1vw' }}
+        >
+          <Button
+            type="primary"
+            htmlType="submit"
+          >
             Submit
           </Button>
         </Form.Item>
