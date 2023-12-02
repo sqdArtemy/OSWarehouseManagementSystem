@@ -41,8 +41,8 @@
 
         button {
           font-size: 1vw;
-          width:13vw;
-          height:2.5vw;
+          width: 13vw;
+          height: 2.5vw;
           text-align: center;
         }
       }
@@ -91,5 +91,7 @@
 
 }
 
-
+.ant-form-item-required:after {
+  display: none;
+}
 
