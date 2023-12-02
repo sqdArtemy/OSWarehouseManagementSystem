@@ -25,6 +25,7 @@ class Order(Base):
 
     # Relationships with other tables
     ordered_items = relationship("OrderItem", back_populates="order")
+    lost_items = relationship("LostItem", back_populates="order")
     transport = relationship("Transport", back_populates="orders")
     supplier_warehouse = relationship(
         "Warehouse",
@@ -76,5 +77,5 @@ class Order(Base):
                 "updated_at": self.updated_at.strftime('%Y-%m-%d %H:%M:%S') if self.updated_at else None,
                 "order_status": self.order_status,
                 "order_type": self.order_type,
-                "transport": self.transport.to_dict() if "transport" in cascade_fields else self.transport_id,
+                "transport": self.transport.to_dict() if self.transport and "transport" in cascade_fields else self.transport_id or "",
             }

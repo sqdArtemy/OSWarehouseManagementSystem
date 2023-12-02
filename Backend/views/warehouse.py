@@ -103,8 +103,8 @@ class WarehouseView(GenericView):
             company_id = session.query(User.company_id).filter_by(user_id=updator).scalar()
             supervisor_id = self.body.get("supervisor_id")
             supervisor = session.query(User).filter_by(user_id=supervisor_id,
-                                                              user_role='supervisor',
-                                                              company_id=company_id).first()
+                                                       user_role='supervisor',
+                                                       company_id=company_id).first()
             if not supervisor:
                 raise ValidationError("supervisor not found", 404)
 
@@ -284,7 +284,8 @@ class WarehouseView(GenericView):
             if len(products) == 0:
                 raise ValidationError("Items are required", 400)
             else:
-                main_product_type = session.query(Product.product_type).filter_by(product_id=products[0]["product_id"]).scalar()
+                main_product_type = session.query(Product.product_type).filter_by(
+                    product_id=products[0]["product_id"]).scalar()
                 for product in products:
                     product_id, quantity = product.get("product_id"), product.get("quantity")
 
@@ -306,12 +307,12 @@ class WarehouseView(GenericView):
 
             # Filter warehouses by order type
             if order_type == "from_warehouse":
-                warehouses = warehouses.join(Rack).join(Inventory).filter(Inventory.product_id.in_(product_ids)).\
+                warehouses = warehouses.join(Rack).join(Inventory).filter(Inventory.product_id.in_(product_ids)). \
                     with_entities(
-                        Warehouse,
-                        Inventory.product_id,
-                        func.sum(Inventory.quantity).label('total_quantity')
-                    ).group_by(Warehouse.warehouse_id, Inventory.product_id).all()
+                    Warehouse,
+                    Inventory.product_id,
+                    func.sum(Inventory.quantity).label('total_quantity')
+                ).group_by(Warehouse.warehouse_id, Inventory.product_id).all()
 
                 warehouses = [
                     w[0] for w in warehouses if w[2] >= products_to_order[w[1]]
@@ -325,4 +326,3 @@ class WarehouseView(GenericView):
             self.response.status_code = 200
             self.response.data = body
             return self.response.create_response()
-
