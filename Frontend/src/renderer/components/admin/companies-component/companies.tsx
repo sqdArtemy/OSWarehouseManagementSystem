@@ -56,7 +56,7 @@ export default function AdminСompanies() {
       align: 'center',
     },
     {
-      title: 'Number of employees',
+      title: 'Number Of Employees',
       dataIndex: 'employees',
       key: 'employees',
       align: 'center',
