@@ -34,7 +34,13 @@ export default function RacksGrid({ gridData, handleCellClick }) {
   };
 
   return (
-    <div className={'grid-container'} style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)`, gridTemplateRows: `repeat(${numRows}, 1fr)` }}>
+    <div
+      className={'grid-container'}
+      style={{
+        gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
+        gridTemplateRows: `repeat(${numRows}, 1fr)`,
+      }}
+    >
       {renderGrid()}
     </div>
   );
