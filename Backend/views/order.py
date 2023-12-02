@@ -575,3 +575,89 @@ class OrderView(GenericView):
             self.response.status_code = 200
             self.response.data = order.to_dict(cascade_fields=())
             return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def receive_preview(self, request: dict) -> dict:
+        """
+        Showing the preview from what racks products will be retrieved.
+        :param request: dictionary containing url, method, headers
+        :return: dictionary containing status_code and response body with list of dictionaries
+        """
+        order = self.instance
+        requester_id = self.requester_id
+        requester_role = self.requester_role
+
+        if requester_role not in (
+                UserRole.SUPERVISOR.value["code"], UserRole.MANAGER.value["code"], UserRole.ADMIN.value["code"]
+        ):
+            raise ValidationError("Only supervisor or manager can receive an order.", 403)
+
+        if not order:
+            raise ValidationError("Order Not Found", 404)
+
+        if order.order_status not in ["delivered", "lost", "damaged"]:
+            raise ValidationError("You cannot receive orders that are not delivered", 400)
+
+        if len(order.ordered_items) == 0:
+            raise ValidationError("Order must contain at least one item.", 400)
+
+        with get_session() as session:
+            requester = session.query(User).filter_by(user_id=requester_id).first()
+
+            if requester_role == UserRole.SUPERVISOR.value["code"]:
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
+                    supervisor_id=requester_id).all()
+                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+            elif requester_role == UserRole.MANAGER.value["code"]:
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
+                    company_id=requester.company.company_id).all()
+                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+
+            if order.recipient_id not in requester_warehouses:
+                raise ValidationError("You are not allowed to see this order.", 403)
+
+            total_volume = session.query(func.sum(OrderItem.quantity * Product.volume)). \
+                join(Product, OrderItem.product_id == Product.product_id). \
+                filter(OrderItem.order_id == order.order_id).scalar()
+
+            if order.order_status == "to_warehouse" and not self.__is_warehouse_capacity_enough(
+                    order.recipient_id, total_volume):
+                raise ValidationError("Warehouse capacity is not enough.", 400)
+
+            filled_inventories = []
+
+            order_items = order.ordered_items
+
+            for order_item in order_items:
+                product = order_item.product
+                total_volume = product.volume * order_item.quantity
+                total_quantity = order_item.quantity
+
+                racks = session.query(Rack).filter_by(
+                    warehouse_id=order.supplier_id).order_by(desc(Rack.rack_position)).all()
+
+                for rack in racks:
+                    if rack.remaining_capacity == 0:
+                        continue
+
+                    max_volume = rack.remaining_capacity if total_volume > rack.remaining_capacity else total_volume
+
+                    real_quantity = floor(max_volume / product.volume)
+
+                    filled_inventories.append({
+                        'rack_id': rack.rack_id,
+                        'product_id': order_item.product_id,
+                        'real_quantity': real_quantity
+                    })
+
+                    total_quantity -= real_quantity
+                    total_volume = total_quantity * product.volume
+
+                    if total_quantity == 0:
+                        break
+
+            self.response.status_code = 200
+            self.response.data["filled_inventories"] = filled_inventories
+
+            return self.response.create_response()

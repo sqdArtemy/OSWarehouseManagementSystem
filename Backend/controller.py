@@ -101,6 +101,9 @@ def controller(request: dict) -> dict:
                 if "/send" in url:
                     if "/preview" in url:
                         return order_view.send_preview(request=request)
+                elif "/receive" in url:
+                    if "/preview" in url:
+                        return order_view.receive_preview(request=request)
                 return order_view.get(request=request)
 
             elif method == Method.DELETE.value:
