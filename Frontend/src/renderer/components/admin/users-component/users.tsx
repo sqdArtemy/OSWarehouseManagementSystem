@@ -7,7 +7,7 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { userApi } from '../../../index';
+import { companyApi, userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddUser from './add-user-component/add-user';
 import EditUser from './edit-user-component/edit-user';
@@ -31,6 +31,7 @@ export default function AdminUsers() {
   const [isAddUserVisible, setIsAddUserVisible] = useState(false);
   const [isEditUserVisible, setIsEditUserVisible] = useState(false);
   const [userData, setUserData] = useState({});
+  const [companiesData, setCompaniesData] = useState([]);
   let filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
@@ -39,9 +40,8 @@ export default function AdminUsers() {
     e.domEvent.target.innerText = selectedRole;
   };
   const handleMenuCompanyClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
-    setSelectedCompany(e.domEvent.target.innerText);
-    e.domEvent.target.innerText = selectedCompany;
+    const selectedCompanyValue = e.domEvent.target.innerText;
+    setSelectedCompany(selectedCompanyValue);
   };
 
   const handleDeleteUser = async (record?) => {
@@ -64,10 +64,22 @@ export default function AdminUsers() {
     const users = result.data?.body;
     const dataItems = [];
 
+    const companiesResponse = await companyApi.getAll();
+
+    let companies = [];
+    if(companiesResponse.success) {
+      companies = companiesResponse.data.body;
+    }
+
     if (users?.length) {
       for (let i = 0; i < users.length; i++) {
+        const company = companies.find(company => {
+          return company.company_id === users[i].company;
+        });
+
         dataItems.push({
           key: (i + 1).toString(),
+          company: company ? company.company_name : '',
           fullName: users[i].user_name + ' ' + users[i].user_surname,
           role: users[i].user_role,
           phoneNumber: users[i].user_phone,
@@ -104,6 +116,20 @@ export default function AdminUsers() {
 
     if (searchValue) {
       filters.user_name = searchValue;
+    }
+
+    if(selectedCompany){
+      const company = companiesData.find(company => {
+        return company.company_name === selectedCompany;
+      })
+
+      if(company && company.company_name !== 'All'){
+        filters.company_id = company.company_id;
+      } else {
+        if(filters.company_id){
+          delete filters.company_id;
+        }
+      }
     }
     debouncedSearch(filters);
   };
@@ -239,18 +265,13 @@ export default function AdminUsers() {
       label: 'Vendor',
     },
   ];
-  const companies = [
-    {
-      label: 'dick.inc',
-    }
-  ]
-
   const menuProps = {
     items: items,
     onClick: handleMenuClick,
   };
+
   const companyProps = {
-    items: companies,
+    items: companiesData.length ? companiesData.map(company => ({ label: company.company_name })) : [],
     onClick: handleMenuCompanyClick,
   }
 
@@ -285,15 +306,31 @@ export default function AdminUsers() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    userApi.getAllUsers(filters).then((result) =>{
+    userApi.getAllUsers(filters).then(async (result) =>{
+      const companiesResponse = await companyApi.getAll();
+
+      let companies = [];
+      if(companiesResponse.success){
+        companies = companiesResponse.data.body;
+        companies.push({
+          company_id: null,
+          company_name: 'All'
+        })
+        setCompaniesData(companies);
+      }
+
       const users = result.data?.body;
       const dataItems = [];
 
       if (users?.length) {
         for (let i = 0; i < users.length; i++) {
+          const company = companies.find(company => {
+            return company.company_id === users[i].company;
+          });
+
           dataItems.push({
             key: (i + 1).toString(),
-            //company:
+            company: company ? company.company_name : '',
             fullName: users[i].user_name + ' ' + users[i].user_surname,
             role: users[i].user_role,
             phoneNumber: users[i].user_phone,
