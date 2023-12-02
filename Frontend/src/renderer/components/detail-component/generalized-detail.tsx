@@ -221,10 +221,12 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           <AddRack
             isPopupVisible={isAddRackPopupVisible}
             hidePopup={hideAddRackPopup}
+            updateGridData={setGridData}
           />
           <AddMultipleRacks
             isPopupVisible={isAddMultipleRacksPopupVisible}
             hidePopup={hideAddMultipleRacksPopup}
+            updateGridData={setGridData}
           />
         </span>
         <RacksGrid

@@ -1,8 +1,12 @@
 import React from 'react';
 import { Button, Form, FormInstance, Input, Modal } from 'antd';
+import { rackApi, warehouseApi } from '../../../index';
+import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';
+import { useError } from '../../error-component/error-context';
 
-export default function AddRack({ isPopupVisible, hidePopup }) {
+export default function AddRack({ isPopupVisible, hidePopup, updateGridData }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   const handleReset = () => {
     formRef.current?.resetFields();
@@ -21,8 +25,24 @@ export default function AddRack({ isPopupVisible, hidePopup }) {
     hidePopup();
   };
 
-  const handleOk = (e) => {
+  const handleOk = async (e) => {
     hidePopup();
+    const response = await rackApi.addRack({
+      warehouse_id: 6,
+      rack_position: formRef.current?.getFieldsValue()['Rack Position'],
+      overall_capacity: Number(formRef.current?.getFieldsValue()['Capacity']),
+    });
+    console.log(response);
+    if (response.success) {
+      console.log('success');
+      warehouseApi.getWarehouse(Number('6')).then((data) => {
+        if (data.success && data.data?.data) {
+          updateGridData(normalizeRacksForGrid(data.data.data.racks));
+        }
+      });
+    } else {
+      showError(response.data.message);
+    }
   };
 
   return (
