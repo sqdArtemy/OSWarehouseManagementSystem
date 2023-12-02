@@ -207,7 +207,7 @@ class UserView(GenericView):
             employee_surname = self.body["user_surname"]
             employee_phone = self.body["user_phone"]
             employee_role = self.body["user_role"]
-            password = f"{company_name[0]}{employee_name[0]}{employee_surname[0]}{employee_phone[-4:]}"
+            password = f"{employee_name[0]}{employee_surname[0]}{employee_phone[-4:]}"
 
             # Validating fields
             if employee_role not in (UserRole.SUPERVISOR.value["name"]):
