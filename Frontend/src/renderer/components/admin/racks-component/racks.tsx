@@ -7,7 +7,7 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { userApi } from '../../../index';
+import { rackApi, userApi, warehouseApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddRack from './add-racks-component/add-racks';
 import EditRack from './edit-racks-component/edit-racks';
@@ -86,13 +86,6 @@ export default function AdminRacks() {
     }, 100);
 
     filters = {};
-    if (selectedRole) {
-      filters.user_role = selectedRole.toLowerCase();
-    }
-
-    if (selectedRole === 'All' && filters.user_role) {
-      delete filters.user_role;
-    }
 
     if (searchValue) {
       filters.user_name = searchValue;
@@ -247,20 +240,29 @@ export default function AdminRacks() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    userApi.getAllUsers(filters).then((result) =>{
-      const users = result.data?.body;
+    rackApi.getAll(filters).then(async (result) =>{
+      const racks = result.data?.body;
       const dataItems = [];
 
-      if (users?.length) {
-        for (let i = 0; i < users.length; i++) {
+      let warehouses = [];
+      const warehousesResponse = await warehouseApi.getAllWarehouses({});
+
+      if(warehousesResponse.success){
+        warehouses = warehousesResponse.data.body;
+      }
+
+      if (racks?.length) {
+        for (let i = 0; i < racks.length; i++) {
+          const warehouse = warehouses.find(warehouse => {
+            return warehouse.warehouse_id === racks[i].warehouse;
+          })
+
           dataItems.push({
             key: (i + 1).toString(),
-            //company:
-            fullName: users[i].user_name + ' ' + users[i].user_surname,
-            role: users[i].user_role,
-            phoneNumber: users[i].user_phone,
-            email: users[i].user_email,
-            user_id: users[i].user_id,
+            warehouse: warehouse ? warehouse.warehouse_name : '',
+            rackPosition: racks[i].rack_position,
+            overallCapacity: racks[i].overall_capacity,
+            rack_id: racks[i].rack_id,
           });
         }
 

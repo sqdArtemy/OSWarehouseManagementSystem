@@ -688,7 +688,7 @@ class OrderView(GenericView):
                 vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=self.requester_id).all()
                 vendors = [vendor[0] for vendor in vendors]
 
-                if vendors is None:
+                if len(vendors) == 0:
                     raise ValidationError("Order Not Found", 404)
                 order = order.filter(Order.recipient_id.in_(vendors))
 

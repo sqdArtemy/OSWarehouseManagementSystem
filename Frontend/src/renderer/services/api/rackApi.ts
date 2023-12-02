@@ -6,6 +6,7 @@ import {
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 import { userApi, warehouseApi } from '../../index';
 import { ISendData } from '../sendDataInterface';
+import { IVendorFilters } from '../interfaces/vendorInterface';
 
 export class RackApi implements IRack {
   private readonly token: string;
@@ -104,5 +105,14 @@ export class RackApi implements IRack {
       delete body.columns;
       return await this.handleApiRequestWithToken({ url, method, body, headers });
     }
+  }
+
+  public async getAll(filters: IVendorFilters): Promise<ApiResponse> {
+    const url = '/racks';
+    const method = 'GET';
+    const headers = { filters };
+    const body = {};
+
+    return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 }
