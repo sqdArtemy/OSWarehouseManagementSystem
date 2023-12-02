@@ -1,9 +1,15 @@
 import React from 'react';
 import { Button, Form, FormInstance, Input, Modal } from 'antd';
+import { rackApi, warehouseApi } from '../../../index';
+import { useError } from '../../error-component/error-context';
+import { useLoading } from '../../loading-component/loading';
+import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';
 
 // pop-up component: inputs are: rack position, capacity
 export default function AddMultipleRacks({ isPopupVisible, hidePopup }) {
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
+  const { startLoading, stopLoading } = useLoading();
 
   const handleReset = () => {
     formRef.current?.resetFields();
@@ -22,8 +28,28 @@ export default function AddMultipleRacks({ isPopupVisible, hidePopup }) {
     hidePopup();
   };
 
-  const handleOk = (e) => {
-    hidePopup();
+  const handleOk = async (e) => {
+    startLoading();
+    const response = await rackApi.addMultipleRacks({
+      columns: Number(formRef.current?.getFieldsValue()['Number of Columns']),
+      rows: Number(formRef.current?.getFieldsValue()['Number of Rows']),
+      warehouse_id: 6,
+      fixed_total_capacity: Number(
+        formRef.current?.getFieldsValue()['Total Capacity'],
+      ),
+    });
+    stopLoading();
+    if (response.success) {
+      console.log('success');
+      hidePopup();
+      warehouseApi.getWarehouse(Number('6')).then((data) => {
+        if (data.success && data.data?.data) {
+          updateGridData(normalizeRacksForGrid(data.data.data.racks));
+        }
+      });
+    } else {
+      showError(response.message);
+    }
   };
 
   return (

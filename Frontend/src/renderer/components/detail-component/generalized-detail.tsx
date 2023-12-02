@@ -109,6 +109,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   const handleAddRack = () => {
     console.log('Add Rack');
     setIsAddRackPopupVisible(true);
+    console.log(gridData);
   };
 
   const handleAddMultipleRacks = () => {
