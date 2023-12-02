@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './companies.scss';
 import { Table } from 'antd';
+import { companyApi } from '../../../index';
 
 
 export interface IOrderData {
@@ -14,20 +15,10 @@ export interface IOrderData {
 }
 
 export default function AdminСompanies() {
-  const [selectedTransportType, setSelectedTransportType] = useState('All');
-  const [selectedStatus, setSelectedStatus] = useState('All');
-  const [selectedType, setSelectedType] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
-  const [deleteBtn, setDeleteBtn] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
-  const [isAddTransportVisible, setIsAddTransportVisible] = useState(false);
-  const [isEditTransportVisible, setIsEditTransportVisible] = useState(false);
-  const [orderData, setOrdersData] = useState({});
 
-
-  const placeholderRowCount = 6;
+  const placeholderRowCount = 3;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
@@ -93,50 +84,26 @@ export default function AdminСompanies() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    setDataSource([
-      {
-        key: '1',
-        companyName: 'Dick.inc',
-        companyAddress: 'Zalupa',
-        companyEmail: 'dick@gmail.com',
-        companyOwner: 'HuivPalto',
-      },
-      {
-        key: '2',
-        companyName: 'Dick.inc',
-        companyAddress: 'Zalupa',
-        companyEmail: 'dick@gmail.com',
-        companyOwner: 'HuivPalto',
-      },
-      {
-        key: '3',
-        companyName: 'Dick.inc',
-        companyAddress: 'Zalupa',
-        companyEmail: 'dick@gmail.com',
-        companyOwner: 'HuivPalto',
-      },
-      {
-        key: '4',
-        companyName: 'Dick.inc',
-        companyAddress: 'Zalupa',
-        companyEmail: 'dick@gmail.com',
-        companyOwner: 'HuivPalto',
-      },
-      {
-        key: '5',
-        companyName: 'Dick.inc',
-        companyAddress: 'Zalupa',
-        companyEmail: 'dick@gmail.com',
-        companyOwner: 'HuivPalto',
-      },
-      {
-        key: '6',
-        companyName: 'Dick.inc',
-        companyAddress: 'Zalupa',
-        companyEmail: 'dick@gmail.com',
-        companyOwner: 'HuivPalto',
-      },
-    ]);
+
+    companyApi.getAll().then(data => {
+      if (data.success) {
+        const companiesSource = [];
+
+        if(data.data.body && data.data.body.length){
+          let i =0;
+          for (let company of data.data.body){
+            companiesSource.push({
+              key: (i + 1).toString(),
+              companyName: company.company_name,
+              companyAddress: company.company_address,
+              companyEmail: company.company_email,
+              companyOwner: 'HuivPalto',
+            })
+          }
+          setDataSource(companiesSource);
+        }
+      }
+    })
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
