@@ -26,6 +26,20 @@ export function SupervisorLayout() {
     const textElement: HTMLSpanElement = event.currentTarget
       .childNodes[1] as HTMLSpanElement;
     setSelected(index);
+    if (textElement.innerText.toLowerCase() === 'warehouses') {
+      return navigate('/supervisor/warehouses/6', {
+        state: {
+          locWarehouseData: {
+            warehouse_id: 6,
+            warehouseName: 'Warehouse',
+            capacity: 100,
+            supervisor: 'Gentlemanbek',
+            type: 'freezer',
+            address: 26,
+          },
+        },
+      });
+    }
     navigate(`/supervisor/${textElement.innerText.toLowerCase()}`);
   };
 

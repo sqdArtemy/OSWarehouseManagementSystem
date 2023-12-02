@@ -15,6 +15,8 @@ import { Button, Table } from 'antd';
 import Inventory from './inventory-component/inventory';
 import { productApi, rackApi, warehouseApi } from '../../index';
 import { normalizeRacksForGrid } from '../../services/utils/normalizeRacksForGrid';
+import AddRack from './add-rack-component/add-rack';
+import AddMultipleRacks from './add-multiple-racks-component/add-multiple-racks';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -27,6 +29,9 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   const [rackData, setRackData] = useState({});
   const [inventoryData, setInventoryData] = useState([]);
   const [gridData, setGridData] = useState([]);
+  const [isAddRackPopupVisible, setIsAddRackPopupVisible] = useState(false);
+  const [isAddMultipleRacksPopupVisible, setIsAddMultipleRacksPopupVisible] =
+    useState(false);
   const { state } = location;
   const warehouseData: IWarehouseData = state.locWarehouseData;
 
@@ -99,6 +104,24 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         backgroundColor: ['#FF6384', '#36A2EB'],
       },
     ],
+  };
+
+  const handleAddRack = () => {
+    console.log('Add Rack');
+    setIsAddRackPopupVisible(true);
+  };
+
+  const handleAddMultipleRacks = () => {
+    console.log('Add Multiple Racks');
+    setIsAddMultipleRacksPopupVisible(true);
+  };
+
+  const hideAddRackPopup = () => {
+    setIsAddRackPopupVisible(false);
+  };
+
+  const hideAddMultipleRacksPopup = () => {
+    setIsAddMultipleRacksPopupVisible(false);
   };
 
   const placeholderRowCount = 30;
@@ -187,10 +210,22 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           </span>
           {isForSupervisor ? (
             <span className={'generalized-detail-header-btns'}>
-              <Button type={'primary'}>Add Rack</Button>
-              <Button type={'primary'}>Add Multiple Racks</Button>
+              <Button type={'primary'} onClick={handleAddRack}>
+                Add Rack
+              </Button>
+              <Button type={'primary'} onClick={handleAddMultipleRacks}>
+                Add Multiple Racks
+              </Button>
             </span>
           ) : null}
+          <AddRack
+            isPopupVisible={isAddRackPopupVisible}
+            hidePopup={hideAddRackPopup}
+          />
+          <AddMultipleRacks
+            isPopupVisible={isAddMultipleRacksPopupVisible}
+            hidePopup={hideAddMultipleRacksPopup}
+          />
         </span>
         <RacksGrid
           handleCellClick={handleRackClick}
