@@ -115,6 +115,12 @@ def controller(request: dict) -> dict:
                     return order_view.cancel(request=request)
                 if "/send" in url:
                     return order_view.send(request=request)
+                if "/status" in url:
+                    return order_view.change_status(request=request)
+                if "/receive/preview" in url:
+                    return order_view.rack_receive_preview(request=request)
+                if "/receive" in url:
+                    return order_view.finalize_order(request=request)
                 return order_view.update(request=request)
 
         # OrderItem`s endpoints
