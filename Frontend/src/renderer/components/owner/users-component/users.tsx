@@ -11,6 +11,7 @@ import { userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddUser from './add-user-component/add-user';
 import EditUser from './edit-user-component/edit-user';
+import { useLoading } from '../../loading-component/loading';
 
 export interface IUserData {
   fullName: string;
@@ -30,6 +31,7 @@ export default function OwnerUsers() {
   const [isAddUserVisible, setIsAddUserVisible] = useState(false);
   const [isEditUserVisible, setIsEditUserVisible] = useState(false);
   const [userData, setUserData] = useState({});
+  const { startLoading, stopLoading } = useLoading();
   let filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
@@ -41,13 +43,17 @@ export default function OwnerUsers() {
   const handleDeleteUser = async (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
+      startLoading();
       for (let user of selectedRows) {
         await userApi.deleteUser(user.user_id);
       }
+      stopLoading();
     }
     if (record) {
       console.log('delete', record);
-      await userApi.deleteUser(record.user_id);
+      startLoading();
+      console.log(await userApi.deleteUser(record.user_id));
+      stopLoading();
     }
 
     await getAllUsers(filters);

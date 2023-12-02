@@ -4,6 +4,7 @@ import { rackApi, warehouseApi } from '../../../index';
 import { useError } from '../../error-component/error-context';
 import { useLoading } from '../../loading-component/loading';
 import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';
+import { useParams } from 'react-router-dom';
 
 // pop-up component: inputs are: rack position, capacity
 export default function AddMultipleRacks({
@@ -14,6 +15,7 @@ export default function AddMultipleRacks({
   const formRef = React.useRef<FormInstance>(null);
   const { showError } = useError();
   const { startLoading, stopLoading } = useLoading();
+  const { warehouse_id } = useParams();
 
   const handleReset = () => {
     formRef.current?.resetFields();
@@ -37,7 +39,7 @@ export default function AddMultipleRacks({
     const response = await rackApi.addMultipleRacks({
       columns: Number(formRef.current?.getFieldsValue()['Number of Columns']),
       rows: Number(formRef.current?.getFieldsValue()['Number of Rows']),
-      warehouse_id: 6,
+      warehouse_id: Number(warehouse_id),
       fixed_total_capacity: Number(
         formRef.current?.getFieldsValue()['Total Capacity'],
       ),
@@ -47,7 +49,7 @@ export default function AddMultipleRacks({
     if (response.success) {
       console.log('success');
       hidePopup();
-      warehouseApi.getWarehouse(Number('6')).then((data) => {
+      warehouseApi.getWarehouse(Number(warehouse_id)).then((data) => {
         if (data.success && data.data?.data) {
           updateGridData(normalizeRacksForGrid(data.data.data.racks));
         }

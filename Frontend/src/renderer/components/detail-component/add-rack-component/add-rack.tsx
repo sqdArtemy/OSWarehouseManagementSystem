@@ -4,8 +4,10 @@ import { rackApi, warehouseApi } from '../../../index';
 import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';
 import { useError } from '../../error-component/error-context';
 import { useLoading } from '../../loading-component/loading';
+import { useParams } from 'react-router-dom';
 
 export default function AddRack({ isPopupVisible, hidePopup, updateGridData }) {
+  const { warehouse_id } = useParams();
   const formRef = React.useRef<FormInstance>(null);
   const { showError } = useError();
   const { startLoading, stopLoading } = useLoading();
@@ -30,7 +32,7 @@ export default function AddRack({ isPopupVisible, hidePopup, updateGridData }) {
   const handleOk = async (e) => {
     startLoading();
     const response = await rackApi.addRack({
-      warehouse_id: 6,
+      warehouse_id: Number(warehouse_id),
       rack_position: formRef.current?.getFieldsValue()['Rack Position'],
       overall_capacity: Number(formRef.current?.getFieldsValue()['Capacity']),
     });
@@ -39,7 +41,7 @@ export default function AddRack({ isPopupVisible, hidePopup, updateGridData }) {
     if (response.success) {
       console.log('success');
       hidePopup();
-      warehouseApi.getWarehouse(Number('6')).then((data) => {
+      warehouseApi.getWarehouse(Number(warehouse_id)).then((data) => {
         if (data.success && data.data?.data) {
           updateGridData(normalizeRacksForGrid(data.data.data.racks));
         }

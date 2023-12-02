@@ -83,8 +83,9 @@ export default function Inventory({
     inventoryData.inventoryData.length > 0 ? inventoryData.inventoryData : [];
 
   const handleDeleteRack = async () => {
+    console.log(rackData);
     const response = await rackApi.deleteRack(
-      rackData.rackData['id'] as number,
+      rackData.rackData['rack_id'] as number,
     );
     console.log(response);
     if (response.success) {
