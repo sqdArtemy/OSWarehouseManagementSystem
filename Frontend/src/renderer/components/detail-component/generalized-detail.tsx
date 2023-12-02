@@ -148,6 +148,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   };
 
   const handleRackClick = async (record) => {
+    console.log(record);
     setRackData(record);
     if (record && record.rack_id) {
       const productsResponse = await productApi.getAllProducts({});

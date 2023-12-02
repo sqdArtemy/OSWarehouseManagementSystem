@@ -6,7 +6,11 @@ import { useLoading } from '../../loading-component/loading';
 import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';
 
 // pop-up component: inputs are: rack position, capacity
-export default function AddMultipleRacks({ isPopupVisible, hidePopup }) {
+export default function AddMultipleRacks({
+  isPopupVisible,
+  hidePopup,
+  updateGridData,
+}) {
   const formRef = React.useRef<FormInstance>(null);
   const { showError } = useError();
   const { startLoading, stopLoading } = useLoading();
@@ -39,6 +43,7 @@ export default function AddMultipleRacks({ isPopupVisible, hidePopup }) {
       ),
     });
     stopLoading();
+    console.log(response);
     if (response.success) {
       console.log('success');
       hidePopup();

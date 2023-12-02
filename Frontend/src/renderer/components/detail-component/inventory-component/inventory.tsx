@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import './inventory.scss';
 import { Button, Modal, Space, Table } from 'antd';
 import { rackApi, userApi } from '../../../index';
+import { useError } from '../../error-component/error-context';
 
 export default function Inventory({
   isInventoryPopupVisible,
@@ -21,7 +22,7 @@ export default function Inventory({
   };
 }) {
   const [scrollSize, setScrollSize] = React.useState({ x: 0, y: 0 });
-
+  const { showError } = useError();
   useEffect(() => {
     const calculateScrollSize = () => {
       const vw = Math.max(
@@ -78,8 +79,20 @@ export default function Inventory({
     },
   ];
 
+  let tableData =
+    inventoryData.inventoryData.length > 0 ? inventoryData.inventoryData : [];
 
-  let tableData = inventoryData.inventoryData.length > 0 ? inventoryData.inventoryData : [];
+  const handleDeleteRack = async () => {
+    const response = await rackApi.deleteRack(
+      rackData.rackData['id'] as number,
+    );
+    console.log(response);
+    if (response.success) {
+      hidePopup();
+    } else {
+      showError(response.message);
+    }
+  };
 
   return (
     <Modal
@@ -104,10 +117,12 @@ export default function Inventory({
           size="middle"
           className={'generalized-detail-footer-btns'}
         >
-          { userApi.getUserData.user_role === 'supervisor' && (
+          {userApi.getUserData.user_role === 'supervisor' && (
             <>
-            <Button type={'primary'}>Edit Rack</Button>
-            <Button danger>Delete Rack</Button>
+              <Button type={'primary'}>Edit Rack</Button>
+              <Button danger onClick={handleDeleteRack}>
+                Delete Rack
+              </Button>
             </>
           )}
         </Space>
