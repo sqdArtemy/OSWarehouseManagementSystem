@@ -27,18 +27,21 @@ export function SupervisorLayout() {
       .childNodes[1] as HTMLSpanElement;
     setSelected(index);
     if (textElement.innerText.toLowerCase() === 'warehouses') {
-      return navigate('/supervisor/warehouses/6', {
-        state: {
-          locWarehouseData: {
-            warehouse_id: 6,
-            warehouseName: 'Warehouse',
-            capacity: 100,
-            supervisor: 'Gentlemanbek',
-            type: 'freezer',
-            address: 26,
+      if(userApi.getUserData && userApi.getUserData.warehouses[0] && userApi.getUserData.warehouses[0]?.warehouse_id) {
+        const id = userApi.getUserData.warehouses[0].warehouse_id;
+        return navigate('/supervisor/warehouses/' + id, {
+          state: {
+            locWarehouseData: {
+              warehouse_id: id,
+              warehouseName: userApi.getUserData.warehouses[0].warehouse_name,
+              capacity: userApi.getUserData.warehouses[0].overall_capacity,
+              supervisor: userApi.getUserData.warehouses[0].supervisor.user_name,
+              type: userApi.getUserData.warehouses[0].warehouse_type,
+              address: userApi.getUserData.warehouses[0].warehouse_address,
+            },
           },
-        },
-      });
+        });
+      }
     }
     navigate(`/supervisor/${textElement.innerText.toLowerCase()}`);
   };
