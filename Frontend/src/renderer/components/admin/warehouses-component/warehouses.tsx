@@ -101,6 +101,10 @@ export default function AdminWarehouses() {
     }
   };
 
+  const onAddSuccess = async () => {
+    await getAllWarehouses(filters);
+  }
+
   const handeDeleteWarehouse = async (record?) => {
     if (record) {
       console.log('delete', record);
@@ -442,6 +446,7 @@ export default function AdminWarehouses() {
                 warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
+              onAddWarehouseSuccess={onAddSuccess}
             />
             <EditWarehouse
               hidePopup={hideEditWarehouse}
@@ -450,6 +455,7 @@ export default function AdminWarehouses() {
                 warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
+              onEditSuccess={onAddSuccess}
             />
           </div>
         </div>

@@ -13,10 +13,11 @@ export interface IWarehouse {
 export interface IAddWarehouse {
   warehouse_name: string,
   warehouse_address: string,
-  supervisor_id: number,
+  supervisor_id?: number,
   warehouse_type: 'freezer' | 'refrigerated' |'dry' | 'hazardous',
   overall_capacity: number;
   remaining_capacity?: number;
+  company_id?: number;
 }
 
 export interface IWarehouseFilters {

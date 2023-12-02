@@ -22,9 +22,13 @@ export default function EditWarehouse({
 
   useEffect(() => {
     if (isPopupVisible && warehouseData.warehouseData && formRef.current) {
-      const { warehouseName, capacity, supervisor, type, address } =
+      let { warehouseName, capacity, supervisor, type, address } =
         warehouseData.warehouseData;
       // const [firstName, lastName] = warehouseName.split(' ');
+
+      if(String(capacity).includes('/')){
+        capacity = String(capacity).split('/')[1];
+      }
 
       formRef.current.setFieldsValue({
         'Warehouse Name': warehouseName,
