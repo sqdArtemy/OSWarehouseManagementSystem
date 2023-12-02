@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import './warehouses.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
-import { Button, Dropdown, Space, Table } from 'antd';
+import { Button, Dropdown, Select, Space, Table } from "antd";
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { userApi, warehouseApi } from '../../../index';
+import { userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddWarehouse from './add-warehouse-component/add-warehouse';
 import EditWarehouse from './edit-warehouse-component/edit-warehouse';
-import { IWarehouseFilters } from '../../../services/interfaces/warehouseInterface';
-import { useError } from '../../error-component/error-context';
-import { useNavigate } from 'react-router-dom';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -23,26 +20,30 @@ export interface IWarehouseData {
   supervisor: string;
   type: string;
   address: number;
-  warehouse_id?: number;
 }
 
-export default function OwnerWarehouses() {
-  const [selectedType, setSelectedType] = useState('All');
+export default function AdminWarehouses() {
+  const [selectedType, setSelectedType] = useState('ALL');
+  const [selectedCompany, setSelectedCompany] = useState('ALL');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
-  const [actionClicked, setActionClicked] = useState(false);
   const [isAddWarehouseVisible, setIsAddWarehouseVisible] = useState(false);
   const [isEditWarehouseVisible, setIsEditWarehouseVisible] = useState(false);
   const [warehouseData, setWarehouseData] = useState({});
-  const { showError } = useError();
-  const navigate = useNavigate();
+
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
     setSelectedType(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedType;
+  };
+  const handleMenuCompanyClick: MenuProps['onClick'] = (e) => {
+    console.log('click', e);
+    console.log(e.domEvent.target.innerText)
+    setSelectedCompany(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectedCompany;
   };
 
   const handeDeleteWarehouse = async (record?) => {
@@ -54,20 +55,33 @@ export default function OwnerWarehouses() {
     // }
     if (record) {
       console.log('delete', record);
-      const response = await warehouseApi.deleteWarehouse(record.warehouse_id);
-      if (!response.success) {
-        showError(response.message);
-        return;
-      }
-      setDataSource(dataSource.filter((item) => item.key !== record.key));
+      await userApi.deleteUser(record.user_id);
     }
   };
 
   const debouncedSearch = debounce(async (filters) => {
-    await getAllWarehouses(filters);
+    // const response = await userApi.getAllUsers(filters);
+    // const users = response?.data?.body;
+    // const dataItems = [];
+    //
+    // if (users?.length) {
+    //   for (let i = 0; i < users.length; i++) {
+    //     dataItems.push({
+    //       key: (i + 1).toString(),
+    //       fullName: users[i].user_name + ' ' + users[i].user_surname,
+    //       role: users[i].user_role,
+    //       phoneNumber: users[i].user_phone,
+    //       email: users[i].user_phone,
+    //       user_id: users[i].user_id,
+    //     });
+    //   }
+    //
+    //   setDataSource(dataItems);
+    // } else {
+    setDataSource([]);
     // }
   }, 1000);
-  let filters: IWarehouseFilters = {};
+
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
@@ -76,16 +90,17 @@ export default function OwnerWarehouses() {
       }
     }, 100);
 
+    const filters = {};
     if (selectedType) {
-      filters.warehouse_type = selectedType.toLowerCase();
+      filters.user_role = selectedType.toLowerCase();
     }
 
-    if (selectedType === 'All' && filters.warehouse_type) {
-      delete filters.warehouse_type;
+    if (selectedType === 'All' && filters.user_role) {
+      delete filters.user_role;
     }
 
     if (searchValue) {
-      filters.warehouse_name_like = searchValue;
+      filters.user_name = searchValue;
     }
     debouncedSearch(filters);
   };
@@ -115,7 +130,7 @@ export default function OwnerWarehouses() {
   };
 
   const handleEditWarehouse = (record) => {
-    // console.log('edit', record);
+    console.log('edit', record);
     setWarehouseData(record);
     setIsEditWarehouseVisible(true);
   };
@@ -126,41 +141,6 @@ export default function OwnerWarehouses() {
 
   const hideEditWarehouse = () => {
     setIsEditWarehouseVisible(false);
-  };
-
-  const onAddWarehouseSuccess = async () => {
-    await getAllWarehouses(filters);
-  };
-
-  const getAllWarehouses = async (filters: IWarehouseFilters) => {
-    const response = await warehouseApi.getAllWarehouses(filters);
-    const warehouses = response.data?.body;
-    const data = [];
-    const allUsers = (await userApi.getAllUsers({})).data.body;
-    if (warehouses?.length) {
-      for (let i = 0; i < warehouses.length; i++) {
-        const user = allUsers?.find(
-          (user) => (user.user_id = warehouses[i].supervisor),
-        );
-        data.push({
-          key: (i + 1).toString(),
-          warehouseName: warehouses[i].warehouse_name,
-          supervisor: user.user_name + ' ' + user.user_surname,
-          address: warehouses[i].warehouse_address,
-          type: warehouses[i].warehouse_type,
-          capacity:
-            warehouses[i].remaining_capacity +
-            '/' +
-            warehouses[i].overall_capacity,
-          warehouse_id: warehouses[i].warehouse_id,
-          overall_capacity: warehouses[i].overall_capacity,
-          remaining_capacity: warehouses[i].remaining_capacity,
-        });
-      }
-      setDataSource(data);
-    } else {
-      setDataSource([]);
-    }
   };
 
   const placeholderRowCount = 30;
@@ -174,7 +154,6 @@ export default function OwnerWarehouses() {
       warehouseName: '',
       supervisor: '',
       type: '',
-      warehouse_id: -1,
     }),
   );
 
@@ -184,12 +163,6 @@ export default function OwnerWarehouses() {
   }
 
   const columns = [
-    // {
-    //   dataIndex: 'warehouse_id',
-    //   key: 'warehouse_id',
-    //   width: '0',
-    //   render: () => null,
-    // },
     {
       title: 'Action',
       dataIndex: 'action',
@@ -211,6 +184,12 @@ export default function OwnerWarehouses() {
         ) : null,
     },
     {
+      title: 'Company name',
+      dataIndex: 'companyName',
+      key: 'companyName',
+      align: 'center',
+    },
+    {
       title: 'Warehouse name',
       dataIndex: 'warehouseName',
       key: 'warehouseName',
@@ -223,7 +202,7 @@ export default function OwnerWarehouses() {
       align: 'center',
     },
     {
-      title: 'Suprevisor',
+      title: 'Supervisor',
       dataIndex: 'supervisor',
       key: 'supervisor',
       align: 'center',
@@ -242,7 +221,7 @@ export default function OwnerWarehouses() {
     },
   ];
 
-  const items = [
+  const types = [
     {
       label: 'Freezer',
     },
@@ -256,11 +235,23 @@ export default function OwnerWarehouses() {
       label: 'Hazardous',
     },
   ];
+  const companies = [
+    {
+      label: 'Cock.inc',
+    },
+    {
+      label: 'SOmething',
+    },
+  ]
 
   const menuProps = {
-    items,
+    items: types,
     onClick: handleMenuClick,
   };
+  const menuCompanyProps = {
+    items: companies,
+    onClick: handleMenuCompanyClick,
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -270,28 +261,6 @@ export default function OwnerWarehouses() {
     getCheckboxProps: (record) => ({
       disabled: record.warehouseName === '',
     }),
-  };
-
-  const handleOnRowClick = (e, record: IWarehouseData, rowIndex) => {
-    console.log('row', e, record, rowIndex);
-    console.dir(e.target);
-    if (
-      e.target.tagName === 'TD' &&
-      e.target.children.length > 0 &&
-      e.target.children[0].classList.contains('table-actions-container')
-    ) {
-      return;
-    } else {
-      console.log('check');
-      if (!Boolean(e.target.closest('.table-actions-container'))) {
-        if (record.warehouse_id !== -1)
-          navigate(`/owner/warehouses/${record.warehouse_id}`, {
-            state: {
-              locWarehouseData: record,
-            },
-          });
-      }
-    }
   };
 
   let data = [];
@@ -315,46 +284,91 @@ export default function OwnerWarehouses() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    warehouseApi.getAllWarehouses({}).then(async (result) => {
-      const warehouses = result.data?.body;
-      if (warehouses?.length) {
-        const allUsers = (await userApi.getAllUsers({})).data.body;
-        for (let i = 0; i < warehouses.length; i++) {
-          const user = allUsers?.find(
-            (user) => (user.user_id === warehouses[i].supervisor),
-          );
-          data.push({
-            key: (i + 1).toString(),
-            warehouseName: warehouses[i].warehouse_name,
-            supervisor: user ? user.user_name + ' ' + user.user_surname : '',
-            address: warehouses[i].warehouse_address,
-            type: warehouses[i].warehouse_type,
-            capacity:
-              warehouses[i].remaining_capacity +
-              '/' +
-              warehouses[i].overall_capacity,
-            warehouse_id: warehouses[i].warehouse_id,
-            overall_capacity: warehouses[i].overall_capacity,
-            remaining_capacity: warehouses[i].remaining_capacity,
-          });
-        }
-        setDataSource(data);
-      }
-    });
+    // userApi.getAllUsers({}).then((result) => {
+    //   const users = result.data?.body;
+    //   if (users?.length) {
+    //     for (let i = 0; i < users.length; i++) {
+    //       data.push({
+    //         key: (i + 1).toString(),
+    //         fullName: users[i].user_name + ' ' + users[i].user_surname,
+    //         role: users[i].user_role,
+    //         phoneNumber: users[i].user_phone,
+    //         email: users[i].user_phone,
+    //         user_id: users[i].user_id,
+    //       });
+    //     }
+    //     setDataSource(data);
+    //   }
+    // });
+
+    setDataSource([
+      {
+        key: '1',
+        companyName: 'Cock.inc',
+        warehouseName: 'John Brown',
+        supervisor: '32',
+        address: 'New York No. 1 Lake Park',
+        type: 'Freezer',
+        capacity: 1000,
+      },
+      {
+        key: '2',
+        companyName: 'Cock.inc',
+        warehouseName: 'Jim Green',
+        supervisor: '42',
+        address: 'London No. 1 Lake Park',
+        type: 'Refrigerator',
+        capacity: 1000,
+      },
+      {
+        key: '3',
+        companyName: 'Cock.inc',
+        warehouseName: 'Joe Black',
+        supervisor: '32',
+        address: 'Sidney No. 1 Lake Park',
+        type: 'Dry',
+        capacity: 1000,
+      },
+      {
+        key: '4',
+        companyName: 'Cock.inc',
+        warehouseName: 'Disabled User',
+        supervisor: '99',
+        address: 'Sidney No. 1 Lake Park',
+        type: 'Hazardous',
+        capacity: 1000,
+      },
+    ]);
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
   return (
-    <div className="warehouses-container">
-      <div className={'warehouses-table-container'}>
-        <div className={'warehouses-table-header-container'}>
-          <span className={'warehouses-table-header'}>WAREHOUSES</span>
-          <div className={'options-container'}>
-            <div className="search-bar-container">
+    <div className="admin-warehouses-container">
+      <div className={'admin-warehouses-table-container'}>
+        <div className={'admin-warehouses-table-header-container'}>
+          <span className={'admin-warehouses-table-header'}>WAREHOUSES</span>
+          <div className={'admin-options-container'}>
+            <div className="admin-search-bar-container">
+              <div className="admin-warehouse-filter">
+                <label className="admin-warehouse-filter-labels">Company</label>
+                <Dropdown
+                  menu={menuCompanyProps}
+                  className={'admin-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedCompany}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
+              <div className="admin-warehouse-filter">
+              <label className="admin-warehouse-filter-labels">Type</label>
               <Dropdown
                 menu={menuProps}
-                className={'search-bar-dropdown-container'}
+                className={'admin-search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
@@ -363,47 +377,47 @@ export default function OwnerWarehouses() {
                   </Space>
                 </Button>
               </Dropdown>
+              </div>
               <input
                 type=""
-                className="search-bar-input"
+                className="admin-search-bar-input"
                 onChange={(e) => {
                   setSearchValue(e.target.value);
                 }}
               />
               <button
-                className="search-bar-button"
+                className="admin-search-bar-button"
                 onClick={(e) => handleSearchClick(e)}
               >
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
             <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={'admin-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handeDeleteWarehouse()}
             ></img>
             <button
-              className={'add-btn'}
+              className={'admin-add-btn'}
               onClick={(e) => handleAddWarehouse(e)}
             >
               <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Warehouse</span>
+              <span className={'admin-add-btn-text'}>Add Warehouse</span>
             </button>
             <AddWarehouse
               hidePopup={hideAddWarehouse}
               isPopupVisible={isAddWarehouseVisible}
               warehouseData={{
-                warehouseData: warehouseData,
+                transportData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
-              onAddWarehouseSuccess={onAddWarehouseSuccess}
             />
             <EditWarehouse
               hidePopup={hideEditWarehouse}
               isPopupVisible={isEditWarehouseVisible}
               warehouseData={{
-                warehouseData: warehouseData,
+                transportData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
             />
@@ -418,19 +432,10 @@ export default function OwnerWarehouses() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'warehouses-table'}
+          className={'admin-warehouses-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
-          onRow={(record, rowIndex) => {
-            return {
-              onClick: (event) => handleOnRowClick(event, record, rowIndex), // click row
-            };
-          }}
-          rowClassName={(record) =>
-            record.warehouseName
-              ? 'highlight-bottom-border highlight-left-border selectable'
-              : 'highlight-bottom-border highlight-left-border'
-          }
+          rowClassName={'highlight-bottom-border highlight-left-border'}
         />
       </div>
     </div>

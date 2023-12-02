@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import './items.scss';
+import './vendor.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import AddItem from './add-item-component/add-item';
-import { productApi } from '../../../index';
+import AddItem from './add-user-component/add-item';
+import { productApi, userApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
-import EditItem from './edit-item-component/edit-item';
-import { useError } from '../../error-component/error-context';
+import EditUser from '../users-component/edit-user-component/edit-user';
+import EditItem from './edit-user-component/edit-item';
 
-export default function OwnerItems() {
+export default function AdminVendors() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -27,8 +27,6 @@ export default function OwnerItems() {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
   const [newItemData, setNewItemData] = useState({});
-
-  const { showError } = useError();
 
   let filters: IProductFilters = {};
 
@@ -48,18 +46,12 @@ export default function OwnerItems() {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
       for (let user of selectedRows) {
-        const response = await productApi.deleteProduct(user.product_id);
-        if (!response.success) {
-          showError(response.message);
-        }
+        await productApi.deleteProduct(user.product_id);
       }
     }
     if (record) {
       console.log('delete', record);
-      const response = await productApi.deleteProduct(record.product_id);
-      if (!response.success) {
-        showError(response.message);
-      }
+      await productApi.deleteProduct(record.product_id);
     }
 
     await getAllProducts(filters);
@@ -73,6 +65,7 @@ export default function OwnerItems() {
     setSearchVolumeValue(e.target.value);
   };
 
+
   const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
@@ -81,24 +74,20 @@ export default function OwnerItems() {
       }
     }, 100);
 
-    if (searchValue) {
+    if(searchValue){
       filters.product_name_like = searchValue;
     } else {
-      if (!filters.product_name_like) delete filters.product_name_like;
+      if(!filters.product_name_like) delete filters.product_name_like;
     }
 
     if (searchVolumeValue) {
-      filters.volume_lte =
-        selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
-      filters.volume_gte =
-        selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_lte = selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_gte = selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
     }
 
     if (searchWeightValue) {
-      filters.weight_lte =
-        selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
-      filters.weight_gte =
-        selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
+      filters.weight_lte = selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
+      filters.weight_gte = selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
     }
 
     console.log(filters);
@@ -161,7 +150,7 @@ export default function OwnerItems() {
           'expiry-duration': products[i].expiry_duration,
           description: products[i].description,
           is_stackable: products[i].is_stackable,
-          price: products[i].price,
+          price: products[i].price
         });
       }
 
@@ -169,7 +158,8 @@ export default function OwnerItems() {
     } else {
       setDataSource([]);
     }
-  };
+  }
+
 
   const debouncedSearch = debounce(async (filters) => {
     await getAllProducts(filters);
@@ -177,11 +167,11 @@ export default function OwnerItems() {
 
   const handleAddItemSuccess = async () => {
     await getAllProducts(filters);
-  };
+  }
 
   const handleEditItemSuccess = async () => {
     await getAllProducts(filters);
-  };
+  }
 
   const placeholderRowCount = 30;
 
@@ -227,26 +217,31 @@ export default function OwnerItems() {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      align: 'center',
     },
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      align: 'center',
     },
     {
       title: 'Volume (m^3)',
       dataIndex: 'volume',
       key: 'volume',
+      align: 'center',
     },
     {
       title: 'Weight (kg)',
       dataIndex: 'weight',
       key: 'weight',
+      align: 'center',
     },
     {
       title: 'Expiry duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
+      align: 'center',
     },
   ];
 
@@ -275,7 +270,7 @@ export default function OwnerItems() {
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.name === '',
+      disabled: record.fullName === '',
     }),
   };
 
@@ -299,7 +294,7 @@ export default function OwnerItems() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    productApi.getAllProducts(filters).then((result) => {
+    productApi.getAllProducts(filters).then((result) =>{
       const products = result.data?.body;
       const dataItems = [];
 
@@ -332,7 +327,7 @@ export default function OwnerItems() {
     <div className="items-container">
       <div className={'items-table-container'}>
         <div className={'items-table-header-container'}>
-          <span className={'items-table-header'}>ITEMS</span>
+          <span className={'items-table-header'}>VENDORS</span>
           <div className={'options-container'}>
             <div className="search-bar-container">
               <Dropdown
@@ -346,10 +341,19 @@ export default function OwnerItems() {
                   </Space>
                 </Button>
               </Dropdown>
+              {/* <Dropdown */}
+              {/*   menu={menuProps} */}
+              {/*   className={'search-bar-dropdown-container'} */}
+              {/* > */}
+              {/*   <Button> */}
+              {/*     <Space> */}
+              {/*       {selected} */}
+              {/*       <DownOutlined /> */}
+              {/*     </Space> */}
+              {/*   </Button> */}
+              {/* </Dropdown> */}
               <div className="filter">
-                <label className="labels" htmlFor="weight">
-                  Weight
-                </label>
+                <label className="labels" htmlFor="weight">Weight</label>
                 <input
                   type=""
                   className="search-bar-filter"
@@ -370,9 +374,7 @@ export default function OwnerItems() {
                 </Button>
               </Dropdown>
               <div className="filter">
-                <label className="labels" htmlFor="volume">
-                  Volume
-                </label>
+                <label className="labels" htmlFor="volume">Volume</label>
                 <input
                   type=""
                   className="search-bar-filter"
@@ -413,10 +415,7 @@ export default function OwnerItems() {
             <EditItem
               hidePopup={hideEditPopup}
               isEditPopupVisible={isEditPopupVisible}
-              itemData={{
-                editItemData: newItemData,
-                setEditItemData: setNewItemData,
-              }}
+              itemData={{ editItemData: newItemData, setEditItemData: setNewItemData }}
               onEditItemSuccess={handleEditItemSuccess}
             />
           </div>
@@ -438,3 +437,4 @@ export default function OwnerItems() {
     </div>
   );
 }
+

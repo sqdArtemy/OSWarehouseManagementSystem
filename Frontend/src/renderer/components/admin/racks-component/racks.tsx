@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './users.scss';
+import './racks.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -9,19 +9,17 @@ import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import { userApi } from '../../../index';
 import debounce from 'lodash.debounce';
-import AddUser from './add-user-component/add-user';
-import EditUser from './edit-user-component/edit-user';
+import AddRack from './add-racks-component/add-racks';
+import EditRack from './edit-racks-component/edit-racks';
 
-export interface IUserData {
-  fullName: string;
-  role: string;
-  phoneNumber: string;
-  email: string;
-  user_id: number;
+export interface IRacksData {
+  warehouse: string;
+  rackPosition: string;
+  overallCapacity: string;
 }
 
-export default function OwnerUsers() {
-  const [selectedRole, setSelectedRole] = useState('All');
+export default function AdminRacks() {
+  const [selectedWarehouse, setSelectedWarehouse] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -32,10 +30,10 @@ export default function OwnerUsers() {
   const [userData, setUserData] = useState({});
   let filters = {};
 
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
+  const handleMenuCompanyClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
-    setSelectedRole(e.domEvent.target.innerText);
-    e.domEvent.target.innerText = selectedRole;
+    setSelectedWarehouse(e.domEvent.target.innerText);
+    e.domEvent.target.innerText = selectedWarehouse;
   };
 
   const handleDeleteUser = async (record?) => {
@@ -51,9 +49,9 @@ export default function OwnerUsers() {
     }
 
     await getAllUsers(filters);
-  };
+  }
 
-  const getAllUsers = async (filters: { [key: string]: any }) => {
+  const getAllUsers = async (filters: {[key: string]: any}) => {
     const result = await userApi.getAllUsers(filters);
     const users = result.data?.body;
     const dataItems = [];
@@ -74,7 +72,7 @@ export default function OwnerUsers() {
     } else {
       setDataSource([]);
     }
-  };
+  }
   const debouncedSearch = debounce(async (filters) => {
     await getAllUsers(filters);
   }, 1000);
@@ -175,7 +173,7 @@ export default function OwnerUsers() {
       align: 'center',
       render: (_, record) =>
         record.fullName ? (
-          <span className={'table-actions-container'}>
+          <span className={'admin-table-actions-container'}>
             <EditOutlined
               onClick={() => handleEditUser(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
@@ -188,44 +186,35 @@ export default function OwnerUsers() {
         ) : null,
     },
     {
-      title: 'Full name',
-      dataIndex: 'fullName',
-      key: 'fullName',
+      title: 'Warehouse',
+      dataIndex: 'warehouse',
+      key: 'warehouse',
       align: 'center',
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
+      title: 'Rack Position',
+      dataIndex: 'rackPosition',
+      key: 'rackPosition',
       align: 'center',
     },
     {
-      title: 'Phone number',
-      dataIndex: 'phoneNumber',
-      key: 'phoneNumber',
+      title: 'Overall Capacity (m^3)',
+      dataIndex: 'overallCapacity',
+      key: 'overallCapacity',
       align: 'center',
     },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-      align: 'center',
-    },
-  ];
 
-  const items = [
-    {
-      label: 'Supervisor',
-    },
-    {
-      label: 'Manager',
-    },
   ];
+  const companies = [
+    {
+      label: 'dick.inc',
+    }
+  ]
 
-  const menuProps = {
-    items,
-    onClick: handleMenuClick,
-  };
+  const warehouseProps = {
+    items: companies,
+    onClick: handleMenuCompanyClick,
+  }
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -258,7 +247,7 @@ export default function OwnerUsers() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    userApi.getAllUsers(filters).then((result) => {
+    userApi.getAllUsers(filters).then((result) =>{
       const users = result.data?.body;
       const dataItems = [];
 
@@ -266,6 +255,7 @@ export default function OwnerUsers() {
         for (let i = 0; i < users.length; i++) {
           dataItems.push({
             key: (i + 1).toString(),
+            //company:
             fullName: users[i].user_name + ' ' + users[i].user_surname,
             role: users[i].user_role,
             phoneNumber: users[i].user_phone,
@@ -284,57 +274,61 @@ export default function OwnerUsers() {
   }, []);
 
   return (
-    <div className="warehouses-container">
-      <div className={'warehouses-table-container'}>
-        <div className={'warehouses-table-header-container'}>
-          <span className={'warehouses-table-header'}>USERS</span>
-          <div className={'options-container'}>
-            <div className="search-bar-container">
-              <Dropdown
-                menu={menuProps}
-                className={'search-bar-dropdown-container'}
-              >
-                <Button>
-                  <Space>
-                    {selectedRole}
-                    <DownOutlined />
-                  </Space>
-                </Button>
-              </Dropdown>
+    <div className="admin-racks-container">
+      <div className={'admin-racks-table-container'}>
+        <div className={'admin-racks-table-header-container'}>
+          <span className={'admin-racks-table-header'}>RACKS</span>
+          <div className={'admin-racks-options-container'}>
+            <div className="admin-racks-search-bar-container">
+              <div className="admin-racks-filter">
+                <label className="admin-racks-filter-labels">Warehouse</label>
+                <Dropdown
+                  menu={warehouseProps}
+                  className={'admin-racks-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedWarehouse}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+              </div>
               <input
                 type=""
-                className="search-bar-input"
+                className="admin-racks-search-bar-input"
+                placeholder="Position of rack"
                 onChange={(e) => {
                   setSearchValue(e.target.value);
                 }}
               />
               <button
-                className="search-bar-button"
+                className="admin-racks-search-bar-button"
                 onClick={(e) => handleSearchClick(e)}
               >
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
             <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={'admin-racks-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handleDeleteUser()}
             ></img>
-            <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
+            <button className={'admin-racks-add-btn'} onClick={(e) => handleAddUser(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add User</span>
+              <span className={'add-btn-text'}>Add Rack</span>
             </button>
-            <AddUser
+            <AddRack
               hidePopup={hideAddUser}
               isPopupVisible={isAddUserVisible}
-              userData={{ userData: userData, setUserData: setUserData }}
+              racksData={{ racksData: userData, setRacksData: setUserData }}
               onAddUserSuccess={handleAddUserSuccess}
             />
-            <EditUser
+            <EditRack
               hidePopup={hideEditUser}
               isPopupVisible={isEditUserVisible}
-              userData={{ userData: userData, setUserData: setUserData }}
+              racksData={{ racksData: userData, setRacksData: setUserData }}
               onEditUserSuccess={handleEditUserSuccess}
             />
           </div>
@@ -348,7 +342,7 @@ export default function OwnerUsers() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'warehouses-table'}
+          className={'admin-racks-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}

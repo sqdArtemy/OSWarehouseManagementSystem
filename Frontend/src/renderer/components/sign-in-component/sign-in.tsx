@@ -58,6 +58,10 @@ export function SignIn() {
           stopLoading();
           navigate('/supervisor');
           break;
+        case 'admin':
+          stopLoading();
+          navigate('/admin');
+          break;
         default:
           break;
       }
