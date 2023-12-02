@@ -394,7 +394,7 @@ export default function OwnerWarehouses() {
               hidePopup={hideAddWarehouse}
               isPopupVisible={isAddWarehouseVisible}
               warehouseData={{
-                transportData: warehouseData,
+                warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
               onAddWarehouseSuccess={onAddWarehouseSuccess}
@@ -403,7 +403,7 @@ export default function OwnerWarehouses() {
               hidePopup={hideEditWarehouse}
               isPopupVisible={isEditWarehouseVisible}
               warehouseData={{
-                transportData: warehouseData,
+                warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
             />
