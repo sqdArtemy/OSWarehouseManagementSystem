@@ -51,10 +51,10 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     window.addEventListener('resize', calculateScrollSize);
 
     warehouseApi.getWarehouse(Number(warehouse_id)).then((data) => {
-      if(data.success && data.data?.data){
+      if (data.success && data.data?.data) {
         setGridData(normalizeRacksForGrid(data.data.data.racks));
       }
-    })
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -125,46 +125,50 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
 
   const handleRackClick = async (record) => {
     setRackData(record);
-    if(record && record.rack_id) {
+    if (record && record.rack_id) {
       const productsResponse = await productApi.getAllProducts({});
-      const products = productsResponse.success ? productsResponse.data?.body : [];
+      const products = productsResponse.success
+        ? productsResponse.data?.body
+        : [];
       const result = await rackApi.getRack(record.rack_id);
-        if(result.success) {
-          const rack = result.data?.body;
+      if (result.success) {
+        const rack = result.data?.body;
 
-          if(rack){
-            const inventories = rack.inventories;
-            const data = [];
-            let index = 0;
+        if (rack) {
+          const inventories = rack.inventories;
+          const data = [];
+          let index = 0;
 
-            for (let inventory of inventories){
-              const product = products.find(product => {
-                return product.product_id === inventory.product
-              });
+          for (let inventory of inventories) {
+            const product = products.find((product) => {
+              return product.product_id === inventory.product;
+            });
 
-              let itemName = '', totalWeight = 0, itemType = '';
+            let itemName = '',
+              totalWeight = 0,
+              itemType = '';
 
-              if(product){
-                itemName = product.product_name;
-                itemType = product.is_stackable ? 'Stackable' : 'Non stackable';
-                totalWeight = product.volume * inventory.quantity;
-              }
-
-              data.push({
-                key: (index++).toString(),
-                itemName: itemName,
-                totalWeight: totalWeight,
-                totalVolume: inventory.total_volume,
-                totalCount: inventory.quantity,
-                expiryDate: inventory.expiry_date,
-                itemType: itemType,
-              })
+            if (product) {
+              itemName = product.product_name;
+              itemType = product.is_stackable ? 'Stackable' : 'Non stackable';
+              totalWeight = product.volume * inventory.quantity;
             }
-            setInventoryData(data);
-          } else {
-            setInventoryData([]);
+
+            data.push({
+              key: (index++).toString(),
+              itemName: itemName,
+              totalWeight: totalWeight,
+              totalVolume: inventory.total_volume,
+              totalCount: inventory.quantity,
+              expiryDate: inventory.expiry_date,
+              itemType: itemType,
+            });
           }
+          setInventoryData(data);
+        } else {
+          setInventoryData([]);
         }
+      }
     } else {
       setInventoryData([]);
     }
@@ -197,7 +201,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           isInventoryPopupVisible={isInventoryPopupVisible}
           hidePopup={hidePopup}
           rackData={{ rackData, setRackData }}
-          inventoryData={{inventoryData, setInventoryData}}
+          inventoryData={{ inventoryData, setInventoryData }}
         />
       </div>
       <div className={'generalized-detail-right'}>
@@ -208,6 +212,23 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
               responsive: true,
               maintainAspectRatio: false,
               cutout: '50%',
+              plugins: {
+                tooltip: {
+                  titleFont: {
+                    size: 20,
+                  },
+                  bodyFont: {
+                    size: 15,
+                  },
+                },
+                legend: {
+                  labels: {
+                    font: {
+                      size: 25,
+                    },
+                  },
+                },
+              },
             }}
           />
         </div>
