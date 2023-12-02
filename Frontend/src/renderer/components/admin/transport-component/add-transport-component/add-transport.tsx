@@ -1,7 +1,7 @@
 import React from 'react';
 import './add-transport.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { userApi } from '../../../../index';
+import { transportApi, userApi } from '../../../../index';
 
 export interface INewTransportData {
   TransportID?: string;
@@ -15,6 +15,7 @@ export default function AdminAddTransport({
   isPopupVisible,
   hidePopup,
   warehouseData,
+  onAddSuccess
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -22,6 +23,7 @@ export default function AdminAddTransport({
     transportData: INewTransportData;
     setTransportData: (userData: unknown) => void;
   };
+  onAddSuccess: () => void
 }) {
   const formRef = React.useRef<FormInstance>(null);
 
@@ -53,21 +55,25 @@ export default function AdminAddTransport({
         check = true;
       }
     }
+
+    const response = await transportApi.addTransport({
+      transport_capacity: Number(newTransportData.Capacity),
+      transport_speed: Number(newTransportData['Max Speed']),
+      transport_type: newTransportData.Type,
+      price_per_weight: Number(newTransportData['Price_weight'])
+    });
+
+    if(response.success){
+      onAddSuccess();
+    }
+    warehouseData.setTransportData(newTransportData);
+
     if (!check) {
       hidePopup();
       handleReset();
     } else {
       hidePopup();
     }
-    // await userApi.addUser({
-    //   user_name: newUserData['First Name'],
-    //   user_surname: newUserData['Last Name'],
-    //   user_email: newUserData['Email'],
-    //   user_phone: newUserData['Phone'],
-    //   user_role: newUserData['Role'],
-    // });
-
-    warehouseData.setTransportData(newTransportData);
   };
 
   const handleReset = () => {
@@ -92,13 +98,6 @@ export default function AdminAddTransport({
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
       >
-        <Form.Item
-          name="TransportID"
-          label={<p style={{ fontSize: '1vw' }}>Transport ID</p>}
-          rules={[{ required: true }]}
-        >
-          <Input style={{ fontSize: '0.9vw' }} />
-        </Form.Item>
         <Form.Item
           name="Capacity"
           label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
@@ -130,7 +129,7 @@ export default function AdminAddTransport({
             onChange={onRoleChange}
             style={{ minHeight: '2vw' }}
           >
-            <Select.Option value="track">Track</Select.Option>
+            <Select.Option value="truck">Truck</Select.Option>
             <Select.Option value="van">Van</Select.Option>
             <Select.Option value="car">Car</Select.Option>
           </Select>

@@ -7,7 +7,7 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { userApi } from '../../../index';
+import { transportApi, userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddTransport from './add-transport-component/add-transport';
 import EditTransport from './edit-transport-component/edit-transport';
@@ -40,39 +40,42 @@ export default function AdminTransport() {
   };
 
   const handeDeleteTransport = async (record?) => {
-    // if (selectedRows.length > 0) {
-    //   console.log('delete', selectedRows);
-    //   for (let user of selectedRows) {
-    //     await userApi.deleteUser(user.user_id);
-    //   }
-    // }
+    if (selectedRows.length > 0) {
+      console.log('delete', selectedRows);
+      for (let transport of selectedRows) {
+        await transportApi.deleteTransport(transport.transport_id);
+      }
+    }
     if (record) {
       console.log('delete', record);
-      await userApi.deleteUser(record.user_id);
+      await transportApi.deleteTransport(record.transport_id);
     }
   };
 
+  const handleSuccessAdd = async () => {
+    await debouncedSearch({});
+  }
+
   const debouncedSearch = debounce(async (filters) => {
-    // const response = await userApi.getAllUsers(filters);
-    // const users = response?.data?.body;
-    // const dataItems = [];
-    //
-    // if (users?.length) {
-    //   for (let i = 0; i < users.length; i++) {
-    //     dataItems.push({
-    //       key: (i + 1).toString(),
-    //       fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //       role: users[i].user_role,
-    //       phoneNumber: users[i].user_phone,
-    //       email: users[i].user_phone,
-    //       user_id: users[i].user_id,
-    //     });
-    //   }
-    //
-    //   setDataSource(dataItems);
-    // } else {
+    const response = await transportApi.getAllTransports(filters);
+    const transports = response?.data?.body;
+    const dataItems = [];
+
+    if (transports?.length) {
+      for (let i = 0; i < transports.length; i++) {
+        data.push({
+          key: (i + 1).toString(),
+          transportID: transports[i].transport_id,
+          capacity: transports[i].transport_capacity,
+          maxSpeed: transports[i].transport_speed,
+          price_weight: transports[i].price_per_weight,
+          type: transports[i].transport_type,
+        });
+      }
+      setDataSource(data);
+    } else {
     setDataSource([]);
-    // }
+    }
   }, 1000);
 
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -85,16 +88,13 @@ export default function AdminTransport() {
 
     const filters = {};
     if (selectedType) {
-      filters.user_role = selectedType.toLowerCase();
+      filters.transport_type = selectedType.toLowerCase();
     }
 
-    if (selectedType === 'All' && filters.user_role) {
-      delete filters.user_role;
+    if (selectedType === 'All' && filters.transport_type) {
+      delete filters.transport_type;
     }
 
-    if (searchValue) {
-      filters.user_name = searchValue;
-    }
     debouncedSearch(filters);
   };
 
@@ -256,57 +256,23 @@ export default function AdminTransport() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    // userApi.getAllUsers({}).then((result) => {
-    //   const users = result.data?.body;
-    //   if (users?.length) {
-    //     for (let i = 0; i < users.length; i++) {
-    //       data.push({
-    //         key: (i + 1).toString(),
-    //         fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //         role: users[i].user_role,
-    //         phoneNumber: users[i].user_phone,
-    //         email: users[i].user_phone,
-    //         user_id: users[i].user_id,
-    //       });
-    //     }
-    //     setDataSource(data);
-    //   }
-    // });
+    transportApi.getAllTransports({}).then((result) => {
+      const transports = result.data?.body;
+      if (transports?.length) {
+        for (let i = 0; i < transports.length; i++) {
+          data.push({
+            key: (i + 1).toString(),
+            transportID: transports[i].transport_id,
+            capacity: transports[i].transport_capacity,
+            maxSpeed: transports[i].transport_speed,
+            price_weight: transports[i].price_per_weight,
+            type: transports[i].transport_type,
+          });
+        }
+        setDataSource(data);
+      }
+    });
 
-    setDataSource([
-      {
-        key: '1',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
-      },
-      {
-        key: '2',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
-      },
-      {
-        key: '3',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
-      },
-      {
-        key: '4',
-        transportID: 'John Brown',
-        capacity: '32',
-        maxSpeed: 'New York No. 1 Lake Park',
-        price_weight: 'Freezer',
-        type: 1000,
-      },
-    ]);
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -363,6 +329,7 @@ export default function AdminTransport() {
                 transportData: transportData,
                 setTransportData: setTransportData,
               }}
+              onAddSuccess={handleSuccessAdd}
             />
             <EditTransport
               hidePopup={hideEditTransport}
@@ -371,6 +338,7 @@ export default function AdminTransport() {
                 transportData: transportData,
                 setTransportData: setTransportData,
               }}
+              onEditSuccess={handleSuccessAdd}
             />
           </div>
         </div>

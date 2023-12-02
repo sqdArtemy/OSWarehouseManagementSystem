@@ -106,6 +106,13 @@ export default function EditUser({
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
+          name="Role"
+          label={<p style={{ fontSize: '1vw' }}>Role</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} disabled={} />
+        </Form.Item>
+        <Form.Item
           name="Email"
           label={<p style={{ fontSize: '1vw' }}>Email</p>}
           rules={[{ required: true }]}

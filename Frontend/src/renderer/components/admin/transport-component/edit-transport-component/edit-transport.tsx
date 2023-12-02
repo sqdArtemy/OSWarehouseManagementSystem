@@ -1,21 +1,23 @@
 import React, { useEffect } from 'react';
 import './edit-transport.scss';
 import { Button, Form, FormInstance, Input, Modal } from 'antd';
-import { userApi } from '../../../../index';
+import { transportApi } from '../../../../index';
 import { INewTransportData } from '../add-transport-component/add-transport';
 import { ITransportData } from '../transport';
 
 export default function EditTransport({
-  isPopupVisible,
-  hidePopup,
-  transportData,
-}: {
+                                        isPopupVisible,
+                                        hidePopup,
+                                        transportData,
+                                        onEditSuccess
+                                      }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   transportData: {
     transportData: INewTransportData | ITransportData;
     setTransportData: (transportData: unknown) => void;
   };
+  onEditSuccess: () => void
 }) {
   console.log(transportData.transportData);
   const formRef = React.useRef<FormInstance>(null);
@@ -54,18 +56,22 @@ export default function EditTransport({
   };
 
   const onFinish = async () => {
-    const newWarehouseData = formRef.current?.getFieldsValue();
+    const newTransportData = formRef.current?.getFieldsValue();
     hidePopup();
 
-    // await userApi.addUser({
-    //   user_name: newUserData['First Name'],
-    //   user_surname: newUserData['Last Name'],
-    //   user_email: newUserData['Email'],
-    //   user_phone: newUserData['Phone'],
-    //   user_role: newUserData['Role'],
-    // });
+    const response = await transportApi.editTransport(
+      newTransportData.transportID, {
+      transport_capacity: Number(newTransportData.Capacity),
+      transport_speed: Number(newTransportData.maxSpeed),
+      transport_type: newTransportData.Type,
+      price_per_weight: Number(newTransportData.price_weight)
+    });
 
-    transportData.setTransportData(newWarehouseData);
+    if(response.success){
+      onEditSuccess();
+    }
+
+    transportData.setTransportData(newTransportData);
   };
 
   return (

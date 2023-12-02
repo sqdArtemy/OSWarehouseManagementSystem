@@ -42,6 +42,7 @@ export default function AddUser({
   const roleOptions: any = [
     { value: 'vendor', label: 'Vendor' },
     { value: 'supervisor', label: 'Supervisor' },
+    { value: 'admin', label: 'Admin' },
   ];
 
   const onCancel = () => {

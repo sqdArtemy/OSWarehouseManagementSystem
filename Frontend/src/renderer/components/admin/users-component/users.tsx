@@ -115,7 +115,7 @@ export default function AdminUsers() {
     }
 
     if (searchValue) {
-      filters.user_name = searchValue;
+      filters.user_name_like = searchValue;
     }
 
     if(selectedCompany){

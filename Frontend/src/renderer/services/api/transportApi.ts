@@ -39,4 +39,20 @@ export class TransportApi implements ITransport {
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
+
+  public async editTransport(id: number, body: IAddTransport): Promise<ApiResponse> {
+    const url = '/transport/' + id ;
+    const method = 'PUT';
+    const headers = {};
+
+    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  }
+
+  public async deleteTransport(id: number): Promise<ApiResponse> {
+    const url = '/transport/' + id ;
+    const method = 'DELETE';
+    const headers = {};
+
+    return await this.handleApiRequestWithToken({ url, method, body: {}, headers });
+  }
 }
