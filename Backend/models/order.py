@@ -25,6 +25,7 @@ class Order(Base):
 
     # Relationships with other tables
     ordered_items = relationship("OrderItem", back_populates="order")
+    lost_items = relationship("LostItem", back_populates="order")
     transport = relationship("Transport", back_populates="orders")
     supplier_warehouse = relationship(
         "Warehouse",
