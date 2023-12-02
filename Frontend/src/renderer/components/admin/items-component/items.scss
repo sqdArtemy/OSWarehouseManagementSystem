@@ -1,11 +1,11 @@
-.admin-warehouses-container {
+.admin-items-container {
   display: flex;
   flex-direction: row;
   width: 85%;
   min-height: 100vh;
   align-items: center;
 
-  .admin-warehouses-table-container {
+  .admin-items-table-container {
     display: flex;
     flex-direction: column;
     gap: 2.5vw;
@@ -15,54 +15,58 @@
     padding-left: 3vw;
 
 
-    .admin-warehouses-table-header-container {
+    .admin-items-table-header-container {
       display: flex;
       flex-direction: column;
       gap: 3vw;
 
-      .admin-warehouses-table-header {
+      .admin-items-table-header {
         font-size: 3vw;
       }
 
-      .admin-options-container {
+      .admin-items-options-container {
         display: flex;
         flex-direction: row;
         gap: 7vw;
         width: 100%;
-        align-items: end;
+        height: 2vw;
+        align-items: center;
 
 
-        .admin-search-bar-container {
+        .admin-items-search-bar-container {
           display: flex;
           flex-direction: row;
           align-items: end;
-          .admin-warehouse-filter{
+
+          .admin-items-search-bar-dropdown-container {
+            min-height: 3vw;
+            width: 3.5vw;
+            border: 0.5px solid #000000;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+          }
+          .admin-items-labels{
+            width: 6vw;
+            text-align: center;
+          }
+          .admin-items-filter{
             display: flex;
             flex-direction: column;
-            .admin-warehouse-filter-labels{
-              width: 8vw;
-              text-align: center;
-              font-size:1vw;
-            }
-          }
-          .admin-search-bar-dropdown-container {
-            min-height: 3vw;
-            width: 8vw;
-            font-size: 1vw;
-            border: 0.5px solid #000000;
-            margin-right: 2vw;
           }
 
-
-          .admin-search-bar-input {
+          .admin-items-search-bar-input {
             width: 20vw;
             min-height: 3vw;
             border: 0.5px solid #000000;
-            border-bottom-left-radius: 1vw;
-            border-top-left-radius: 1vw;
+          }
+          .admin-items-search-bar-filter{
+            width: 6vw;
+            border: 0.5px solid #000000;
+            margin-right: 3vw;
+            min-height: 3vw;
           }
 
-          .admin-search-bar-button {
+          .admin-items-search-bar-button {
             width: 3vw;
             min-height: 3vw;
             background: #5564B2;
@@ -86,19 +90,19 @@
           }
         }
 
-        .admin-delete-btn {
+        .admin-items-delete-btn {
           width: 2.2vw;
           min-height: 2.2vw;
         }
 
-        .admin-add-btn {
+        .admin-items-add-btn {
           display: flex;
           flex-direction: row;
           align-items: center;
           justify-content: center;
           gap: 0.5vw;
 
-          width: 12vw;
+          width: 10vw;
           min-height: 2.2vw;
           border: 0.5px solid #000000;
 
@@ -109,11 +113,8 @@
 
           cursor: pointer;
 
-          .admin-add-btn-text {
+          .admin-items-add-btn-text {
             font-size: 1.3vw;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
           }
 
           &:hover {
@@ -128,7 +129,7 @@
       }
     }
 
-    .admin-warehouses-table {
+    .warehouses-table {
       width: 85%;
       min-height: 70%;
 
@@ -136,7 +137,13 @@
 
   }
 
-  .admin-warehouses-form {
+  .users-separator-line {
+    width: 2px;
+    height: 80%;
+    background-color: #000000;
+  }
+
+  .warehouses-form {
     min-height: 100vh;
     width: 40%;
   }
@@ -176,4 +183,4 @@
   transition: all 0.3s ease;
 }
 
-.ant-table table { font-size: 1vw; }
+
