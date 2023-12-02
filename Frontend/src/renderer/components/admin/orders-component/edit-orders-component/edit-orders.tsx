@@ -12,7 +12,7 @@ export default function EditOrders({
   isPopupVisible: boolean;
   hidePopup: () => void;
   orderData: {
-    ordersData: IOrderData;
+    ordersData: IOrderData | any;
     setOrdersData: (orderData: unknown) => void;
   };
 }) {
