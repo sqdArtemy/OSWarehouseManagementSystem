@@ -102,14 +102,6 @@ export default function AddWarehouse({
       hidePopup();
     }
 
-    // await userApi.addUser({
-    //   user_name: newUserData['First Name'],
-    //   user_surname: newUserData['Last Name'],
-    //   user_email: newUserData['Email'],
-    //   user_phone: newUserData['Phone'],
-    //   user_role: newUserData['Role'],
-    // });
-
     startLoading();
     const response = await warehouseApi.addWarehouse({
       warehouse_address: newWarehouseData['Address'],

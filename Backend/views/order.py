@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import floor
 from typing import Dict, List, Any
 
@@ -96,19 +96,20 @@ class OrderView(GenericView):
             raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 404)
 
         with get_session() as session:
-            requester = session.query(User).filter_by(user_id=self.requester_id).first()
+            requester = session.query(User).filter_by(user_id=requester_id).first()
+
             if requester_role == UserRole.VENDOR.value["code"]:
                 requester_vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester_id).all()
                 requester_vendors = [vendor[0] for vendor in requester_vendors]
-            elif requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"]):
 
-                if self.requester_role == UserRole.SUPERVISOR.value["code"]:
-                    requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester_id).all()
-                    requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
-                else:
-                    requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(company_id=requester.company_id).all()
-                    requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
-
+            elif self.requester_role == UserRole.SUPERVISOR.value["code"]:
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
+                    supervisor_id=requester_id).all()
+                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+            else:
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
+                    company_id=requester.company.company_id).all()
+                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
 
             if requester_role != UserRole.ADMIN.value["code"] and (
                     (
@@ -155,12 +156,13 @@ class OrderView(GenericView):
             orders = None
 
             if self.requester_role in (UserRole.SUPERVISOR.value["code"], UserRole.MANAGER.value["code"]):
-
                 if self.requester_role == UserRole.SUPERVISOR.value["code"]:
-                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=requester.user_id).all()
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(
+                        supervisor_id=self.requester_id).all()
                     warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
                 else:
-                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(company_id=requester.company_id).all()
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(
+                        company_id=requester.company.company_id).all()
                     warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
 
                 orders = session.query(Order).filter(
@@ -422,12 +424,15 @@ class OrderView(GenericView):
         requester_id = self.requester_id
 
         with get_session() as session:
-            requester = session.query(User).filter_by(user_id=self.requester_id).first()
+            requester = session.query(User).filter_by(user_id=requester_id).first()
+
             if requester_role == UserRole.VENDOR.value["code"]:
-                requester_vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester_id).all()
+                requester_vendors = session.query(Vendor.vendor_id).filter_by(
+                    vendor_owner_id=requester_id).all()
                 requester_vendors = [vendor[0] for vendor in requester_vendors]
             elif requester_role == UserRole.MANAGER.value["code"]:
-                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(company_id=requester.company_id).all()
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
+                    company_id=requester.company.company_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
 
             if requester_role == UserRole.SUPERVISOR.value["code"] or (
@@ -569,6 +574,252 @@ class OrderView(GenericView):
             session.query(Order).filter_by(order_id=order_id).update(
                     {"order_status": "processing", "updated_at": datetime.now()})
 
+            session.commit()
+
+            self.response.status_code = 200
+            self.response.data = order.to_dict(cascade_fields=())
+            return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def receive_preview(self, request: dict) -> dict:
+        """
+        Showing the preview from what racks products will be retrieved.
+        :param request: dictionary containing url, method, headers
+        :return: dictionary containing status_code and response body with list of dictionaries
+        """
+        order = self.instance
+        requester_id = self.requester_id
+        requester_role = self.requester_role
+
+        if requester_role not in (
+                UserRole.SUPERVISOR.value["code"], UserRole.MANAGER.value["code"], UserRole.ADMIN.value["code"]
+        ):
+            raise ValidationError("Only supervisor or manager can receive an order.", 403)
+
+        if not order:
+            raise ValidationError("Order Not Found", 404)
+
+        if order.order_status not in ["delivered", "lost", "damaged"]:
+            raise ValidationError("You cannot receive orders that are not delivered", 400)
+
+        if len(order.ordered_items) == 0:
+            raise ValidationError("Order must contain at least one item.", 400)
+
+        with get_session() as session:
+            requester = session.query(User).filter_by(user_id=requester_id).first()
+
+            if requester_role == UserRole.SUPERVISOR.value["code"]:
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
+                    supervisor_id=requester_id).all()
+                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+            elif requester_role == UserRole.MANAGER.value["code"]:
+                requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
+                    company_id=requester.company.company_id).all()
+                requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
+
+            if order.recipient_id not in requester_warehouses:
+                raise ValidationError("You are not allowed to see this order.", 403)
+
+            total_volume = session.query(func.sum(OrderItem.quantity * Product.volume)). \
+                join(Product, OrderItem.product_id == Product.product_id). \
+                filter(OrderItem.order_id == order.order_id).scalar()
+
+            if order.order_status == "to_warehouse" and not self.__is_warehouse_capacity_enough(
+                    order.recipient_id, total_volume):
+                raise ValidationError("Warehouse capacity is not enough.", 400)
+
+            filled_inventories = []
+
+            order_items = order.ordered_items
+
+            for order_item in order_items:
+                product = order_item.product
+                total_volume = product.volume * order_item.quantity
+                total_quantity = order_item.quantity
+
+                racks = session.query(Rack).filter_by(
+                    warehouse_id=order.supplier_id).order_by(desc(Rack.rack_position)).all()
+
+                for rack in racks:
+                    if rack.remaining_capacity == 0:
+                        continue
+
+                    max_volume = rack.remaining_capacity if total_volume > rack.remaining_capacity else total_volume
+
+                    real_quantity = floor(max_volume / product.volume)
+
+                    filled_inventories.append({
+                        'rack_id': rack.rack_id,
+                        'product_id': order_item.product_id,
+                        'real_quantity': real_quantity
+                    })
+
+                    total_quantity -= real_quantity
+                    total_volume = total_quantity * product.volume
+
+                    if total_quantity == 0:
+                        break
+
+            self.response.status_code = 200
+            self.response.data["filled_inventories"] = filled_inventories
+
+            return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.PUT.value])
+    def change_status(self, request: dict) -> dict:
+        """
+        Change status of an order in the database.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+        with (get_session() as session):
+            # get order
+            order = session.query(Order).filter_by(order_id=self.instance_id)
+
+            if order.first() is None:
+                raise ValidationError("Order Not Found", 404)
+
+            order_type = order.first().order_type
+
+            # check if recipient has access to the order
+            if order_type == "from_warehouse" and self.requester_role == UserRole.VENDOR.value["code"]:
+                vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=self.requester_id).all()
+                vendors = [vendor[0] for vendor in vendors]
+
+                if len(vendors) == 0:
+                    raise ValidationError("Order Not Found", 404)
+                order = order.filter(Order.recipient_id.in_(vendors))
+
+            elif order_type == "to_warehouse":
+                warehouse = order.first().recipient_warehouse
+                if self.requester_role == UserRole.MANAGER.value["code"]:
+                    users = warehouse.company.users
+                    for user in users:
+                        if user.user_role == UserRole.MANAGER.value["name"]:
+                            manager = user
+                            break
+                    if manager is None:
+                        raise ValidationError("Order Not Found", 404)
+                elif self.requester_role == UserRole.SUPERVISOR.value["code"]:
+                    supervisor = warehouse.supervisor
+                    if supervisor is None:
+                        raise ValidationError("Order Not Found", 404)
+
+            # check if requester has access to change status
+            if (self.requester_role == UserRole.VENDOR.value["code"] and
+                    self.body.get("status") not in ["finished", "delivered"]):
+                raise ValidationError("You cannot change status of this order", 400)
+
+            if self.requester_role == UserRole.MANAGER.value["code"] and self.body.get("status") != "processing":
+                raise ValidationError("You cannot change status of this order", 400)
+
+            if self.requester_role == UserRole.SUPERVISOR.value["code"] and self.body.get("status") != "delivered":
+                raise ValidationError("You cannot change status of this order", 400)
+
+            order = order.first()
+
+            # change status and updated_at
+            order.updated_at = datetime.now()
+            order.order_status = self.body.get("status")
+            session.commit()
+
+            self.response.status_code = 200
+            self.response.data = order.to_dict(cascade_fields=())
+            return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.PUT.value])
+    def finalize_order(self, request: dict) -> dict:
+        """
+        Complete delivery to warehouse.
+        """
+        order_id = extract_id_from_url(request["url"], "order")
+        creator_id = decode_token(self.headers.get("token"))
+        with get_session() as session:
+
+            warehouse_id = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=creator_id).scalar()
+            order = session.query(Order).filter_by(order_id=order_id, supplier_id=warehouse_id)
+            if not order.first():
+                raise ValidationError("Order Not Found", 404)
+
+            if order.first().order_status != "delivered":
+                raise ValidationError("You cannot receive orders that are not delivered", 400)
+
+            # main logic
+            filled_inventories = self.body.get("filled_inventories")
+            for f_inv in filled_inventories:
+                rack_id = f_inv.get("rack_id")
+                product_id = f_inv.get("product_id")
+                quantity = f_inv.get("quantity")
+
+                creator_id = decode_token(self.headers.get("token"))
+                warehouse = session.query(Warehouse).filter_by(supervisor_id=creator_id).first()
+                company_id = session.query(User.company_id).filter_by(user_id=creator_id).scalar()
+
+                rack = session.query(Rack).filter_by(rack_id=rack_id, warehouse_id=warehouse.warehouse_id).first()
+                if not rack:
+                    raise ValidationError("Rack Not Found", 404)
+
+                product = session.query(Product).filter_by(product_id=product_id, company_id=company_id).first()
+                if not product:
+                    raise ValidationError("Product Not Found", 404)
+
+                total_volume_init = product.volume * quantity
+                if rack.remaining_capacity < total_volume_init:
+                    raise ValidationError("Not enough capacity", 400)
+
+                products_from_rack = session.query(Inventory.product_id).filter_by(rack_id=rack_id).all()
+                if products_from_rack:
+                    for product_from_rack in products_from_rack:
+                        is_stackable = session.query(Product.is_stackable).filter_by(
+                            product_id=product_from_rack[0]).scalar()
+                        if not is_stackable:
+                            raise ValidationError("Non stackable product is already occupying this rack", 400)
+
+                if warehouse.warehouse_type != product.product_type:
+                    raise ValidationError(
+                        f"Product with type {product.product_type} cannot be put to the warehouse for {warehouse.warehouse_type} products",
+                        400)
+
+                inventory = session.query(Inventory).filter_by(rack_id=rack_id, product_id=product_id).first()
+                if inventory:
+                    quantity = quantity + inventory.quantity
+                    total_volume = total_volume_init + inventory.total_volume
+
+                    update_data = {"quantity": quantity, "total_volume": total_volume}
+                    session.query(Inventory).filter_by(rack_id=rack_id, product_id=product_id).update(update_data)
+
+                else:
+                    new_inventory = Inventory(
+                        rack_id=rack_id,
+                        product_id=product_id,
+                        quantity=quantity,
+                        total_volume=total_volume_init,
+                        arrival_date=datetime.now(),
+                        expiry_date=datetime.now() + timedelta(days=product.expiry_duration),
+                    )
+
+                    session.add(new_inventory)
+
+                session.flush()
+
+                rack = session.query(Rack).filter_by(rack_id=rack_id).first()
+                session.query(Rack).filter_by(rack_id=rack_id).update(
+                    {"remaining_capacity": rack.remaining_capacity - total_volume_init})
+
+                warehouse = session.query(Warehouse).filter_by(warehouse_id=warehouse.warehouse_id).first()
+                session.query(Warehouse).filter_by(warehouse_id=warehouse.warehouse_id).update(
+                    {"remaining_capacity": warehouse.remaining_capacity - total_volume_init})
+
+                session.commit()
+
+            order = order.first()
+
+            # change updated_at and order_status
+            order.updated_at = datetime.now()
+            order.order_status = "finished"
             session.commit()
 
             self.response.status_code = 200

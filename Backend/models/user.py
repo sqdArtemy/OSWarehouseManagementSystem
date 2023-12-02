@@ -21,7 +21,7 @@ class User(Base):
     vendors = relationship("Vendor", back_populates="vendor_owner")
     warehouses = relationship("Warehouse", back_populates="supervisor")
 
-    def to_dict(self, cascade_fields: list[str] = ("company",)):
+    def to_dict(self, cascade_fields: list[str] = ("company", "warehouses")):
         with get_session() as session:
             user = session.query(User).filter(User.user_id == self.user_id).first()
             return {
@@ -32,5 +32,8 @@ class User(Base):
                 "user_phone": self.user_phone,
                 "user_email": self.user_email,
                 "user_address": self.user_address if self.user_address is not None else "",
-                "user_role": self.user_role
+                "user_role": self.user_role,
+                "warehouses": [
+                    w.to_dict() if "warehouses" in cascade_fields else w.warehouse_id for w in user.warehouses
+                ]
             }

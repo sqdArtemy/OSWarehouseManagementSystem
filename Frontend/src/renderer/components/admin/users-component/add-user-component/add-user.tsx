@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './add-user.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { userApi } from '../../../../index';
+import { companyApi, userApi } from '../../../../index';
 
 export interface INewUserData {
   'First Name'?: string;
@@ -12,10 +12,11 @@ export interface INewUserData {
 }
 
 export default function AddUser({
-  isPopupVisible,
-  hidePopup,
-  userData, onAddUserSuccess,
-}: {
+                                  isPopupVisible,
+                                  hidePopup,
+                                  userData,
+                                  onAddUserSuccess,
+                                }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   userData: {
@@ -25,6 +26,7 @@ export default function AddUser({
   onAddUserSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const [companyOptions, setCompanyOptions] = React.useState<Select['OptionType'][]>([]);
 
   const layout = {
     labelCol: {
@@ -37,9 +39,11 @@ export default function AddUser({
     wrapperCol: { offset: 13, span: 17 },
   };
 
-  function onRoleChange() {
-    console.log('change');
-  }
+  const roleOptions: any = [
+    { value: 'vendor', label: 'Vendor' },
+    { value: 'supervisor', label: 'Supervisor' },
+    { value: 'admin', label: 'Admin' },
+  ];
 
   const onCancel = () => {
     hidePopup();
@@ -66,18 +70,40 @@ export default function AddUser({
       user_surname: newUserData['Last Name'],
       user_email: newUserData['Email'],
       user_phone: newUserData['Phone'],
-      user_role: 'supervisor',
+      user_role: newUserData['Role'],
+      company_id: newUserData['Company']
     });
+
     console.log(response);
-    if(response.success){
+
+    if (response.success) {
       onAddUserSuccess();
     }
+
     userData.setUserData(newUserData);
   };
 
   const handleReset = () => {
     formRef.current?.resetFields();
   };
+
+  useEffect(() => {
+    if (isPopupVisible && formRef.current) {
+      companyApi.getAll().then((res) => {
+        const companies = res.data.body;
+
+        setCompanyOptions(
+          companies.map((company) => {
+            return {
+              value: company.company_id,
+              label: company.company_name,
+            };
+          }),
+        );
+      });
+    }
+  }, [isPopupVisible]);
+
   return (
     <Modal
       title={<p style={{ fontSize: '1.2vw' }}>Add New User</p>}
@@ -102,7 +128,11 @@ export default function AddUser({
           label={<p style={{ fontSize: '1vw' }}>Company</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select
+            placeholder={'Select a Company'}
+            style={{ minHeight: '2vw' }}
+            options={companyOptions}
+          />
         </Form.Item>
         <Form.Item
           name="First Name"
@@ -123,7 +153,11 @@ export default function AddUser({
           label={<p style={{ fontSize: '1vw' }}>Role</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select
+            placeholder={'Select a Role'}
+            style={{ minHeight: '2vw' }}
+            options={roleOptions}
+          />
         </Form.Item>
         <Form.Item
           name="Email"

@@ -7,10 +7,12 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { userApi } from '../../../index';
+import { companyApi, userApi, warehouseApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddWarehouse from './add-warehouse-component/add-warehouse';
 import EditWarehouse from './edit-warehouse-component/edit-warehouse';
+import { IWarehouseFilters } from '../../../services/interfaces/warehouseInterface';
+import { useError } from '../../error-component/error-context';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -23,8 +25,8 @@ export interface IWarehouseData {
 }
 
 export default function AdminWarehouses() {
-  const [selectedType, setSelectedType] = useState('ALL');
-  const [selectedCompany, setSelectedCompany] = useState('ALL');
+  const [selectedType, setSelectedType] = useState('All');
+  const [selectedCompany, setSelectedCompany] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -33,6 +35,10 @@ export default function AdminWarehouses() {
   const [isAddWarehouseVisible, setIsAddWarehouseVisible] = useState(false);
   const [isEditWarehouseVisible, setIsEditWarehouseVisible] = useState(false);
   const [warehouseData, setWarehouseData] = useState({});
+  const [companiesData, setCompaniesData] = useState([]);
+  const { showError } = useError();
+
+  const filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -46,40 +52,73 @@ export default function AdminWarehouses() {
     e.domEvent.target.innerText = selectedCompany;
   };
 
+  const getAllWarehouses = async (filters: IWarehouseFilters) => {
+    const response = await warehouseApi.getAllWarehouses(filters);
+    const warehouses = response.data?.body;
+    const data = [];
+
+    const companiesResponse = await companyApi.getAll();
+    let companies = [];
+    if(companiesResponse.success){
+      companies = companiesResponse.data.body;
+      companies.push({
+        company_id: null,
+        company_name: 'All'
+      })
+      setCompaniesData(companies);
+    }
+
+    if (warehouses?.length) {
+      const allUsers = (await userApi.getAllUsers({})).data.body;
+      for (let i = 0; i < warehouses.length; i++) {
+        const user = allUsers?.find(
+          (user) => (user.user_id === warehouses[i].supervisor),
+        );
+
+        const company = companies.find(company => {
+          return company.company_id === warehouses[i].company;
+        });
+
+        data.push({
+          key: (i + 1).toString(),
+          companyName: company ? company.company_name: '',
+          warehouseName: warehouses[i].warehouse_name,
+          supervisor: user ? user.user_name + ' ' + user.user_surname : '',
+          address: warehouses[i].warehouse_address,
+          type: warehouses[i].warehouse_type,
+          capacity:
+            warehouses[i].remaining_capacity +
+            '/' +
+            warehouses[i].overall_capacity,
+          warehouse_id: warehouses[i].warehouse_id,
+          overall_capacity: warehouses[i].overall_capacity,
+          remaining_capacity: warehouses[i].remaining_capacity,
+        });
+      }
+      setDataSource(data);
+    } else {
+      setDataSource([]);
+    }
+  };
+
+  const onAddSuccess = async () => {
+    await getAllWarehouses(filters);
+  }
+
   const handeDeleteWarehouse = async (record?) => {
-    // if (selectedRows.length > 0) {
-    //   console.log('delete', selectedRows);
-    //   for (let user of selectedRows) {
-    //     await userApi.deleteUser(user.user_id);
-    //   }
-    // }
     if (record) {
       console.log('delete', record);
-      await userApi.deleteUser(record.user_id);
+      const response = await warehouseApi.deleteWarehouse(record.warehouse_id);
+      if (!response.success) {
+        showError(response.message);
+        return;
+      }
+      setDataSource(dataSource.filter((item) => item.key !== record.key));
     }
   };
 
   const debouncedSearch = debounce(async (filters) => {
-    // const response = await userApi.getAllUsers(filters);
-    // const users = response?.data?.body;
-    // const dataItems = [];
-    //
-    // if (users?.length) {
-    //   for (let i = 0; i < users.length; i++) {
-    //     dataItems.push({
-    //       key: (i + 1).toString(),
-    //       fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //       role: users[i].user_role,
-    //       phoneNumber: users[i].user_phone,
-    //       email: users[i].user_phone,
-    //       user_id: users[i].user_id,
-    //     });
-    //   }
-    //
-    //   setDataSource(dataItems);
-    // } else {
-    setDataSource([]);
-    // }
+    await getAllWarehouses(filters);
   }, 1000);
 
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -90,17 +129,30 @@ export default function AdminWarehouses() {
       }
     }, 100);
 
-    const filters = {};
     if (selectedType) {
-      filters.user_role = selectedType.toLowerCase();
+      filters.warehouse_type = selectedType.toLowerCase();
     }
 
-    if (selectedType === 'All' && filters.user_role) {
-      delete filters.user_role;
+    if (selectedType === 'All' && filters.warehouse_type) {
+      delete filters.warehouse_type;
+    }
+
+    if(selectedCompany){
+      const company = companiesData.find(company => {
+        return company.company_name === selectedCompany;
+      })
+
+      if(company && company.company_name !== 'All'){
+        filters.company_id = company.company_id;
+      } else {
+        if(filters.company_id){
+          delete filters.company_id;
+        }
+      }
     }
 
     if (searchValue) {
-      filters.user_name = searchValue;
+      filters.warehouse_name_like = searchValue;
     }
     debouncedSearch(filters);
   };
@@ -235,21 +287,14 @@ export default function AdminWarehouses() {
       label: 'Hazardous',
     },
   ];
-  const companies = [
-    {
-      label: 'Cock.inc',
-    },
-    {
-      label: 'SOmething',
-    },
-  ]
+
 
   const menuProps = {
     items: types,
     onClick: handleMenuClick,
   };
   const menuCompanyProps = {
-    items: companies,
+    items: companiesData.length ? companiesData.map(company => ({ label: company.company_name })) : [],
     onClick: handleMenuCompanyClick,
   }
 
@@ -284,61 +329,50 @@ export default function AdminWarehouses() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    // userApi.getAllUsers({}).then((result) => {
-    //   const users = result.data?.body;
-    //   if (users?.length) {
-    //     for (let i = 0; i < users.length; i++) {
-    //       data.push({
-    //         key: (i + 1).toString(),
-    //         fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //         role: users[i].user_role,
-    //         phoneNumber: users[i].user_phone,
-    //         email: users[i].user_phone,
-    //         user_id: users[i].user_id,
-    //       });
-    //     }
-    //     setDataSource(data);
-    //   }
-    // });
+    warehouseApi.getAllWarehouses({}).then(async (result) => {
+      const warehouses = result.data?.body;
+      const companiesResponse = await companyApi.getAll();
 
-    setDataSource([
-      {
-        key: '1',
-        companyName: 'Cock.inc',
-        warehouseName: 'John Brown',
-        supervisor: '32',
-        address: 'New York No. 1 Lake Park',
-        type: 'Freezer',
-        capacity: 1000,
-      },
-      {
-        key: '2',
-        companyName: 'Cock.inc',
-        warehouseName: 'Jim Green',
-        supervisor: '42',
-        address: 'London No. 1 Lake Park',
-        type: 'Refrigerator',
-        capacity: 1000,
-      },
-      {
-        key: '3',
-        companyName: 'Cock.inc',
-        warehouseName: 'Joe Black',
-        supervisor: '32',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Dry',
-        capacity: 1000,
-      },
-      {
-        key: '4',
-        companyName: 'Cock.inc',
-        warehouseName: 'Disabled User',
-        supervisor: '99',
-        address: 'Sidney No. 1 Lake Park',
-        type: 'Hazardous',
-        capacity: 1000,
-      },
-    ]);
+      let companies = [];
+      if(companiesResponse.success){
+        companies = companiesResponse.data.body;
+        companies.push({
+          company_id: null,
+          company_name: 'All'
+        })
+        setCompaniesData(companies);
+      }
+
+      if (warehouses?.length) {
+        const allUsers = (await userApi.getAllUsers({})).data.body;
+        for (let i = 0; i < warehouses.length; i++) {
+          const user = allUsers?.find(
+            (user) => (user.user_id === warehouses[i].supervisor),
+          );
+
+          const company = companies.find(company => {
+            return company.company_id === warehouses[i].company;
+          });
+
+          data.push({
+            key: (i + 1).toString(),
+            companyName: company ? company.company_name: '',
+            warehouseName: warehouses[i].warehouse_name,
+            supervisor: user ? user.user_name + ' ' + user.user_surname : '',
+            address: warehouses[i].warehouse_address,
+            type: warehouses[i].warehouse_type,
+            capacity:
+              warehouses[i].remaining_capacity +
+              '/' +
+              warehouses[i].overall_capacity,
+            warehouse_id: warehouses[i].warehouse_id,
+            overall_capacity: warehouses[i].overall_capacity,
+            remaining_capacity: warehouses[i].remaining_capacity,
+          });
+        }
+        setDataSource(data);
+      }
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -409,17 +443,19 @@ export default function AdminWarehouses() {
               hidePopup={hideAddWarehouse}
               isPopupVisible={isAddWarehouseVisible}
               warehouseData={{
-                transportData: warehouseData,
+                warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
+              onAddWarehouseSuccess={onAddSuccess}
             />
             <EditWarehouse
               hidePopup={hideEditWarehouse}
               isPopupVisible={isEditWarehouseVisible}
               warehouseData={{
-                transportData: warehouseData,
+                warehouseData: warehouseData,
                 setWarehouseData: setWarehouseData,
               }}
+              onEditSuccess={onAddSuccess}
             />
           </div>
         </div>

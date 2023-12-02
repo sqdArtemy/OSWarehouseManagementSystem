@@ -2,6 +2,8 @@ import { ApiResponse } from '../apiRequestHandler';
 
 export interface ITransport {
   addTransport(body: IAddTransport): Promise<ApiResponse>;
+  editTransport(id: number, body: IAddTransport): Promise<ApiResponse>;
+  deleteTransport(id: number): Promise<ApiResponse>;
   getAllTransports(filters: ITransportFilters): Promise<ApiResponse>;
 }
 

@@ -46,12 +46,6 @@ export default function OwnerWarehouses() {
   };
 
   const handeDeleteWarehouse = async (record?) => {
-    // if (selectedRows.length > 0) {
-    //   console.log('delete', selectedRows);
-    //   for (let user of selectedRows) {
-    //     await userApi.deleteUser(user.user_id);
-    //   }
-    // }
     if (record) {
       console.log('delete', record);
       const response = await warehouseApi.deleteWarehouse(record.warehouse_id);

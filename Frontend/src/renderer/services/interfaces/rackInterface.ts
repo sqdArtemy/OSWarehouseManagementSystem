@@ -6,6 +6,7 @@ export interface IRack {
   deleteRack(id: number): Promise<ApiResponse>;
   updateRack(body: IAddRack, id: number): Promise<ApiResponse>;
   getRack(id: number): Promise<ApiResponse>;
+  getAll(filters: IRackFilter): Promise<ApiResponse>;
 }
 
 
@@ -25,3 +26,7 @@ export interface IAddMultipleRacks {
   rack_positions?: string[];
 }
 
+export interface IRackFilter {
+  rack_position?: string;
+  warehouse_id?: string;
+}

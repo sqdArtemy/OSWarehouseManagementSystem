@@ -3,6 +3,7 @@ from .company import CompanyView
 from .inventory import InventoryView
 from .order import OrderView
 from .order_item import OrderItemView
+from .lost_item import LostItemView
 from .product import ProductView
 from .rack import RackView
 from .vendor import VendorView

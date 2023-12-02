@@ -2,6 +2,7 @@ from .company import Company
 from .inventory import Inventory
 from .order import Order
 from .order_item import OrderItem
+from .lost_item import LostItem
 from .product import Product
 from .rack import Rack
 from .vendor import Vendor

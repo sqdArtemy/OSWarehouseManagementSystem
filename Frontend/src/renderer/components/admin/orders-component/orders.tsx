@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import './orders.scss';
-import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
-import { Button, Dropdown, Space, Table, DatePicker } from 'antd';
-import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
-import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
-import { userApi } from '../../../index';
+import { Button, DatePicker, Dropdown, Space, Table } from 'antd';
+import { DownOutlined, EditOutlined } from '@ant-design/icons';
+import { orderApi, transportApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import EditOrders from './edit-orders-component/edit-orders';
+import moment from 'moment';
 
 export interface IOrderData {
   fromWarehouse: string;
@@ -25,118 +23,130 @@ export default function AdminOrders() {
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
-  const [deleteBtn, setDeleteBtn] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
-  const [isAddTransportVisible, setIsAddTransportVisible] = useState(false);
   const [isEditTransportVisible, setIsEditTransportVisible] = useState(false);
   const [orderData, setOrdersData] = useState({});
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
+  const filters = {};
+  const handleMenuClick: MenuProps['onClick'] = async (e) => {
     setSelectedTransportType(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedTransportType;
   };
-  const handleStatusClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
+
+  const handleStatusClick: MenuProps['onClick'] = async (e) => {
     setSelectedStatus(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedStatus;
   };
-  const handleFromToWarehouseClick: MenuProps['onClick'] = (e) => {
-    console.log('click', e);
+
+  const handleFromToWarehouseClick: MenuProps['onClick'] = async (e) => {
     setSelectedType(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedType;
   };
 
-  const handeDeleteOrder = async (record?) => {
-    // if (selectedRows.length > 0) {
-    //   console.log('delete', selectedRows);
-    //   for (let user of selectedRows) {
-    //     await userApi.deleteUser(user.user_id);
-    //   }
-    // }
-    if (record) {
-      console.log('delete', record);
-      await userApi.deleteUser(record.user_id);
-    }
-  };
-
-  const debouncedSearch = debounce(async (filters) => {
-    // const response = await userApi.getAllUsers(filters);
-    // const users = response?.data?.body;
-    // const dataItems = [];
-    //
-    // if (users?.length) {
-    //   for (let i = 0; i < users.length; i++) {
-    //     dataItems.push({
-    //       key: (i + 1).toString(),
-    //       fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //       role: users[i].user_role,
-    //       phoneNumber: users[i].user_phone,
-    //       email: users[i].user_phone,
-    //       user_id: users[i].user_id,
-    //     });
-    //   }
-    //
-    //   setDataSource(dataItems);
-    // } else {
-    setDataSource([]);
-    // }
-  }, 1000);
-
-  const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    setTimeout(() => {
-      if (e.target instanceof HTMLButtonElement) e.target.blur();
-      else {
-        (e.target as HTMLImageElement).parentElement?.blur();
-      }
-    }, 100);
-
-    const filters = {};
-    if (selectedTransportType) {
-      filters.user_role = selectedTransportType.toLowerCase();
-    }
-
-    if (selectedTransportType === 'All' && filters.user_role) {
-      delete filters.user_role;
-    }
-
-    if (searchValue) {
-      filters.user_name = searchValue;
-    }
-    debouncedSearch(filters);
-  };
-
-  const handleRowSelectionChange = (selectedRowKeys, selectedRows) => {
-    console.log(
-      `selectedRowKeys: ${selectedRowKeys}`,
-      'selectedRows: ',
-      selectedRows,
-    );
-    setSelectedRows(selectedRows);
-    if (selectedRows.length > 0) {
-      setDeleteBtn(true);
-    } else {
-      setDeleteBtn(false);
-    }
-  };
-
 
   const handleEditOrder = (record) => {
-    console.log('edit', record);
     setOrdersData(record);
     setIsEditTransportVisible(true);
   };
 
-  const hideAddTransport = () => {
-    setIsAddTransportVisible(false);
-  };
 
   const hideEditTransport = () => {
     setIsEditTransportVisible(false);
   };
 
+  const handleSearch = async () => {
+    const filters = {};
+
+    if(selectedStatus.toLowerCase() === 'all'){
+      delete filters.order_status;
+    }
+    else {
+      filters.order_status = selectedStatus.toLowerCase();
+    }
+
+    const transportsResponse = await transportApi.getAllTransports({});
+    if(transportsResponse.success) {
+      const transports = transportsResponse.data.body;
+
+      const transport = transports.find(transport => {
+        return transport.transport_type.toLowerCase() === selectedTransportType.toLowerCase();
+      })
+
+      if(transport) {
+        filters.transport_id = transport.transport_id;
+      }
+      else {
+        if(filters.transport_id){
+          delete filters.transport_id;
+        }
+      }
+    }
+
+    if(selectedType === 'All') {
+      delete filters.order_type;
+    } else if(selectedType.includes('From')){
+      filters.order_type = 'from_warehouse';
+    } else {
+      filters.order_type = 'to_warehouse';
+    }
+
+    if(startDate){
+      filters.created_at_gte = moment(startDate['$d'] as any).format('YYYY-MM-DD');
+    }
+
+    if(endDate){
+      filters.created_at_lte = moment(endDate['$d'] as any).format('YYYY-MM-DD');
+    }
+
+    await getAllOrders(filters);
+  }
+
+  const getAllOrders = async (filters) => {
+    const response = await orderApi.getAllOrders(filters);
+    const orders = response.data?.body;
+    const dataSource = [];
+    let transports = [];
+
+    const transportsResponse = await transportApi.getAllTransports({});
+    if(transportsResponse.success) {
+      transports = transportsResponse.data.body;
+    }
+
+    if (orders?.length) {
+
+      for (let i = 0; i < orders.length; i++) {
+        let order = orders[i];
+        const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
+        const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
+        const transport = transports.find(transport => {
+          return transport.transport_id === order.transport_id
+        });
+
+        dataSource.push({
+          key: (i+1).toString(),
+          status: orders[i].order_status,
+          order_type: orders[i].order_type,
+          created_at: orders[i].created_at,
+          order_id: orders[i].order_id,
+          vendor: vendor?.vendor_name,
+          vendor_id: vendor?.vendor_id,
+          warehouse: warehouse?.warehouse_name,
+          warehouse_id: warehouse?.warehouse_id,
+          transport_type: transport ? transport.transport_type : "No transport",
+          price: order.total_price
+        })
+      }
+      setDataSource(dataSource);
+    } else {
+      setDataSource([]);
+    }
+  }
+
+  const debouncedSearch = debounce(async (filters) => {
+    await getAllOrders(filters);
+  }, 1000);
   const placeholderRowCount = 30;
 
   const placeholderData = Array.from(
@@ -172,23 +182,19 @@ export default function AdminOrders() {
               onClick={() => handleEditOrder(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
             />
-            <DeleteOutlined
-              onClick={() => handeDeleteOrder(record)}
-              style={{ color: 'red', cursor: 'pointer' }}
-            />
           </span>
         ) : null,
     },
     {
-      title: 'From',
-      dataIndex: 'fromWarehouse',
-      key: 'fromWarehouse',
+      title: 'Vendor',
+      dataIndex: 'vendor',
+      key: 'vendor',
       align: 'center',
     },
     {
-      title: 'To',
-      dataIndex: 'toWarehouse',
-      key: 'toWarehouse',
+      title: 'Warehouse',
+      dataIndex: 'warehouse',
+      key: 'warehouse',
       align: 'center',
     },
     {
@@ -276,17 +282,6 @@ export default function AdminOrders() {
     onClick: handleFromToWarehouseClick,
   }
 
-  const rowSelection = {
-    onChange: (selectedRowKeys, selectedRows) => {
-      handleRowSelectionChange(selectedRowKeys, selectedRows);
-    },
-
-    getCheckboxProps: (record) => ({
-      disabled: record.warehouseName === '',
-    }),
-  };
-
-  let data = [];
   useEffect(() => {
     const calculateScrollSize = () => {
       const vw = Math.max(
@@ -307,35 +302,45 @@ export default function AdminOrders() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    // userApi.getAllUsers({}).then((result) => {
-    //   const users = result.data?.body;
-    //   if (users?.length) {
-    //     for (let i = 0; i < users.length; i++) {
-    //       data.push({
-    //         key: (i + 1).toString(),
-    //         fullName: users[i].user_name + ' ' + users[i].user_surname,
-    //         role: users[i].user_role,
-    //         phoneNumber: users[i].user_phone,
-    //         email: users[i].user_phone,
-    //         user_id: users[i].user_id,
-    //       });
-    //     }
-    //     setDataSource(data);
-    //   }
-    // });
+    orderApi.getAllOrders(filters).then(async (data) => {
+      const orders = data.data?.body;
+      const dataSource = [];
+      let transports = [];
 
-    setDataSource([
-      {
-        key: '1',
-        fromWarehouse: 'Dick.inc',
-        toWarehouse: 'Cock.inc',
-        amount: '6969',
-        price: '9696',
-        created_at: '2023-12-31',
-        transport_type: 'Van',
-        status: 'Finished',
-      },
-    ]);
+      const transportsResponse = await transportApi.getAllTransports({});
+      if(transportsResponse.success) {
+        transports = transportsResponse.data.body;
+      }
+
+      if (orders?.length) {
+
+        for (let i = 0; i < orders.length; i++) {
+          let order = orders[i];
+          const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
+          const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
+          const transport = transports.find(transport => {
+            return transport.transport_id === order.transport_id
+          });
+
+          dataSource.push({
+            key: (i+1).toString(),
+            status: orders[i].order_status,
+            order_type: orders[i].order_type,
+            created_at: orders[i].created_at,
+            order_id: orders[i].order_id,
+            vendor: vendor?.vendor_name,
+            vendor_id: vendor?.vendor_id,
+            warehouse: warehouse?.warehouse_name,
+            warehouse_id: warehouse?.warehouse_id,
+            transport_type: transport ? transport.transport_type : "No transport",
+            price: order.total_price
+          })
+        }
+        setDataSource(dataSource);
+      } else {
+        setDataSource([]);
+      }
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
@@ -395,6 +400,7 @@ export default function AdminOrders() {
                   className={'admin-orders-datepicker'}
                   size={'small'}
                   bordered={true}
+                  onChange={(date) => setStartDate(date)}
                 />
               </div>
               <div className="admin-orders-filter">
@@ -403,15 +409,13 @@ export default function AdminOrders() {
                   className={'admin-orders-datepicker'}
                   size={'small'}
                   bordered={true}
+                  onChange={(date) => setEndDate(date)}
                 />
               </div>
+              <Button onClick={handleSearch}>
+                Search
+              </Button>
             </div>
-            <img
-              className={'admin-orders-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
-              src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
-              alt={'Delete Button'}
-              onClick={() => handeDeleteOrder()}
-            ></img>
             <EditOrders
               hidePopup={hideEditTransport}
               isPopupVisible={isEditTransportVisible}
@@ -424,7 +428,7 @@ export default function AdminOrders() {
         </div>
         <Table
           rowSelection={{
-            ...rowSelection,
+
           }}
           dataSource={tableData as []}
           columns={columns as []}

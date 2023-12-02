@@ -1,0 +1,45 @@
+.admin-companies-container{
+  display: flex;
+  flex-direction: row;
+  width: 85%;
+  min-height: 100vh;
+  align-items: center;
+  .admin-companies-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5vw;
+    min-height: 100vh;
+    width: 100%;
+    padding-top: 3vw;
+    padding-left: 3vw;
+    .admin-companies-table-header-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3vw;
+
+      .admin-companies-table-header {
+        font-size: 3vw;
+      }
+    }
+    .admin-companies-table {
+      width: 85%;
+      min-height: 70%;
+    }
+  }
+  .admin-companies-form {
+    min-height: 100vh;
+    width: 40%;
+  }
+}
+
+.highlight-bottom-border > td {
+  border-bottom: solid 1px black !important
+}
+
+.highlight-left-border > td {
+  border-left: solid 1px black !important
+}
+.ant-table-tbody > tr > td {
+  height: 5px;
+  padding: 4px;
+}

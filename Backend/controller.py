@@ -1,5 +1,5 @@
 from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, VendorView, \
-    TransactionView, TransactionItemView, WarehouseView, TransportView
+    TransactionView, TransactionItemView, WarehouseView, TransportView, LostItemView
 from utilities.exceptions import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
@@ -17,6 +17,7 @@ def controller(request: dict) -> dict:
     company_view = CompanyView()
     inventory_view = InventoryView()
     order_view = OrderView()
+    lost_item_view = LostItemView()
     order_item_view = OrderItemView()
     product_view = ProductView()
     rack_view = RackView()
@@ -101,7 +102,13 @@ def controller(request: dict) -> dict:
                 if "/send" in url:
                     if "/preview" in url:
                         return order_view.send_preview(request=request)
+                elif "/receive" in url:
+                    if "/preview" in url:
+                        return order_view.receive_preview(request=request)
                 return order_view.get(request=request)
+            elif method == Method.POST.value:
+                if "/lost-items" in url:
+                    return lost_item_view.create(request=request)
 
             elif method == Method.DELETE.value:
                 return order_view.delete(request=request)
@@ -112,6 +119,12 @@ def controller(request: dict) -> dict:
                     return order_view.cancel(request=request)
                 if "/send" in url:
                     return order_view.send(request=request)
+                if "/status" in url:
+                    return order_view.change_status(request=request)
+                if "/receive/preview" in url:
+                    return order_view.rack_receive_preview(request=request)
+                if "/receive" in url:
+                    return order_view.finalize_order(request=request)
                 return order_view.update(request=request)
 
         # OrderItem`s endpoints

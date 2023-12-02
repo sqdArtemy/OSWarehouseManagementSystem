@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './add-warehouse.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { userApi } from '../../../../index';
+import { companyApi, userApi, warehouseApi } from '../../../../index';
+import { useLoading } from '../../../loading-component/loading';
+import { useError } from '../../../error-component/error-context';
 
 export interface INewWarehouseData {
   'Warehouse Name'?: string;
@@ -15,6 +17,7 @@ export default function AdminAddWarehouse({
   isPopupVisible,
   hidePopup,
   warehouseData,
+  onAddWarehouseSuccess
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -22,8 +25,14 @@ export default function AdminAddWarehouse({
     warehouseData: INewWarehouseData;
     setWarehouseData: (userData: unknown) => void;
   };
+  onAddWarehouseSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const [companyOptions, setCompanyOptions] = React.useState<Select['OptionType'][]>([]);
+  const { startLoading, stopLoading } = useLoading();
+  const { showError } = useError();
+  const [options, setOptions] = React.useState<Select['OptionType'][]>([]);
+  const [supervisor, setSupervisor] = React.useState<Select['ValueType']>({});
 
   const layout = {
     labelCol: {
@@ -59,13 +68,25 @@ export default function AdminAddWarehouse({
     } else {
       hidePopup();
     }
-    // await userApi.addUser({
-    //   user_name: newUserData['First Name'],
-    //   user_surname: newUserData['Last Name'],
-    //   user_email: newUserData['Email'],
-    //   user_phone: newUserData['Phone'],
-    //   user_role: newUserData['Role'],
-    // });
+
+    startLoading();
+    console.log(newWarehouseData)
+    const response = await warehouseApi.addWarehouse({
+      warehouse_address: newWarehouseData['Address'],
+      warehouse_name: newWarehouseData['Warehouse Name'],
+      overall_capacity: newWarehouseData['Capacity'],
+      supervisor_id: newWarehouseData['Supervisor'],
+      warehouse_type: newWarehouseData['Type'],
+      company_id: newWarehouseData['Company']
+    });
+
+    if (response.success) {
+      stopLoading();
+      onAddWarehouseSuccess();
+    } else {
+      stopLoading();
+      showError(response.message);
+    }
 
     warehouseData.setWarehouseData(newWarehouseData);
   };
@@ -73,6 +94,42 @@ export default function AdminAddWarehouse({
   const handleReset = () => {
     formRef.current?.resetFields();
   };
+
+  useEffect(() => {
+    if (isPopupVisible && warehouseData.warehouseData && formRef.current) {
+      startLoading();
+      userApi.getAllUsers({ user_role: 'supervisor' }).then(async (res) => {
+        console.log('supervisors', res.data.body);
+        setOptions(
+          res.data.body.map((val) => {
+            return {
+              value: val.user_id,
+              label: val.user_name + ' ' + val.user_surname,
+            };
+          }),
+        );
+
+        setSupervisor(formRef.current.getFieldsValue()['Supervisor']);
+
+        const response = await companyApi.getAll();
+        const companies = response.data.body;
+        setCompanyOptions(
+          companies.map((company) => {
+            return {
+              value: company.company_id,
+              label: company.company_name,
+            };
+          }),
+        );
+        stopLoading();
+        if (!res.success) {
+          showError(res.message);
+        }
+      });
+
+    }
+  }, [warehouseData]);
+
   return (
     <Modal
       title={<p style={{ fontSize: '1.2vw' }}>Add New Warehouse</p>}
@@ -93,11 +150,15 @@ export default function AdminAddWarehouse({
         onFinish={onFinish}
       >
         <Form.Item
-          name="Company Warehouse Name"
-          label={<p style={{ fontSize: '1vw' }}>Company Name</p>}
+          name="Company"
+          label={<p style={{ fontSize: '1vw' }}>Company</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select
+            placeholder={'Select a Company'}
+            style={{ minHeight: '2vw' }}
+            options={companyOptions}
+          />
         </Form.Item>
         <Form.Item
           name="Warehouse Name"
@@ -125,7 +186,19 @@ export default function AdminAddWarehouse({
           label={<p style={{ fontSize: '1vw' }}>Supervisor</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select
+            placeholder={'Select a Supervisor'}
+            style={{ minHeight: '2vw' }}
+            value={supervisor ? supervisor : undefined}
+            onChange={(value, option) => {
+              const supervisorObj = {
+                supervisor_id: option?.value,
+                fullName: option?.label,
+              };
+              setSupervisor(supervisorObj);
+            }}
+            options={options}
+          ></Select>
         </Form.Item>
         <Form.Item
           name="Type"
@@ -137,10 +210,10 @@ export default function AdminAddWarehouse({
             onChange={onRoleChange}
             style={{ minHeight: '2vw' }}
           >
-            <Select.Option value="manager">Freezer</Select.Option>
-            <Select.Option value="shipper">Refrigerator</Select.Option>
-            <Select.Option value="manager">Dry</Select.Option>
-            <Select.Option value="shipper">Hazardous</Select.Option>
+            <Select.Option value="freezer">Freezer</Select.Option>
+            <Select.Option value="refrigerated">Refrigerator</Select.Option>
+            <Select.Option value="dry">Dry</Select.Option>
+            <Select.Option value="hazardous">Hazardous</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item

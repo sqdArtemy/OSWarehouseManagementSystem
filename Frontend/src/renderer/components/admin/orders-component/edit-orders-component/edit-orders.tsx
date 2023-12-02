@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import './edit-orders.scss';
-import { Button, Form, FormInstance, Input, Modal } from 'antd';
-import { userApi } from '../../../../index';
+import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
+import { orderApi, userApi } from '../../../../index';
 import { IOrderData } from '../orders';
+import { useError } from '../../../error-component/error-context';
 
 export default function EditOrders({
   isPopupVisible,
@@ -12,27 +13,63 @@ export default function EditOrders({
   isPopupVisible: boolean;
   hidePopup: () => void;
   orderData: {
-    ordersData: IOrderData;
+    ordersData: IOrderData | any;
     setOrdersData: (orderData: unknown) => void;
   };
 }) {
   console.log(orderData.ordersData);
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
+
+  const order_statuses = [
+    {
+      label: 'lost',
+    },
+    {
+      label: 'damaged',
+    },
+    {
+      label: 'new',
+    },
+    {
+      label: 'processing',
+    },
+    {
+      label: 'delivered',
+    },
+    {
+      label: 'submitted',
+    },
+    {
+      label: 'finished',
+    },
+    {
+      label: 'cancelled',
+    },
+  ]
 
   useEffect(() => {
     if (isPopupVisible && orderData.ordersData && formRef.current) {
-      const { fromWarehouse, toWarehouse, amount, price,created_at,transport_type, status } =
+      const { vendor, warehouse, amount, price,created_at,transport_type, status } =
         orderData.ordersData;
 
       formRef.current.setFieldsValue({
-        fromWarehouse: fromWarehouse,
-        toWarehouse: toWarehouse,
+        vendor: vendor,
+        warehouse: warehouse,
         amount: amount,
         price: price,
         created_at: created_at,
         transport_type: transport_type,
         status: status,
       });
+
+      orderApi.getOrder(orderData.ordersData.order_id).then(data => {
+        if(data.success){
+          const order = data.data.body;
+
+          formRef.current.setFieldsValue({ amount : order.total_volume });
+        }
+      })
     }
   }, [orderData]);
 
@@ -58,13 +95,12 @@ export default function EditOrders({
     const newOrderData = formRef.current?.getFieldsValue();
     hidePopup();
 
-    // await userApi.addUser({
-    //   user_name: newUserData['First Name'],
-    //   user_surname: newUserData['Last Name'],
-    //   user_email: newUserData['Email'],
-    //   user_phone: newUserData['Phone'],
-    //   user_role: newUserData['Role'],
-    // });
+    const response = await orderApi.changeStatusOfOrder(
+      orderData.ordersData.order_id, newOrderData['status']
+    )
+    if(!response.success){
+      showError(response.message);
+    }
 
     orderData.setOrdersData(newOrderData);
   };
@@ -88,14 +124,14 @@ export default function EditOrders({
         onFinish={onFinish}
       >
         <Form.Item
-          name="fromWarehouse"
+          name="vendor"
           label={<p style={{ fontSize: '1vw' }}>From </p>}
 
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
-          name="toWarehouse"
+          name="warehouse"
           label={<p style={{ fontSize: '1vw' }}>To </p>}
 
         >
@@ -132,9 +168,15 @@ export default function EditOrders({
         <Form.Item
           name="status"
           label={<p style={{ fontSize: '1vw' }}>Status </p>}
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: 'Please select a status' }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select style={{ fontSize: '0.9vw' }}>
+            {order_statuses.map((status) => (
+              <Option key={status.label} value={status.label}>
+                {status.label}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button type="primary" htmlType="submit">

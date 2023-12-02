@@ -21,12 +21,13 @@ import OwnerWarehouses from './components/owner/warehouses-component/warehouses'
 import { AdminDashboardLayout } from './components/admin/dashboard-layout-component/dashboard-layout';
 import AdminProfile from './components/admin/profile-component/profile';
 import AdminWarehouses from './components/admin/warehouses-component/warehouses';
-import AdminVendors from './components/admin/vendor-component/vendor';
+import AdminVendors from './components/admin/vendors-component/vendors';
 import AdminUsers from './components/admin/users-component/users';
 import AdminCompanies from './components/admin/companies-component/companies';
 import AdminTransport from './components/admin/transport-component/transport';
 import AdminOrders from './components/admin/orders-component/orders';
-import AdminRacks from './components/admin/racks-component/racks'
+import AdminRacks from './components/admin/racks-component/racks';
+import AdminProducts from './components/admin/items-component/items'
 import { ErrorProvider } from './components/error-component/error-context';
 import { LoadingProvider } from './components/loading-component/loading';
 import Vendors from './components/vendor/vendors-component/vendors';
@@ -92,7 +93,7 @@ export default function App() {
             <Route path="admin/*" element={<AdminDashboardLayout />}>
               <Route
                 path="./"
-                element={<Navigate to="/admin/dashboard" replace />}
+                element={<Navigate to="/admin/companies" replace />}
               />
               <Route path="companies" element={<AdminCompanies />} />
               <Route path="users" element={<AdminUsers />} />
@@ -102,6 +103,7 @@ export default function App() {
               <Route path="profile" element={<AdminProfile />} />
               <Route path="orders" element={<AdminOrders />} />
               <Route path="racks" element={<AdminRacks />} />
+              <Route path="products" element={<AdminProducts />} />
             </Route>
           </Routes>
         </Router>

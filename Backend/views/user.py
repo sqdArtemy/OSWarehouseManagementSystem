@@ -186,7 +186,7 @@ class UserView(GenericView):
             return super().update(request=request)
 
     @view_function_middleware
-    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"]])
+    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"], UserRole.ADMIN.value["code"]])
     @check_allowed_methods_middleware([Method.POST.value])
     def create(self, request: dict) -> dict:
         """
@@ -199,7 +199,6 @@ class UserView(GenericView):
             owner_id = decode_token(self.headers.get("token"))
             company = session.query(User).filter_by(user_id=owner_id).first().company
             company_id = company.company_id
-            company_name = company.company_name
 
             # Autogenerate password from data
             employee_name = self.body["user_name"]
@@ -207,11 +206,9 @@ class UserView(GenericView):
             employee_surname = self.body["user_surname"]
             employee_phone = self.body["user_phone"]
             employee_role = self.body["user_role"]
-            password = f"{company_name[0]}{employee_name[0]}{employee_surname[0]}{employee_phone[1:5]}"
+            password = f"{employee_name[0]}{employee_surname[0]}{employee_phone[-4:]}"
 
             # Validating fields
-            if employee_role not in (UserRole.SUPERVISOR.value["name"]):
-                raise ValidationError("Only managers can be added to the company.")
 
             if not is_email_valid(employee_email):
                 raise ValidationError("Invalid email address.")
@@ -222,6 +219,11 @@ class UserView(GenericView):
             # Checking if user already exists or not
             if is_instance_already_exists(User, user_email=self.body["user_email"]):
                 raise DatabaseError("User email is already registered.")
+
+            if self.requester_role == UserRole.MANAGER.value["code"] and employee_role not in (
+                    UserRole.SUPERVISOR.value["name"]
+            ):
+                raise ValidationError("Only managers can be added to the company.")
 
             new_body = dict(
                 user_name=employee_name,
