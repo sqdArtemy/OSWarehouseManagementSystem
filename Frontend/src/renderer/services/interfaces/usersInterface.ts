@@ -34,7 +34,8 @@ export interface IAddUser {
   user_email?: string;
   user_role?: string;
   user_phone?: string;
-  user_id?: number
+  user_id?: number;
+  company_id?: number
 }
 
 interface IGetUsersFilters {}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './companies.scss';
 import { Table } from 'antd';
-import { companyApi } from '../../../index';
+import { companyApi, userApi } from '../../../index';
 
 
 export interface IOrderData {
@@ -44,12 +44,6 @@ export default function AdminСompanies() {
       align: 'center',
     },
     {
-      title: 'Company Address',
-      dataIndex: 'companyAddress',
-      key: 'companyAddress',
-      align: 'center',
-    },
-    {
       title: 'Company Email',
       dataIndex: 'companyEmail',
       key: 'companyEmail',
@@ -59,6 +53,12 @@ export default function AdminСompanies() {
       title: 'Company Owner',
       dataIndex: 'companyOwner',
       key: 'companyOwner',
+      align: 'center',
+    },
+    {
+      title: 'Number of employees',
+      dataIndex: 'employees',
+      key: 'employees',
       align: 'center',
     },
   ];
@@ -85,19 +85,35 @@ export default function AdminСompanies() {
     window.addEventListener('resize', calculateScrollSize);
 
 
-    companyApi.getAll().then(data => {
+    companyApi.getAll().then(async data => {
       if (data.success) {
         const companiesSource = [];
+        let users = [];
+
+        const usersResponse = await userApi.getAllUsers({});
+        if(usersResponse.data.body){
+          users = usersResponse.data.body;
+        }
 
         if(data.data.body && data.data.body.length){
           let i =0;
           for (let company of data.data.body){
+
+            const user = users.find( user => {
+              return (['manager', 'vendor'].includes(user.user_role)) && user.company === company.company_id
+            });
+            let employees = 0;
+
+            employees = users.filter(user => {
+              return user.company === company.company_id && user.user_role !== 'admin'
+            }).length;
+
             companiesSource.push({
               key: (i + 1).toString(),
               companyName: company.company_name,
-              companyAddress: company.company_address,
               companyEmail: company.company_email,
-              companyOwner: 'HuivPalto',
+              companyOwner: user ? user.user_name + ' ' + user.user_surname : '',
+              employees
             })
           }
           setDataSource(companiesSource);

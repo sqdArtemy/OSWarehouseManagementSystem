@@ -16,7 +16,8 @@ export interface IAddProduct {
   volume: number,
   price: number,
   expiry_duration: number, is_stackable: boolean,
-  product_type: 'freezer' | 'refrigerated' |'dry' | 'hazardous'
+  product_type: 'freezer' | 'refrigerated' |'dry' | 'hazardous',
+  company_id?: number
 }
 
 export interface IProductFilters {

@@ -71,6 +71,7 @@ export default function AddUser({
       user_email: newUserData['Email'],
       user_phone: newUserData['Phone'],
       user_role: newUserData['Role'],
+      company_id: newUserData['Company']
     });
 
     console.log(response);

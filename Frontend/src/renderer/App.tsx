@@ -48,7 +48,7 @@ export default function App() {
       <LoadingProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/admin/companies" replace />} />
+            <Route path="/" element={<Navigate to="/sign-in" replace />} />
             <Route path="sign-in" element={<SignIn />} />
             <Route path="sign-up" element={<SignUp />} />
             <Route path="sign-up-details" element={<SignUpDetails />} />

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './add-item.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { productApi } from '../../../../index';
+import { companyApi, productApi } from '../../../../index';
 import { useError } from '../../../error-component/error-context';
 
 export interface IItemData {
@@ -29,6 +29,7 @@ export default function AddItem({
   onAddItemSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const [companyOptions, setCompanyOptions] = React.useState<Select['OptionType'][]>([]);
   const { showError } = useError();
 
   const layout = {
@@ -52,7 +53,6 @@ export default function AddItem({
         check = true;
       }
     }
-
     const typeMapping = {
       'perishable-refrigerator': 'refrigerated',
       'perishable-freezer': 'freezer',
@@ -69,6 +69,7 @@ export default function AddItem({
       weight: newitemData['Weight'],
       volume: newitemData['Volume'],
       is_stackable: newitemData['Storage type'] === 'stackable',
+      company_id: newitemData['Company']
     });
 
     if (response.success) {
@@ -93,6 +94,24 @@ export default function AddItem({
   const handleReset = () => {
     formRef.current?.resetFields();
   };
+
+  useEffect(() => {
+    if (isPopupVisible && formRef.current) {
+      companyApi.getAll().then((res) => {
+        const companies = res.data.body;
+
+        setCompanyOptions(
+          companies.map((company) => {
+            return {
+              value: company.company_id,
+              label: company.company_name,
+            };
+          }),
+        );
+      });
+    }
+  }, [isPopupVisible]);
+
   return (
     <Modal
       title="Add New Item"
@@ -113,6 +132,17 @@ export default function AddItem({
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
       >
+        <Form.Item
+          name="Company"
+          label={<p style={{ fontSize: '1vw' }}>Company</p>}
+          rules={[{ required: true }]}
+        >
+          <Select
+            placeholder={'Select a Company'}
+            style={{ minHeight: '2vw' }}
+            options={companyOptions}
+          />
+        </Form.Item>
         <Form.Item
           name="Product Name"
           label="Product Name"
