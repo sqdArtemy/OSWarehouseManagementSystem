@@ -1,7 +1,7 @@
 import {
   IAddMultipleRacks,
   IAddRack,
-  IRack,
+  IRack, IRackFilter
 } from '../interfaces/rackInterface';
 import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
 import { userApi, warehouseApi } from '../../index';
@@ -117,7 +117,7 @@ export class RackApi implements IRack {
     }
   }
 
-  public async getAll(filters: IVendorFilters): Promise<ApiResponse> {
+  public async getAll(filters: IRackFilter): Promise<ApiResponse> {
     const url = '/racks';
     const method = 'GET';
     const headers = { filters };
