@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import './vendor.scss';
+import './items.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
-import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import AddItem from './add-user-component/add-item';
-import { productApi, userApi } from '../../../index';
+import AddItem from './add-item-component/add-item';
+import { productApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
-import EditUser from '../users-component/edit-user-component/edit-user';
-import EditItem from './edit-user-component/edit-item';
+import EditItem from './edit-item-component/edit-item';
+import { useError } from '../../error-component/error-context';
 
-export default function AdminVendors() {
+export default function AdminItems() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -27,6 +27,8 @@ export default function AdminVendors() {
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isEditPopupVisible, setIsEditPopupVisible] = useState(false);
   const [newItemData, setNewItemData] = useState({});
+
+  const { showError } = useError();
 
   let filters: IProductFilters = {};
 
@@ -46,12 +48,18 @@ export default function AdminVendors() {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
       for (let user of selectedRows) {
-        await productApi.deleteProduct(user.product_id);
+        const response = await productApi.deleteProduct(user.product_id);
+        if (!response.success) {
+          showError(response.message);
+        }
       }
     }
     if (record) {
       console.log('delete', record);
-      await productApi.deleteProduct(record.product_id);
+      const response = await productApi.deleteProduct(record.product_id);
+      if (!response.success) {
+        showError(response.message);
+      }
     }
 
     await getAllProducts(filters);
@@ -65,7 +73,6 @@ export default function AdminVendors() {
     setSearchVolumeValue(e.target.value);
   };
 
-
   const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
@@ -74,20 +81,24 @@ export default function AdminVendors() {
       }
     }, 100);
 
-    if(searchValue){
+    if (searchValue) {
       filters.product_name_like = searchValue;
     } else {
-      if(!filters.product_name_like) delete filters.product_name_like;
+      if (!filters.product_name_like) delete filters.product_name_like;
     }
 
     if (searchVolumeValue) {
-      filters.volume_lte = selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
-      filters.volume_gte = selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_lte =
+        selectVolumeValue === '<=' ? Number(searchVolumeValue) : undefined;
+      filters.volume_gte =
+        selectVolumeValue === '>=' ? Number(searchVolumeValue) : undefined;
     }
 
     if (searchWeightValue) {
-      filters.weight_lte = selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
-      filters.weight_gte = selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
+      filters.weight_lte =
+        selectWeightValue === '<=' ? Number(searchWeightValue) : undefined;
+      filters.weight_gte =
+        selectWeightValue === '>=' ? Number(searchWeightValue) : undefined;
     }
 
     console.log(filters);
@@ -150,7 +161,7 @@ export default function AdminVendors() {
           'expiry-duration': products[i].expiry_duration,
           description: products[i].description,
           is_stackable: products[i].is_stackable,
-          price: products[i].price
+          price: products[i].price,
         });
       }
 
@@ -158,8 +169,7 @@ export default function AdminVendors() {
     } else {
       setDataSource([]);
     }
-  }
-
+  };
 
   const debouncedSearch = debounce(async (filters) => {
     await getAllProducts(filters);
@@ -167,11 +177,11 @@ export default function AdminVendors() {
 
   const handleAddItemSuccess = async () => {
     await getAllProducts(filters);
-  }
+  };
 
   const handleEditItemSuccess = async () => {
     await getAllProducts(filters);
-  }
+  };
 
   const placeholderRowCount = 30;
 
@@ -201,7 +211,7 @@ export default function AdminVendors() {
       align: 'center',
       render: (_, record) =>
         record.name ? (
-          <span className={'table-actions-container'}>
+          <span className={'admin-items-table-actions-container'}>
             <EditOutlined
               onClick={() => handleEditItem(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
@@ -217,31 +227,26 @@ export default function AdminVendors() {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
-      align: 'center',
     },
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      align: 'center',
     },
     {
       title: 'Volume (m^3)',
       dataIndex: 'volume',
       key: 'volume',
-      align: 'center',
     },
     {
       title: 'Weight (kg)',
       dataIndex: 'weight',
       key: 'weight',
-      align: 'center',
     },
     {
       title: 'Expiry duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
-      align: 'center',
     },
   ];
 
@@ -270,7 +275,7 @@ export default function AdminVendors() {
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.fullName === '',
+      disabled: record.name === '',
     }),
   };
 
@@ -294,7 +299,7 @@ export default function AdminVendors() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    productApi.getAllProducts(filters).then((result) =>{
+    productApi.getAllProducts(filters).then((result) => {
       const products = result.data?.body;
       const dataItems = [];
 
@@ -324,15 +329,15 @@ export default function AdminVendors() {
   }, []);
 
   return (
-    <div className="items-container">
-      <div className={'items-table-container'}>
-        <div className={'items-table-header-container'}>
-          <span className={'items-table-header'}>VENDORS</span>
-          <div className={'options-container'}>
-            <div className="search-bar-container">
+    <div className="admin-items-container">
+      <div className={'admin-items-table-container'}>
+        <div className={'admin-items-table-header-container'}>
+          <span className={'admin-items-table-header'}>ITEMS</span>
+          <div className={'admin-items-options-container'}>
+            <div className="admin-items-search-bar-container">
               <Dropdown
                 menu={menuWeightProps}
-                className={'search-bar-dropdown-container'}
+                className={'admin-items-search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
@@ -341,22 +346,13 @@ export default function AdminVendors() {
                   </Space>
                 </Button>
               </Dropdown>
-              {/* <Dropdown */}
-              {/*   menu={menuProps} */}
-              {/*   className={'search-bar-dropdown-container'} */}
-              {/* > */}
-              {/*   <Button> */}
-              {/*     <Space> */}
-              {/*       {selected} */}
-              {/*       <DownOutlined /> */}
-              {/*     </Space> */}
-              {/*   </Button> */}
-              {/* </Dropdown> */}
-              <div className="filter">
-                <label className="labels" htmlFor="weight">Weight</label>
+              <div className="admin-items-filter">
+                <label className="admin-items-labels" htmlFor="weight">
+                  Weight
+                </label>
                 <input
                   type=""
-                  className="search-bar-filter"
+                  className="admin-items-search-bar-filter"
                   id="weight"
                   onChange={handleWeightInputChange}
                 />
@@ -364,7 +360,7 @@ export default function AdminVendors() {
 
               <Dropdown
                 menu={menuVolumeProps}
-                className={'search-bar-dropdown-container'}
+                className={'admin-items-search-bar-dropdown-container'}
               >
                 <Button>
                   <Space>
@@ -373,38 +369,40 @@ export default function AdminVendors() {
                   </Space>
                 </Button>
               </Dropdown>
-              <div className="filter">
-                <label className="labels" htmlFor="volume">Volume</label>
+              <div className="admin-items-filter">
+                <label className="admin-items-labels" htmlFor="volume">
+                  Volume
+                </label>
                 <input
                   type=""
-                  className="search-bar-filter"
+                  className="admin-items-search-bar-filter"
                   id="volume"
                   onChange={handleVolumeInputChange}
                 />
               </div>
               <input
                 type=""
-                className="search-bar-input"
+                className="admin-items-search-bar-input"
                 onChange={(e) => {
                   setSearchValue(e.target.value);
                 }}
               />
               <button
-                className="search-bar-button"
+                className="admin-items-search-bar-button"
                 onClick={(e) => handleSearchClick(e)}
               >
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
             <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={'admin-items-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handleDeleteItem()}
             ></img>
-            <button className={'add-btn'} onClick={(e) => handleAddItem(e)}>
+            <button className={'admin-items-add-btn'} onClick={(e) => handleAddItem(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Item</span>
+              <span className={'admin-items-add-btn-text'}>Add Item</span>
             </button>
             <AddItem
               hidePopup={hideAddPopup}
@@ -415,7 +413,10 @@ export default function AdminVendors() {
             <EditItem
               hidePopup={hideEditPopup}
               isEditPopupVisible={isEditPopupVisible}
-              itemData={{ editItemData: newItemData, setEditItemData: setNewItemData }}
+              itemData={{
+                editItemData: newItemData,
+                setEditItemData: setNewItemData,
+              }}
               onEditItemSuccess={handleEditItemSuccess}
             />
           </div>
@@ -429,7 +430,7 @@ export default function AdminVendors() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'users-table'}
+          className={'admin-items-table'}
           bordered={true}
           rowClassName={'highlight-bottom-border highlight-left-border'}
         />
@@ -437,4 +438,3 @@ export default function AdminVendors() {
     </div>
   );
 }
-

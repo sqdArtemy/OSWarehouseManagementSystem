@@ -1,30 +1,30 @@
-.items-container {
+.admin-vendors-container {
   display: flex;
   flex-direction: row;
   width: 85%;
   min-height: 100vh;
   align-items: center;
 
-  .items-table-container {
+  .admin-vendors-table-container {
     display: flex;
     flex-direction: column;
     gap: 2.5vw;
     min-height: 100vh;
-    width: 100%;
+    width: calc(100% - 6vw); /* Adjusted width to account for left padding */
     padding-top: 3vw;
     padding-left: 3vw;
 
 
-    .items-table-header-container {
+    .admin-vendors-table-header-container {
       display: flex;
       flex-direction: column;
       gap: 3vw;
 
-      .items-table-header {
+      .admin-vendors-table-header {
         font-size: 3vw;
       }
 
-      .options-container {
+      .admin-vendors-options-container {
         display: flex;
         flex-direction: row;
         gap: 7vw;
@@ -32,41 +32,44 @@
         height: 2vw;
         align-items: center;
 
-
-        .search-bar-container {
+        .admin-vendors-search-bar-container {
           display: flex;
           flex-direction: row;
           align-items: end;
 
-          .search-bar-dropdown-container {
-            min-height: 3vw;
-            width: 3.5vw;
-            border: 0.5px solid #000000;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-          }
-          .labels{
-            width: 6vw;
-            text-align: center;
-          }
-          .filter{
+          .admin-vendors-filter{
             display: flex;
             flex-direction: column;
+
+            .admin-vendors-filter-labels{
+              width: 8vw;
+              text-align: center;
+              font-size:1vw;
+            }
           }
 
-          .search-bar-input {
+          .admin-vendors-search-bar-dropdown-container {
+            min-height: 3vw;
+            width: 8vw;
+            font-size: 1vw;
+            border: 0.5px solid #000000;
+            margin-right: 2vw;
+          }
+
+          .admin-vendors-search-bar-input {
             width: 20vw;
             min-height: 3vw;
             border: 0.5px solid #000000;
           }
-          .search-bar-filter{
+
+          .admin-vendors-search-bar-filter {
             width: 6vw;
             border: 0.5px solid #000000;
             margin-right: 3vw;
             min-height: 3vw;
           }
 
-          .search-bar-button {
+          .admin-vendors-search-bar-button {
             width: 3vw;
             min-height: 3vw;
             background: #5564B2;
@@ -86,34 +89,29 @@
             &:focus {
               box-shadow: inset 0 0 0 1px #007bff;
             }
-
           }
         }
 
-        .delete-btn {
+        .admin-vendors-delete-btn {
           width: 2.2vw;
           min-height: 2.2vw;
         }
 
-        .add-btn {
+        .admin-vendors-add-btn {
           display: flex;
           flex-direction: row;
           align-items: center;
           justify-content: center;
           gap: 0.5vw;
-
           width: 10vw;
           min-height: 2.2vw;
           border: 0.5px solid #000000;
-
-
           color: #FFFFFF;
           background-color: #378BA4;
           border-radius: 0.3rem;
-
           cursor: pointer;
 
-          .add-btn-text {
+          .admin-vendors-add-btn-text {
             font-size: 1.3vw;
           }
 
@@ -132,9 +130,7 @@
     .warehouses-table {
       width: 85%;
       min-height: 70%;
-
     }
-
   }
 
   .users-separator-line {
@@ -150,18 +146,18 @@
 }
 
 .highlight-bottom-border > td {
-  border-bottom: solid 1px black !important
+  border-bottom: solid 1px black !important;
 }
 
 .highlight-left-border > td {
-  border-left: solid 1px black !important
+  border-left: solid 1px black !important;
 }
 
 .enabled {
   cursor: pointer;
 }
 
-.table-actions-container {
+.admin-vendors-table-actions-container {
   display: flex;
   flex-direction: row;
   gap: 1vw;
@@ -173,9 +169,6 @@
     cursor: pointer;
     transition: all 0.3s ease;
     color: #ff0000;
-
-
-
   }
 }
 
@@ -185,5 +178,3 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
-
