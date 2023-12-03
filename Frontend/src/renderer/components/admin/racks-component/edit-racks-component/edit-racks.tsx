@@ -1,14 +1,15 @@
 import React, { useEffect } from 'react';
 import './edit-racks.scss';
 import { Button, Form, FormInstance, Input, Modal } from 'antd';
-import { userApi } from '../../../../index';
+import { rackApi, userApi } from '../../../../index';
 import { INewRacksData } from '../add-racks-component/add-racks';
 import { IRacksData } from '../racks';
+import { useError } from '../../../error-component/error-context';
 
 export default function EditRacks({
   isPopupVisible,
   hidePopup,
-  racksData, onEditUserSuccess
+  racksData, onEditRackSuccess
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -16,10 +17,11 @@ export default function EditRacks({
     racksData: INewRacksData | IRacksData;
     setRacksData: (racksData: unknown) => void;
   };
-  onEditUserSuccess: () => void;
+  onEditRackSuccess: () => void;
 }) {
   console.log(racksData.racksData);
   const formRef = React.useRef<FormInstance>(null);
+  const { showError } = useError();
 
   useEffect(() => {
     if (isPopupVisible && racksData.racksData && formRef.current) {
@@ -55,17 +57,17 @@ export default function EditRacks({
     const newUserData = formRef.current?.getFieldsValue();
     hidePopup();
 
-    const response = await userApi.updateUser({
-      user_name: newUserData['First Name'],
-      user_surname: newUserData['Last Name'],
-      user_email: newUserData['Email'],
-      user_phone: newUserData['Phone'],
-      user_role: racksData?.racksData?.role
-    }, racksData.racksData?.user_id);
+    const response = await rackApi.updateRack({
+      rack_position: newUserData['rackPosition'],
+      overall_capacity: newUserData['overallCapacity'],
 
-    console.log(response);
+    }, racksData.racksData?.rack_id);
+
+
     if(response?.success){
-      onEditUserSuccess();
+      onEditRackSuccess();
+    } else {
+      showError(response.message);
     }
     racksData.setRacksData(newUserData);
   };

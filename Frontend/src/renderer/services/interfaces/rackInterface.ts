@@ -11,7 +11,7 @@ export interface IRack {
 
 
 export interface IAddRack {
-  warehouse_id: number,
+  warehouse_id?: number,
   rack_position: string;
   overall_capacity: number;
   remaining_capacity?: number;
