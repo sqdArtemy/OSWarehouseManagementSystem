@@ -17,6 +17,7 @@ import { productApi, rackApi, warehouseApi } from '../../index';
 import { normalizeRacksForGrid } from '../../services/utils/normalizeRacksForGrid';
 import AddRack from './add-rack-component/add-rack';
 import AddMultipleRacks from './add-multiple-racks-component/add-multiple-racks';
+import EditRack from './edit-rack-component/edit-rack';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -102,8 +103,9 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     labels: ['Occupied', 'Free'],
     datasets: [
       {
-        label: 'Racks',
-        data: [12, 19],
+        label: 'Capacity of warehouse',
+        data: [state.locWarehouseData.capacity - state.locWarehouseData.remaining,
+          state.locWarehouseData.remaining],
         backgroundColor: ['#FF6384', '#36A2EB'],
       },
     ],
@@ -112,7 +114,6 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   const handleAddRack = () => {
     console.log('Add Rack');
     setIsAddRackPopupVisible(true);
-    console.log(gridData);
   };
 
   const handleAddMultipleRacks = () => {

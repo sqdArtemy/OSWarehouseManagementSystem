@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './inventory.scss';
 import { Button, Modal, Space, Table } from 'antd';
 import { rackApi, userApi } from '../../../index';
 import { useError } from '../../error-component/error-context';
+import EditRack from '../edit-rack-component/edit-rack';
 
 export default function Inventory({
   isInventoryPopupVisible,
@@ -23,6 +24,9 @@ export default function Inventory({
 }) {
   const [scrollSize, setScrollSize] = React.useState({ x: 0, y: 0 });
   const { showError } = useError();
+  const [isEditRackPopupVisible, setIsEditRackPopupVisible] = useState(false);
+  const [gridData, setGridData] = useState([]);
+
   useEffect(() => {
     const calculateScrollSize = () => {
       const vw = Math.max(
@@ -95,6 +99,13 @@ export default function Inventory({
     }
   };
 
+  const hideEditRackPopup = () => {
+    setIsEditRackPopupVisible(false);
+  };
+
+  const showEditRackPopup = () => {
+    setIsEditRackPopupVisible(true);
+  }
   return (
     <Modal
       title={'Inventory of Rack ' + rackData.rackData['position']}
@@ -120,13 +131,20 @@ export default function Inventory({
         >
           {userApi.getUserData.user_role === 'supervisor' && (
             <>
-              <Button type={'primary'}>Edit Rack</Button>
+              <Button type={'primary'} onClick={showEditRackPopup}>Edit Rack</Button>
               <Button danger onClick={handleDeleteRack}>
                 Delete Rack
               </Button>
             </>
           )}
         </Space>
+        <EditRack
+          isPopupVisible={isEditRackPopupVisible}
+          hidePopup={hideEditRackPopup}
+          rackData={{rackData: rackData.rackData, setRackData: rackData.setRackData}}
+          updateGridData={setGridData}
+        >
+        </EditRack>
       </Space>
     </Modal>
   );

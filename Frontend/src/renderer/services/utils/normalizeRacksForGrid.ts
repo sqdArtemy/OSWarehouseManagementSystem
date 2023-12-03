@@ -34,7 +34,8 @@ export const normalizeRacksForGrid = (racks: IAddRack[]) => {
         isHidden: true,
         isFull: false,
         isEmpty: true,
-        rack_id: null
+        rack_id: null,
+        capacity: 0
       })
     }
   }
@@ -47,6 +48,7 @@ export const normalizeRacksForGrid = (racks: IAddRack[]) => {
 
       if(existingRack){
         column.isHidden = false;
+        column.capacity = existingRack.overall_capacity;
         column.rack_id = existingRack.rack_id;
         if(existingRack.overall_capacity === existingRack.overall_capacity){
           column.isEmpty = true;
