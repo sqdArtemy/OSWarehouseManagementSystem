@@ -70,7 +70,7 @@ class VendorView(GenericView):
             user = session.query(User).filter(User.user_id == user_id).first()
 
             # if role is not vendor then return 403
-            if user.user_role != UserRole.VENDOR.value["name"]:
+            if user.user_role not in [UserRole.VENDOR.value["name"], UserRole.ADMIN.value["name"]]:
                 self.response.status_code = 403
                 self.response.message = "Ebanmisan? San vendor emassan"
                 return self.response.create_response()
