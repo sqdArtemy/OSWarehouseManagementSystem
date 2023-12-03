@@ -761,6 +761,7 @@ class OrderView(GenericView):
                 # change updated_at and order_status
                 order = order.first()
                 order.updated_at = datetime.now()
+                order.order_status = "finished"
                 session.commit()
 
                 self.response.status_code = 200
