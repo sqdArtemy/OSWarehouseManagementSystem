@@ -191,6 +191,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
               totalCount: inventory.quantity,
               expiryDate: inventory.expiry_date,
               itemType: itemType,
+              itemId: inventory.product
             });
           }
           setInventoryData(data);
