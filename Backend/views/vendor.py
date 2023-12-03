@@ -72,7 +72,7 @@ class VendorView(GenericView):
             # if role is not vendor then return 403
             if user.user_role not in [UserRole.VENDOR.value["name"], UserRole.ADMIN.value["name"]]:
                 self.response.status_code = 403
-                self.response.message = "Ebanmisan? San vendor emassan"
+                self.response.message = "Forbidden"
                 return self.response.create_response()
 
             # If the vendor_name of this vendor owner already exists
@@ -100,6 +100,10 @@ class VendorView(GenericView):
         :return: dictionary containing status_code and response body
         """
         with get_session() as session:
+            # if admin then call super().update()
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                return super().update(request=request)
+
             # check id user_id from token and vendor_owner_id are the same
             user_id = decode_token(self.headers.get("token"))
             vendor = session.query(Vendor).filter(Vendor.vendor_owner_id == user_id).first()
