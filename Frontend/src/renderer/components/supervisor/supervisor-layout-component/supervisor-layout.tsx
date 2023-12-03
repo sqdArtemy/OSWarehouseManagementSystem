@@ -38,6 +38,7 @@ export function SupervisorLayout() {
               supervisor: userApi.getUserData.warehouses[0].supervisor.user_name,
               type: userApi.getUserData.warehouses[0].warehouse_type,
               address: userApi.getUserData.warehouses[0].warehouse_address,
+              remaining: userApi.getUserData.warehouses[0].remaining_capacity
             },
           },
         });

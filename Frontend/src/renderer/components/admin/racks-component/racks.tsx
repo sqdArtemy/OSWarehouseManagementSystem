@@ -7,10 +7,12 @@ import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { rackApi, userApi, warehouseApi } from '../../../index';
+import { rackApi, warehouseApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddRack from './add-racks-component/add-racks';
 import EditRack from './edit-racks-component/edit-racks';
+import { IRackFilter } from '../../../services/interfaces/rackInterface';
+import { useLoading } from '../../loading-component/loading';
 
 export interface IRacksData {
   warehouse: string;
@@ -25,46 +27,59 @@ export default function AdminRacks() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
-  const [isAddUserVisible, setIsAddUserVisible] = useState(false);
-  const [isEditUserVisible, setIsEditUserVisible] = useState(false);
-  const [userData, setUserData] = useState({});
+  const [isAddRackVisible, setIsAddRackVisible] = useState(false);
+  const [isEditRackVisible, setIsEditRackVisible] = useState(false);
+  const [RackData, setRackData] = useState({});
+  const [warehouseData, setWarehouseData] = useState([]);
+  const { startLoading, stopLoading } = useLoading();
   let filters = {};
 
-  const handleMenuCompanyClick: MenuProps['onClick'] = (e) => {
+  const handleMenuWarehouseClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
     setSelectedWarehouse(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedWarehouse;
   };
 
-  const handleDeleteUser = async (record?) => {
+  const handleDeleteRack = async (record?) => {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
-      for (let user of selectedRows) {
-        await userApi.deleteUser(user.user_id);
+      for (let rack of selectedRows) {
+        await rackApi.deleteRack(Rack.rack_id);
       }
     }
     if (record) {
       console.log('delete', record);
-      await userApi.deleteUser(record.user_id);
+      await rackApi.deleteRack(record.rack_id);
     }
 
-    await getAllUsers(filters);
+    await getAllRacks(filters);
   }
 
-  const getAllUsers = async (filters: {[key: string]: any}) => {
-    const result = await userApi.getAllUsers(filters);
-    const users = result.data?.body;
+  const getAllRacks = async (filters: IRackFilter) => {
+    startLoading();
+    const result = await rackApi.getAll(filters);
+    const racks = result.data?.body;
     const dataItems = [];
 
-    if (users?.length) {
-      for (let i = 0; i < users.length; i++) {
+    let warehouses = [];
+    const warehousesResponse = await warehouseApi.getAllWarehouses({});
+
+    if(warehousesResponse.success){
+      warehouses = warehousesResponse.data.body;
+    }
+
+    if (racks?.length) {
+      for (let i = 0; i < racks.length; i++) {
+        const warehouse = warehouses.find(warehouse => {
+          return warehouse.warehouse_id === racks[i].warehouse;
+        })
+
         dataItems.push({
           key: (i + 1).toString(),
-          fullName: users[i].user_name + ' ' + users[i].user_surname,
-          role: users[i].user_role,
-          phoneNumber: users[i].user_phone,
-          email: users[i].user_email,
-          user_id: users[i].user_id,
+          warehouse: warehouse ? warehouse.warehouse_name : '',
+          rackPosition: racks[i].rack_position,
+          overallCapacity: racks[i].overall_capacity,
+          rack_id: racks[i].rack_id,
         });
       }
 
@@ -72,9 +87,11 @@ export default function AdminRacks() {
     } else {
       setDataSource([]);
     }
+    stopLoading();
   }
+
   const debouncedSearch = debounce(async (filters) => {
-    await getAllUsers(filters);
+    await getAllRacks(filters);
   }, 1000);
 
   const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -88,7 +105,20 @@ export default function AdminRacks() {
     filters = {};
 
     if (searchValue) {
-      filters.user_name = searchValue;
+      filters.rack_position = searchValue;
+    }
+
+    if(selectedWarehouse){
+      const warehouses = warehouseData;
+      const warehouse = warehouseData.find(warehouse => {
+        return warehouse.warehouse_name === selectedWarehouse;
+      })
+
+      if(warehouse) {
+        filters.warehouse_id = warehouse.warehouse_id;
+      } else {
+        delete filters.warehouse_id;
+      }
     }
     debouncedSearch(filters);
   };
@@ -107,55 +137,40 @@ export default function AdminRacks() {
     }
   };
 
-  const handleAddUser = (e) => {
+  const handleAddRack = (e) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    setIsAddUserVisible(true);
+    setIsAddRackVisible(true);
   };
 
-  const handleAddUserSuccess = async () => {
-    await getAllUsers(filters);
+  const handleAddRackSuccess = async () => {
+    await getAllRacks(filters);
   };
 
-  const handleEditUserSuccess = async () => {
-    await getAllUsers(filters);
+  const handleEditRackSuccess = async () => {
+    await getAllRacks(filters);
   };
 
-  const handleEditUser = (record) => {
+  const handleEditRack = (record) => {
     console.log('edit', record);
-    setUserData(record);
-    setIsEditUserVisible(true);
+    setRackData(record);
+    setIsEditRackVisible(true);
   };
 
-  const hideAddUser = () => {
-    setIsAddUserVisible(false);
+  const hideAddRack = () => {
+    setIsAddRackVisible(false);
   };
 
-  const hideEditUser = () => {
-    setIsEditUserVisible(false);
+  const hideEditRack = () => {
+    setIsEditRackVisible(false);
   };
 
-  const placeholderRowCount = 30;
 
-  const placeholderData = Array.from(
-    { length: placeholderRowCount },
-    (_, index) => ({
-      key: (index + 1).toString(),
-      fullName: '',
-      role: '',
-      phoneNumber: '',
-      email: '',
-    }),
-  );
-
-  let tableData = dataSource.length > 0 ? dataSource : placeholderData;
-  if (tableData.length < placeholderRowCount) {
-    tableData = [...tableData, ...placeholderData.slice(tableData.length + 1)];
-  }
+  let tableData = dataSource.length > 0 ? dataSource : [];
 
   const columns = [
     {
@@ -165,14 +180,14 @@ export default function AdminRacks() {
       width: '10%',
       align: 'center',
       render: (_, record) =>
-        record.fullName ? (
+        record.rackPosition ? (
           <span className={'admin-table-actions-container'}>
             <EditOutlined
-              onClick={() => handleEditUser(record)}
+              onClick={() => handleEditRack(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
             />
             <DeleteOutlined
-              onClick={() => handleDeleteUser(record)}
+              onClick={() => handleDeleteRack(record)}
               style={{ color: 'red', cursor: 'pointer' }}
             />
           </span>
@@ -198,15 +213,11 @@ export default function AdminRacks() {
     },
 
   ];
-  const companies = [
-    {
-      label: 'dick.inc',
-    }
-  ]
+
 
   const warehouseProps = {
-    items: companies,
-    onClick: handleMenuCompanyClick,
+    items: warehouseData.length ? warehouseData.map(warehouse=> ({ label: warehouse.warehouse_name })) : [],
+    onClick: handleMenuWarehouseClick,
   }
 
   const rowSelection = {
@@ -240,6 +251,7 @@ export default function AdminRacks() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
+    startLoading();
     rackApi.getAll(filters).then(async (result) =>{
       const racks = result.data?.body;
       const dataItems = [];
@@ -249,6 +261,7 @@ export default function AdminRacks() {
 
       if(warehousesResponse.success){
         warehouses = warehousesResponse.data.body;
+        setWarehouseData(warehouses);
       }
 
       if (racks?.length) {
@@ -270,6 +283,7 @@ export default function AdminRacks() {
       } else {
         setDataSource([]);
       }
+      stopLoading();
     });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
@@ -315,23 +329,23 @@ export default function AdminRacks() {
               className={'admin-racks-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
-              onClick={() => handleDeleteUser()}
+              onClick={() => handleDeleteRack()}
             ></img>
-            <button className={'admin-racks-add-btn'} onClick={(e) => handleAddUser(e)}>
+            <button className={'admin-racks-add-btn'} onClick={(e) => handleAddRack(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add Rack</span>
             </button>
             <AddRack
-              hidePopup={hideAddUser}
-              isPopupVisible={isAddUserVisible}
-              racksData={{ racksData: userData, setRacksData: setUserData }}
-              onAddUserSuccess={handleAddUserSuccess}
+              hidePopup={hideAddRack}
+              isPopupVisible={isAddRackVisible}
+              racksData={{ racksData: RackData, setRacksData: setRackData }}
+              onAddRackSuccess={handleAddRackSuccess}
             />
             <EditRack
-              hidePopup={hideEditUser}
-              isPopupVisible={isEditUserVisible}
-              racksData={{ racksData: userData, setRacksData: setUserData }}
-              onEditUserSuccess={handleEditUserSuccess}
+              hidePopup={hideEditRack}
+              isPopupVisible={isEditRackVisible}
+              racksData={{ racksData: RackData, setRacksData: setRackData }}
+              onEditRackSuccess={handleEditRackSuccess}
             />
           </div>
         </div>
