@@ -166,6 +166,7 @@ class UserView(GenericView):
                 return super().get_list(request=request, pre_selected_query=query, **kwargs)
 
     @view_function_middleware
+    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"], UserRole.ADMIN.value["code"]])
     @check_allowed_methods_middleware([Method.PUT.value])
     def update(self, request: dict) -> dict:
         with get_session() as session:
@@ -176,7 +177,7 @@ class UserView(GenericView):
 
             if self.instance_id != requester_id and (
                     self.instance.company_id != requester.company_id or requester.user_role != UserRole.MANAGER.value["name"]
-            ):
+            ) and self.requester_role != UserRole.ADMIN.value["code"]:
                 raise ValidationError(status_code=401, message="You can not update data of this user.")
 
             # Remove password if it was passed
@@ -240,6 +241,7 @@ class UserView(GenericView):
             return super().create(request=request)
 
     @view_function_middleware
+    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"], UserRole.ADMIN.value["code"]])
     @check_allowed_methods_middleware([Method.DELETE.value])
     def delete(self, request: dict) -> dict:
         """
@@ -254,11 +256,6 @@ class UserView(GenericView):
             user_to_del = session.query(User).filter_by(user_id=id_to_del).first()
             user_id = decode_token(self.headers.get("token"))
             user = session.query(User).filter_by(user_id=user_id).first()
-            user_role = user.user_role
-
-            # check if user is owner
-            if user_role != UserRole.MANAGER.value["name"]:
-                raise ValidationError("Forbidden", 403)
 
             # check if there is user_to_be_deleted in DB and
             # is from the same company as the user who wants to delete

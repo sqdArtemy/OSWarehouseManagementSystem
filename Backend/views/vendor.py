@@ -22,6 +22,10 @@ class VendorView(GenericView):
         :return: dictionary containing status_code and response body with list of dictionaries of vendors
         """
         with get_session() as session:
+            # if admin then return all vendors
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                return super().get_list(request=request, **kwargs)
+
             # get owner_id from token and filter vendors by it
             owner_id = decode_token(self.headers.get("token"))
             vendors = session.query(Vendor).filter(Vendor.vendor_owner_id == owner_id)
