@@ -32,9 +32,11 @@ export function OwnerDashboardLayout() {
   };
 
   useEffect(() => {
-    setName(
-      userApi.getUserData.user_name + ' ' + userApi.getUserData.user_surname,
-    );
+    if(userApi.getUserData){
+      setName(
+        userApi.getUserData.user_name + ' ' + userApi.getUserData.user_surname,
+      );
+    }
   });
 
   return (
