@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, FormInstance, Input, Modal, Select, Table } from "antd";
+import { orderApi, transportApi } from '../../../../index';
+import { useNavigate } from 'react-router-dom';
+import { useError } from '../../../error-component/error-context';
 
 export interface INewAcceptData{
   from?: string;
@@ -7,25 +10,33 @@ export interface INewAcceptData{
   createdAt?: string;
 }
 
-export default function Accept(
+export default function ChooseTransport(
   {
     isPopupVisible,
     hidePopup,
     acceptData,
+    success
   }: {
     isPopupVisible: boolean;
     hidePopup: () => void;
     acceptData: {
       acceptData:  INewAcceptData;
       setAcceptData: (userData: unknown) => void;
-    }
+    };
+    success: () => void;
   })
 {
   const [transport, setTransport] = useState([]);
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [showColumn, setShowColumn] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedTransport, setSelectedTransport] = useState(null);
+  const navigate = useNavigate();
+  const { showError } = useError();
 
+  const initialValues = {
+    'total-volume': acceptData ? acceptData.total_volume: 0,
+  };
 
   const placeholderRowCount = 30;
 
@@ -39,6 +50,11 @@ export default function Accept(
     }),
   );
 
+  const handleRadioSelect = (record) => {
+    // Set the selected transport when the radio button is selected
+    setSelectedTransport(record);
+  };
+
   const columns = [
     {
       title: 'Transport',
@@ -47,7 +63,7 @@ export default function Accept(
       align: 'center',
     },
     {
-      title: 'Total Volume (m^3)',
+      title: 'Total Capacity (m^3)',
       dataIndex: 'totalVolume',
       key: 'totalVolume',
       align: 'center',
@@ -61,7 +77,12 @@ export default function Accept(
       render: (_, record) =>
         record.transport ? (
             <span className={'table-actions-container'}>
-              <Input type={'radio'} name={'choice'} style={{ fontSize: '0.9vw' }} />
+              <Input
+                type={'radio'}
+                name={'choice'}
+                style={{ fontSize: '0.9vw' }}
+                onChange={() => handleRadioSelect(record)}
+              />
             </span>
           ) : null
     },
@@ -69,14 +90,30 @@ export default function Accept(
 
 
   useEffect(() => {
+    const volume = acceptData ? acceptData.total_volume: 0;
 
-    setTransport([
-      {
-        key: '1',
-        transport: 'Dildo',
-        totalVolume: '100',
-      },
-    ]);
+    transportApi.getAllTransports({ transport_capacity_gte: volume }).then(data => {
+      const transports = data.data.body;
+
+      let dataSource = [];
+      let counter = 0;
+      for (let transport of transports){
+        dataSource.push({
+          key: (counter++).toString(),
+          transport: transport.transport_type,
+          totalVolume: transport.transport_capacity,
+          transport_id: transport.transport_id
+        })
+      }
+
+      dataSource.filter(transport => {
+        return transport.transport_capacity > volume;
+      }).sort((a, b) => {
+        return a.transport_capacity - b.transport_capacity;
+      })
+
+      setTransport(dataSource);
+    })
     const calculateScrollSize = () => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -133,9 +170,17 @@ export default function Accept(
     } else {
       hidePopup();
     }
-    acceptData.setAcceptData(newAcceptData);
-  };
 
+    if (selectedTransport) {
+      const response = await orderApi.confirmOrder(selectedTransport.transport_id, acceptData.order_id);
+      if(response.success){
+        success();
+      } else {
+        showError(response.message);
+      }
+    }
+    //acceptData.setAcceptData(newAcceptData);
+  };
 
 
   let transportTableData = transport.length > 0 ? transport : placeholderData;
@@ -161,13 +206,14 @@ export default function Accept(
         size={'middle'}
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
+        initialValues={initialValues}
       >
         <Form.Item
           name="total-volume"
           label={<p style={{ fontSize: '1vw' }}>Total Volume</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Input style={{ fontSize: '0.9vw' }} disabled={}/>
         </Form.Item>
         <Table
           dataSource={transportTableData as []}
@@ -178,6 +224,7 @@ export default function Accept(
           bordered={true}
           className={'transport-data-table'}
           rowClassName={'highlight-bottom-border highlight-left-border'}
+          rowSelection={}
         />
 
         <Form.Item

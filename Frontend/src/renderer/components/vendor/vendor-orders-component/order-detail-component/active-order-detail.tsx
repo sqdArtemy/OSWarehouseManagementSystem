@@ -4,6 +4,7 @@ import { orderApi, productApi, userApi } from '../../../../index';
 import './active-order-detail.scss';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../../error-component/error-context';
+import ChooseTransport from '../../../owner/confirm-order-component/choose-transport-component/choose-transport';
 
 interface OrderActiveDetailsProps {
   id: string;
@@ -17,47 +18,50 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   const { showError } = useError();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showCancelConfirmationModal, setShowCancelConfirmationModal] = useState(false);
+  const [showTransportConfirmationModal, setShowTransportConfirmationModal] = useState(false);
 
   useEffect(() => {
-    orderApi.getOrder(Number(id)).then(async (data) => {
-      if(data.success) {
-        const productsResponse = await productApi.getAllProducts({});
-        const products = productsResponse.data?.body;
+    if(isActiveOrderVisible && id) {
+      orderApi.getOrder(Number(id)).then(async (data) => {
+        if (data.success) {
+          const productsResponse = await productApi.getAllProducts({});
+          const products = productsResponse.data?.body;
 
-        const items = data.data?.body?.items;
-        const orderDetails = data.data?.body;
-        const orderItems = [];
+          const items = data.data?.body?.items;
+          const orderDetails = data.data?.body;
+          const orderItems = [];
 
-        if (items) {
-          for (let item of items) {
-            const product = products?.find((product) => {
-              return product.product_id == item.product;
-            });
-
-            if (product) {
-              orderItems.push({
-                product_name: product?.product_name,
-                product_id: item.product,
-                quantity: item.quantity,
+          if (items) {
+            for (let item of items) {
+              const product = products?.find((product) => {
+                return product.product_id == item.product;
               });
+
+              if (product) {
+                orderItems.push({
+                  product_name: product?.product_name,
+                  product_id: item.product,
+                  quantity: item.quantity,
+                });
+              }
             }
           }
+
+          const vendor = orderDetails.order_type === 'to_warehouse' ? orderDetails.supplier : orderDetails.recipient;
+          const warehouse =
+            orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
+
+          orderDetails.items = orderItems ?? [];
+          orderDetails.vendor = vendor?.vendor_name;
+          orderDetails.vendor_id = vendor?.vendor_id;
+          orderDetails.warehouse = warehouse?.warehouse_name;
+          setOrderDetails(data.data?.body);
+        } else {
+          showError(data.message);
         }
-
-        const vendor = orderDetails.order_type === 'to_warehouse' ? orderDetails.supplier : orderDetails.recipient;
-        const warehouse =
-          orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
-
-        orderDetails.items = orderItems ?? [];
-        orderDetails.vendor = vendor?.vendor_name;
-        orderDetails.vendor_id = vendor?.vendor_id;
-        orderDetails.warehouse = warehouse?.warehouse_name;
-        setOrderDetails(data.data?.body);
-      } else {
-        showError(data.message);
-      }
-    });
-  }, [id]);
+      });
+    }
+  }, [id, showError]);
 
   const columns = [
     { title: 'Product Name', dataIndex: 'product_name', key: 'product_name' },
@@ -97,6 +101,10 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
   };
+
+  const hidePopup = () => {
+    setShowTransportConfirmationModal(false);
+  }
 
   const handleEditOrder = () => {
     setEditMode(true);
@@ -177,12 +185,17 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   const userRole = userApi.getUserData.user_role;
 
   const handleConfirmOrder = async () => {
+    setShowTransportConfirmationModal(true);
   };
 
   const handleRejectOrder = async () => {
     setShowCancelConfirmationModal(true);
   };
 
+  const handleSuccessConfirm = async () => {
+    onCancelSuccess();
+    onClose();
+  }
   return (
     <Modal
       title={`Order Active Details ${editMode ? '(Editing)' : ''}`}
@@ -271,7 +284,12 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       >
         <p>Are you sure you want to confirm delivery?</p>
       </Modal>
-
+      {orderDetails && (<ChooseTransport
+        acceptData={orderDetails}
+        isPopupVisible={showTransportConfirmationModal}
+        hidePopup={hidePopup}
+        success={handleSuccessConfirm}
+      ></ChooseTransport>)}
       <Modal
         title="Confirm Cancel Order"
         visible={showCancelConfirmationModal}

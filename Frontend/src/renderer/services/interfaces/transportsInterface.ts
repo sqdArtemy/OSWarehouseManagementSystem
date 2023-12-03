@@ -17,4 +17,5 @@ export interface IAddTransport {
 
 export interface ITransportFilters {
   transport_type?: 'truck' | 'van' | 'car' | 'helicopter',
+  transport_capacity_gte?: number1
 }
