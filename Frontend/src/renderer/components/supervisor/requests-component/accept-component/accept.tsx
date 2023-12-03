@@ -1,40 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { Button, Form, FormInstance, Input, Modal, Select, Table } from "antd";
+import React, { useEffect, useState } from 'react';
+import { Button, Form, FormInstance, Input, Modal, Select, Table } from 'antd';
+import { orderApi, productApi } from '../../../../index';
+import { IOrderData } from '../requests';
+import { ApiResponse } from '../../../../services/apiRequestHandler';
 
-export interface INewAcceptData{
-  from?: string;
-  to?: string;
-  createdAt?: string;
-}
-
-export default function Accept(
-  {
-    isPopupVisible,
-    hidePopup,
-    acceptData,
-  }: {
-    isPopupVisible: boolean;
-    hidePopup: () => void;
-    acceptData: {
-      acceptData:  INewAcceptData;
-      setAcceptData: (userData: unknown) => void;
-    }
-  })
-{
-  const [fromTo, setFromTo] = useState([]);
+export default function Accept({
+  isPopupVisible,
+  hidePopup,
+  orderData,
+}: {
+  isPopupVisible: boolean;
+  hidePopup: () => void;
+  orderData: {
+    orderData: IOrderData;
+    setOrderData: (orderData: IOrderData) => void;
+  };
+}) {
+  const [itemsData, setItemsData] = useState([]);
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [showColumn, setShowColumn] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState('');
 
   const getStatusDependentColumnName = () => {
-    switch (selectedStatus) {
-      case 'damaged':
-        return 'damaged';
-      case 'lost':
-        return 'lost';
-      default:
-        return ' ';
-    }
+    if (selectedStatus.includes('damaged')) return 'damaged';
+    else if (selectedStatus.includes('lost')) return 'lost';
+    return '';
   };
 
   const placeholderRowCount = 30;
@@ -43,8 +33,7 @@ export default function Accept(
     { length: placeholderRowCount },
     (_, index) => ({
       key: (index + 1).toString(),
-      from: '',
-      to: '',
+      name: '',
       amount: '',
     }),
   );
@@ -63,24 +52,17 @@ export default function Accept(
       align: 'center',
     },
     {
-      title: 'Space (m^3)',
-      dataIndex: 'space',
-      key: 'space',
-      align: 'center',
-    },
-/*       showColumn && */
-    {
-      title: getStatusDependentColumnName().charAt(0).toUpperCase() + getStatusDependentColumnName().slice(1),
+      title:
+        getStatusDependentColumnName().charAt(0).toUpperCase() +
+        getStatusDependentColumnName().slice(1),
       dataIndex: getStatusDependentColumnName(),
       key: getStatusDependentColumnName(),
-      width: '20%',
+      width: (() => (showColumn ? '20%' : '0'))(),
       align: 'center',
       render: (_, record) =>
         record.name ? (
           showColumn ? (
-            <span className={'table-actions-container'}>
-              <Input style={{ fontSize: '0.9vw' }} />
-            </span>
+            <Input style={{ fontSize: '0.9vw' }} />
           ) : null
         ) : null,
     },
@@ -98,26 +80,11 @@ export default function Accept(
       key: 'amount',
       align: 'center',
     },
-    {
-      title: 'Space (m^3)',
-      dataIndex: 'space',
-      key: 'space',
-      align: 'center',
-    },
   ];
 
-  const [currentColumns, setCurrentColumns] = useState(columns)
+  const [currentColumns, setCurrentColumns] = useState(columns);
 
   useEffect(() => {
-
-    setFromTo([
-      {
-        key: '1',
-        name: 'Dildo',
-        amount: '100',
-        space: '100',
-      },
-    ]);
     const calculateScrollSize = () => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -133,12 +100,56 @@ export default function Accept(
         y: vh * 0.3,
       });
     };
-
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
+
+  useEffect(() => {
+    // setFromTo([
+    //   {
+    //     key: '1',
+    //     name: 'Dildo',
+    //     amount: '100',
+    //     space: '100',
+    //   },
+    // ]);
+    if (isPopupVisible && orderData.orderData && formRef.current) {
+      console.log(true);
+      orderApi
+        .getOrder(orderData.orderData.orderId)
+        .then((res: ApiResponse) => {
+          if (res.success) {
+            const items = res.data.body.items;
+            console.log('items', items);
+            const products = productApi.getAllProducts({}).then((res) => {
+              const products = res.data.body;
+              const itemsMap = items.map((item, idx) => {
+                const matchProduct = products.find((product) => {
+                  return item.product === product.product_id;
+                });
+                if (matchProduct) {
+                  return {
+                    key: (idx + 1).toString(),
+                    name: matchProduct.product_name,
+                    amount: item.quantity,
+                  };
+                } else {
+                  return {
+                    key: (idx + 1).toString(),
+                    name: '',
+                    amount: '',
+                  };
+                }
+              });
+              console.log('itemsMap', itemsMap);
+              setItemsData([...itemsMap]);
+            });
+          }
+        });
+    }
+  }, [orderData]);
 
   const handleReset = () => {
     formRef.current?.resetFields();
@@ -174,10 +185,10 @@ export default function Accept(
     } else {
       hidePopup();
     }
-    acceptData.setAcceptData(newAcceptData);
+    orderData.setOrderData(newAcceptData);
   };
 
-  const options = [
+  const options: Select['OptGroup'] = [
     {
       label: 'Delivered',
       value: 'delivered',
@@ -190,22 +201,25 @@ export default function Accept(
       label: 'Lost',
       value: 'lost',
     },
-  ]
-
+  ];
 
   const onStatusChange = (selectedOption) => {
-      setSelectedStatus(selectedOption);
-      setShowColumn(!selectedOption.includes('delivered'));
+    setSelectedStatus(selectedOption);
+    setShowColumn(!selectedOption.includes('delivered'));
   };
 
-  let fromToTableData = fromTo.length > 0 ? fromTo : placeholderData;
-  if (fromToTableData.length < placeholderRowCount) {
-    fromToTableData = [...fromToTableData, ...placeholderData.slice(fromToTableData.length + 1)];
+  let tableData = itemsData.length > 0 ? itemsData : placeholderData;
+  if (tableData.length < placeholderRowCount) {
+    tableData = [...tableData, ...placeholderData.slice(tableData.length + 1)];
   }
 
-  return(
+  return (
     <Modal
-      title={<p style={{ textAlign:'center',fontSize: '1.2vw' }}>Delivery Process</p>}
+      title={
+        <p style={{ textAlign: 'center', fontSize: '1.2vw' }}>
+          Delivery Process
+        </p>
+      }
       width={'50vw'}
       open={isPopupVisible}
       onOk={onFinish}
@@ -234,22 +248,21 @@ export default function Accept(
             options={options}
           />
         </Form.Item>
-          <Table
-            rowSelection={}
-            dataSource={fromToTableData as []}
-            columns={columns as []}
-            scroll={scrollSize}
-            pagination={false}
-            size={'small'}
-            bordered={true}
-            className={'requests-data-table'}
-            rowClassName={'highlight-bottom-border highlight-left-border'}
-          />
+        <Table
+          dataSource={tableData as []}
+          columns={columns as []}
+          scroll={scrollSize}
+          pagination={false}
+          size={'small'}
+          bordered={true}
+          className={'requests-data-table'}
+          rowClassName={'default-table-row-height'}
+        />
 
         <Form.Item
           {...tailLayout}
           labelAlign={'right'}
-          style={{ marginTop: '1vw',marginBottom: '1vw' }}
+          style={{ marginTop: '1vw', marginBottom: '1vw' }}
         >
           <Button
             htmlType="button"
@@ -265,6 +278,5 @@ export default function Accept(
         </Form.Item>
       </Form>
     </Modal>
-
   );
 }
