@@ -108,7 +108,8 @@ class GenericView(metaclass=ModelAttributesMeta):
             if self.instance is None:
                 raise ValidationError(f"{self.model_name.capitalize()} with given id does not exist.", 400)
 
-            session.delete(self.instance)
+            merged = session.merge(self.instance)
+            session.delete(merged)
             session.commit()
 
             self.response.status_code = 204
