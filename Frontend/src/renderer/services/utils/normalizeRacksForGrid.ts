@@ -1,6 +1,16 @@
 import { IAddRack } from '../interfaces/rackInterface';
 
-export const normalizeRacksForGrid = (racks: IAddRack[]) => {
+export interface INormalizedRack {
+  position: string;
+  isHidden: boolean;
+  isFull: boolean;
+  isEmpty: boolean;
+  rack_id: number;
+  capacity: number;
+  isSelected: boolean;
+}
+
+export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
   const sortedRacks = racks.sort((a, b) => {
     return a.rack_position.localeCompare(b.rack_position);
   })
@@ -35,7 +45,8 @@ export const normalizeRacksForGrid = (racks: IAddRack[]) => {
         isFull: false,
         isEmpty: true,
         rack_id: null,
-        capacity: 0
+        capacity: 0,
+        isSelected: false
       })
     }
   }

@@ -639,7 +639,7 @@ class OrderView(GenericView):
                 total_quantity = order_item.quantity
 
                 racks = session.query(Rack).filter_by(
-                    warehouse_id=order.supplier_id).order_by(desc(Rack.rack_position)).all()
+                    warehouse_id=order.recipient_id).order_by(desc(Rack.rack_position)).all()
 
                 for rack in racks:
                     if rack.remaining_capacity == 0:
