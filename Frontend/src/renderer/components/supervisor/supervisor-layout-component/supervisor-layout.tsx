@@ -15,8 +15,7 @@ export function SupervisorLayout() {
 
   const sideBarElements = [
     { iconSrc: RequestIcon, text: 'Requests' },
-    { iconSrc: WarehouseIcon, text: 'Warehouses' },
-    { iconSrc: TransactionsIcon, text: 'Transactions' },
+    { iconSrc: WarehouseIcon, text: 'Warehouses' }
   ];
 
   const handleSideBarElementClick = (

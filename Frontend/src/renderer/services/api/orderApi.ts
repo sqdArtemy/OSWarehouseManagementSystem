@@ -138,4 +138,12 @@ export class OrderApi implements IOrder {
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
+
+  public async lostItems(id: number, status: 'lost' | 'damaged', filledInventory: IFilledInventory[]): Promise<ApiResponse> {
+    const url = '/order/' + id + '/lost-items';
+    const method = 'POST';
+    const headers = {};
+
+    return await this.handleApiRequestWithToken({ url, method, body: { status, items: filledInventory}, headers });
+  }
 }

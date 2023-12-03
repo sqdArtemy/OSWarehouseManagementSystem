@@ -13,6 +13,7 @@ export interface IOrder {
   sendOrderPreview(id: number): Promise<ApiResponse>;
   sendOrder(id: number, filledInventory: IFilledInventory[]): Promise<ApiResponse>;
   getAllOrders(filters: IOrderFilters): Promise<ApiResponse>;
+  lostItems(id: number, status: 'lost' | 'damaged', filledInventory: IFilledInventory[]): Promise<ApiResponse>;
 }
 
 
