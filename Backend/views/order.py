@@ -895,7 +895,7 @@ class OrderView(GenericView):
                 .group_by(Order.order_status)
                 .all()
             )
-            print(result)
 
-
-        pass
+        self.response.status_code = 200
+        self.response.data = result
+        return self.response.create_response()
