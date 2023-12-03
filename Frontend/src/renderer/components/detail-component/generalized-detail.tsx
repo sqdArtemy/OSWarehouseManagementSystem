@@ -55,7 +55,10 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
+    console.log('Warehouse ID: ', warehouse_id);
+
     warehouseApi.getWarehouse(Number(warehouse_id)).then((data) => {
+      console.log(data);
       if (data.success && data.data?.data) {
         setGridData(normalizeRacksForGrid(data.data.data.racks));
       }
