@@ -5,6 +5,8 @@ import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import { IOrderFilters } from '../../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
 import Accept from './accept-component/accept';
+import { orderApi } from '../../../index';
+import { useLocation } from 'react-router-dom';
 
 export interface IacceptData{
   from: string;
@@ -18,6 +20,8 @@ export default function Requests() {
   const [toFrom, setToFrom] = useState([]);
   const [isAcceptVisible, setIsAcceptVisible] = useState(false);
   const [acceptData, setAcceptData] = useState({});
+  const location = useLocation();
+  const { state } = location;
 
 
   const placeholderRowCount = 30;
@@ -46,15 +50,15 @@ export default function Requests() {
 
   const columns = [
     {
-      title: 'From',
-      dataIndex: 'from',
-      key: 'from',
+      title: 'Vendor',
+      dataIndex: 'vendor',
+      key: 'vendor',
       align: 'center',
     },
     {
-      title: 'To',
-      dataIndex: 'to',
-      key: 'to',
+      title: 'Warehouse',
+      dataIndex: 'warehouse',
+      key: 'warehouse',
       align: 'center',
     },
     {
@@ -70,7 +74,7 @@ export default function Requests() {
       width: '10%',
       align: 'center',
       render: (_, record) =>
-        record.from ? (
+        record.createdAt ? (
           <span className={'table-actions-container'}>
         <button
           className='accept-btn'
@@ -85,22 +89,66 @@ export default function Requests() {
 
 
   useEffect(() => {
-    setFromTo([
-      {
-        key: '1',
-        from: 'something',
-        to: 'something',
-        createdAt: '11.09.2001',
-      },
-    ]);
-    setToFrom([
-      {
-        key: '1',
-        from: 'something',
-        to: 'something',
-        createdAt: '12.09.2001',
-      },
-    ]);
+
+    orderApi.getAllOrders({order_status: 'processing'}).then(async (data) => {
+      const orders = data.data?.body;
+
+      if (orders?.length) {
+        const finishedItems = [];
+        const activeItems = [];
+        let activeKey = 0;
+        let finishKey = 0;
+        for (let i = 0; i < orders.length; i++) {
+          let order = orders[i];
+          const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
+          const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
+
+          const orderItem = {
+            order_status: orders[i].order_status,
+            order_type: orders[i].order_type,
+            createdAt: orders[i].created_at,
+            order_id: orders[i].order_id,
+            vendor: vendor?.vendor_name,
+            vendor_id: vendor?.vendor_id,
+            warehouse: warehouse?.warehouse_name,
+            warehouse_id: warehouse?.warehouse_id
+          };
+
+
+          if (order.order_type === 'from_warehouse') {
+            orderItem.key = (activeKey++).toString();
+            activeItems.push(orderItem);
+          } else {
+            orderItem.key = (finishKey++).toString();
+            finishedItems.push(orderItem)
+          }
+        }
+
+        console.log(finishedItems, activeItems);
+        setFromTo(finishedItems);
+        setToFrom(activeItems);
+      } else {
+        setFromTo([]);
+        setToFrom([]);
+      }
+    });
+
+    // setFromTo([
+    //   {
+    //     key: '1',
+    //     from: 'something',
+    //     to: 'something',
+    //     createdAt: '11.09.2001',
+    //   },
+    // ]);
+    // setToFrom([
+    //   {
+    //     key: '1',
+    //     from: 'something',
+    //     to: 'something',
+    //     createdAt: '12.09.2001',
+    //   },
+    // ]);
     const calculateScrollSize = () => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -136,7 +184,7 @@ export default function Requests() {
 
 
 
-  const nameOfWarehouse = 'DICK.INC'
+  const nameOfWarehouse = '';
 
   return (
     <div className="orders-container">
