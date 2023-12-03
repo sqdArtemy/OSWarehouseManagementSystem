@@ -161,9 +161,41 @@ export default function Inventory({
     setIsEditRackPopupVisible(true);
   }
 
+  const addInventoryItem = async (rackId, productId, quantity) => {
+    const response = await inventoryApi.addInventory({
+      rack_id: rackId,
+      product_id: productId,
+      quantity: quantity,
+    });
+
+    if (!response.success) {
+      showError(response.message);
+    }
+  };
+
+  const deleteInventoryItem = async (rackId, productId, quantity) => {
+    const response = await inventoryApi.deleteInventory({
+      rack_id: rackId,
+      product_id: productId,
+      quantity: quantity,
+    });
+
+    if (!response.success) {
+      showError(response.message);
+    }
+  };
+
+  const updateInventoryItem = async (rackId, productId, currentQuantity, newQuantity) => {
+    if (newQuantity > currentQuantity) {
+      await addInventoryItem(rackId, productId, newQuantity - currentQuantity);
+    } else if (newQuantity < currentQuantity) {
+      await deleteInventoryItem(rackId, productId, currentQuantity - newQuantity);
+    }
+  };
+
   const handleUpdateInventory = async () => {
     setIsEditMode(false);
-    // Add logic to update the inventory with selectedProducts
+
     const updatedInventoryData = inventoryData.inventoryData.map((item) => {
       const selectedItem = selectedProducts.find(
         (selectedItem) => selectedItem.productName === item.itemName
@@ -172,88 +204,44 @@ export default function Inventory({
       if (selectedItem) {
         return { ...item, totalCount: selectedItem.totalCount };
       }
+
       return item;
     });
 
     const currentInventory = inventoryData.inventoryData;
     const apiResponse = await rackApi.getRack(rackData.rackData.rack_id);
 
-    if(apiResponse.success) {
+    if (apiResponse.success) {
       const originalInventory = apiResponse.data.body.inventories;
+
       for (let inventory of currentInventory) {
+        const product = products.find((product) => product.label === inventory.itemName);
+        const inventoryItem = originalInventory.find((orgInventory) => product.value === orgInventory.product);
 
-        const product = products.find(product => {
-          return product.label === inventory.itemName
-        })
-
-        const inventoryItem = originalInventory.find(orgInventory => {
-          return product.value === orgInventory.product;
-        })
-
-        // add new
         if (!inventoryItem) {
-          const response = await inventoryApi.addInventory({
-            rack_id: rackData.rackData.rack_id,
-            product_id: product.value,
-            quantity: inventory.totalCount
-          });
-
-          if (!response.success) {
-            showError(response.message);
-          }
+          await addInventoryItem(rackData.rackData.rack_id, product.value, inventory.totalCount);
         } else {
-          if (inventory.totalCount > inventoryItem.totalCount) {
-            const response = await inventoryApi.addInventory({
-              rack_id: rackData.rackData.rack_id,
-              product_id: product.value,
-              quantity: inventory.totalCount - inventoryItem.quantity
-            });
-
-            if (!response.success) {
-              showError(response.message);
-            }
-          } else {
-            const response = await inventoryApi.deleteInventory({
-              rack_id: rackData.rackData.rack_id,
-              product_id: product.value,
-              quantity: inventoryItem.quantity - inventory.totalCount
-            });
-
-            if (!response.success) {
-              showError(response.message);
-            }
-          }
+          await updateInventoryItem(
+            rackData.rackData.rack_id,
+            product.value,
+            inventoryItem.quantity,
+            inventory.totalCount
+          );
         }
       }
 
-      for (let item of originalInventory){
-        const product = products.find(product => {
-          return product.value === item.product
-        })
+      for (let item of originalInventory) {
+        const product = products.find((product) => product.value === item.product);
+        const inventoryItem = currentInventory.find((currInventory) => product.label === currInventory.itemName);
 
-        const inventoryItem = currentInventory.find(currInventory => {
-          return product.label === currInventory.itemName;
-        })
-
-        if(!inventoryItem){
-          const response = await inventoryApi.deleteInventory({
-            rack_id: rackData.rackData.rack_id,
-            product_id: product.value,
-            quantity: item.quantity
-          });
-
-          if (!response.success) {
-            showError(response.message);
-          }
+        if (!inventoryItem) {
+          await deleteInventoryItem(rackData.rackData.rack_id, product.value, item.quantity);
         }
       }
-      // Assuming setInventoryData updates the state with the modified inventoryData
+
       inventoryData.setInventoryData(updatedInventoryData);
-
-      // Reset selectedProducts
       setSelectedProducts([]);
     }
-
   };
 
   const handleUpdateTotalCount = (productName, value) => {
@@ -270,11 +258,26 @@ export default function Inventory({
   };
 
   const handleSearchProducts = (value) => {
-    // Add logic to search for products and update the table
-    if (value) {
+    // Check if the product with the same itemName already exists in tableData
+    const existingProduct = tableData.find((item) => item.itemName === value);
+
+    if (existingProduct) {
+      // Product already exists, update its totalCount
+      const updatedTableData = tableData.map((item) =>
+        item.itemName === value ? { ...item, totalCount: item.totalCount + 1 } : item
+      );
+      inventoryData.setInventoryData(updatedTableData);
+
+      if (isEditMode) {
+        const updatedSelectedProducts = selectedProducts.map((item) =>
+          item.productName === value ? { ...item, totalCount: item.totalCount + 1 } : item
+        );
+        setSelectedProducts(updatedSelectedProducts);
+      }
+    } else {
       const newProduct = {
         itemName: value,
-        itemType: '', // You can set the appropriate value based on your requirements
+        itemType: '', // Set the appropriate value based on your requirements
         totalWeight: '', // Set the initial values as needed
         totalVolume: '',
         totalCount: 1,
@@ -284,7 +287,6 @@ export default function Inventory({
       const updatedTableData = [...tableData, newProduct];
       inventoryData.setInventoryData(updatedTableData);
 
-      // Add the new product to selectedProducts when in edit mode
       if (isEditMode) {
         setSelectedProducts([...selectedProducts, { productName: value, totalCount: 1 }]);
       }
