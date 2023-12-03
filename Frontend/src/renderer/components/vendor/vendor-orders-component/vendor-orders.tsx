@@ -217,7 +217,7 @@ export default function Orders() {
         <div className={'orders-table-header-container'}>
           <span className={'orders-table-header'}>ORDERS</span>
           <div className={'options-container'}>
-            { userApi.getUserData.user_role === userApi.getUserData &&'vendor' && (<button className={'add-btn'} onClick={(e) => handleAddOrder(e)}>
+            { userApi.getUserData && userApi.getUserData.user_role === 'vendor' && (<button className={'add-btn'} onClick={(e) => handleAddOrder(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add Order</span>
             </button>)}
