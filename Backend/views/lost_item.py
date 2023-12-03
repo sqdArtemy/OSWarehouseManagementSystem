@@ -18,7 +18,7 @@ class LostItemView(GenericView):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
-    def create(self, request: dict) -> int:
+    def create(self, request: dict) -> dict:
         """
         Create a new lost_item in the database.
         :param request: dictionary containing url, method, body and headers
@@ -110,6 +110,11 @@ class LostItemView(GenericView):
                     session.rollback()
                     raise ValidationError("Error creating lost_item", 500)
 
+            order_items = session.query(OrderItem).filter_by(order_id=order_id).first()
+            if order_items is None:
+                order.order_status = "finished"
+                session.commit()
+
             total_volume = session.query(func.sum(OrderItem.quantity * Product.volume)). \
                 join(Product, OrderItem.product_id == Product.product_id). \
                 filter(OrderItem.order_id == order.order_id).scalar()
@@ -122,13 +127,3 @@ class LostItemView(GenericView):
             ]
 
             return self.response.create_response()
-
-    @view_function_middleware
-    @check_allowed_methods_middleware([Method.PUT.value])
-    def update(self, request: dict) -> dict:
-        """
-        Update a lost_item in the database.
-        :param request: dictionary containing url, method, body and headers
-        :return: dictionary containing status_code and response body
-        """
-        return super().update(request=request)
