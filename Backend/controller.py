@@ -105,6 +105,8 @@ def controller(request: dict) -> dict:
                 elif "/receive" in url:
                     if "/preview" in url:
                         return order_view.receive_preview(request=request)
+                elif "/stats/order" in url:
+                    return order_view.get_order_stats(request=request)
                 return order_view.get(request=request)
             elif method == Method.POST.value:
                 if "/lost-items" in url:

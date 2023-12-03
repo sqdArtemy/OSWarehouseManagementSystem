@@ -847,3 +847,55 @@ class OrderView(GenericView):
             self.response.status_code = 200
             self.response.data = order.to_dict(cascade_fields=())
             return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_order_stats(self, request: dict) -> dict:
+        """
+        Get order statistics.
+        """
+        requester_id = self.requester_id
+        requester_role = self.requester_role
+
+        with get_session() as session:
+            requester = session.query(User).filter_by(user_id=requester_id).first()
+            orders = session.query(Order.order_id)
+
+            if self.requester_role in (UserRole.SUPERVISOR.value["code"], UserRole.MANAGER.value["code"]):
+                if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(
+                        supervisor_id=self.requester_id).all()
+                    warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+                else:
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(
+                        company_id=requester.company.company_id).all()
+                    warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+
+                orders = orders.filter(
+                    or_(
+                        and_(Order.order_type == "from_warehouse", Order.supplier_id.in_(warehouse_ids)),
+                        and_(Order.order_type == "to_warehouse", Order.recipient_id.in_(warehouse_ids))
+                    )
+                )
+
+            elif self.requester_role == UserRole.VENDOR.value["code"]:
+                vendor_ids = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester.user_id).all()
+                vendor_ids = [vendor[0] for vendor in vendor_ids]
+
+                orders = orders.filter(
+                    or_(
+                        and_(Order.order_type == "to_warehouse", Order.supplier_id.in_(vendor_ids)),
+                        and_(Order.order_type == "from_warehouse", Order.recipient_id.in_(vendor_ids))
+                    )
+                )
+
+            result = (
+                session.query(Order.order_status, func.count().label('order_count'))
+                .filter(Order.order_id.in_(orders))
+                .group_by(Order.order_status)
+                .all()
+            )
+            print(result)
+
+
+        pass
