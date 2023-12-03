@@ -174,6 +174,7 @@ export default function ChooseTransport(
     if (selectedTransport) {
       const response = await orderApi.confirmOrder(selectedTransport.transport_id, acceptData.order_id);
       if(response.success){
+        await orderApi.changeStatusOfOrder(acceptData.order_id, 'processing');
         success();
       } else {
         showError(response.message);
