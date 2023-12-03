@@ -133,9 +133,8 @@ export default function AdminVendors() {
       for (let i = 0; i < vendors.length; i++) {
 
         const user = users.find( user => {
-          return user.user_id === vendors[i].vendor_owner;
+          return user.user_id === vendors[i].vendor_owner?.user_id;
         })
-
         dataItems.push({
           key: (i + 1).toString(),
           owner: user ? user.user_name + ' ' + user.user_surname: '',
@@ -144,7 +143,7 @@ export default function AdminVendors() {
           is_government: vendors[i].is_government,
           vendor_id: vendors[i].vendor_id,
           is_government_display: vendors[i].is_government ? 'Government' : 'Private',
-          vendor_owner_id: vendors[i].vendor_owner
+          vendor_owner_id: vendors[i].vendor_owner.user_id
         });
       }
 
@@ -276,7 +275,7 @@ export default function AdminVendors() {
         for (let i = 0; i < vendors.length; i++) {
 
           const user = users.find( user => {
-            return user.user_id === vendors[i].vendor_owner;
+            return user.user_id === vendors[i].vendor_owner.user_id;
           })
 
           dataItems.push({
@@ -287,7 +286,7 @@ export default function AdminVendors() {
             is_government: vendors[i].is_government,
             vendor_id: vendors[i].vendor_id,
             is_government_display: vendors[i].is_government ? 'Government' : 'Private',
-            vendor_owner_id: vendors[i].vendor_owner
+            vendor_owner_id: vendors[i].vendor_owner.user_id
           });
         }
 

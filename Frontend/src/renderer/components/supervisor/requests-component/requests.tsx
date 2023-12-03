@@ -90,7 +90,7 @@ export default function Requests() {
 
   useEffect(() => {
 
-    orderApi.getAllOrders({order_status: 'processing'}).then(async (data) => {
+    orderApi.getAllOrders({order_status: 'submitted'}).then(async (data) => {
       const orders = data.data?.body;
 
       if (orders?.length) {
