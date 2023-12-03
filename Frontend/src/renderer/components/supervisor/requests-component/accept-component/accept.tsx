@@ -192,7 +192,7 @@ export default function Accept({
             quantity: value.damaged,
           };
         })
-        .filter((item) => item.name !== '');
+        .filter((item) => item.name !== '' && item.damaged !== 0);
       await orderApi.lostItems(orderData.orderData.orderId, 'damaged', items);
     } else if (selectedStatus == 'lost') {
       const items = itemsData
@@ -202,7 +202,7 @@ export default function Accept({
             quantity: value.lost,
           };
         })
-        .filter((item) => item.name !== '');
+        .filter((item) => item.name !== '' && item.lost !== 0);
       await orderApi.lostItems(orderData.orderData.orderId, 'lost', items);
     }
 
