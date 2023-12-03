@@ -13,6 +13,7 @@ export class VendorApi implements IVendor {
     data: ISendData,
   ): Promise<ApiResponse> {
     data.headers.token = this.token || userApi.getToken;
+    console.log(data);
     return await handleApiRequest({
       url: data.url,
       method: data.method,

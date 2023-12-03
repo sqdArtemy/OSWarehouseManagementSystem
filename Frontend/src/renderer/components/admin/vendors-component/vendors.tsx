@@ -7,7 +7,7 @@ import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-d
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
-import { vendorApi } from '../../../index'; // Import your vendor API
+import { userApi, vendorApi } from '../../../index'; // Import your vendor API
 import { IVendorFilters } from '../../../services/interfaces/vendorInterface'; // Import the vendor interface
 import debounce from 'lodash.debounce';
 import AddVendor from './add-vendor-component/add-vendor'; // Create an AddVendor component similar to AddItem
@@ -68,6 +68,13 @@ export default function AdminVendors() {
       if (!filters.vendor_name_like) delete filters.vendor_name_like;
     }
 
+    if(selectedType){
+      if(selectedType.toLowerCase() === 'government') filters.is_government = 1;
+      else if(selectedType.toLowerCase() === 'private') filters.is_government = 0;
+      else delete filters.is_government;
+    } else {
+      delete filters.is_government;
+    }
     console.log(filters);
     await debouncedSearch(filters);
   };
@@ -114,18 +121,33 @@ export default function AdminVendors() {
     const result = await vendorApi.getAllVendors(filters);
     const vendors = result.data?.body;
     const dataItems = [];
+    let users = [];
+
+    const usersResponse = await userApi.getAllUsers({});
+
+    if(usersResponse.success){
+      users = usersResponse.data.body;
+    }
 
     if (vendors?.length) {
       for (let i = 0; i < vendors.length; i++) {
+
+        const user = users.find( user => {
+          return user.user_id === vendors[i].vendor_owner;
+        })
+
         dataItems.push({
           key: (i + 1).toString(),
+          owner: user ? user.user_name + ' ' + user.user_surname: '',
           vendor_name: vendors[i].vendor_name,
           vendor_address: vendors[i].vendor_address,
           is_government: vendors[i].is_government,
-          is_government_display: vendors[i].is_government ? 'Government' : 'Private',
           vendor_id: vendors[i].vendor_id,
+          is_government_display: vendors[i].is_government ? 'Government' : 'Private',
+          vendor_owner_id: vendors[i].vendor_owner
         });
       }
+
       setDataSource(dataItems);
     } else {
       setDataSource([]);
@@ -184,9 +206,9 @@ export default function AdminVendors() {
         ) : null,
     },
     {
-      title: 'Company Name',
-      dataIndex: 'company_name',
-      key: 'company_name',
+      title: 'Owner',
+      dataIndex: 'owner',
+      key: 'owner',
       align: 'center',
     },
     {
@@ -239,19 +261,33 @@ export default function AdminVendors() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    vendorApi.getAllVendors(filters).then((result) => {
+    vendorApi.getAllVendors({}).then(async (result) => {
       const vendors = result.data?.body;
       const dataItems = [];
+      let users = [];
+
+      const usersResponse = await userApi.getAllUsers({});
+
+      if(usersResponse.success){
+        users = usersResponse.data.body;
+      }
 
       if (vendors?.length) {
         for (let i = 0; i < vendors.length; i++) {
+
+          const user = users.find( user => {
+            return user.user_id === vendors[i].vendor_owner;
+          })
+
           dataItems.push({
             key: (i + 1).toString(),
+            owner: user ? user.user_name + ' ' + user.user_surname: '',
             vendor_name: vendors[i].vendor_name,
             vendor_address: vendors[i].vendor_address,
             is_government: vendors[i].is_government,
             vendor_id: vendors[i].vendor_id,
-            is_government_display: vendors[i].is_government ? 'Government' : 'Private'
+            is_government_display: vendors[i].is_government ? 'Government' : 'Private',
+            vendor_owner_id: vendors[i].vendor_owner
           });
         }
 
@@ -272,7 +308,7 @@ export default function AdminVendors() {
 
   const types = [
     {
-      label: 'Goverment',
+      label: 'Government',
     },
     {
       label: 'Private',

@@ -73,7 +73,7 @@ export default function EditVendor({
       vendor_name: editVendorData['Vendor Name'],
       vendor_address: editVendorData['Vendor Address'],
       is_government: editVendorData['Is Government'] === 'true',
-      vendor_owner_id: userApi.getUserData.user_id
+      vendor_owner_id: vendorData.editVendorData.vendor_owner_id
     };
 
 
