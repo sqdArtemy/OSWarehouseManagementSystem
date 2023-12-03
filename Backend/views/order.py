@@ -677,6 +677,19 @@ class OrderView(GenericView):
             if order.first() is None:
                 raise ValidationError("Order Not Found", 404)
 
+            # if requester is admin
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                order = order.first()
+
+                # change status and updated_at
+                order.updated_at = datetime.now()
+                order.order_status = self.body.get("status")
+                session.commit()
+
+                self.response.status_code = 200
+                self.response.data = order.to_dict(cascade_fields=())
+                return self.response.create_response()
+
             order_type = order.first().order_type
 
             # check if recipient has access to the order
