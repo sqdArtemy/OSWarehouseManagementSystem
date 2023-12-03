@@ -38,6 +38,7 @@ import AddOrderModal from './components/vendor/vendor-orders-component/create-or
 import CreateOrder from './components/vendor/vendor-orders-component/create-order-component/create-order';
 import WarehouseDetail from './components/owner/warehouses-component/warehouse-detail-component/warehouse-detail';
 import SupervisorWarehouses from './components/supervisor/warehouses-component/warehouses';
+import SupervisorRequests from './components/supervisor/requests-component/requests'
 import { SupervisorLayout } from './components/supervisor/supervisor-layout-component/supervisor-layout';
 
 
@@ -48,7 +49,7 @@ export default function App() {
       <LoadingProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/admin/companies" replace />} />
+            <Route path="/" element={<Navigate to="/supervisor/requests" replace />} />
             <Route path="sign-in" element={<SignIn />} />
             <Route path="sign-up" element={<SignUp />} />
             <Route path="sign-up-details" element={<SignUpDetails />} />
@@ -89,6 +90,7 @@ export default function App() {
                 path="warehouses/:warehouse_id"
                 element={<SupervisorWarehouses />}
               />
+              <Route path="requests" element={<SupervisorRequests />}/>
             </Route>
             <Route path="admin/*" element={<AdminDashboardLayout />}>
               <Route
