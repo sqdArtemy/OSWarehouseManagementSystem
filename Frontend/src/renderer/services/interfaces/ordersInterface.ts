@@ -6,16 +6,28 @@ export interface IOrder {
   cancelOrder(id: number): Promise<ApiResponse>;
   updateOrder(body: IAddOrder, id: number): Promise<ApiResponse>;
   confirmOrder(transport_id: number, id: number): Promise<ApiResponse>;
-  changeStatusOfOrder(id: number, status: 'finished' | 'delivered' | 'processing'): Promise<ApiResponse>;
+  changeStatusOfOrder(
+    id: number,
+    status: 'finished' | 'delivered' | 'processing',
+  ): Promise<ApiResponse>;
   getOrder(id: number): Promise<ApiResponse>;
   receiveOrderPreview(id: number): Promise<ApiResponse>;
-  receiveOrder(id: number, filledInventory: IFilledInventory[]): Promise<ApiResponse>;
+  receiveOrder(
+    id: number,
+    filledInventory: IFilledInventory[],
+  ): Promise<ApiResponse>;
   sendOrderPreview(id: number): Promise<ApiResponse>;
-  sendOrder(id: number, filledInventory: IFilledInventory[]): Promise<ApiResponse>;
+  sendOrder(
+    id: number,
+    filledInventory: IFilledInventory[],
+  ): Promise<ApiResponse>;
   getAllOrders(filters: IOrderFilters): Promise<ApiResponse>;
-  lostItems(id: number, status: 'lost' | 'damaged', filledInventory: IFilledInventory[]): Promise<ApiResponse>;
+  lostItems(
+    id: number,
+    status: 'lost' | 'damaged',
+    filledInventory: IFilledInventory[],
+  ): Promise<ApiResponse>;
 }
-
 
 export interface IAddOrder {
   order_type?: 'to_warehouse' | 'from_warehouse';
@@ -25,15 +37,23 @@ export interface IAddOrder {
 }
 
 export interface IOrderFilters {
-  order_status?: 'new' | 'processing' | 'submitted' | 'finished' | 'cancelled' | 'delivered' | 'lost' | 'damaged',
-  created_at_gte?: Date,
-  created_at_lte?: Date,
-  order_type?: 'from_warehouse' | 'to_warehouse',
-  transport_id?: number
+  order_status?:
+    | 'new'
+    | 'processing'
+    | 'submitted'
+    | 'finished'
+    | 'cancelled'
+    | 'delivered'
+    | 'lost'
+    | 'damaged';
+  created_at_gte?: Date;
+  created_at_lte?: Date;
+  order_type?: 'from_warehouse' | 'to_warehouse';
+  transport_id?: number;
 }
 
 export interface IFilledInventory {
-  quantity: number,
-  product_id: number,
-  rack_id: number
+  quantity: number;
+  product_id: number;
+  rack_id?: number;
 }

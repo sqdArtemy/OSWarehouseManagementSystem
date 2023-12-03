@@ -62,7 +62,12 @@ export default function Accept({
       render: (_, record) =>
         record.name ? (
           showColumn ? (
-            <Input style={{ fontSize: '0.9vw' }} />
+            <Input
+              onChange={(e) => {
+                record[getStatusDependentColumnName()] = Number(e.target.value);
+              }}
+              style={{ fontSize: '0.9vw' }}
+            />
           ) : null
         ) : null,
     },
@@ -116,14 +121,13 @@ export default function Accept({
     //   },
     // ]);
     if (isPopupVisible && orderData.orderData && formRef.current) {
-      console.log(true);
       orderApi
         .getOrder(orderData.orderData.orderId)
         .then((res: ApiResponse) => {
           if (res.success) {
             const items = res.data.body.items;
             console.log('items', items);
-            const products = productApi.getAllProducts({}).then((res) => {
+            productApi.getAllProducts({}).then((res) => {
               const products = res.data.body;
               const itemsMap = items.map((item, idx) => {
                 const matchProduct = products.find((product) => {
@@ -134,12 +138,14 @@ export default function Accept({
                     key: (idx + 1).toString(),
                     name: matchProduct.product_name,
                     amount: item.quantity,
+                    id: matchProduct.product_id,
                   };
                 } else {
                   return {
                     key: (idx + 1).toString(),
                     name: '',
                     amount: '',
+                    id: -1,
                   };
                 }
               });
@@ -172,20 +178,35 @@ export default function Accept({
 
   const formRef = React.useRef<FormInstance>(null);
   const onFinish = async () => {
-    const newAcceptData = formRef.current?.getFieldsValue();
-    let check = false;
-    for (let key in newAcceptData) {
-      if (newAcceptData[key]) {
-        check = true;
-      }
+    await orderApi.changeStatusOfOrder(
+      orderData.orderData.orderId,
+      'delivered',
+    );
+
+    console.log(items);
+    if (selectedStatus == 'damaged') {
+      const items = itemsData
+        .map((value) => {
+          return {
+            product_id: value.id,
+            quantity: value.damaged,
+          };
+        })
+        .filter((item) => item.name !== '');
+      await orderApi.lostItems(orderData.orderData.orderId, 'damaged', items);
+    } else if (selectedStatus == 'lost') {
+      const items = itemsData
+        .map((value) => {
+          return {
+            product_id: value.id,
+            quantity: value.lost,
+          };
+        })
+        .filter((item) => item.name !== '');
+      await orderApi.lostItems(orderData.orderData.orderId, 'lost', items);
     }
-    if (!check) {
-      hidePopup();
-      handleReset();
-    } else {
-      hidePopup();
-    }
-    orderData.setOrderData(newAcceptData);
+
+    hidePopup();
   };
 
   const options: Select['OptGroup'] = [
