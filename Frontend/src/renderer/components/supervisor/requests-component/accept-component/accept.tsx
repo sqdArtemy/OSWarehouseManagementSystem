@@ -68,7 +68,7 @@ export default function Accept(
       key: 'space',
       align: 'center',
     },
-      showColumn &&
+/*       showColumn && */
     {
       title: getStatusDependentColumnName().charAt(0).toUpperCase() + getStatusDependentColumnName().slice(1),
       dataIndex: getStatusDependentColumnName(),
