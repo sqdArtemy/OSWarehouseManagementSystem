@@ -24,7 +24,7 @@ class VendorView(GenericView):
         with get_session() as session:
             # if admin then return all vendors
             if self.requester_role == UserRole.ADMIN.value["code"]:
-                return super().get_list(request=request, **kwargs)
+                return super().get_list(request=request, cascade_fields=["vendor_owner"], **kwargs)
 
             # get owner_id from token and filter vendors by it
             owner_id = decode_token(self.headers.get("token"))
