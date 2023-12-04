@@ -22,11 +22,11 @@ export default function RacksGrid({ gridData, handleCellClick }) {
       <div className="grid-row" key={`row-${rowIndex}`}>
         {row.map((cell, cellIndex) => (
           <div
-            className={
-              'grid-cell ' +
-              (cell.isHidden ? 'hidden' : '') +
-              (cell.isSelected ? 'golden' : '')
-            }
+            className={`grid-cell ${
+              cell.isFull ? 'full' : !cell.isEmpty ? 'nonempty' : ''
+            } ${cell.isHidden ? 'hidden' : ''} ${
+              cell.isSelected ? 'golden' : ''
+            }`}
             key={`cell-${rowIndex}-${cellIndex}`}
             onClick={handleCellClick ? () => handleCellClick(cell) : null}
           ></div>

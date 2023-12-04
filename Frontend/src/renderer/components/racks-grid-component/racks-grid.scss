@@ -18,13 +18,22 @@
       cursor: pointer;
       height: 2.8vw;
     }
+
+    .grid-cell.full {
+      background-color: red;
+    }
+
+    .grid-cell.nonempty {
+      background-color: yellow;
+    }
+
+    .grid-cell.golden {
+      background-color: #FFD700 !important;
+    }
+
   }
 }
 
-.hidden{
+.hidden {
   display: none !important;
-}
-
-.golden{
-  background-color: #FFD700 !important;
 }

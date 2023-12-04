@@ -5,11 +5,14 @@ import { Button, Form, FormInstance, Input, Space } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { userApi } from '../../../index';
 import { useError } from '../../error-component/error-context';
+import { useNavigate } from 'react-router-dom';
 
 export default function OwnerProfile() {
   const [changePassDisplay, setChangePassDisplay] = useState(false);
   const [userData, setUserData] = useState({});
   const { showError } = useError();
+  const navigate = useNavigate();
+
   let id;
 
   const formRef = React.useRef<FormInstance>(null);
@@ -46,6 +49,15 @@ export default function OwnerProfile() {
     }
     setUserData(newUserData);
   };
+
+  const handleDelete = async () => {
+    const response = await userApi.deleteUser(userApi.userData.user_id);
+    if(!response.success){
+      showError(response.message);
+    } else {
+      navigate('/sign-in');
+    }
+  }
 
   useEffect(() => {
     const data = userApi.getUserData;
@@ -88,6 +100,11 @@ export default function OwnerProfile() {
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
       >
+        <Form.Item>
+          <Button htmlType="button" type={'primary'} danger={} onClick={handleDelete}>
+            Delete account
+          </Button>
+        </Form.Item>
         <Form.Item
           name="First Name"
           label={<p style={{ fontSize: '1vw' }}>First Name</p>}

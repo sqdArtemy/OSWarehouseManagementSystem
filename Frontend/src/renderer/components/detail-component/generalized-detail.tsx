@@ -104,6 +104,20 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       if (data.success && data.data?.data) {
         setGridData(normalizeRacksForGrid(data.data.data.racks));
       }
+
+      setChartData({
+        labels: ['Occupied', 'Free'],
+        datasets: [
+          {
+            label: 'Capacity of warehouse',
+            data: [
+              warehouseApi.warehouseData.overall_capacity - warehouseApi.warehouseData.remaining_capacity,
+              warehouseApi.warehouseData.remaining_capacity
+            ],
+            backgroundColor: ['#FF6384', '#36A2EB'],
+          },
+        ],
+      })
     });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
@@ -276,6 +290,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           rackData={{ rackData, setRackData }}
           inventoryData={{ inventoryData, setInventoryData }}
           updateChartData={updateChartData}
+          updateGridData={setGridData}
         />
       </div>
       <div className={'generalized-detail-right'}>
