@@ -91,6 +91,7 @@ export default function App() {
                 element={<SupervisorWarehouses />}
               />
               <Route path="requests" element={<SupervisorRequests />}/>
+              <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="admin/*" element={<AdminDashboardLayout />}>
               <Route
@@ -106,6 +107,7 @@ export default function App() {
               <Route path="orders" element={<AdminOrders />} />
               <Route path="racks" element={<AdminRacks />} />
               <Route path="products" element={<AdminProducts />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
           </Routes>
         </Router>
