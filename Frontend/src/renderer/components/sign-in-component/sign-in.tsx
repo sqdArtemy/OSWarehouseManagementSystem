@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../index';
 import './sign-in.scss';
-import { Button, Tooltip } from 'antd';
+import { Button, Form, Input, Tooltip } from 'antd';
 import { useError } from '../error-component/error-context';
 import { useLoading } from '../loading-component/loading';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 export function SignIn() {
   const location = useLocation();
@@ -115,29 +116,34 @@ export function SignIn() {
               </span>
             </div>
           </div>
-          <form>
-            <Tooltip title={'Input Email'} placement={'topLeft'}>
-              <input
-                type="email"
-                id="email"
-                placeholder={'Email'}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Tooltip>
-            <Tooltip title={'Input Password'} placement={'topLeft'}>
-              <input
-                type="password"
-                id="password"
-                placeholder={'Password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Tooltip>
+          <Form>
+            <Form.Item>
+              <Tooltip title={'Input Email'} placement={'topLeft'}>
+                <Input
+                  type="email"
+                  placeholder={'Email'}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Tooltip>
+            </Form.Item>
+            <Form.Item>
+              <Tooltip title={'Input Password'} placement={'topLeft'}>
+                <Input.Password
+                  placeholder={'Password'}
+                  value={password}
+                  iconRender={(visible) =>
+                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  }
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Tooltip>
+            </Form.Item>
+
             <Button type="primary" onClick={async () => handleSignIn()}>
               SIGN IN
             </Button>
-          </form>
+          </Form>
         </div>
       </div>
     </div>
