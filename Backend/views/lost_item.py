@@ -2,6 +2,8 @@ from datetime import datetime
 from sqlite3 import IntegrityError
 
 from sqlalchemy import func
+from sqlalchemy import func, or_, and_, desc
+from sqlalchemy.orm import joinedload
 
 from db_config import get_session
 from models import LostItem, User, Warehouse, Order, Product, OrderItem
@@ -18,7 +20,7 @@ class LostItemView(GenericView):
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.POST.value])
-    def create(self, request: dict) -> int:
+    def create(self, request: dict) -> dict:
         """
         Create a new lost_item in the database.
         :param request: dictionary containing url, method, body and headers
@@ -53,10 +55,13 @@ class LostItemView(GenericView):
                             (order.order_type == "to_warehouse" and order.supplier_id not in requester_vendors)
                     )
                     ) or (
-                            (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                    )
+                            (requester_role in (
+                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    (
+                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                                    (
+                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            )
                     )
             ):
                 raise ValidationError("Order Not Found", 404)
@@ -110,6 +115,11 @@ class LostItemView(GenericView):
                     session.rollback()
                     raise ValidationError("Error creating lost_item", 500)
 
+            order_items = session.query(OrderItem).filter_by(order_id=order_id).first()
+            if order_items is None:
+                order.order_status = "finished"
+                session.commit()
+
             total_volume = session.query(func.sum(OrderItem.quantity * Product.volume)). \
                 join(Product, OrderItem.product_id == Product.product_id). \
                 filter(OrderItem.order_id == order.order_id).scalar()
@@ -124,11 +134,74 @@ class LostItemView(GenericView):
             return self.response.create_response()
 
     @view_function_middleware
-    @check_allowed_methods_middleware([Method.PUT.value])
-    def update(self, request: dict) -> dict:
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_list(self, request: dict, **kwargs) -> dict:
         """
-        Update a lost_item in the database.
+        Display lost_items in the database.
         :param request: dictionary containing url, method, body and headers
+        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
         :return: dictionary containing status_code and response body
         """
-        return super().update(request=request)
+
+        requester_role = self.requester_role
+        requester_id = self.requester_id
+
+        if requester_role != UserRole.MANAGER.value["code"]:
+            raise ValidationError("Only managers can access this functionality")
+
+        with get_session() as session:
+            requester = session.query(User).filter_by(user_id=requester_id).first()
+
+            filters_to_apply = []
+            cmp = self.headers.get('filters')
+
+            if 'created_at_gte' in cmp:
+                filters_to_apply.append(Order.created_at >= cmp['created_at_gte'])
+            if 'created_at_lte' in cmp:
+                filters_to_apply.append(Order.created_at <= cmp['created_at_lte'])
+
+            lost_products = (
+                session.query(
+                    Product.product_id.label('product_id'),
+                    Warehouse.warehouse_id.label('warehouse_id'),
+                    func.sum(LostItem.quantity).label('total_quantity'),
+                    Warehouse.warehouse_name.label('warehouse_name'),
+                    Product.product_name.label('product_name')
+                )
+                .join(LostItem, LostItem.product_id == Product.product_id)
+                .join(Order, Order.order_id == LostItem.order_id)
+                .join(Warehouse, or_(
+                    and_(Order.order_type == 'to_warehouse', Order.recipient_id == Warehouse.warehouse_id),
+                    and_(Order.order_type == 'from_warehouse', Order.supplier_id == Warehouse.warehouse_id)
+                ))
+                .filter(Warehouse.company_id == requester.company_id)
+                .group_by(Warehouse.warehouse_id, Product.product_id)
+                .order_by(Warehouse.warehouse_name, Product.product_name)
+            )
+
+            # Apply the filters to the query
+            if filters_to_apply:
+                lost_products = lost_products.filter(*filters_to_apply).all()
+
+            lost = []
+
+            for lost_product in lost_products:
+                product_id = lost_product.product_id
+                warehouse_id = lost_product.warehouse_id
+                total_quantity = lost_product.total_quantity
+                warehouse_name = lost_product.warehouse_name
+                product_name = lost_product.product_name
+
+                # Append values with corresponding names to the lost list
+                lost.append({
+                    'product_id': product_id,
+                    'warehouse_id': warehouse_id,
+                    'total_quantity': total_quantity,
+                    'warehouse_name': warehouse_name,
+                    'product_name': product_name
+                })
+
+            self.response.status_code = 200
+            self.response.data = lost
+
+            return self.response.create_response()
