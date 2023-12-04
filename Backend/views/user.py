@@ -257,6 +257,13 @@ class UserView(GenericView):
             user_id = decode_token(self.headers.get("token"))
             user = session.query(User).filter_by(user_id=user_id).first()
 
+            # Check that user cannot delete himself
+            if id_to_del == user_id:
+                raise ValidationError("You cannot delete yourself.")
+
+            if user_to_del.user_role == UserRole.SUPERVISOR.value["name"] and len(user_to_del.warehouses) > 0:
+                raise ValidationError("You cannot delete supervisor who has warehouses.")
+
             # check if there is user_to_be_deleted in DB and
             # is from the same company as the user who wants to delete
             if not user_to_del or user_to_del.company_id != user.company_id:

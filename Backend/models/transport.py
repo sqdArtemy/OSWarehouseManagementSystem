@@ -17,7 +17,7 @@ class Transport(Base):
     __table_args__ = (
         CheckConstraint("transport_capacity > 0", name="check_transport_capacity"),
         CheckConstraint("transport_speed > 0", name="check_transport_speed"),
-        CheckConstraint("price_per_weight > 0", name="check_price_per_weight")
+        CheckConstraint("price_per_weight >= 0", name="check_price_per_weight")
     )
 
     # Relationships with other tables
