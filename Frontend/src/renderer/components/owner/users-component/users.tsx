@@ -180,7 +180,7 @@ export default function OwnerUsers() {
       width: '10%',
       align: 'center',
       render: (_, record) =>
-        record.fullName ? (
+        record.fullName && record.user_id !== userApi.userData.user_id ? (
           <span className={'table-actions-container'}>
             <EditOutlined
               onClick={() => handleEditUser(record)}
@@ -235,11 +235,15 @@ export default function OwnerUsers() {
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
+      selectedRows = selectedRows.filter(row => {
+        return row.user_id !== userApi.userData.user_id
+      })
+
       handleRowSelectionChange(selectedRowKeys, selectedRows);
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.fullName === '',
+      disabled: record.user_id === userApi.userData.user_id || record.fullName === '',
     }),
   };
 
