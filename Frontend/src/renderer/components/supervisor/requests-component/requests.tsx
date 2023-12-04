@@ -7,6 +7,7 @@ import debounce from 'lodash.debounce';
 import Accept from './accept-component/accept';
 import { orderApi } from '../../../index';
 import { useLocation } from 'react-router-dom';
+import Preview from './preview-component/preview';
 
 export interface IOrderData {
   orderStatus: string;
@@ -24,6 +25,7 @@ export default function Requests() {
   const [fromTo, setFromTo] = useState([]);
   const [toFrom, setToFrom] = useState([]);
   const [isAcceptVisible, setIsAcceptVisible] = useState(false);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [orderData, setOrderData] = useState<IOrderData>({
     orderStatus: '',
     orderType: '',
@@ -65,18 +67,23 @@ export default function Requests() {
     setOrderData(record);
   };
 
-  const handlePreview = (e) => {
+  const handlePreview = (e, record) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    setIsAcceptVisible(true);
+    setIsPreviewVisible(true);
+    setOrderData(record);
   };
 
   const hideAccept = () => {
     setIsAcceptVisible(false);
+  };
+
+  const hidePreview = () => {
+    setIsPreviewVisible(false);
   };
 
   const columns = [
@@ -103,20 +110,24 @@ export default function Requests() {
       title: 'Action',
       dataIndex: 'action',
       key: 'action',
-      width: '10%',
+      width: '15%',
       align: 'center',
       render: (_, record: IOrderData) =>
         record.orderStatus === 'processing'
           ? record.createdAt && (
               <button
-                className="accept-btn"
+                className="requests-action-btn selectable"
                 onClick={(e) => handleAccept(e, record)}
               >
                 Accept
               </button>
             )
-          : record.createdAt && (
-              <button className="accept-btn" onClick={(e) => handlePreview(e)}>
+          : record.createdAt &&
+            record.orderStatus !== 'submitted' && (
+              <button
+                className="requests-action-btn selectable"
+                onClick={(e) => handlePreview(e, record)}
+              >
                 Preview
               </button>
             ),
@@ -124,7 +135,7 @@ export default function Requests() {
   ];
 
   useEffect(() => {
-    orderApi.getAllOrders({ order_status: 'processing' }).then(async (data) => {
+    orderApi.getAllOrders({}).then(async (data) => {
       const orders = data.data?.body;
       console.log('orders', orders);
       if (orders?.length) {
@@ -246,9 +257,7 @@ export default function Requests() {
             size={'small'}
             bordered={true}
             className={'requests-data-table'}
-            rowClassName={
-              'highlight-bottom-border highlight-left-border default-table-row-height'
-            }
+            rowClassName={' default-table-row-height'}
           />
         </div>
         <div className="requests-table">
@@ -260,15 +269,22 @@ export default function Requests() {
             pagination={false}
             size={'small'}
             bordered={true}
+            b
             className={'requests-data-table'}
-            rowClassName={
-              'highlight-bottom-border highlight-left-border default-table-row-height'
-            }
+            rowClassName={' default-table-row-height'}
           />
         </div>
         <Accept
           hidePopup={hideAccept}
           isPopupVisible={isAcceptVisible}
+          orderData={{
+            orderData: orderData,
+            setOrderData: setOrderData,
+          }}
+        />
+        <Preview
+          hidePopup={hidePreview}
+          isPopupVisible={isPreviewVisible}
           orderData={{
             orderData: orderData,
             setOrderData: setOrderData,

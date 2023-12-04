@@ -1,7 +1,7 @@
 .orders-container {
   display: flex;
   flex-direction: row;
-  width: 50%; /* Adjusted width */
+  width: 80%; /* Adjusted width */
   min-height: 100vh;
   align-items: center;
 
@@ -79,11 +79,11 @@
         max-height: 30%;
       }
 
-      .accept-btn{
+      .requests-action-btn{
         border: none;
         border-radius: 0.5vw;
-        width: 4vw;
-        height: 1.5vw;
+        width: 5vw;
+        height: 2vw;
         background-color: #5564B2;
         color: #ffffff;
         align-items: center;
