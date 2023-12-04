@@ -5,6 +5,7 @@ import { ISendData } from '../sendDataInterface';
 
 export class WarehouseApi implements IWarehouse {
   private readonly token: string;
+  public warehouseData: IAddWarehouse;
   constructor() {
     this.token = userApi.getToken;
   }
@@ -53,7 +54,11 @@ export class WarehouseApi implements IWarehouse {
     const headers = {};
     const body = {};
 
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    const response = await this.handleApiRequestWithToken({ url, method, body, headers });
+    if(response.success){
+      this.warehouseData = response.data.data;
+    }
+    return response;
   }
 
   public async updateWarehouse(body: IAddWarehouse, id: number): Promise<ApiResponse> {

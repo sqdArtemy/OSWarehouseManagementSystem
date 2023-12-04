@@ -18,6 +18,7 @@ export interface IAddWarehouse {
   overall_capacity: number;
   remaining_capacity?: number;
   company_id?: number;
+  warehouse_id?: number;
 }
 
 export interface IWarehouseFilters {

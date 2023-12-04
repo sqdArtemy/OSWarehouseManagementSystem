@@ -12,6 +12,7 @@ import debounce from 'lodash.debounce';
 import AddUser from './add-user-component/add-user';
 import EditUser from './edit-user-component/edit-user';
 import { useLoading } from '../../loading-component/loading';
+import { useError } from '../../error-component/error-context';
 
 export interface IUserData {
   fullName: string;
@@ -32,6 +33,7 @@ export default function OwnerUsers() {
   const [isEditUserVisible, setIsEditUserVisible] = useState(false);
   const [userData, setUserData] = useState({});
   const { startLoading, stopLoading } = useLoading();
+  const { showError } = useError();
   let filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
@@ -42,17 +44,22 @@ export default function OwnerUsers() {
 
   const handleDeleteUser = async (record?) => {
     if (selectedRows.length > 0) {
-      console.log('delete', selectedRows);
       startLoading();
       for (let user of selectedRows) {
-        await userApi.deleteUser(user.user_id);
+        const response = await userApi.deleteUser(user.user_id);
+        if(!response.success){
+          showError(response.message);
+          break;
+        }
       }
       stopLoading();
     }
     if (record) {
-      console.log('delete', record);
       startLoading();
-      console.log(await userApi.deleteUser(record.user_id));
+      const response = await userApi.deleteUser(record.user_id);
+      if(!response.success){
+        showError(response.message);
+      }
       stopLoading();
     }
 
@@ -103,7 +110,7 @@ export default function OwnerUsers() {
     }
 
     if (searchValue) {
-      filters.user_name = searchValue;
+      filters.user_name_like = searchValue;
     }
     debouncedSearch(filters);
   };
@@ -180,7 +187,7 @@ export default function OwnerUsers() {
       width: '10%',
       align: 'center',
       render: (_, record) =>
-        record.fullName ? (
+        record.fullName && record.user_id !== userApi.userData.user_id ? (
           <span className={'table-actions-container'}>
             <EditOutlined
               onClick={() => handleEditUser(record)}
@@ -235,11 +242,15 @@ export default function OwnerUsers() {
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
+      selectedRows = selectedRows.filter(row => {
+        return row.user_id !== userApi.userData.user_id
+      })
+
       handleRowSelectionChange(selectedRowKeys, selectedRows);
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.fullName === '',
+      disabled: record.user_id === userApi.userData.user_id || record.fullName === '',
     }),
   };
 

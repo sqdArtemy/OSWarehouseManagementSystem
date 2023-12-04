@@ -55,12 +55,13 @@ export default function EditRack({ isPopupVisible, hidePopup, rackData, updateGr
 
   useEffect(() => {
     if (isPopupVisible && rackData.rackData && formRef.current) {
-      const { position, capacity } = rackData.rackData;
-      console.log(rackData)
-
-      formRef.current.setFieldsValue({
-        'Rack Position': position,
-        'Capacity': capacity
+      rackApi.getRack(rackData.rackData.rack_id).then(data => {
+        if(data.success) {
+          formRef.current.setFieldsValue({
+            'Rack Position': data.data.body.rack_position,
+            'Capacity': data.data.body.overall_capacity
+          });
+        }
       });
     }
   }, [rackData]);

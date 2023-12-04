@@ -18,9 +18,20 @@
       cursor: pointer;
       height: 2.8vw;
     }
+
+    .grid-cell.full {
+      background-color: red;
+    }
+
+    .grid-cell.nonempty {
+      background-color: yellow;
+    }
   }
 }
 
-.hidden{
+.grid-cell.hidden{
   display: none !important;
 }
+
+
+

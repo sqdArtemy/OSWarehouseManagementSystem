@@ -102,6 +102,13 @@ export class RackApi implements IRack {
               startingLetter.toUpperCase().charCodeAt(0) + i,
             ) + j,
           );
+
+          if(startingLetter.toUpperCase().charCodeAt(0) + i > 'Z'.charCodeAt(0)){
+            return {
+              message: 'Maximum racks reached. Please choose the smaller Number',
+              success: false
+            }
+          }
         }
       }
 

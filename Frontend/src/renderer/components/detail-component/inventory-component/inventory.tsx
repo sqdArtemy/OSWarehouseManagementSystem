@@ -11,6 +11,7 @@ import {
 import { useError } from '../../error-component/error-context';
 import EditRack from '../edit-rack-component/edit-rack';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
+import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';
 
 export default function Inventory({
   isInventoryPopupVisible,
@@ -18,6 +19,7 @@ export default function Inventory({
   rackData,
   inventoryData,
   updateChartData,
+  updateGridData
 }: {
   isInventoryPopupVisible: boolean;
   hidePopup: () => void;
@@ -30,6 +32,7 @@ export default function Inventory({
     setInventoryData: (InventoryData: unknown) => void;
   };
   updateChartData: () => void;
+  updateGridData: (data: any) => void;
 }) {
   const [scrollSize, setScrollSize] = React.useState({ x: 0, y: 0 });
   const { showError } = useError();
@@ -40,7 +43,6 @@ export default function Inventory({
     { productName: string; totalCount: number }[]
   >([]);
   const [products, setProducts] = useState<Select['OptionType'][]>([]);
-
   let originalInventory = [];
 
   const getProducts = async (filters: IProductFilters) => {
@@ -164,6 +166,11 @@ export default function Inventory({
     } else {
       showError(response.message);
     }
+
+    const warehouse = await warehouseApi.getWarehouse(Number(warehouseApi.warehouseData.warehouse_id));
+    if (warehouse.success && warehouse.data?.data) {
+      updateGridData(normalizeRacksForGrid(warehouse.data.data.racks));
+    }
   };
 
   const hideEditRackPopup = () => {
@@ -280,6 +287,11 @@ export default function Inventory({
       inventoryData.setInventoryData(updatedInventoryData);
       setSelectedProducts([]);
       updateChartData();
+
+      const warehouse = await warehouseApi.getWarehouse(Number(warehouseApi.warehouseData.warehouse_id));
+      if (warehouse.success && warehouse.data?.data) {
+        updateGridData(normalizeRacksForGrid(warehouse.data.data.racks));
+      }
     }
   };
 
@@ -425,7 +437,7 @@ export default function Inventory({
             rackData: rackData.rackData,
             setRackData: rackData.setRackData,
           }}
-          updateGridData={setGridData}
+          updateGridData={updateGridData}
         ></EditRack>
       </Space>
     </Modal>
