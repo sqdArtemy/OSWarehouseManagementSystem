@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import './inventory.scss';
 import { Button, InputNumber, Modal, Select, Space, Table } from 'antd';
-import { inventoryApi, productApi, rackApi, userApi, warehouseApi } from '../../../index';
+import {
+  inventoryApi,
+  productApi,
+  rackApi,
+  userApi,
+  warehouseApi,
+} from '../../../index';
 import { useError } from '../../error-component/error-context';
 import EditRack from '../edit-rack-component/edit-rack';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
@@ -11,6 +17,7 @@ export default function Inventory({
   hidePopup,
   rackData,
   inventoryData,
+  updateChartData,
 }: {
   isInventoryPopupVisible: boolean;
   hidePopup: () => void;
@@ -22,6 +29,7 @@ export default function Inventory({
     inventoryData: unknown;
     setInventoryData: (InventoryData: unknown) => void;
   };
+  updateChartData: () => void;
 }) {
   const [scrollSize, setScrollSize] = React.useState({ x: 0, y: 0 });
   const { showError } = useError();
@@ -30,7 +38,7 @@ export default function Inventory({
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<
     { productName: string; totalCount: number }[]
-    >([]);
+  >([]);
   const [products, setProducts] = useState<Select['OptionType'][]>([]);
 
   let originalInventory = [];
@@ -39,10 +47,12 @@ export default function Inventory({
     const rackId = rackData.rackData.rack_id;
 
     const rackResponse = await rackApi.getRack(rackId);
-    if(rackResponse.success){
-      const warehouse = await warehouseApi.getWarehouse(rackResponse.data.body.warehouse);
+    if (rackResponse.success) {
+      const warehouse = await warehouseApi.getWarehouse(
+        rackResponse.data.body.warehouse,
+      );
 
-      if(warehouse.success){
+      if (warehouse.success) {
         filters.product_type = warehouse.data.data.warehouse_type;
       }
     }
@@ -54,13 +64,12 @@ export default function Inventory({
         label: item.product_name,
         volume: item.volume,
         weight: item.weight,
-        price: item.price
+        price: item.price,
       }));
     };
 
     setProducts(mapToOptions(products.data.body));
   };
-
 
   useEffect(() => {
     const calculateScrollSize = () => {
@@ -130,7 +139,11 @@ export default function Inventory({
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Button type="link" danger onClick={() => handleRemoveProduct(record.itemName)}>
+        <Button
+          type="link"
+          danger
+          onClick={() => handleRemoveProduct(record.itemName)}
+        >
           Delete
         </Button>
       ),
@@ -159,7 +172,7 @@ export default function Inventory({
 
   const showEditRackPopup = () => {
     setIsEditRackPopupVisible(true);
-  }
+  };
 
   const addInventoryItem = async (rackId, productId, quantity) => {
     const response = await inventoryApi.addInventory({
@@ -185,11 +198,20 @@ export default function Inventory({
     }
   };
 
-  const updateInventoryItem = async (rackId, productId, currentQuantity, newQuantity) => {
+  const updateInventoryItem = async (
+    rackId,
+    productId,
+    currentQuantity,
+    newQuantity,
+  ) => {
     if (newQuantity > currentQuantity) {
       await addInventoryItem(rackId, productId, newQuantity - currentQuantity);
     } else if (newQuantity < currentQuantity) {
-      await deleteInventoryItem(rackId, productId, currentQuantity - newQuantity);
+      await deleteInventoryItem(
+        rackId,
+        productId,
+        currentQuantity - newQuantity,
+      );
     }
   };
 
@@ -198,7 +220,7 @@ export default function Inventory({
 
     const updatedInventoryData = inventoryData.inventoryData.map((item) => {
       const selectedItem = selectedProducts.find(
-        (selectedItem) => selectedItem.productName === item.itemName
+        (selectedItem) => selectedItem.productName === item.itemName,
       );
 
       if (selectedItem) {
@@ -215,44 +237,61 @@ export default function Inventory({
       const originalInventory = apiResponse.data.body.inventories;
 
       for (let inventory of currentInventory) {
-        const product = products.find((product) => product.label === inventory.itemName);
-        const inventoryItem = originalInventory.find((orgInventory) => product.value === orgInventory.product);
+        const product = products.find(
+          (product) => product.label === inventory.itemName,
+        );
+        const inventoryItem = originalInventory.find(
+          (orgInventory) => product.value === orgInventory.product,
+        );
 
         if (!inventoryItem) {
-          await addInventoryItem(rackData.rackData.rack_id, product.value, inventory.totalCount);
+          await addInventoryItem(
+            rackData.rackData.rack_id,
+            product.value,
+            inventory.totalCount,
+          );
         } else {
           await updateInventoryItem(
             rackData.rackData.rack_id,
             product.value,
             inventoryItem.quantity,
-            inventory.totalCount
+            inventory.totalCount,
           );
         }
       }
 
       for (let item of originalInventory) {
-        const product = products.find((product) => product.value === item.product);
-        const inventoryItem = currentInventory.find((currInventory) => product.label === currInventory.itemName);
+        const product = products.find(
+          (product) => product.value === item.product,
+        );
+        const inventoryItem = currentInventory.find(
+          (currInventory) => product.label === currInventory.itemName,
+        );
 
         if (!inventoryItem) {
-          await deleteInventoryItem(rackData.rackData.rack_id, product.value, item.quantity);
+          await deleteInventoryItem(
+            rackData.rackData.rack_id,
+            product.value,
+            item.quantity,
+          );
         }
       }
 
       inventoryData.setInventoryData(updatedInventoryData);
       setSelectedProducts([]);
+      updateChartData();
     }
   };
 
   const handleUpdateTotalCount = (productName, value) => {
     const updatedTableData = tableData.map((item) =>
-      item.itemName === productName ? { ...item, totalCount: value } : item
+      item.itemName === productName ? { ...item, totalCount: value } : item,
     );
     inventoryData.setInventoryData(updatedTableData);
 
     // Update the selectedProducts array with the new totalCount value
     const updatedSelectedProducts = selectedProducts.map((item) =>
-      item.productName === productName ? { ...item, totalCount: value } : item
+      item.productName === productName ? { ...item, totalCount: value } : item,
     );
     setSelectedProducts(updatedSelectedProducts);
   };
@@ -264,13 +303,17 @@ export default function Inventory({
     if (existingProduct) {
       // Product already exists, update its totalCount
       const updatedTableData = tableData.map((item) =>
-        item.itemName === value ? { ...item, totalCount: item.totalCount + 1 } : item
+        item.itemName === value
+          ? { ...item, totalCount: item.totalCount + 1 }
+          : item,
       );
       inventoryData.setInventoryData(updatedTableData);
 
       if (isEditMode) {
         const updatedSelectedProducts = selectedProducts.map((item) =>
-          item.productName === value ? { ...item, totalCount: item.totalCount + 1 } : item
+          item.productName === value
+            ? { ...item, totalCount: item.totalCount + 1 }
+            : item,
         );
         setSelectedProducts(updatedSelectedProducts);
       }
@@ -288,21 +331,25 @@ export default function Inventory({
       inventoryData.setInventoryData(updatedTableData);
 
       if (isEditMode) {
-        setSelectedProducts([...selectedProducts, { productName: value, totalCount: 1 }]);
+        setSelectedProducts([
+          ...selectedProducts,
+          { productName: value, totalCount: 1 },
+        ]);
       }
     }
   };
 
   const handleRemoveProduct = (productName) => {
-    const updatedTableData = tableData.filter((item) => item.itemName !== productName);
+    const updatedTableData = tableData.filter(
+      (item) => item.itemName !== productName,
+    );
     inventoryData.setInventoryData(updatedTableData);
 
     if (isEditMode) {
-      const updatedSelectedProducts = selectedProducts.filter(
-        (item) => {
-          console.log(item);
-          return item.productName !== productName}
-      );
+      const updatedSelectedProducts = selectedProducts.filter((item) => {
+        console.log(item);
+        return item.productName !== productName;
+      });
       setSelectedProducts(updatedSelectedProducts);
     }
   };
@@ -310,7 +357,7 @@ export default function Inventory({
   const handleToggleEditMode = async () => {
     setIsEditMode(!isEditMode);
     await getProducts({});
-  }
+  };
 
   return (
     <Modal
@@ -359,7 +406,9 @@ export default function Inventory({
         >
           {userApi.getUserData.user_role === 'supervisor' && (
             <>
-              <Button type={'primary'} onClick={showEditRackPopup}>Edit Rack</Button>
+              <Button type={'primary'} onClick={showEditRackPopup}>
+                Edit Rack
+              </Button>
               <Button danger onClick={handleDeleteRack}>
                 Delete Rack
               </Button>
@@ -372,12 +421,13 @@ export default function Inventory({
         <EditRack
           isPopupVisible={isEditRackPopupVisible}
           hidePopup={hideEditRackPopup}
-          rackData={{rackData: rackData.rackData, setRackData: rackData.setRackData}}
+          rackData={{
+            rackData: rackData.rackData,
+            setRackData: rackData.setRackData,
+          }}
           updateGridData={setGridData}
-        >
-        </EditRack>
+        ></EditRack>
       </Space>
     </Modal>
   );
 }
-

@@ -18,6 +18,8 @@ import { normalizeRacksForGrid } from '../../services/utils/normalizeRacksForGri
 import AddRack from './add-rack-component/add-rack';
 import AddMultipleRacks from './add-multiple-racks-component/add-multiple-racks';
 import EditRack from './edit-rack-component/edit-rack';
+import { useError } from '../error-component/error-context';
+import { useLoading } from '../loading-component/loading';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -31,10 +33,49 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   const [inventoryData, setInventoryData] = useState([]);
   const [gridData, setGridData] = useState([]);
   const [isAddRackPopupVisible, setIsAddRackPopupVisible] = useState(false);
+  const { showError } = useError();
+  const { startLoading, stopLoading } = useLoading();
   const [isAddMultipleRacksPopupVisible, setIsAddMultipleRacksPopupVisible] =
     useState(false);
   const { state } = location;
   const warehouseData: IWarehouseData = state.locWarehouseData;
+  const [chartData, setChartData] = useState<ChartData<'doughnut', any, any>>({
+    labels: ['Occupied', 'Free'],
+    datasets: [
+      {
+        label: 'Capacity of warehouse',
+        data: [
+          state.locWarehouseData.capacity - state.locWarehouseData.remaining,
+          state.locWarehouseData.remaining,
+        ],
+        backgroundColor: ['#FF6384', '#36A2EB'],
+      },
+    ],
+  });
+
+  const updateChartData = async () => {
+    startLoading();
+    const result = await warehouseApi.getWarehouse(Number(warehouse_id));
+    stopLoading();
+    if (result.success) {
+      const data = result.data?.data;
+      setChartData({
+        labels: ['Occupied', 'Free'],
+        datasets: [
+          {
+            label: 'Capacity of warehouse',
+            data: [
+              data.overall_capacity - data.remaining_capacity,
+              data.remaining_capacity,
+            ],
+            backgroundColor: ['#FF6384', '#36A2EB'],
+          },
+        ],
+      });
+    } else {
+      showError(result.message);
+    }
+  };
 
   useEffect(() => {
     const calculateScrollSize = () => {
@@ -98,18 +139,6 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       align: 'center',
     },
   ];
-
-  const data: ChartData<'doughnut', any, any> = {
-    labels: ['Occupied', 'Free'],
-    datasets: [
-      {
-        label: 'Capacity of warehouse',
-        data: [state.locWarehouseData.capacity - state.locWarehouseData.remaining,
-          state.locWarehouseData.remaining],
-        backgroundColor: ['#FF6384', '#36A2EB'],
-      },
-    ],
-  };
 
   const handleAddRack = () => {
     console.log('Add Rack');
@@ -191,7 +220,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
               totalCount: inventory.quantity,
               expiryDate: inventory.expiry_date,
               itemType: itemType,
-              itemId: inventory.product
+              itemId: inventory.product,
             });
           }
           setInventoryData(data);
@@ -246,12 +275,13 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           hidePopup={hidePopup}
           rackData={{ rackData, setRackData }}
           inventoryData={{ inventoryData, setInventoryData }}
+          updateChartData={updateChartData}
         />
       </div>
       <div className={'generalized-detail-right'}>
         <div className={'generalized-detail-doughnut-chart'}>
           <Doughnut
-            data={data}
+            data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
