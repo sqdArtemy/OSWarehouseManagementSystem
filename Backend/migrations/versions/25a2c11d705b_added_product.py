@@ -33,7 +33,7 @@ def upgrade() -> None:
                     sa.Column('product_type',
                               sa.Enum('freezer', 'refrigerated', 'dry', 'hazardous', name='product_type'),
                               nullable=False),
-                    sa.CheckConstraint('price > 0', name='check_price'),
+                    sa.CheckConstraint('price >= 0', name='check_price'),
                     sa.CheckConstraint('volume > 0', name='check_volume'),
                     sa.CheckConstraint('weight > 0', name='check_weight'),
                     sa.ForeignKeyConstraint(['company_id'], ['companies.company_id'], ),

@@ -244,6 +244,11 @@ def controller(request: dict) -> dict:
             elif method == Method.PUT.value:
                 return transport_view.update(request=request)
 
+        elif "/stats" in url:
+            if method == Method.GET.value:
+                if "/lost-items":
+                    return lost_item_view.get_list(request=request)
+
         # In case of no route found
         else:
             response.status_code = 404
