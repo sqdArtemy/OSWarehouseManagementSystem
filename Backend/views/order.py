@@ -132,6 +132,9 @@ class OrderView(GenericView):
             self.response.data["items"] = [
                 order_item.to_dict(cascade_fields=()) for order_item in order.ordered_items
             ]
+            self.response.data["lost_items"] = [
+                lost_item.to_dict(cascade_fields=()) for lost_item in order.lost_items
+            ]
 
             return self.response.create_response()
 
