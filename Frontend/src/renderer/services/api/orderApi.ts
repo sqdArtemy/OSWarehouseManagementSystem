@@ -93,7 +93,14 @@ export class OrderApi implements IOrder {
     const url = `/order/${id}/receive`;
     const method = 'PUT';
     const headers = {};
-    const body = { filledInventory };
+    const processedFilledInventory = filledInventory.map((item) => {
+      return {
+        quantity: item.real_quantity,
+        product_id: item.product_id,
+        rack_id: item.rack_id,
+      };
+    });
+    const body = { filled_inventories: processedFilledInventory };
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
@@ -114,7 +121,14 @@ export class OrderApi implements IOrder {
     const url = `/order/${id}/send`;
     const method = 'PUT';
     const headers = {};
-    const body = { filledInventory };
+    const processedFilledInventory = filledInventory.map((item) => {
+      return {
+        quantity: item.real_quantity,
+        product_id: item.product_id,
+        rack_id: item.rack_id,
+      };
+    });
+    const body = { filled_inventories: processedFilledInventory };
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
@@ -128,10 +142,7 @@ export class OrderApi implements IOrder {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async updateOrder(
-    body: IAddOrder,
-    id: number,
-  ): Promise<ApiResponse> {
+  public async updateOrder(body: IAddOrder, id: number): Promise<ApiResponse> {
     const url = '/order/' + id;
     const method = 'PUT';
     const headers = {};
@@ -139,11 +150,20 @@ export class OrderApi implements IOrder {
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
-  public async lostItems(id: number, status: 'lost' | 'damaged', filledInventory: IFilledInventory[]): Promise<ApiResponse> {
+  public async lostItems(
+    id: number,
+    status: 'lost' | 'damaged',
+    filledInventory: IFilledInventory[],
+  ): Promise<ApiResponse> {
     const url = '/order/' + id + '/lost-items';
     const method = 'POST';
     const headers = {};
 
-    return await this.handleApiRequestWithToken({ url, method, body: { status, items: filledInventory}, headers });
+    return await this.handleApiRequestWithToken({
+      url,
+      method,
+      body: { status, items: filledInventory },
+      headers,
+    });
   }
 }

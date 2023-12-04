@@ -638,8 +638,20 @@ class OrderView(GenericView):
                 total_volume = product.volume * order_item.quantity
                 total_quantity = order_item.quantity
 
-                racks = session.query(Rack).filter_by(
-                    warehouse_id=order.recipient_id).order_by(desc(Rack.rack_position)).all()
+                racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
+                  Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id,
+                  or_(
+                    and_(
+                      Inventory.inventory_id != None,
+                      Product.is_stackable == 1
+                    ),
+                    Inventory.inventory_id == None
+                  )
+                ).order_by(desc(Rack.rack_position)).all()
+
+
+
+
 
                 for rack in racks:
                     if rack.remaining_capacity == 0:
@@ -753,22 +765,22 @@ class OrderView(GenericView):
         with get_session() as session:
 
             warehouse_id = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=creator_id).scalar()
-            order = session.query(Order).filter_by(order_id=order_id, supplier_id=warehouse_id)
+            order = session.query(Order).filter_by(order_id=order_id, recipient_id=warehouse_id)
             if not order.first():
                 raise ValidationError("Order Not Found.", 404)
 
-            if order.first().order_status in ("lost", "damaged"):
-                # change updated_at and order_status
-                order = order.first()
-                order.updated_at = datetime.now()
-                order.order_status = "finished"
-                session.commit()
+            # if order.first().order_status in ("lost", "damaged"):
+            #     # change updated_at and order_status
+            #     order = order.first()
+            #     order.updated_at = datetime.now()
+            #     order.order_status = "finished"
+            #     session.commit()
+            #
+            #     self.response.status_code = 200
+            #     self.response.data = order.to_dict(cascade_fields=())
+            #     return self.response.create_response()
 
-                self.response.status_code = 200
-                self.response.data = order.to_dict(cascade_fields=())
-                return self.response.create_response()
-
-            if order.first().order_status != "delivered":
+            if order.first().order_status != "delivered" and order.first().order_status != "lost" and order.first().order_status != "damaged":
                 raise ValidationError("You cannot receive orders that are not delivered.", 400)
 
             # if order_items is empty

@@ -63,6 +63,7 @@ export default function Preview({
 
   const onFinish = async () => {
     startLoading();
+    console.log(orderData.orderData);
     const result = await orderApi.receiveOrder(
       orderData.orderData.orderId,
       filledInventories,
@@ -70,7 +71,7 @@ export default function Preview({
     stopLoading();
     if (result.success) {
       hidePopup();
-      navigate('/supervisor/warehouses');
+      navigate(`/supervisor/warehouse/${orderData.orderData.warehouseId}`);
     } else {
       hidePopup();
       showError(result.message);
@@ -80,12 +81,14 @@ export default function Preview({
   return (
     <Modal
       open={isPopupVisible}
-      onCancel={onFinish}
+      onCancel={hidePopup}
+      onOk={onFinish}
       footer={null}
       width={1000}
       title="Order Preview"
+      okButtonProps={{ style: { display: 'none' } }}
     >
-      <Form>
+      <Form onFinish={onFinish}>
         <Form.Item>
           <RacksGrid gridData={previewGridData} />
         </Form.Item>
