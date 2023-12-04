@@ -27,21 +27,19 @@ import AdminCompanies from './components/admin/companies-component/companies';
 import AdminTransport from './components/admin/transport-component/transport';
 import AdminOrders from './components/admin/orders-component/orders';
 import AdminRacks from './components/admin/racks-component/racks';
-import AdminProducts from './components/admin/items-component/items'
+import AdminProducts from './components/admin/items-component/items';
 import { ErrorProvider } from './components/error-component/error-context';
 import { LoadingProvider } from './components/loading-component/loading';
 import Vendors from './components/vendor/vendors-component/vendors';
-import VendorOrders from './components/vendor/vendor-orders-component/vendor-orders';
+import VendorOrders from './components/orders-component/orders';
 import { VendorLayout } from './components/vendor/vendor-layout-component/vendor-layout';
 
 import AddOrderModal from './components/vendor/vendor-orders-component/create-order-component/create-order';
 import CreateOrder from './components/vendor/vendor-orders-component/create-order-component/create-order';
 import WarehouseDetail from './components/owner/warehouses-component/warehouse-detail-component/warehouse-detail';
 import SupervisorWarehouses from './components/supervisor/warehouses-component/warehouses';
-import SupervisorRequests from './components/supervisor/requests-component/requests'
+import SupervisorRequests from './components/supervisor/requests-component/requests';
 import { SupervisorLayout } from './components/supervisor/supervisor-layout-component/supervisor-layout';
-
-
 
 export default function App() {
   return (
@@ -113,5 +111,5 @@ export default function App() {
         </Router>
       </LoadingProvider>
     </ErrorProvider>
-  )
+  );
 }

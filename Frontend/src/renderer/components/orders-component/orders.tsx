@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import './vendor-orders.scss';
+import './orders.scss';
 import { Table } from 'antd';
-import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
-import { orderApi, userApi, vendorApi, warehouseApi } from '../../../index';
-import { IOrderFilters } from '../../../services/interfaces/ordersInterface';
+import PlusIcon from '../../../../assets/icons/users-plus-icon.png';
+import { orderApi, userApi, vendorApi, warehouseApi } from '../../index';
+import { IOrderFilters } from '../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
-import { IWarehouseData } from '../../owner/warehouses-component/warehouses';
+import { IWarehouseData } from '../owner/warehouses-component/warehouses';
 import OrderActiveDetails from './order-detail-component/active-order-detail';
 
 export default function Orders() {
@@ -34,8 +34,14 @@ export default function Orders() {
       let finishKey = 0;
       for (let i = 0; i < orders.length; i++) {
         let order = orders[i];
-        const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
-        const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
+        const vendor =
+          order.order_type === 'to_warehouse'
+            ? order.supplier
+            : order.recipient;
+        const warehouse =
+          order.order_type === 'from_warehouse'
+            ? order.supplier
+            : order.recipient;
 
         const orderItem = {
           order_status: orders[i].order_status,
@@ -45,16 +51,15 @@ export default function Orders() {
           vendor: vendor?.vendor_name,
           vendor_id: vendor?.vendor_id,
           warehouse: warehouse?.warehouse_name,
-          warehouse_id: warehouse?.warehouse_id
+          warehouse_id: warehouse?.warehouse_id,
         };
-
 
         if (!['finished', 'cancelled'].includes(orderItem.order_status)) {
           orderItem.key = (activeKey++).toString();
           activeItems.push(orderItem);
         } else {
           orderItem.key = (finishKey++).toString();
-          finishedItems.push(orderItem)
+          finishedItems.push(orderItem);
         }
       }
 
@@ -96,7 +101,7 @@ export default function Orders() {
 
   const handleCancelSuccess = async () => {
     await getAllOrders(filters);
-  }
+  };
 
   const placeholderRowCount = 5;
 
@@ -112,14 +117,22 @@ export default function Orders() {
     }),
   );
 
-  let currentTableData = currentOrders.length > 0 ? currentOrders : placeholderData;
+  let currentTableData =
+    currentOrders.length > 0 ? currentOrders : placeholderData;
   if (currentTableData.length < placeholderRowCount) {
-    currentTableData = [...currentTableData, ...placeholderData.slice(currentTableData.length + 1)];
+    currentTableData = [
+      ...currentTableData,
+      ...placeholderData.slice(currentTableData.length + 1),
+    ];
   }
 
-  let finishedTableData = finishedOrders.length > 0 ? finishedOrders : placeholderData;
+  let finishedTableData =
+    finishedOrders.length > 0 ? finishedOrders : placeholderData;
   if (finishedTableData.length < placeholderRowCount) {
-    finishedTableData = [...finishedTableData, ...placeholderData.slice(finishedTableData.length + 1)];
+    finishedTableData = [
+      ...finishedTableData,
+      ...placeholderData.slice(finishedTableData.length + 1),
+    ];
   }
 
   const columns = [
@@ -142,7 +155,7 @@ export default function Orders() {
       title: 'status',
       dataIndex: 'order_status',
       key: 'order_status',
-    }
+    },
   ];
 
   useEffect(() => {
@@ -166,18 +179,24 @@ export default function Orders() {
     window.addEventListener('resize', calculateScrollSize);
 
     orderApi.getAllOrders(filters).then(async (data) => {
-    const orders = data.data?.body;
-    console.log(orders);
+      const orders = data.data?.body;
+      console.log(orders);
 
-    if (orders?.length) {
+      if (orders?.length) {
         const finishedItems = [];
         const activeItems = [];
         let activeKey = 0;
         let finishKey = 0;
         for (let i = 0; i < orders.length; i++) {
           let order = orders[i];
-          const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
-          const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
+          const vendor =
+            order.order_type === 'to_warehouse'
+              ? order.supplier
+              : order.recipient;
+          const warehouse =
+            order.order_type === 'from_warehouse'
+              ? order.supplier
+              : order.recipient;
 
           const orderItem = {
             order_status: orders[i].order_status,
@@ -187,16 +206,15 @@ export default function Orders() {
             vendor: vendor?.vendor_name,
             vendor_id: vendor?.vendor_id,
             warehouse: warehouse?.warehouse_name,
-            warehouse_id: warehouse?.warehouse_id
+            warehouse_id: warehouse?.warehouse_id,
           };
-
 
           if (!['finished', 'cancelled'].includes(orderItem.order_status)) {
             orderItem.key = (activeKey++).toString();
             activeItems.push(orderItem);
           } else {
             orderItem.key = (finishKey++).toString();
-            finishedItems.push(orderItem)
+            finishedItems.push(orderItem);
           }
         }
 
@@ -217,27 +235,35 @@ export default function Orders() {
         <div className={'orders-table-header-container'}>
           <span className={'orders-table-header'}>ORDERS</span>
           <div className={'options-container'}>
-            { userApi.getUserData && userApi.getUserData.user_role === 'vendor' && (<button className={'add-btn'} onClick={(e) => handleAddOrder(e)}>
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Order</span>
-            </button>)}
+            {userApi.getUserData &&
+              userApi.getUserData.user_role === 'vendor' && (
+                <button
+                  className={'add-btn'}
+                  onClick={(e) => handleAddOrder(e)}
+                >
+                  <img src={PlusIcon} alt={'Add Button'}></img>
+                  <span className={'add-btn-text'}>Add Order</span>
+                </button>
+              )}
             {/* AddOrder component and related logic */}
           </div>
         </div>
         <div className="orders-table">
           <span className="custom-table-header">Current Orders</span>
           <Table
-            rowSelection={}
             dataSource={currentTableData as []}
             columns={columns as []}
             scroll={scrollSize}
             pagination={false}
             size={'small'}
             bordered={true}
-            rowClassName={'highlight-bottom-border highlight-left-border'}
+            rowClassName={
+              'highlight-bottom-border highlight-left-border default-table-row-height selectable'
+            }
             onRow={(record, rowIndex) => {
               return {
-                onClick: (event) => handleOnCurrentRowClick(event, record, rowIndex), // click row
+                onClick: (event) =>
+                  handleOnCurrentRowClick(event, record, rowIndex), // click row
               };
             }}
           />
@@ -245,17 +271,19 @@ export default function Orders() {
         <div className="orders-table">
           <span className="custom-table-header">Finished Orders</span>
           <Table
-            rowSelection={}
             dataSource={finishedTableData as []}
             columns={columns as []}
             scroll={scrollSize}
             pagination={false}
             size={'small'}
             bordered={true}
-            rowClassName={'highlight-bottom-border highlight-left-border'}
+            rowClassName={
+              'highlight-bottom-border highlight-left-border default-table-row-height selectable'
+            }
             onRow={(record, rowIndex) => {
               return {
-                onClick: (event) => handleOnFinishRowClick(event, record, rowIndex), // click row
+                onClick: (event) =>
+                  handleOnFinishRowClick(event, record, rowIndex), // click row
               };
             }}
           />
