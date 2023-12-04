@@ -290,6 +290,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           rackData={{ rackData, setRackData }}
           inventoryData={{ inventoryData, setInventoryData }}
           updateChartData={updateChartData}
+          updateGridData={setGridData}
         />
       </div>
       <div className={'generalized-detail-right'}>
