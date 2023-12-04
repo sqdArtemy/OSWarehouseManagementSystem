@@ -1,31 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { Button, Form, FormInstance, Input, Modal, Select, Table } from "antd";
+import React, { useEffect, useState } from 'react';
+import { Button, Form, FormInstance, Input, Modal, Select, Table } from 'antd';
 import { orderApi, transportApi } from '../../../../index';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../../error-component/error-context';
 
-export interface INewAcceptData{
+export interface INewAcceptData {
   from?: string;
   to?: string;
   createdAt?: string;
 }
 
-export default function ChooseTransport(
-  {
-    isPopupVisible,
-    hidePopup,
-    acceptData,
-    success
-  }: {
-    isPopupVisible: boolean;
-    hidePopup: () => void;
-    acceptData: {
-      acceptData:  INewAcceptData;
-      setAcceptData: (userData: unknown) => void;
-    };
-    success: () => void;
-  })
-{
+export default function ChooseTransport({
+  isPopupVisible,
+  hidePopup,
+  acceptData,
+  success,
+}: {
+  isPopupVisible: boolean;
+  hidePopup: () => void;
+  acceptData: {
+    acceptData: INewAcceptData;
+    setAcceptData: (userData: unknown) => void;
+  };
+  success: () => void;
+}) {
   const [transport, setTransport] = useState([]);
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [showColumn, setShowColumn] = useState(false);
@@ -35,7 +33,7 @@ export default function ChooseTransport(
   const { showError } = useError();
 
   const initialValues = {
-    'total-volume': acceptData ? acceptData.total_volume: 0,
+    'total-volume': acceptData ? acceptData.total_volume : 0,
   };
 
   const placeholderRowCount = 30;
@@ -76,44 +74,47 @@ export default function ChooseTransport(
       width: '20%',
       render: (_, record) =>
         record.transport ? (
-            <span className={'table-actions-container'}>
-              <Input
-                type={'radio'}
-                name={'choice'}
-                style={{ fontSize: '0.9vw' }}
-                onChange={() => handleRadioSelect(record)}
-              />
-            </span>
-          ) : null
+          <span className={'table-actions-container'}>
+            <Input
+              type={'radio'}
+              name={'choice'}
+              style={{ fontSize: '0.9vw' }}
+              onChange={() => handleRadioSelect(record)}
+            />
+          </span>
+        ) : null,
     },
   ];
 
-
   useEffect(() => {
-    const volume = acceptData ? acceptData.total_volume: 0;
+    const volume = acceptData ? acceptData.total_volume : 0;
 
-    transportApi.getAllTransports({ transport_capacity_gte: volume }).then(data => {
-      const transports = data.data.body;
+    transportApi
+      .getAllTransports({ transport_capacity_gte: volume })
+      .then((data) => {
+        const transports = data.data.body;
 
-      let dataSource = [];
-      let counter = 0;
-      for (let transport of transports){
-        dataSource.push({
-          key: (counter++).toString(),
-          transport: transport.transport_type,
-          totalVolume: transport.transport_capacity,
-          transport_id: transport.transport_id
-        })
-      }
+        let dataSource = [];
+        let counter = 0;
+        for (let transport of transports) {
+          dataSource.push({
+            key: (counter++).toString(),
+            transport: transport.transport_type,
+            totalVolume: transport.transport_capacity,
+            transport_id: transport.transport_id,
+          });
+        }
 
-      dataSource.filter(transport => {
-        return transport.transport_capacity > volume;
-      }).sort((a, b) => {
-        return a.transport_capacity - b.transport_capacity;
-      })
+        dataSource
+          .filter((transport) => {
+            return transport.transport_capacity > volume;
+          })
+          .sort((a, b) => {
+            return a.transport_capacity - b.transport_capacity;
+          });
 
-      setTransport(dataSource);
-    })
+        setTransport(dataSource);
+      });
     const calculateScrollSize = () => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -172,8 +173,11 @@ export default function ChooseTransport(
     }
 
     if (selectedTransport) {
-      const response = await orderApi.confirmOrder(selectedTransport.transport_id, acceptData.order_id);
-      if(response.success){
+      const response = await orderApi.confirmOrder(
+        selectedTransport.transport_id,
+        acceptData.order_id,
+      );
+      if (response.success) {
         await orderApi.changeStatusOfOrder(acceptData.order_id, 'processing');
         success();
       } else {
@@ -183,15 +187,21 @@ export default function ChooseTransport(
     //acceptData.setAcceptData(newAcceptData);
   };
 
-
   let transportTableData = transport.length > 0 ? transport : placeholderData;
   if (transportTableData.length < placeholderRowCount) {
-    transportTableData = [...transportTableData, ...placeholderData.slice(transportTableData.length + 1)];
+    transportTableData = [
+      ...transportTableData,
+      ...placeholderData.slice(transportTableData.length + 1),
+    ];
   }
 
-  return(
+  return (
     <Modal
-      title={<p style={{ textAlign:'center',fontSize: '1.2vw' }}>Delivery Process</p>}
+      title={
+        <p style={{ textAlign: 'center', fontSize: '1.2vw' }}>
+          Delivery Process
+        </p>
+      }
       width={'50vw'}
       open={isPopupVisible}
       onOk={onFinish}
@@ -214,7 +224,7 @@ export default function ChooseTransport(
           label={<p style={{ fontSize: '1vw' }}>Total Volume</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} disabled={}/>
+          <Input style={{ fontSize: '0.9vw' }} disabled={} />
         </Form.Item>
         <Table
           dataSource={transportTableData as []}
@@ -224,14 +234,15 @@ export default function ChooseTransport(
           size={'small'}
           bordered={true}
           className={'transport-data-table'}
-          rowClassName={'highlight-bottom-border highlight-left-border'}
-          rowSelection={}
+          rowClassName={
+            'highlight-bottom-border highlight-left-border default-table-row-height'
+          }
         />
 
         <Form.Item
           {...tailLayout}
           labelAlign={'right'}
-          style={{ marginTop: '1vw',marginBottom: '1vw' }}
+          style={{ marginTop: '1vw', marginBottom: '1vw' }}
         >
           <Button
             htmlType="button"
@@ -247,6 +258,5 @@ export default function ChooseTransport(
         </Form.Item>
       </Form>
     </Modal>
-
   );
 }

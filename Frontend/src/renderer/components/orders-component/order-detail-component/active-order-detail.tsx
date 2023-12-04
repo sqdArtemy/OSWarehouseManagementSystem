@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Table, Button, InputNumber, Space } from 'antd';
-import { orderApi, productApi, userApi } from '../../../../index';
+import { orderApi, productApi, userApi } from '../../../index';
 import './active-order-detail.scss';
 import { useNavigate } from 'react-router-dom';
-import { useError } from '../../../error-component/error-context';
-import ChooseTransport from '../../../owner/confirm-order-component/choose-transport-component/choose-transport';
+import { useError } from '../../error-component/error-context';
+import ChooseTransport from '../../owner/confirm-order-component/choose-transport-component/choose-transport';
 
 interface OrderActiveDetailsProps {
   id: string;
@@ -12,16 +12,23 @@ interface OrderActiveDetailsProps {
   isActiveOrderVisible: boolean;
 }
 
-const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, isActiveOrderVisible, onCancelSuccess }) => {
+const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
+  id,
+  onClose,
+  isActiveOrderVisible,
+  onCancelSuccess,
+}) => {
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
   const { showError } = useError();
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [showCancelConfirmationModal, setShowCancelConfirmationModal] = useState(false);
-  const [showTransportConfirmationModal, setShowTransportConfirmationModal] = useState(false);
+  const [showCancelConfirmationModal, setShowCancelConfirmationModal] =
+    useState(false);
+  const [showTransportConfirmationModal, setShowTransportConfirmationModal] =
+    useState(false);
 
   useEffect(() => {
-    if(isActiveOrderVisible && id) {
+    if (isActiveOrderVisible && id) {
       orderApi.getOrder(Number(id)).then(async (data) => {
         if (data.success) {
           const productsResponse = await productApi.getAllProducts({});
@@ -47,9 +54,14 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
             }
           }
 
-          const vendor = orderDetails.order_type === 'to_warehouse' ? orderDetails.supplier : orderDetails.recipient;
+          const vendor =
+            orderDetails.order_type === 'to_warehouse'
+              ? orderDetails.supplier
+              : orderDetails.recipient;
           const warehouse =
-            orderDetails.order_type === 'from_warehouse' ? orderDetails.supplier : orderDetails.recipient;
+            orderDetails.order_type === 'from_warehouse'
+              ? orderDetails.supplier
+              : orderDetails.recipient;
 
           orderDetails.items = orderItems ?? [];
           orderDetails.vendor = vendor?.vendor_name;
@@ -73,7 +85,9 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         return editMode ? (
           <InputNumber
             value={text}
-            onChange={(value) => handleQuantityChange(record.product_name, value)}
+            onChange={(value) =>
+              handleQuantityChange(record.product_name, value)
+            }
           />
         ) : (
           text
@@ -89,11 +103,14 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
       key: 'action',
       render: (text, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleRemoveItem(record.product_name)}>
+          <Button
+            type="link"
+            onClick={() => handleRemoveItem(record.product_name)}
+          >
             Remove
           </Button>
         </Space>
-      )
+      ),
     });
   }
 
@@ -104,7 +121,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   const hidePopup = () => {
     setShowTransportConfirmationModal(false);
-  }
+  };
 
   const handleEditOrder = () => {
     setEditMode(true);
@@ -113,14 +130,17 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   const handleUpdateOrder = async () => {
     const items = [];
-    for (let item of orderDetails.items){
+    for (let item of orderDetails.items) {
       items.push({
         product_id: item.product_id,
-        quantity: item.quantity
-      })
+        quantity: item.quantity,
+      });
     }
 
-    const response = await orderApi.updateOrder({ items, vendor_id: orderDetails.vendor_id }, Number(id));
+    const response = await orderApi.updateOrder(
+      { items, vendor_id: orderDetails.vendor_id },
+      Number(id),
+    );
     if (response.success) {
       onCancelSuccess();
       onClose();
@@ -136,7 +156,9 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   const handleRemoveItem = (productName) => {
     setOrderDetails((prevOrderDetails) => {
-      const updatedItems = prevOrderDetails.items.filter((item) => item.product_name !== productName);
+      const updatedItems = prevOrderDetails.items.filter(
+        (item) => item.product_name !== productName,
+      );
 
       return {
         ...prevOrderDetails,
@@ -150,7 +172,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   };
 
   const handleConfirmCancelOrder = async () => {
-    setShowCancelConfirmationModal(false)
+    setShowCancelConfirmationModal(false);
     const response = await orderApi.cancelOrder(Number(id));
     if (response.success) {
       onCancelSuccess();
@@ -163,7 +185,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   const handleQuantityChange = (productName, value) => {
     setOrderDetails((prevOrderDetails) => {
       const updatedItems = prevOrderDetails.items.map((item) =>
-        item.product_name === productName ? { ...item, quantity: value } : item
+        item.product_name === productName ? { ...item, quantity: value } : item,
       );
 
       return {
@@ -175,10 +197,10 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
 
   const handleConfirmDelivery = async () => {
     const response = await orderApi.changeStatusOfOrder(Number(id), 'finished');
-    if(response.success) {
+    if (response.success) {
       setShowConfirmationModal(false);
     } else {
-      showError(response.message)
+      showError(response.message);
     }
   };
 
@@ -195,11 +217,11 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
   const handleSuccessConfirm = async () => {
     onCancelSuccess();
     onClose();
-  }
+  };
   return (
     <Modal
       title={`Order Active Details ${editMode ? '(Editing)' : ''}`}
-      visible={isActiveOrderVisible}
+      open={isActiveOrderVisible}
       onCancel={onClose}
       footer={null}
     >
@@ -208,7 +230,9 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
           <span className="form-value">{orderDetails?.created_at}</span>
         </Form.Item>
         <Form.Item label="Destination" name="order_type">
-          <span className="form-value">{String(orderDetails?.order_type).replace(/_/g, ' ')}</span>
+          <span className="form-value">
+            {String(orderDetails?.order_type).replace(/_/g, ' ')}
+          </span>
         </Form.Item>
         <Form.Item label="Vendor Name" name="vendor">
           <span className="form-value">{orderDetails?.vendor}</span>
@@ -227,79 +251,104 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({ id, onClose, is
         </Form.Item>
       </Form>
 
-      <Table pagination={false} dataSource={orderDetails?.items} columns={columns} />
+      <Table
+        pagination={false}
+        dataSource={orderDetails?.items}
+        columns={columns}
+      />
 
       {editMode && (
         <>
-        <Button type="primary" onClick={handleUpdateOrder} style={{ marginTop: '16px' }}>
-          Update Order
-        </Button>
-        < Button onClick={handleCancelEdit} style={{marginLeft: '8px'}}>
-        Cancel update
-        </Button>
+          <Button
+            type="primary"
+            onClick={handleUpdateOrder}
+            style={{ marginTop: '16px' }}
+          >
+            Update Order
+          </Button>
+          <Button onClick={handleCancelEdit} style={{ marginLeft: '8px' }}>
+            Cancel update
+          </Button>
         </>
       )}
 
       <div style={{ textAlign: 'right', marginTop: '16px' }}>
-        {orderDetails?.order_status === 'new' && !editMode &&
+        {orderDetails?.order_status === 'new' &&
+          !editMode &&
           userRole === 'vendor' && (
-          <>
-            <Button type="primary" onClick={handleEditOrder}>
-              Edit Order
-            </Button>
-            <Button danger onClick={handleCancelOrder} style={{ marginLeft: '8px' }}>
-              Cancel Order
-            </Button>
-          </>
-        )}
-        {orderDetails?.order_status === 'processing' && orderDetails?.order_type === 'from_warehouse'
-          && userRole === 'vendor' && (
-          <>
-            <span style={{ marginRight: '8px', color: 'red' }}>Confirm order when it's delivered.</span>
-            <Button type="primary" onClick={() => setShowConfirmationModal(true)}>
-              Confirm Delivery
-            </Button>
-          </>
-        )}
+            <>
+              <Button type="primary" onClick={handleEditOrder}>
+                Edit Order
+              </Button>
+              <Button
+                danger
+                onClick={handleCancelOrder}
+                style={{ marginLeft: '8px' }}
+              >
+                Cancel Order
+              </Button>
+            </>
+          )}
+        {orderDetails?.order_status === 'processing' &&
+          orderDetails?.order_type === 'from_warehouse' &&
+          userRole === 'vendor' && (
+            <>
+              <span style={{ marginRight: '8px', color: 'red' }}>
+                Confirm order when it's delivered.
+              </span>
+              <Button
+                type="primary"
+                onClick={() => setShowConfirmationModal(true)}
+              >
+                Confirm Delivery
+              </Button>
+            </>
+          )}
       </div>
       <div style={{ textAlign: 'right', marginTop: '16px' }}>
         {/* ... (existing buttons) */}
-        {userRole === 'manager' && orderDetails?.order_status === 'new' && !editMode && (
-          <>
-            <Button type="primary" onClick={handleConfirmOrder}>
-              Confirm Order
-            </Button>
-            <Button danger onClick={handleRejectOrder} style={{ marginLeft: '8px' }}>
-              Reject Order
-            </Button>
-          </>
-        )}
-        {/* ... (existing buttons) */}
+        {userRole === 'manager' &&
+          orderDetails?.order_status === 'new' &&
+          !editMode && (
+            <>
+              <Button type="primary" onClick={handleConfirmOrder}>
+                Confirm Order
+              </Button>
+              <Button
+                danger
+                onClick={handleRejectOrder}
+                style={{ marginLeft: '8px' }}
+              >
+                Reject Order
+              </Button>
+            </>
+          )}
       </div>
       <Modal
         title="Confirm Delivery"
-        visible={showConfirmationModal}
+        open={showConfirmationModal}
         onOk={handleConfirmDelivery}
         onCancel={() => setShowConfirmationModal(false)}
       >
         <p>Are you sure you want to confirm delivery?</p>
       </Modal>
-      {orderDetails && (<ChooseTransport
-        acceptData={orderDetails}
-        isPopupVisible={showTransportConfirmationModal}
-        hidePopup={hidePopup}
-        success={handleSuccessConfirm}
-      ></ChooseTransport>)}
+      {orderDetails && (
+        <ChooseTransport
+          acceptData={orderDetails}
+          isPopupVisible={showTransportConfirmationModal}
+          hidePopup={hidePopup}
+          success={handleSuccessConfirm}
+        ></ChooseTransport>
+      )}
       <Modal
         title="Confirm Cancel Order"
-        visible={showCancelConfirmationModal}
+        open={showCancelConfirmationModal}
         onOk={handleConfirmCancelOrder}
         onCancel={() => setShowCancelConfirmationModal(false)}
       >
         <p>Are you sure you want to cancel this order?</p>
       </Modal>
     </Modal>
-
   );
 };
 
