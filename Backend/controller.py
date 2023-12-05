@@ -96,6 +96,8 @@ def controller(request: dict) -> dict:
         # Order`s endpoints
         elif "/orders" in url:
             if method == Method.GET.value:
+                if "/details" in url:
+                    return order_view.details(request=request, **filters)
                 return order_view.get_list(request=request, **filters)
             elif method == Method.POST.value:
                 return order_view.create(request=request)
