@@ -178,7 +178,9 @@ export default function ChooseTransport({
         acceptData.order_id,
       );
       if (response.success) {
-        await orderApi.changeStatusOfOrder(acceptData.order_id, 'processing');
+        if(acceptData.order_type === 'to_warehouse') {
+          await orderApi.changeStatusOfOrder(acceptData.order_id, 'processing');
+        }
         success();
       } else {
         showError(response.message);
