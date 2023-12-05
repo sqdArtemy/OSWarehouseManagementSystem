@@ -637,16 +637,21 @@ class OrderView(GenericView):
                 total_volume = product.volume * order_item.quantity
                 total_quantity = order_item.quantity
 
-                racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
-                  Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id,
-                  or_(
-                    and_(
-                      Inventory.inventory_id != None,
-                      Product.is_stackable == 1
-                    ),
-                    Inventory.inventory_id == None
-                  )
-                ).order_by(desc(Rack.rack_position)).all()
+                if product.is_stackable:
+                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
+                      Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id,
+                      or_(
+                        and_(
+                          Inventory.inventory_id != None,
+                          Product.is_stackable == 1
+                        ),
+                        Inventory.inventory_id == None
+                      )
+                    ).order_by(desc(Rack.rack_position)).all()
+                else:
+                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
+                      Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id, Rack.remaining_capacity == Rack.overall_capacity
+                    ).order_by(desc(Rack.rack_position)).all()
 
                 for rack in racks:
                     if rack.remaining_capacity == 0:
