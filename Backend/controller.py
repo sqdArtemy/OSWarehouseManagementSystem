@@ -85,6 +85,8 @@ def controller(request: dict) -> dict:
                 return inventory_view.create(request=request)
         elif "/inventory" in url:
             if method == Method.GET.value:
+                if "/stats/inventory/" in url:
+                    return inventory_view.group_inventory_by_product(request=request)
                 return inventory_view.get(request=request)
             elif method == Method.DELETE.value:
                 return inventory_view.delete(request=request)
@@ -105,6 +107,8 @@ def controller(request: dict) -> dict:
                 elif "/receive" in url:
                     if "/preview" in url:
                         return order_view.receive_preview(request=request)
+                elif "/stats/order" in url:
+                    return order_view.get_order_stats(request=request)
                 return order_view.get(request=request)
             elif method == Method.POST.value:
                 if "/lost-items" in url:
