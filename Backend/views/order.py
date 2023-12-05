@@ -763,22 +763,11 @@ class OrderView(GenericView):
         with get_session() as session:
 
             warehouse_id = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=creator_id).scalar()
-            order = session.query(Order).filter_by(order_id=order_id, supplier_id=warehouse_id)
+            order = session.query(Order).filter_by(order_id=order_id, recipient_id=warehouse_id)
             if not order.first():
                 raise ValidationError("Order Not Found.", 404)
 
-            if order.first().order_status in ("lost", "damaged"):
-                # change updated_at and order_status
-                order = order.first()
-                order.updated_at = datetime.now()
-                order.order_status = "finished"
-                session.commit()
-
-                self.response.status_code = 200
-                self.response.data = order.to_dict(cascade_fields=())
-                return self.response.create_response()
-
-            if order.first().order_status != "delivered":
+            if order.first().order_status not in ("lost", "damaged", "delivered"):
                 raise ValidationError("You cannot receive orders that are not delivered.", 400)
 
             # if order_items is empty
