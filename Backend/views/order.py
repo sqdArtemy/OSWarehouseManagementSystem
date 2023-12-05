@@ -114,9 +114,12 @@ class OrderView(GenericView):
                             (order.order_type == "to_warehouse" and order.supplier_id not in requester_vendors)
                     )
                     ) or (
-                            (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            (requester_role in (
+                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    (
+                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                                    (
+                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
                             )
                     )
             ):
@@ -436,15 +439,18 @@ class OrderView(GenericView):
 
             if requester_role == UserRole.SUPERVISOR.value["code"] or (
                     (
-                    requester_role == UserRole.VENDOR.value["code"] and (
-                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
-                       )
+                            requester_role == UserRole.VENDOR.value["code"] and (
+                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
+                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                    )
                     ) or (
-                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                       )
+                            (requester_role in (
+                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    (
+                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                                    (
+                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            )
                     )
             ):
                 raise ValidationError("Order not found.", 404)
@@ -571,7 +577,7 @@ class OrderView(GenericView):
                     {"remaining_capacity": warehouse.remaining_capacity + changed_volume})
 
             session.query(Order).filter_by(order_id=order_id).update(
-                    {"order_status": "processing", "updated_at": datetime.now()})
+                {"order_status": "processing", "updated_at": datetime.now()})
 
             session.commit()
 
@@ -915,3 +921,78 @@ class OrderView(GenericView):
         self.response.status_code = 200
         self.response.data = result
         return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def details(self, request: dict, **kwargs) -> dict:
+        """
+        Get all orders from the database depending on requester`s role.
+        :param request: dictionary containing url, method, body and headers
+        :param kwargs: arguments to be checked, here you need to pass fields on which instances will be filtered
+        :return: dictionary containing status_code and response body with list of dictionaries of order`s data
+        """
+        with get_session() as session:
+            requester = session.query(User).filter_by(user_id=self.requester_id).first()
+            warehouse_id = extract_id_from_url(request["url"], "details")
+
+            filters_to_apply = []
+            if self.headers.get('filters'):
+                cmp = self.headers.get('filters')
+                if 'created_at_gte' in cmp:
+                    filters_to_apply.append(Order.created_at >= cmp['created_at_gte'])
+                if 'created_at_lte' in cmp:
+                    filters_to_apply.append(Order.created_at <= cmp['created_at_lte'])
+
+            if self.requester_role == UserRole.MANAGER.value["code"]:
+                warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(
+                    company_id=requester.company.company_id).all()
+                warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+
+                if warehouse_id:
+                    warehouse_ids = [warehouse_id]
+
+                orders = session.query(Order).filter(
+                    or_(
+                        and_(Order.order_type == "from_warehouse", Order.supplier_id.in_(warehouse_ids)),
+                        and_(Order.order_type == "to_warehouse", Order.recipient_id.in_(warehouse_ids))
+                    )
+                )
+                # Apply the filters to the query
+                if filters_to_apply:
+                    orders = orders.filter(*filters_to_apply).all()
+            else:
+                raise ValidationError("Not allowed to access this functionality", 403)
+
+            all_results = []
+            for order in orders:
+
+                total_volume = session.query(func.sum(OrderItem.quantity * Product.volume)). \
+                    join(Product, OrderItem.product_id == Product.product_id). \
+                    filter(OrderItem.order_id == order.order_id).scalar()
+
+                result = order.to_dict(cascade_fields=("supplier", "recipient"))
+                result["total_volume"] = total_volume
+                result["ordered_items"] = [
+                    order_item.to_dict(cascade_fields=()) for order_item in order.ordered_items
+                ]
+
+                if len(result["ordered_items"]) != 0:
+                    for var in result["ordered_items"]:
+                        product_name = session.query(Product.product_name).filter(Product.product_id == var["product"]).scalar()
+                        var["product_name"] = product_name
+
+                result["lost_items"] = [
+                    lost_item.to_dict(cascade_fields=()) for lost_item in order.lost_items
+                ]
+
+                if len(result["lost_items"]) != 0:
+                    for var in result["lost_items"]:
+                        product_name = session.query(Product.product_name).filter(Product.product_id == var["product"]).scalar()
+                        var["product_name"] = product_name
+
+                all_results.append(result)
+
+            self.response.status_code = 200
+            self.response.data = all_results
+
+            return self.response.create_response()

@@ -56,7 +56,7 @@ class LostItemView(GenericView):
                     )
                     ) or (
                             (requester_role in (
-                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
                                     (
                                             order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
                                     (
@@ -153,12 +153,12 @@ class LostItemView(GenericView):
             requester = session.query(User).filter_by(user_id=requester_id).first()
 
             filters_to_apply = []
-            cmp = self.headers.get('filters')
-
-            if 'created_at_gte' in cmp:
-                filters_to_apply.append(Order.created_at >= cmp['created_at_gte'])
-            if 'created_at_lte' in cmp:
-                filters_to_apply.append(Order.created_at <= cmp['created_at_lte'])
+            if self.headers.get('filters'):
+                cmp = self.headers.get('filters')
+                if 'created_at_gte' in cmp:
+                    filters_to_apply.append(Order.created_at >= cmp['created_at_gte'])
+                if 'created_at_lte' in cmp:
+                    filters_to_apply.append(Order.created_at <= cmp['created_at_lte'])
 
             lost_products = (
                 session.query(
