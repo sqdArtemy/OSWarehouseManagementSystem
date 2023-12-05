@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { IOrderData } from '../requests';
 import { Button, Form, Modal } from 'antd';
 import RacksGrid from '../../../racks-grid-component/racks-grid';
-import { orderApi, warehouseApi } from '../../../../index';
+import { orderApi, userApi, warehouseApi } from '../../../../index';
 import { normalizeRacksForGrid } from '../../../../services/utils/normalizeRacksForGrid';
 import { normalizePreviewedRacks } from '../../../../services/utils/normalizePreviewedRacks';
 import { useLoading } from '../../../loading-component/loading';
@@ -80,7 +80,23 @@ export default function Preview({
     stopLoading();
     if (result.success) {
       hidePopup();
-      navigate(`/supervisor/warehouses/${orderData.orderData.warehouseId}`);
+      return navigate(
+        `/supervisor/warehouses/${orderData.orderData.warehouseId}`,
+        {
+          state: {
+            locWarehouseData: {
+              warehouse_id: orderData.orderData.warehouseId,
+              warehouseName: userApi.getUserData.warehouses[0].warehouse_name,
+              capacity: userApi.getUserData.warehouses[0].overall_capacity,
+              supervisor:
+                userApi.getUserData.warehouses[0].supervisor.user_name,
+              type: userApi.getUserData.warehouses[0].warehouse_type,
+              address: userApi.getUserData.warehouses[0].warehouse_address,
+              remaining: userApi.getUserData.warehouses[0].remaining_capacity,
+            },
+          },
+        },
+      );
     } else {
       hidePopup();
       showError(result.message);
