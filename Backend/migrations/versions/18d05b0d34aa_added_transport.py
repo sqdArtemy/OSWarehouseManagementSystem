@@ -26,7 +26,7 @@ def upgrade() -> None:
     sa.Column('transport_type', sa.Enum('truck', 'van', 'car', 'helicopter', name='transport_type'), nullable=False),
     sa.Column('transport_speed', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
     sa.Column('price_per_weight', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
-    sa.CheckConstraint('price_per_weight > 0', name='check_price_per_weight'),
+    sa.CheckConstraint('price_per_weight >= 0', name='check_price_per_weight'),
     sa.CheckConstraint('transport_capacity > 0', name='check_transport_capacity'),
     sa.CheckConstraint('transport_speed > 0', name='check_transport_speed'),
     sa.PrimaryKeyConstraint('transport_id')

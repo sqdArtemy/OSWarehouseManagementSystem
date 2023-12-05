@@ -8,6 +8,7 @@ export default function Accept({
   isPopupVisible,
   hidePopup,
   orderData,
+  onSuccessDeliver
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -15,6 +16,7 @@ export default function Accept({
     orderData: IOrderData;
     setOrderData: (orderData: IOrderData) => void;
   };
+  onSuccessDeliver: () => void
 }) {
   const [itemsData, setItemsData] = useState([]);
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
@@ -178,12 +180,15 @@ export default function Accept({
 
   const formRef = React.useRef<FormInstance>(null);
   const onFinish = async () => {
-    await orderApi.changeStatusOfOrder(
-      orderData.orderData.orderId,
-      'delivered',
-    );
 
-    if (selectedStatus == 'damaged') {
+    if(selectedStatus === 'delivered') {
+      await orderApi.changeStatusOfOrder(
+        orderData.orderData.orderId,
+        'delivered',
+      );
+    }
+
+    else if (selectedStatus == 'damaged') {
       const items = itemsData
         .map((value) => {
           return {
@@ -204,7 +209,7 @@ export default function Accept({
         .filter((item) => item.name !== '' && item.lost !== 0);
       await orderApi.lostItems(orderData.orderData.orderId, 'lost', items);
     }
-
+    onSuccessDeliver();
     hidePopup();
   };
 

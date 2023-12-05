@@ -53,6 +53,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     ],
   });
 
+
   const updateChartData = async () => {
     startLoading();
     const result = await warehouseApi.getWarehouse(Number(warehouse_id));

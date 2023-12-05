@@ -28,7 +28,7 @@ class Product(Base):
     __table_args__ = (
         CheckConstraint("weight > 0", name="check_weight"),
         CheckConstraint("volume > 0", name="check_volume"),
-        CheckConstraint("price > 0", name="check_price")
+        CheckConstraint("price >= 0", name="check_price")
     )
 
     def to_dict(self, cascade_fields: list[str] = ("company",)):

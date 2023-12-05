@@ -80,7 +80,7 @@ export default function Preview({
     stopLoading();
     if (result.success) {
       hidePopup();
-      navigate(`/supervisor/warehouse/${orderData.orderData.warehouseId}`);
+      navigate(`/supervisor/warehouses/${orderData.orderData.warehouseId}`);
     } else {
       hidePopup();
       showError(result.message);
