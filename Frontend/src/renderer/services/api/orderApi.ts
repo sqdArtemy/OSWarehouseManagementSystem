@@ -99,6 +99,8 @@ export class OrderApi implements IOrder {
         product_id: item.product_id,
         rack_id: item.rack_id,
       };
+    }).filter((item) => {
+      return item.quantity > 0;
     });
     const body = { filled_inventories: processedFilledInventory };
 
@@ -127,6 +129,8 @@ export class OrderApi implements IOrder {
         product_id: item.product_id,
         rack_id: item.rack_id,
       };
+    }).filter((item) => {
+      return item.quantity > 0;
     });
     const body = { filled_inventories: processedFilledInventory };
 
