@@ -93,17 +93,18 @@ export class OrderApi implements IOrder {
     const url = `/order/${id}/receive`;
     const method = 'PUT';
     const headers = {};
-    const processedFilledInventory = filledInventory.map((item) => {
-      return {
-        quantity: item.real_quantity,
-        product_id: item.product_id,
-        rack_id: item.rack_id,
-      };
-    }).filter((item) => {
-      return item.quantity > 0;
-    });
+    const processedFilledInventory = filledInventory
+      .map((item) => {
+        return {
+          quantity: item.real_quantity,
+          product_id: item.product_id,
+          rack_id: item.rack_id,
+        };
+      })
+      .filter((item) => {
+        return item.quantity > 0;
+      });
     const body = { filled_inventories: processedFilledInventory };
-
     return await this.handleApiRequestWithToken({ url, method, body, headers });
   }
 
@@ -123,15 +124,17 @@ export class OrderApi implements IOrder {
     const url = `/order/${id}/send`;
     const method = 'PUT';
     const headers = {};
-    const processedFilledInventory = filledInventory.map((item) => {
-      return {
-        quantity: item.real_quantity,
-        product_id: item.product_id,
-        rack_id: item.rack_id,
-      };
-    }).filter((item) => {
-      return item.quantity > 0;
-    });
+    const processedFilledInventory = filledInventory
+      .map((item) => {
+        return {
+          quantity: item.real_quantity,
+          product_id: item.product_id,
+          rack_id: item.rack_id,
+        };
+      })
+      .filter((item) => {
+        return item.quantity > 0;
+      });
     const body = { filled_inventories: processedFilledInventory };
 
     return await this.handleApiRequestWithToken({ url, method, body, headers });

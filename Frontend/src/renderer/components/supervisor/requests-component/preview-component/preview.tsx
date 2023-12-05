@@ -192,7 +192,7 @@ export default function Preview({
         <div className={'order-preview-container'}>
           <div className={'order-preview-left-container'}>
             <RacksGrid externalGridData={previewGridData} />
-            <Button type="primary" htmlType="submit" onClick={onFinish}>
+            <Button type="primary" htmlType="submit">
               Confirm
             </Button>
           </div>

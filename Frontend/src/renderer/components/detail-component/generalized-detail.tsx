@@ -53,7 +53,6 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     ],
   });
 
-
   const updateChartData = async () => {
     startLoading();
     const result = await warehouseApi.getWarehouse(Number(warehouse_id));
@@ -100,11 +99,14 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
 
     console.log('Warehouse ID: ', warehouse_id);
 
+    startLoading();
     warehouseApi.getWarehouse(Number(warehouse_id)).then((data) => {
-      console.log(data);
       if (data.success && data.data?.data) {
         setGridData(normalizeRacksForGrid(data.data.data.racks));
+      } else {
+        showError(data.message);
       }
+      stopLoading();
 
       setChartData({
         labels: ['Occupied', 'Free'],
