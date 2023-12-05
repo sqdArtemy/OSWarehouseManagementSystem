@@ -87,55 +87,57 @@ export default function ChooseTransport({
   ];
 
   useEffect(() => {
-    const volume = acceptData ? acceptData.total_volume : 0;
+    if (isPopupVisible) {
+      const volume = acceptData ? acceptData.total_volume : 0;
 
-    transportApi
-      .getAllTransports({ transport_capacity_gte: volume })
-      .then((data) => {
-        const transports = data.data.body;
+      transportApi
+        .getAllTransports({ transport_capacity_gte: volume })
+        .then((data) => {
+          const transports = data.data.body;
 
-        let dataSource = [];
-        let counter = 0;
-        for (let transport of transports) {
-          dataSource.push({
-            key: (counter++).toString(),
-            transport: transport.transport_type,
-            totalVolume: transport.transport_capacity,
-            transport_id: transport.transport_id,
-          });
-        }
+          let dataSource = [];
+          let counter = 0;
+          for (let transport of transports) {
+            dataSource.push({
+              key: (counter++).toString(),
+              transport: transport.transport_type,
+              totalVolume: transport.transport_capacity,
+              transport_id: transport.transport_id,
+            });
+          }
 
-        dataSource
-          .filter((transport) => {
-            return transport.transport_capacity > volume;
-          })
-          .sort((a, b) => {
-            return a.transport_capacity - b.transport_capacity;
-          });
+          dataSource
+            .filter((transport) => {
+              return transport.transport_capacity > volume;
+            })
+            .sort((a, b) => {
+              return a.transport_capacity - b.transport_capacity;
+            });
 
-        setTransport(dataSource);
-      });
-    const calculateScrollSize = () => {
-      const vw = Math.max(
-        document.documentElement.clientWidth || 0,
-        window.innerWidth || 0,
-      );
-      const vh = Math.max(
-        document.documentElement.clientHeight || 0,
-        window.innerHeight || 0,
-      );
+          setTransport(dataSource);
+        });
+      const calculateScrollSize = () => {
+        const vw = Math.max(
+          document.documentElement.clientWidth || 0,
+          window.innerWidth || 0,
+        );
+        const vh = Math.max(
+          document.documentElement.clientHeight || 0,
+          window.innerHeight || 0,
+        );
 
-      setScrollSize({
-        x: vw * 0.3,
-        y: vh * 0.3,
-      });
-    };
+        setScrollSize({
+          x: vw * 0.3,
+          y: vh * 0.3,
+        });
+      };
 
-    calculateScrollSize();
-    window.addEventListener('resize', calculateScrollSize);
+      calculateScrollSize();
+      window.addEventListener('resize', calculateScrollSize);
 
-    return () => window.removeEventListener('resize', calculateScrollSize);
-  }, []);
+      return () => window.removeEventListener('resize', calculateScrollSize);
+    }
+  }, [isPopupVisible]);
 
   const handleReset = () => {
     formRef.current?.resetFields();
@@ -178,7 +180,7 @@ export default function ChooseTransport({
         acceptData.order_id,
       );
       if (response.success) {
-        if(acceptData.order_type === 'to_warehouse') {
+        if (acceptData.order_type === 'to_warehouse') {
           await orderApi.changeStatusOfOrder(acceptData.order_id, 'processing');
         }
         success();

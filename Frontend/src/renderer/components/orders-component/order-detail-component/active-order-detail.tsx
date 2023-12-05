@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Table, Button, InputNumber, Space } from 'antd';
-import { orderApi, productApi, userApi } from '../../../index';
+import { orderApi, productApi, transportApi, userApi } from '../../../index';
 import './active-order-detail.scss';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../error-component/error-context';
@@ -207,6 +207,16 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
   const userRole = userApi.getUserData.user_role;
 
   const handleConfirmOrder = async () => {
+    const volume = orderDetails ? orderDetails.total_volume : 0;
+    const transports = await transportApi.getAllTransports({
+      transport_capacity_gte: volume,
+    });
+    if (transports.length === 0) {
+      showError(
+        'No transport available. Ask the system administrator to add more transport.',
+      );
+      return;
+    }
     setShowTransportConfirmationModal(true);
   };
 
@@ -338,7 +348,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
           isPopupVisible={showTransportConfirmationModal}
           hidePopup={hidePopup}
           success={handleSuccessConfirm}
-        ></ChooseTransport>
+        />
       )}
       <Modal
         title="Confirm Cancel Order"
