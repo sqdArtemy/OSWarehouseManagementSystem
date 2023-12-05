@@ -86,6 +86,58 @@ export default function Requests() {
     setIsPreviewVisible(false);
   };
 
+  const separateOrders = (orders: any[]) => {
+    if (orders?.length) {
+      const finishedItems = [];
+      const activeItems = [];
+      let activeKey = 0;
+      let finishKey = 0;
+      for (let i = 0; i < orders.length; i++) {
+        let order = orders[i];
+        const vendor =
+          order.order_type === 'to_warehouse'
+            ? order.supplier
+            : order.recipient;
+        const warehouse =
+          order.order_type === 'from_warehouse'
+            ? order.supplier
+            : order.recipient;
+
+        const orderItem = {
+          orderStatus: orders[i].order_status,
+          orderType: orders[i].order_type,
+          createdAt: orders[i].created_at,
+          orderId: orders[i].order_id,
+          vendorName: vendor?.vendor_name,
+          vendorId: vendor?.vendor_id,
+          warehouseName: warehouse?.warehouse_name,
+          warehouseId: warehouse?.warehouse_id,
+        };
+
+        if (order.order_type === 'from_warehouse' && order.order_status === 'submitted') {
+          orderItem.key = (activeKey++).toString();
+          activeItems.push(orderItem);
+        } else if (order.order_type === 'to_warehouse'
+          && ['processing', 'delivered', 'lost', 'damaged'].includes(order.order_status) ){
+          orderItem.key = (finishKey++).toString();
+          finishedItems.push(orderItem);
+        }
+      }
+
+      setFromTo(finishedItems);
+      setToFrom(activeItems);
+    } else {
+      setFromTo([]);
+      setToFrom([]);
+    }
+  }
+
+  const setOrders = async () => {
+    const response = await orderApi.getAllOrders({});
+    if(response.success){
+      separateOrders(response.data.body);
+    }
+  }
   const columns = [
     {
       title: 'Vendor',
@@ -139,67 +191,9 @@ export default function Requests() {
     orderApi.getAllOrders({}).then(async (data) => {
       const orders = data.data?.body;
       console.log('orders', orders);
-      if (orders?.length) {
-        const finishedItems = [];
-        const activeItems = [];
-        let activeKey = 0;
-        let finishKey = 0;
-        for (let i = 0; i < orders.length; i++) {
-          let order = orders[i];
-          const vendor =
-            order.order_type === 'to_warehouse'
-              ? order.supplier
-              : order.recipient;
-          const warehouse =
-            order.order_type === 'from_warehouse'
-              ? order.supplier
-              : order.recipient;
-
-          const orderItem = {
-            orderStatus: orders[i].order_status,
-            orderType: orders[i].order_type,
-            createdAt: orders[i].created_at,
-            orderId: orders[i].order_id,
-            vendorName: vendor?.vendor_name,
-            vendorId: vendor?.vendor_id,
-            warehouseName: warehouse?.warehouse_name,
-            warehouseId: warehouse?.warehouse_id,
-          };
-
-          if (order.order_type === 'from_warehouse') {
-            orderItem.key = (activeKey++).toString();
-            activeItems.push(orderItem);
-          } else {
-            orderItem.key = (finishKey++).toString();
-            finishedItems.push(orderItem);
-          }
-        }
-
-        console.log('items', finishedItems, activeItems);
-        setFromTo(finishedItems);
-        setToFrom(activeItems);
-      } else {
-        setFromTo([]);
-        setToFrom([]);
-      }
+      separateOrders(orders);
     });
 
-    // setFromTo([
-    //   {
-    //     key: '1',
-    //     from: 'something',
-    //     to: 'something',
-    //     createdAt: '11.09.2001',
-    //   },
-    // ]);
-    // setToFrom([
-    //   {
-    //     key: '1',
-    //     from: 'something',
-    //     to: 'something',
-    //     createdAt: '12.09.2001',
-    //   },
-    // ]);
     const calculateScrollSize = () => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -282,6 +276,7 @@ export default function Requests() {
             orderData: orderData,
             setOrderData: setOrderData,
           }}
+          onSuccessDeliver={setOrders}
         />
         <Preview
           hidePopup={hidePreview}
