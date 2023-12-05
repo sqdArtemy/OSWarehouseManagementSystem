@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './racks-grid.scss';
+import { Tooltip } from 'antd';
 
 export default function RacksGrid({ externalGridData, handleCellClick }) {
   // gridData = [
@@ -18,7 +19,6 @@ export default function RacksGrid({ externalGridData, handleCellClick }) {
   const [numColumns, setNumColumns] = useState(0);
   const [numRows, setNumRows] = useState(0);
   useEffect(() => {
-    console.log(externalGridData);
     setGridData(externalGridData);
     setNumColumns(gridData.length > 0 ? gridData[0].length : 0);
     setNumRows(gridData.length);
@@ -28,15 +28,20 @@ export default function RacksGrid({ externalGridData, handleCellClick }) {
     return gridData.map((row, rowIndex) => (
       <div className="grid-row" key={`row-${rowIndex}`}>
         {row.map((cell, cellIndex) => (
-          <div
-            className={`grid-cell ${
-              cell.isFull ? 'full' : !cell.isEmpty ? 'nonempty' : ''
-            } ${cell.isHidden ? 'hidden' : ''} ${
-              cell.isSelected ? 'golden' : ''
-            }`}
-            key={`cell-${rowIndex}-${cellIndex}`}
-            onClick={handleCellClick ? () => handleCellClick(cell) : null}
-          ></div>
+          <Tooltip
+            placement={'topLeft'}
+            title={`${cell.isSelected ? 'Selected Rack' : ''}`}
+          >
+            <div
+              className={`grid-cell ${
+                cell.isFull ? 'full' : !cell.isEmpty ? 'nonempty' : ''
+              } ${cell.isHidden ? 'hidden' : ''} ${
+                cell.isSelected ? 'selected' : ''
+              }`}
+              key={`cell-${rowIndex}-${cellIndex}`}
+              onClick={handleCellClick ? () => handleCellClick(cell) : null}
+            ></div>
+          </Tooltip>
         ))}
       </div>
     ));
