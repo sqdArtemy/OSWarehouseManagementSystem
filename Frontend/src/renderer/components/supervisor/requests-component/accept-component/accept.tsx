@@ -3,12 +3,13 @@ import { Button, Form, FormInstance, Input, Modal, Select, Table } from 'antd';
 import { orderApi, productApi } from '../../../../index';
 import { IOrderData } from '../requests';
 import { ApiResponse } from '../../../../services/apiRequestHandler';
+import { getItems } from '../util';
 
 export default function Accept({
   isPopupVisible,
   hidePopup,
   orderData,
-  onSuccessDeliver
+  onSuccessDeliver,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -16,7 +17,7 @@ export default function Accept({
     orderData: IOrderData;
     setOrderData: (orderData: IOrderData) => void;
   };
-  onSuccessDeliver: () => void
+  onSuccessDeliver: () => void;
 }) {
   const [itemsData, setItemsData] = useState([]);
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
@@ -28,17 +29,6 @@ export default function Accept({
     else if (selectedStatus.includes('lost')) return 'lost';
     return '';
   };
-
-  const placeholderRowCount = 30;
-
-  const placeholderData = Array.from(
-    { length: placeholderRowCount },
-    (_, index) => ({
-      key: (index + 1).toString(),
-      name: '',
-      amount: '',
-    }),
-  );
 
   const columns = [
     {
@@ -123,39 +113,9 @@ export default function Accept({
     //   },
     // ]);
     if (isPopupVisible && orderData.orderData && formRef.current) {
-      orderApi
-        .getOrder(orderData.orderData.orderId)
-        .then((res: ApiResponse) => {
-          if (res.success) {
-            const items = res.data.body.items;
-            console.log('items', items);
-            productApi.getAllProducts({}).then((res) => {
-              const products = res.data.body;
-              const itemsMap = items.map((item, idx) => {
-                const matchProduct = products.find((product) => {
-                  return item.product === product.product_id;
-                });
-                if (matchProduct) {
-                  return {
-                    key: (idx + 1).toString(),
-                    name: matchProduct.product_name,
-                    amount: item.quantity,
-                    id: matchProduct.product_id,
-                  };
-                } else {
-                  return {
-                    key: (idx + 1).toString(),
-                    name: '',
-                    amount: '',
-                    id: -1,
-                  };
-                }
-              });
-              console.log('itemsMap', itemsMap);
-              setItemsData([...itemsMap]);
-            });
-          }
-        });
+      getItems(orderData).then((data) => {
+        setItemsData(data);
+      });
     }
   }, [orderData]);
 
@@ -180,15 +140,12 @@ export default function Accept({
 
   const formRef = React.useRef<FormInstance>(null);
   const onFinish = async () => {
-
-    if(selectedStatus === 'delivered') {
+    if (selectedStatus === 'delivered') {
       await orderApi.changeStatusOfOrder(
         orderData.orderData.orderId,
         'delivered',
       );
-    }
-
-    else if (selectedStatus == 'damaged') {
+    } else if (selectedStatus == 'damaged') {
       const items = itemsData
         .map((value) => {
           return {
@@ -232,6 +189,17 @@ export default function Accept({
     setSelectedStatus(selectedOption);
     setShowColumn(!selectedOption.includes('delivered'));
   };
+
+  const placeholderRowCount = 30;
+
+  const placeholderData = Array.from(
+    { length: placeholderRowCount },
+    (_, index) => ({
+      key: (index + 1).toString(),
+      name: '',
+      amount: '',
+    }),
+  );
 
   let tableData = itemsData.length > 0 ? itemsData : placeholderData;
   if (tableData.length < placeholderRowCount) {

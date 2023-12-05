@@ -1,0 +1,51 @@
+.order-preview-container {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  height: 70vh;
+  gap: 2vw;
+
+  .order-preview-left-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 40%;
+    height: 100%;
+    gap: 1rem;
+    overflow: auto;
+
+  }
+
+  .order-preview-right-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60%;
+    height: 100%;
+    gap:3vw;
+
+    .order-preview-right-items-list-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .order-preview-right-lost-items-list-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+    }
+  }
+
+}
+
+.order-preview-right-table-header{
+  font-size: 1.2vw;
+}
+
+.order-preview-right-items-table{
+  width: 40vw;
+}

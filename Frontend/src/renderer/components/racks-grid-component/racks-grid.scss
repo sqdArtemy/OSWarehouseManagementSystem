@@ -2,8 +2,8 @@
   display: grid;
   grid-template-columns: repeat(10, 1fr); /* Adjusted as needed */
   grid-template-rows: repeat(10, 1fr); /* Adjusted as needed */
-  width: 35vw; /* Set a fixed width */
-  height: 70vh; /* Set a fixed height */
+  width: 100%; /* Set a fixed width */
+  height: 100%; /* Set a fixed height */
   gap: 0.7vw;
   overflow: auto; /* Enables scrolling */
 

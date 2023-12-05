@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IOrderData } from '../requests';
-import { Button, Form, Modal } from 'antd';
+import { Button, Form, Input, Modal, Table } from 'antd';
 import RacksGrid from '../../../racks-grid-component/racks-grid';
 import { orderApi, userApi, warehouseApi } from '../../../../index';
 import { normalizeRacksForGrid } from '../../../../services/utils/normalizeRacksForGrid';
@@ -8,6 +8,8 @@ import { normalizePreviewedRacks } from '../../../../services/utils/normalizePre
 import { useLoading } from '../../../loading-component/loading';
 import { useError } from '../../../error-component/error-context';
 import { useNavigate } from 'react-router-dom';
+import './preview.scss';
+import { getItems, getLostItems } from '../util';
 
 export default function Preview({
   isPopupVisible,
@@ -23,6 +25,9 @@ export default function Preview({
 }) {
   const [previewGridData, setPreviewGridData] = useState([]);
   const [filledInventories, setFilledInventories] = useState([]);
+  const [itemsDataSource, setItemsDataSource] = useState([]);
+  const [lostItemsDataSource, setLostItemsDataSource] = useState([]);
+  const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const { showError } = useError();
   const { startLoading, stopLoading } = useLoading();
   const navigate = useNavigate();
@@ -59,6 +64,10 @@ export default function Preview({
           } else {
             showError(warehouseResponse.message);
           }
+          const itemsResponse = await getItems(orderData);
+          const lostItemsResponse = await getLostItems(orderData);
+          setItemsDataSource(itemsResponse);
+          setLostItemsDataSource(lostItemsResponse);
         } catch (error) {
           showError(error.message);
         } finally {
@@ -103,25 +112,123 @@ export default function Preview({
     }
   };
 
+  useEffect(() => {
+    const calculateScrollSize = () => {
+      const vw = Math.max(
+        document.documentElement.clientWidth || 0,
+        window.innerWidth || 0,
+      );
+      const vh = Math.max(
+        document.documentElement.clientHeight || 0,
+        window.innerHeight || 0,
+      );
+
+      setScrollSize({
+        x: vw * 0.1,
+        y: vh * 0.2,
+      });
+    };
+    calculateScrollSize();
+    window.addEventListener('resize', calculateScrollSize);
+
+    return () => window.removeEventListener('resize', calculateScrollSize);
+  }, []);
+
+  const columns = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      align: 'center',
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'center',
+    },
+  ];
+
+  const placeholderRowCount = 30;
+
+  const placeholderData = Array.from(
+    { length: placeholderRowCount },
+    (_, index) => ({
+      key: (index + 1).toString(),
+      name: '',
+      amount: '',
+    }),
+  );
+
+  let itemsTableData =
+    itemsDataSource.length > 0 ? itemsDataSource : placeholderData;
+  if (itemsTableData.length < placeholderRowCount) {
+    itemsTableData = [
+      ...itemsTableData,
+      ...placeholderData.slice(itemsTableData.length + 1),
+    ];
+  }
+
+  let lostItemsTableData =
+    lostItemsDataSource.length > 0 ? lostItemsDataSource : placeholderData;
+  if (lostItemsTableData.length < placeholderRowCount) {
+    lostItemsTableData = [
+      ...lostItemsTableData,
+      ...placeholderData.slice(lostItemsTableData.length + 1),
+    ];
+  }
+
   return (
     <Modal
       open={isPopupVisible}
       onCancel={hidePopup}
       onOk={onFinish}
       footer={null}
-      width={1000}
+      width="80vw"
       title="Order Preview"
       okButtonProps={{ style: { display: 'none' } }}
     >
       <Form onFinish={onFinish}>
-        <Form.Item>
-          <RacksGrid externalGridData={previewGridData} />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" onClick={onFinish}>
-            Confirm
-          </Button>
-        </Form.Item>
+        <div className={'order-preview-container'}>
+          <div className={'order-preview-left-container'}>
+            <RacksGrid externalGridData={previewGridData} />
+            <Button type="primary" htmlType="submit" onClick={onFinish}>
+              Confirm
+            </Button>
+          </div>
+          <div className={'order-preview-right-container'}>
+            <div className={'order-preview-right-items-list-container'}>
+              <span className={'order-preview-right-table-header'}>
+                Items List
+              </span>
+              <Table
+                dataSource={itemsTableData as []}
+                columns={columns as []}
+                scroll={scrollSize}
+                pagination={false}
+                size={'small'}
+                bordered={true}
+                className={'order-preview-right-items-table'}
+                rowClassName={'default-table-row-height'}
+              />
+            </div>
+            <div className={'order-preview-right-lost-items-list-container'}>
+              <span className={'order-preview-right-table-header'}>
+                Lost Items List
+              </span>
+              <Table
+                dataSource={lostItemsTableData as []}
+                columns={columns as []}
+                scroll={scrollSize}
+                pagination={false}
+                size={'small'}
+                bordered={true}
+                className={'order-preview-right-items-table'}
+                rowClassName={'default-table-row-height'}
+              />
+            </div>
+          </div>
+        </div>
       </Form>
     </Modal>
   );
