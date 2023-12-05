@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
+from sqlalchemy import func, or_, and_, desc, text
 
 from db_config import get_session
 from models import Inventory, User, Warehouse, Rack, Product
-from services import view_function_middleware, check_allowed_methods_middleware
+from services import view_function_middleware, check_allowed_methods_middleware, check_allowed_roles_middleware
 from services.generics import GenericView
 from utilities import decode_token, ValidationError
+from utilities.enums.data_related_enums import UserRole
 from utilities.enums.method import Method
 
 
@@ -146,4 +148,56 @@ class InventoryView(GenericView):
 
             self.response.status_code = 200
             self.response.data = rack.to_dict()
+            return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"],
+                                     UserRole.ADMIN.value["code"],
+                                     UserRole.SUPERVISOR.value["code"]])
+    @check_allowed_methods_middleware([Method.GET.value])
+    def group_inventory_by_product(self, request: dict) -> dict:
+        """
+        Group inventory by product.
+        :param request: dictionary containing url, method, body and headers
+        :return: dictionary containing status_code and response body
+        """
+        # TODO: fix Decimal which is returned from func.avg(func.datediff())
+        with (get_session() as session):
+
+            result = session.query(Inventory.product_id, Product.product_name,
+                                   func.count(Inventory.product_id).label("products_number"),
+                                   func.sum(Inventory.total_volume).label("total_volume_sum"),
+                                   func.avg(func.datediff(Inventory.expiry_date, Inventory.arrival_date))
+                                   .label("average_expiry_date"),
+                                   ).join(Product).group_by(Inventory.product_id)
+
+            # if admin - return everything
+            if self.requester_role == UserRole.ADMIN.value["code"]:
+                result = result.all()
+
+            # if manager - return all warehouses
+            if self.requester_role == UserRole.MANAGER.value["code"]:
+                manager = session.query(User).filter_by(user_id=self.requester_id).first()
+                wh_ids = session.query(Warehouse.warehouse_id).filter_by(company_id=manager.company_id).all()
+                rack_ids = session.query(Rack.rack_id).filter(Rack.warehouse_id.in_([i[0] for i in wh_ids])).all()
+                result = result.filter(Inventory.rack_id.in_([j[0] for j in rack_ids])).all()
+
+            # if supervisor - return only his warehouse
+            if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+                warehouse = session.query(Warehouse).filter_by(supervisor_id=self.requester_id).first()
+                rack_ids = session.query(Rack.rack_id).filter_by(warehouse_id=warehouse.warehouse_id).all()
+                result = result.filter(Inventory.rack_id.in_([j[0] for j in rack_ids])).all()
+
+            data = list()
+            for res in result:
+                data.append({
+                    "product_id": res[0],
+                    "product_name": res[1],
+                    "products_number": res[2],
+                    "total_volume_sum": res[3],
+                    "average_expiry_date": res[4],
+                })
+
+            self.response.status_code = 200
+            self.response.data = data
             return self.response.create_response()

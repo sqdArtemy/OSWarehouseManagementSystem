@@ -98,11 +98,7 @@ class OrderView(GenericView):
         with get_session() as session:
             requester = session.query(User).filter_by(user_id=requester_id).first()
 
-            if requester_role == UserRole.VENDOR.value["code"]:
-                requester_vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester_id).all()
-                requester_vendors = [vendor[0] for vendor in requester_vendors]
-
-            elif self.requester_role == UserRole.SUPERVISOR.value["code"]:
+            if self.requester_role == UserRole.SUPERVISOR.value["code"]:
                 requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
                     supervisor_id=requester_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
@@ -135,6 +131,9 @@ class OrderView(GenericView):
             self.response.data["total_volume"] = total_volume
             self.response.data["items"] = [
                 order_item.to_dict(cascade_fields=()) for order_item in order.ordered_items
+            ]
+            self.response.data["lost_items"] = [
+                lost_item.to_dict(cascade_fields=()) for lost_item in order.lost_items
             ]
 
             return self.response.create_response()
@@ -638,20 +637,21 @@ class OrderView(GenericView):
                 total_volume = product.volume * order_item.quantity
                 total_quantity = order_item.quantity
 
-                racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
-                  Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id,
-                  or_(
-                    and_(
-                      Inventory.inventory_id != None,
-                      Product.is_stackable == 1
-                    ),
-                    Inventory.inventory_id == None
-                  )
-                ).order_by(desc(Rack.rack_position)).all()
-
-
-
-
+                if product.is_stackable:
+                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
+                      Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id,
+                      or_(
+                        and_(
+                          Inventory.inventory_id != None,
+                          Product.is_stackable == 1
+                        ),
+                        Inventory.inventory_id == None
+                      )
+                    ).order_by(desc(Rack.rack_position)).all()
+                else:
+                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
+                      Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id, Rack.remaining_capacity == Rack.overall_capacity
+                    ).order_by(desc(Rack.rack_position)).all()
 
                 for rack in racks:
                     if rack.remaining_capacity == 0:
@@ -710,12 +710,10 @@ class OrderView(GenericView):
 
             # check if recipient has access to the order
             if order_type == "from_warehouse" and self.requester_role == UserRole.VENDOR.value["code"]:
-                vendors = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=self.requester_id).all()
-                vendors = [vendor[0] for vendor in vendors]
-
-                if len(vendors) == 0:
+                vendor = session.query(Vendor).filter_by(vendor_owner_id=self.requester_id).first()
+                if vendor is None:
                     raise ValidationError("Order Not Found", 404)
-                order = order.filter(Order.recipient_id.in_(vendors))
+                order = order.filter(Order.recipient_id == vendor.vendor_id)
 
             elif order_type == "to_warehouse":
                 warehouse = order.first().recipient_warehouse
@@ -769,18 +767,18 @@ class OrderView(GenericView):
             if not order.first():
                 raise ValidationError("Order Not Found.", 404)
 
-            # if order.first().order_status in ("lost", "damaged"):
-            #     # change updated_at and order_status
-            #     order = order.first()
-            #     order.updated_at = datetime.now()
-            #     order.order_status = "finished"
-            #     session.commit()
-            #
-            #     self.response.status_code = 200
-            #     self.response.data = order.to_dict(cascade_fields=())
-            #     return self.response.create_response()
+#             if order.first().order_status in ("lost", "damaged"):
+#                 # change updated_at and order_status
+#                 order = order.first()
+#                 order.updated_at = datetime.now()
+#                 order.order_status = "finished"
+#                 session.commit()
+#
+#                 self.response.status_code = 200
+#                 self.response.data = order.to_dict(cascade_fields=())
+#                 return self.response.create_response()
 
-            if order.first().order_status != "delivered" and order.first().order_status != "lost" and order.first().order_status != "damaged":
+            if order.first().order_status != "delivered" and order.first().order_status != 'lost' and order.first().order_status != 'damaged':
                 raise ValidationError("You cannot receive orders that are not delivered.", 400)
 
             # if order_items is empty
@@ -865,3 +863,55 @@ class OrderView(GenericView):
             self.response.status_code = 200
             self.response.data = order.to_dict(cascade_fields=())
             return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    def get_order_stats(self, request: dict) -> dict:
+        """
+        Get order statistics.
+        """
+        requester_id = self.requester_id
+        requester_role = self.requester_role
+
+        with get_session() as session:
+            requester = session.query(User).filter_by(user_id=requester_id).first()
+            orders = session.query(Order.order_id)
+
+            if self.requester_role in (UserRole.SUPERVISOR.value["code"], UserRole.MANAGER.value["code"]):
+                if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(
+                        supervisor_id=self.requester_id).all()
+                    warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+                else:
+                    warehouse_ids = session.query(Warehouse.warehouse_id).filter_by(
+                        company_id=requester.company.company_id).all()
+                    warehouse_ids = [warehouse[0] for warehouse in warehouse_ids]
+
+                orders = orders.filter(
+                    or_(
+                        and_(Order.order_type == "from_warehouse", Order.supplier_id.in_(warehouse_ids)),
+                        and_(Order.order_type == "to_warehouse", Order.recipient_id.in_(warehouse_ids))
+                    )
+                )
+
+            elif self.requester_role == UserRole.VENDOR.value["code"]:
+                vendor_ids = session.query(Vendor.vendor_id).filter_by(vendor_owner_id=requester.user_id).all()
+                vendor_ids = [vendor[0] for vendor in vendor_ids]
+
+                orders = orders.filter(
+                    or_(
+                        and_(Order.order_type == "to_warehouse", Order.supplier_id.in_(vendor_ids)),
+                        and_(Order.order_type == "from_warehouse", Order.recipient_id.in_(vendor_ids))
+                    )
+                )
+
+            result = (
+                session.query(Order.order_status, func.count().label('order_count'))
+                .filter(Order.order_id.in_(orders))
+                .group_by(Order.order_status)
+                .all()
+            )
+
+        self.response.status_code = 200
+        self.response.data = result
+        return self.response.create_response()
