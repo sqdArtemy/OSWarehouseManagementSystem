@@ -111,13 +111,14 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           {
             label: 'Capacity of warehouse',
             data: [
-              warehouseApi.warehouseData.overall_capacity - warehouseApi.warehouseData.remaining_capacity,
-              warehouseApi.warehouseData.remaining_capacity
+              warehouseApi.warehouseData.overall_capacity -
+                warehouseApi.warehouseData.remaining_capacity,
+              warehouseApi.warehouseData.remaining_capacity,
             ],
             backgroundColor: ['#FF6384', '#36A2EB'],
           },
         ],
-      })
+      });
     });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
@@ -281,8 +282,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         </span>
         <RacksGrid
           handleCellClick={handleRackClick}
-          isForSupervisor={isForSupervisor}
-          gridData={gridData}
+          externalGridData={gridData}
         />
         <Inventory
           isInventoryPopupVisible={isInventoryPopupVisible}

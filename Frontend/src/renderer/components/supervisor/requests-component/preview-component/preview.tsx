@@ -21,7 +21,6 @@ export default function Preview({
     setOrderData: (orderData: IOrderData) => void;
   };
 }) {
-  const [gridData, setGridData] = useState([]);
   const [previewGridData, setPreviewGridData] = useState([]);
   const [filledInventories, setFilledInventories] = useState([]);
   const { showError } = useError();
@@ -29,36 +28,46 @@ export default function Preview({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (orderData.orderData && isPopupVisible) {
-      console.log(orderData.orderData);
-      startLoading();
-      warehouseApi
-        .getWarehouse(Number(orderData.orderData.warehouseId))
-        .then((data) => {
-          console.log(data);
-          if (data.success && data.data?.data) {
-            setGridData(normalizeRacksForGrid(data.data.data.racks));
+    const fetchData = async () => {
+      if (orderData.orderData && isPopupVisible) {
+        startLoading();
+        try {
+          const warehouseResponse = await warehouseApi.getWarehouse(
+            Number(orderData.orderData.warehouseId),
+          );
+          if (warehouseResponse.success && warehouseResponse.data?.data) {
+            const normalizedData = normalizeRacksForGrid(
+              warehouseResponse.data.data.racks,
+            );
+
+            const previewResponse = await orderApi.receiveOrderPreview(
+              orderData.orderData.orderId,
+            );
+            if (previewResponse.success) {
+              setFilledInventories(
+                previewResponse.data.body.filled_inventories,
+              );
+              setPreviewGridData(
+                normalizePreviewedRacks(
+                  normalizedData,
+                  previewResponse.data.body.filled_inventories,
+                ),
+              );
+            } else {
+              showError(previewResponse.message);
+            }
           } else {
-            showError(data.message);
+            showError(warehouseResponse.message);
           }
+        } catch (error) {
+          showError(error.message);
+        } finally {
           stopLoading();
-          startLoading();
-          orderApi
-            .receiveOrderPreview(orderData.orderData.orderId)
-            .then((response) => {
-              console.log(response);
-              if (response.success) {
-                setFilledInventories(response.data.body.filled_inventories);
-                setPreviewGridData(
-                  normalizePreviewedRacks(gridData, filledInventories),
-                );
-              } else {
-                showError(response.message);
-              }
-              stopLoading();
-            });
-        });
-    }
+        }
+      }
+    };
+
+    fetchData();
   }, [isPopupVisible]);
 
   const onFinish = async () => {
@@ -90,7 +99,7 @@ export default function Preview({
     >
       <Form onFinish={onFinish}>
         <Form.Item>
-          <RacksGrid gridData={previewGridData} />
+          <RacksGrid externalGridData={previewGridData} />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" onClick={onFinish}>

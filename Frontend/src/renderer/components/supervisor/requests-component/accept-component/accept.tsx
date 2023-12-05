@@ -183,7 +183,6 @@ export default function Accept({
       'delivered',
     );
 
-    console.log(items);
     if (selectedStatus == 'damaged') {
       const items = itemsData
         .map((value) => {

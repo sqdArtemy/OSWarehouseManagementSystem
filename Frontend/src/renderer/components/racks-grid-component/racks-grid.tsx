@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './racks-grid.scss';
 
-export default function RacksGrid({ gridData, handleCellClick }) {
+export default function RacksGrid({ externalGridData, handleCellClick }) {
   // gridData = [
   //   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   //   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -14,8 +14,15 @@ export default function RacksGrid({ gridData, handleCellClick }) {
   //   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   //   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   // ];
-  const numColumns = gridData.length > 0 ? gridData[0].length : 0;
-  const numRows = gridData.length;
+  const [gridData, setGridData] = useState([]);
+  const [numColumns, setNumColumns] = useState(0);
+  const [numRows, setNumRows] = useState(0);
+  useEffect(() => {
+    console.log(externalGridData);
+    setGridData(externalGridData);
+    setNumColumns(gridData.length > 0 ? gridData[0].length : 0);
+    setNumRows(gridData.length);
+  }, [externalGridData]);
 
   const renderGrid = () => {
     return gridData.map((row, rowIndex) => (
