@@ -52,6 +52,12 @@ class InventoryView(GenericView):
                     if not is_stackable:
                         raise ValidationError("Non stackable product is already occupying this rack", 400)
 
+            is_stackable = session.query(Product.is_stackable).filter_by(
+                product_id=product_id).scalar()
+
+            if is_stackable == 0 and products_from_rack is not None:
+                raise ValidationError("Cannot stack non-stackable product", 400)
+
             if warehouse.warehouse_type != product.product_type:
                 raise ValidationError(
                     f"Product with type {product.product_type} cannot be put to the warehouse for {warehouse.warehouse_type} products",

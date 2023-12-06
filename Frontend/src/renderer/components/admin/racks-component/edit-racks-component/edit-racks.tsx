@@ -54,12 +54,12 @@ export default function EditRacks({
   };
 
   const onFinish = async () => {
-    const newUserData = formRef.current?.getFieldsValue();
+    const newRackData = formRef.current?.getFieldsValue();
     hidePopup();
 
     const response = await rackApi.updateRack({
-      rack_position: newUserData['rackPosition'],
-      overall_capacity: newUserData['overallCapacity'],
+      rack_position: newRackData['rackPosition'],
+      overall_capacity: Number(newRackData['overallCapacity']),
 
     }, racksData.racksData?.rack_id);
 
@@ -69,7 +69,7 @@ export default function EditRacks({
     } else {
       showError(response.message);
     }
-    racksData.setRacksData(newUserData);
+    racksData.setRacksData(newRackData);
   };
 
   return (
