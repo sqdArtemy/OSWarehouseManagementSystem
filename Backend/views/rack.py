@@ -109,11 +109,14 @@ class RackView(GenericView):
                 raise ValidationError(
                     "The overall capacity of all racks cannot exceed the maximum capacity in the warehouse", 404)
 
-            if capacity_change < 0:
-                if rack.overall_capacity - rack.remaining_capacity > overall_capacity:
+            if overall_capacity < rack.overall_capacity - rack.remaining_capacity:
                     raise ValidationError("Overall capacity cannot be less than the remaining capacity", 400)
 
-            request["body"] = {"remaining_capacity": rack.remaining_capacity + capacity_change, **request["body"]}
+            if rack.remaining_capacity > rack.remaining_capacity + capacity_change:
+                rack.remaining_capacity = rack.remaining_capacity + capacity_change
+                session.commit()
+            else:
+                self.body["remaining_capacity"] = rack.remaining_capacity + capacity_change
 
             return super().update(request=request)
 

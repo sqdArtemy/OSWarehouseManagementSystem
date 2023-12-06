@@ -175,7 +175,6 @@ export default function Requests() {
               </button>
             )
           : record.createdAt &&
-            record.orderStatus !== 'submitted' &&
             record.orderStatus !== 'finished' && (
               <button
                 className="requests-action-btn selectable"

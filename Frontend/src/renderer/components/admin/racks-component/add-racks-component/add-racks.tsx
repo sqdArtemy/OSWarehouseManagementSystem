@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './add-racks.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
-import { userApi } from '../../../../index';
+import { rackApi, userApi, warehouseApi } from '../../../../index';
 
 export interface INewRacksData {
   warehouse?: string;
@@ -12,7 +12,7 @@ export interface INewRacksData {
 export default function AddRacks({
   isPopupVisible,
   hidePopup,
-  racksData, onAddUserSuccess,
+  racksData, onAddRackSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -20,9 +20,12 @@ export default function AddRacks({
     racksData: INewRacksData;
     setRacksData: (racksData: unknown) => void;
   };
-  onAddUserSuccess: () => void;
+  onAddRackSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
+  const [options, setOptions] = React.useState<Select['OptionType'][]>([]);
+  const [warehouse, setWarehouse] = React.useState<Select['ValueType']>({});
+
 
   const layout = {
     labelCol: {
@@ -45,37 +48,41 @@ export default function AddRacks({
   };
 
   const onFinish = async () => {
-    const newUserData = formRef.current?.getFieldsValue();
-    let check = false;
-    for (let key in newUserData) {
-      if (newUserData[key]) {
-        check = true;
-      }
-    }
-    if (!check) {
-      hidePopup();
-      handleReset();
-    } else {
-      hidePopup();
-    }
+    const newRackData = formRef.current?.getFieldsValue();
 
-    const response = await userApi.addUser({
-      user_name: newUserData['First Name'],
-      user_surname: newUserData['Last Name'],
-      user_email: newUserData['Email'],
-      user_phone: newUserData['Phone'],
-      user_role: 'supervisor',
-    });
+    const response = await rackApi.addRack({
+      rack_position: newRackData['rackPosition'],
+      overall_capacity: Number(newRackData['overallCapacity']),
+      warehouse_id: newRackData['warehouse']
+    })
     console.log(response);
     if(response.success){
-      onAddUserSuccess();
+      onAddRackSuccess();
     }
-    racksData.setRacksData(newUserData);
+    hidePopup();
+    racksData.setRacksData(newRackData);
   };
 
   const handleReset = () => {
     formRef.current?.resetFields();
   };
+
+  useEffect(() => {
+    if (isPopupVisible && racksData.racksData && formRef.current) {
+      warehouseApi.getAllWarehouses({  }).then(async (res) => {
+        setOptions(
+          res.data.body.map((val) => {
+            return {
+              value: val.warehouse_id,
+              label: val.warehouse_name,
+            };
+          }),
+        );
+
+        setWarehouse(formRef.current.getFieldsValue()['Supervisor']);
+      })
+    }
+  })
   return (
     <Modal
       title={<p style={{ fontSize: '1.2vw' }}>Add New Rack</p>}
@@ -97,10 +104,14 @@ export default function AddRacks({
       >
         <Form.Item
           name="warehouse"
-          label={<p style={{ fontSize: '1vw' }}>Warehouse Name</p>}
+          label={<p style={{ fontSize: '1vw' }}>Company</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Select
+            placeholder={'Select a warehouse'}
+            style={{ minHeight: '2vw' }}
+            options={options}
+          />
         </Form.Item>
         <Form.Item
           name="rackPosition"

@@ -121,7 +121,7 @@ export default function AdminOrders() {
         const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
         const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
         const transport = transports.find(transport => {
-          return transport.transport_id === order.transport_id
+          return transport.transport_id === order.transport
         });
 
         dataSource.push({
@@ -319,7 +319,7 @@ export default function AdminOrders() {
           const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
           const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
           const transport = transports.find(transport => {
-            return transport.transport_id === order.transport_id
+            return transport.transport_id === order.transport
           });
 
           dataSource.push({
