@@ -125,15 +125,8 @@ export class OrderApi implements IOrder {
     const method = 'PUT';
     const headers = {};
     const processedFilledInventory = filledInventory
-      .map((item) => {
-        return {
-          quantity: item.real_quantity,
-          product_id: item.product_id,
-          rack_id: item.rack_id,
-        };
-      })
       .filter((item) => {
-        return item.quantity > 0;
+        return item.real_quantity > 0;
       });
     const body = { filled_inventories: processedFilledInventory };
 
