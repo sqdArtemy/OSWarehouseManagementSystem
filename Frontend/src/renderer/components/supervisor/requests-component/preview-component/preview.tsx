@@ -46,7 +46,7 @@ export default function Preview({
             );
 
             let previewResponse;
-            if(orderData.orderData.orderStatus === 'to_warehouse') {
+            if(orderData.orderData.orderType === 'to_warehouse') {
               previewResponse = await orderApi.receiveOrderPreview(
                 orderData.orderData.orderId,
               );
@@ -91,7 +91,7 @@ export default function Preview({
     console.log(orderData.orderData);
     let result;
 
-    if(orderData.orderData.orderStatus === 'to_warehouse') {
+    if(orderData.orderData.orderType === 'to_warehouse') {
       result = await orderApi.receiveOrder(
         orderData.orderData.orderId,
         filledInventories,
