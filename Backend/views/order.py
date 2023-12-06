@@ -98,11 +98,7 @@ class OrderView(GenericView):
         with get_session() as session:
             requester = session.query(User).filter_by(user_id=requester_id).first()
 
-            if requester_role == UserRole.VENDOR.value["code"]:
-                requester_vendors = session.query(Vendor.vendor_id).filter_by(
-                    vendor_owner_id=requester_id).all()
-                requester_vendors = [vendor[0] for vendor in requester_vendors]
-            elif self.requester_role == UserRole.SUPERVISOR.value["code"]:
+            if self.requester_role == UserRole.SUPERVISOR.value["code"]:
                 requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
                     supervisor_id=requester_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
@@ -777,22 +773,7 @@ class OrderView(GenericView):
             if not order.first():
                 raise ValidationError("Order Not Found.", 404)
 
-<<<<<<< HEAD
-#             if order.first().order_status in ("lost", "damaged"):
-#                 # change updated_at and order_status
-#                 order = order.first()
-#                 order.updated_at = datetime.now()
-#                 order.order_status = "finished"
-#                 session.commit()
-#
-#                 self.response.status_code = 200
-#                 self.response.data = order.to_dict(cascade_fields=())
-#                 return self.response.create_response()
-
-            if order.first().order_status != "delivered" and order.first().order_status != 'lost' and order.first().order_status != 'damaged':
-=======
             if order.first().order_status not in ("lost", "damaged", "delivered"):
->>>>>>> 72b953b6b64b11f4bf2a833ae326ead2dbd69e6c
                 raise ValidationError("You cannot receive orders that are not delivered.", 400)
 
             # if order_items is empty
@@ -928,9 +909,6 @@ class OrderView(GenericView):
 
         self.response.status_code = 200
         self.response.data = result
-<<<<<<< HEAD
-        return self.response.create_response()
-=======
         return self.response.create_response()
 
     @view_function_middleware
@@ -1007,4 +985,3 @@ class OrderView(GenericView):
             self.response.data = all_results
 
             return self.response.create_response()
->>>>>>> 72b953b6b64b11f4bf2a833ae326ead2dbd69e6c
