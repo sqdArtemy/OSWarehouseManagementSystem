@@ -45,9 +45,16 @@ export default function Preview({
               warehouseResponse.data.data.racks,
             );
 
-            const previewResponse = await orderApi.receiveOrderPreview(
-              orderData.orderData.orderId,
-            );
+            let previewResponse;
+            if(orderData.orderData.orderStatus === 'to_warehouse') {
+              previewResponse = await orderApi.receiveOrderPreview(
+                orderData.orderData.orderId,
+              );
+            } else {
+              previewResponse = await orderApi.sendOrderPreview(
+                orderData.orderData.orderId,
+              );
+            }
             if (previewResponse.success) {
               setFilledInventories(
                 previewResponse.data.body.filled_inventories,
@@ -82,10 +89,20 @@ export default function Preview({
   const onFinish = async () => {
     startLoading();
     console.log(orderData.orderData);
-    const result = await orderApi.receiveOrder(
-      orderData.orderData.orderId,
-      filledInventories,
-    );
+    let result;
+
+    if(orderData.orderData.orderStatus === 'to_warehouse') {
+      result = await orderApi.receiveOrder(
+        orderData.orderData.orderId,
+        filledInventories,
+      );
+    } else {
+      result = await orderApi.sendOrder(
+        orderData.orderData.orderId,
+        filledInventories
+      );
+    }
+
     stopLoading();
     if (result.success) {
       hidePopup();
