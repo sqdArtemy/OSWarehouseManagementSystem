@@ -57,7 +57,7 @@ export default function AddRacks({
     })
     console.log(response);
     if(response.success){
-      onAddUserSuccess();
+      onAddRackSuccess();
     }
     hidePopup();
     racksData.setRacksData(newRackData);
