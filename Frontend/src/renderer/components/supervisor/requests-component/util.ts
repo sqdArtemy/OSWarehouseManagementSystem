@@ -1,5 +1,5 @@
 import { orderApi, productApi } from '../../../index';
-import { ApiResponse } from '../../../services/apiRequestHandler';
+import { IApiResponse } from '../../../services/apiRequestHandler';
 
 const processItems = async (orderData, itemKey) => {
   let itemsMap = [];

@@ -3,71 +3,34 @@ import {
   IProduct,
   IProductFilters,
 } from '../interfaces/productsInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
-import { userApi } from '../../index';
-import { ISendData } from '../sendDataInterface';
+import { IApiResponse } from '../apiRequestHandler';
+import { GenericApi } from './genericApi';
 
-export class ProductApi implements IProduct {
-  private readonly token: string;
+export class ProductApi extends GenericApi implements IProduct {
   constructor() {
-    this.token = userApi.getToken;
+    super();
   }
 
-  private async handleApiRequestWithToken(
-    data: ISendData,
-  ): Promise<ApiResponse> {
-    data.headers.token = this.token || userApi.getToken;
-    return await handleApiRequest({
-      url: data.url,
-      method: data.method,
-      body: data.body,
-      headers: data.headers,
-    });
+  public async addProduct(body: IAddProduct): Promise<IApiResponse> {
+    return await this.create(body, 'products');
   }
 
-  public async addProduct(body: IAddProduct): Promise<ApiResponse> {
-    const url = '/products';
-    const method = 'POST';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async deleteProduct(id: number): Promise<IApiResponse> {
+    return await this.delete(id, 'product');
   }
 
-  public async deleteProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
-    const method = 'DELETE';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getAllProducts(filters: IProductFilters): Promise<IApiResponse> {
+    return await this.getAll('products', filters);
   }
 
-  public async getAllProducts(filters: IProductFilters): Promise<ApiResponse> {
-    const url = '/products';
-    const method = 'GET';
-    const headers = { filters };
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
-  }
-
-  public async getProduct(id: number): Promise<ApiResponse> {
-    const url = '/product/' + id;
-    const method = 'GET';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getProduct(id: number): Promise<IApiResponse> {
+    return await this.getOne(id, 'product');
   }
 
   public async updateProduct(
     body: IAddProduct,
     id: number,
-  ): Promise<ApiResponse> {
-    const url = '/product/' + id;
-    const method = 'PUT';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  ): Promise<IApiResponse> {
+    return await this.update(id, body, 'product');
   }
 }

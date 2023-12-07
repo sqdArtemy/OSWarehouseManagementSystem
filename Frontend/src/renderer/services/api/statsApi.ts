@@ -1,31 +1,35 @@
 import { IOrderFilters, IStats } from '../interfaces/statsInterface';
-import { userApi } from '../../index';
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
+import { GenericApi } from './genericApi';
 
-export class StatsApi implements IStats {
-  private readonly token: string;
+export class StatsApi extends GenericApi implements IStats {
   constructor() {
-    this.token = userApi.getToken;
+    super();
   }
 
-  getLostItems(filters: IOrderFilters): Promise<ApiResponse> {
-    return Promise.resolve(undefined);
+  public async getLostItems(filters: IOrderFilters): Promise<IApiResponse> {
+    const url = '/stats/lost-items';
+    return await this.genericRequest({ url, method: 'GET', body: {}, headers: { filters }});
   }
 
-  getOrderDetails(filters: IOrderFilters): Promise<ApiResponse> {
-    return Promise.resolve(undefined);
+  public async getOrderDetails(filters: IOrderFilters): Promise<IApiResponse> {
+    const url = '/orders/details';
+    return await this.genericRequest({ url, method: 'GET', body: {}, headers: { filters }});
   }
 
-  getOrderStats(): Promise<ApiResponse> {
-    return Promise.resolve(undefined);
+  public async getOrderStats(): Promise<IApiResponse> {
+    const url = '/stats/order';
+    return await this.genericRequest({ url, method: 'GET', body: {}, headers: {}});
   }
 
-  getProductsStats(): Promise<ApiResponse> {
-    return Promise.resolve(undefined);
+  public async getProductsStats(): Promise<IApiResponse> {
+    const url = '/stats/inventory/';
+    return await this.genericRequest({ url, method: 'GET', body: {}, headers: {}});
   }
 
-  getWarehouseItems(filters: IOrderFilters): Promise<ApiResponse> {
-    return Promise.resolve(undefined);
+  public async getWarehouseItems(filters: IOrderFilters): Promise<IApiResponse> {
+    const url = '/stats/warehouse';
+    return await this.genericRequest({ url, method: 'GET', body: {}, headers: { filters}});
   }
 
 }

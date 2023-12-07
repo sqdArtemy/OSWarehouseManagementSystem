@@ -1,6 +1,6 @@
 import { userApi } from '../../index';
 import { ISendData } from '../sendDataInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
+import { IApiResponse, handleApiRequest } from '../apiRequestHandler';
 
 export class GenericApi {
   private readonly token: string;
@@ -10,7 +10,7 @@ export class GenericApi {
 
   protected async genericRequest(
     data: ISendData,
-  ): Promise<ApiResponse> {
+  ): Promise<IApiResponse> {
     data.headers.token = this.token || userApi.getToken;
 
     return await handleApiRequest({
@@ -21,7 +21,7 @@ export class GenericApi {
     });
   }
 
-  protected async getOne(id: number, url: string): Promise<ApiResponse> {
+  protected async getOne(id: number, url: string): Promise<IApiResponse> {
     url = `/${url}/${id}`;
     const method = 'GET';
     const body = {};
@@ -30,7 +30,7 @@ export class GenericApi {
     return await this.genericRequest({ url, method, body, headers});
   }
 
-  protected async getAll(url: string, filters?: {[key: string]: any}): Promise<ApiResponse> {
+  protected async getAll(url: string, filters?: {[key: string]: any}): Promise<IApiResponse> {
     url = `/${url}/`;
     const method = 'GET';
     const body = {};
@@ -39,7 +39,7 @@ export class GenericApi {
     return await this.genericRequest({ url, method, body, headers });
   }
 
-  protected async update(id: number, body: {[key: string]: any}, url: string): Promise<ApiResponse> {
+  protected async update(id: number, body: {[key: string]: any}, url: string): Promise<IApiResponse> {
     url = `/${url}/${id}`;
     const method = 'PUT';
     const headers = {};
@@ -47,7 +47,7 @@ export class GenericApi {
     return await this.genericRequest({ url, method, body, headers });
   }
 
-  protected async create(body: {[key: string]: any}, url: string): Promise<ApiResponse> {
+  protected async create(body: {[key: string]: any}, url: string): Promise<IApiResponse> {
     url = `/${url}/`;
     const method = 'POST';
     const headers = {};
@@ -55,7 +55,7 @@ export class GenericApi {
     return await this.genericRequest({ url, method, body, headers });
   }
 
-  protected async delete(id: number, url: string): Promise<ApiResponse> {
+  protected async delete(id: number, url: string): Promise<IApiResponse> {
     url = `/${url}/${id}`;
     const method = 'DELETE';
     const body = {};

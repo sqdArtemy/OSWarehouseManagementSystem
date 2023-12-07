@@ -1,11 +1,11 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 
 export interface IProduct {
-  addProduct(body: IAddProduct): Promise<ApiResponse>;
-  deleteProduct(id: number): Promise<ApiResponse>;
-  updateProduct(body: IAddProduct, id: number): Promise<ApiResponse>;
-  getProduct(id: number): Promise<ApiResponse>;
-  getAllProducts(filters: IProductFilters): Promise<ApiResponse>;
+  addProduct(body: IAddProduct): Promise<IApiResponse>;
+  deleteProduct(id: number): Promise<IApiResponse>;
+  updateProduct(body: IAddProduct, id: number): Promise<IApiResponse>;
+  getProduct(id: number): Promise<IApiResponse>;
+  getAllProducts(filters: IProductFilters): Promise<IApiResponse>;
 }
 
 

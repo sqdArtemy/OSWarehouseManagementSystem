@@ -1,12 +1,12 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 
 export interface IRack {
-  addRack(body: IAddRack): Promise<ApiResponse>;
-  addMultipleRacks(body: IAddMultipleRacks): Promise<ApiResponse>;
-  deleteRack(id: number): Promise<ApiResponse>;
-  updateRack(body: IAddRack, id: number): Promise<ApiResponse>;
-  getRack(id: number): Promise<ApiResponse>;
-  getAll(filters: IRackFilter): Promise<ApiResponse>;
+  addRack(body: IAddRack): Promise<IApiResponse>;
+  addMultipleRacks(body: IAddMultipleRacks): Promise<IApiResponse>;
+  deleteRack(id: number): Promise<IApiResponse>;
+  updateRack(body: IAddRack, id: number): Promise<IApiResponse>;
+  getRack(id: number): Promise<IApiResponse>;
+  getAll(filters: IRackFilter): Promise<IApiResponse>;
 }
 
 

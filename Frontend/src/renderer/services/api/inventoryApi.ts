@@ -1,43 +1,23 @@
-import { IInventory} from '../interfaces/inventoryInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
-import { userApi } from '../../index';
-import { ISendData } from '../sendDataInterface';
+import { IInventory } from '../interfaces/inventoryInterface';
+import { IApiResponse } from '../apiRequestHandler';
 import { IFilledInventory } from '../interfaces/ordersInterface';
+import { GenericApi } from './genericApi';
 
-export class InventoryApi implements IInventory {
-  private readonly token: string;
-
+export class InventoryApi extends GenericApi implements IInventory {
   constructor() {
-    this.token = userApi.getToken;
+    super();
   }
 
-  private async handleApiRequestWithToken(
-    data: ISendData,
-  ): Promise<ApiResponse> {
-    data.headers.token = this.token || userApi.getToken;
-    return await handleApiRequest({
-      url: data.url,
-      method: data.method,
-      body: data.body,
-      headers: data.headers,
-    });
+  public async addInventory(item: IFilledInventory): Promise<IApiResponse> {
+    return await this.create(item, 'inventories');
   }
 
-  public async addInventory(item: IFilledInventory): Promise<ApiResponse> {
-    const url = '/inventories';
-    const method = 'POST';
-    const headers = {};
-    const body = item;
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
-  }
-
-  public async deleteInventory(item: IFilledInventory): Promise<ApiResponse> {
+  public async deleteInventory(item: IFilledInventory): Promise<IApiResponse> {
     const url = '/inventory';
     const method = 'DELETE';
     const headers = {};
     const body = item;
 
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({ url, method, body, headers });
   }
 }

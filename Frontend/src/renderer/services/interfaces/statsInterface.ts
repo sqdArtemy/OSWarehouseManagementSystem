@@ -1,11 +1,11 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 
 export interface IStats {
-  getProductsStats(): Promise<ApiResponse>;
-  getOrderStats(): Promise<ApiResponse>;
-  getLostItems(filters: IOrderFilters): Promise<ApiResponse>;
-  getOrderDetails(filters: IOrderFilters): Promise<ApiResponse>;
-  getWarehouseItems(filters: IOrderFilters): Promise<ApiResponse>;
+  getProductsStats(): Promise<IApiResponse>;
+  getOrderStats(): Promise<IApiResponse>;
+  getLostItems(filters: IOrderFilters): Promise<IApiResponse>;
+  getOrderDetails(filters: IOrderFilters): Promise<IApiResponse>;
+  getWarehouseItems(filters: IOrderFilters): Promise<IApiResponse>;
 }
 
 export interface IOrderFilters {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Form, FormInstance, Input, Modal, Select, Table } from 'antd';
 import { orderApi, productApi } from '../../../../index';
 import { IOrderData } from '../requests';
-import { ApiResponse } from '../../../../services/apiRequestHandler';
+import { IApiResponse } from '../../../../services/apiRequestHandler';
 import { getItems } from '../util';
 
 export default function Accept({

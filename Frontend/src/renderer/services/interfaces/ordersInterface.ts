@@ -1,32 +1,32 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 import { IItem } from './warehouseInterface';
 
 export interface IOrder {
-  addOrder(body: IAddOrder): Promise<ApiResponse>;
-  cancelOrder(id: number): Promise<ApiResponse>;
-  updateOrder(body: IAddOrder, id: number): Promise<ApiResponse>;
-  confirmOrder(transport_id: number, id: number): Promise<ApiResponse>;
+  addOrder(body: IAddOrder): Promise<IApiResponse>;
+  cancelOrder(id: number): Promise<IApiResponse>;
+  updateOrder(body: IAddOrder, id: number): Promise<IApiResponse>;
+  confirmOrder(transport_id: number, id: number): Promise<IApiResponse>;
   changeStatusOfOrder(
     id: number,
     status: 'finished' | 'delivered' | 'processing',
-  ): Promise<ApiResponse>;
-  getOrder(id: number): Promise<ApiResponse>;
-  receiveOrderPreview(id: number): Promise<ApiResponse>;
+  ): Promise<IApiResponse>;
+  getOrder(id: number): Promise<IApiResponse>;
+  receiveOrderPreview(id: number): Promise<IApiResponse>;
   receiveOrder(
     id: number,
     filledInventory: IFilledInventory[],
-  ): Promise<ApiResponse>;
-  sendOrderPreview(id: number): Promise<ApiResponse>;
+  ): Promise<IApiResponse>;
+  sendOrderPreview(id: number): Promise<IApiResponse>;
   sendOrder(
     id: number,
     filledInventory: IFilledInventory[],
-  ): Promise<ApiResponse>;
-  getAllOrders(filters: IOrderFilters): Promise<ApiResponse>;
+  ): Promise<IApiResponse>;
+  getAllOrders(filters: IOrderFilters): Promise<IApiResponse>;
   lostItems(
     id: number,
     status: 'lost' | 'damaged',
     filledInventory: IFilledInventory[],
-  ): Promise<ApiResponse>;
+  ): Promise<IApiResponse>;
 }
 
 export interface IAddOrder {
@@ -53,7 +53,8 @@ export interface IOrderFilters {
 }
 
 export interface IFilledInventory {
-  quantity: number;
+  quantity?: number;
+  real_quantity?: number;
   product_id: number;
   rack_id?: number;
 }

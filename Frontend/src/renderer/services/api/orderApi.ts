@@ -4,92 +4,59 @@ import {
   IOrder,
   IOrderFilters,
 } from '../interfaces/ordersInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
-import { userApi } from '../../index';
-import { ISendData } from '../sendDataInterface';
+import { IApiResponse, handleApiRequest } from '../apiRequestHandler';
+import { GenericApi } from './genericApi';
 
-export class OrderApi implements IOrder {
-  private readonly token: string;
-
+export class OrderApi extends GenericApi implements IOrder {
   constructor() {
-    this.token = userApi.getToken;
+    super();
   }
 
-  private async handleApiRequestWithToken(
-    data: ISendData,
-  ): Promise<ApiResponse> {
-    data.headers.token = this.token || userApi.getToken;
-    console.log(data);
-    return await handleApiRequest({
-      url: data.url,
-      method: data.method,
-      body: data.body,
-      headers: data.headers,
-    });
+  public async addOrder(body: IAddOrder): Promise<IApiResponse> {
+    return await this.create(body, 'orders');
   }
 
-  public async addOrder(body: IAddOrder): Promise<ApiResponse> {
-    const url = '/orders';
-    const method = 'POST';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
-  }
-
-  public async cancelOrder(id: number): Promise<ApiResponse> {
+  public async cancelOrder(id: number): Promise<IApiResponse> {
     const url = '/order/' + id + '/cancel';
     const method = 'PUT';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({ url, method, body: {}, headers: {} });
   }
 
   public async changeStatusOfOrder(
     id: number,
     status: 'finished' | 'delivered' | 'processing',
-  ): Promise<ApiResponse> {
+  ): Promise<IApiResponse> {
     const url = `/order/${id}/status`;
     const method = 'PUT';
     const body = { status };
     const headers = {};
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({ url, method, body, headers });
   }
 
   public async confirmOrder(
     transport_id: number,
     id: number,
-  ): Promise<ApiResponse> {
+  ): Promise<IApiResponse> {
     const url = `/order/${id}/confirm`;
     const method = 'PUT';
     const headers = {};
     const body = { transport_id };
 
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({ url, method, body, headers });
   }
 
-  public async getAllOrders(filters: IOrderFilters): Promise<ApiResponse> {
-    const url = '/orders';
-    const method = 'GET';
-    const headers = { filters };
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getAllOrders(filters: IOrderFilters): Promise<IApiResponse> {
+    return await this.getAll('/orders', filters);
   }
 
-  public async getOrder(id: number): Promise<ApiResponse> {
-    const url = '/order/' + id;
-    const method = 'GET';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getOrder(id: number): Promise<IApiResponse> {
+    return await this.getOne(id, 'order');
   }
 
   public async receiveOrder(
     id: number,
     filledInventory: IFilledInventory[],
-  ): Promise<ApiResponse> {
+  ): Promise<IApiResponse> {
     const url = `/order/${id}/receive`;
     const method = 'PUT';
     const headers = {};
@@ -104,62 +71,61 @@ export class OrderApi implements IOrder {
       .filter((item) => {
         return item.quantity > 0;
       });
+
     const body = { filled_inventories: processedFilledInventory };
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({ url, method, body, headers });
   }
 
-  public async receiveOrderPreview(id: number): Promise<ApiResponse> {
+  public async receiveOrderPreview(id: number): Promise<IApiResponse> {
     const url = `/order/${id}/receive/preview`;
-    const method = 'GET';
-    const headers = {};
-    const body = {};
 
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({
+      url,
+      method: 'GET',
+      body: {},
+      headers: {},
+    });
   }
 
   public async sendOrder(
     id: number,
     filledInventory: IFilledInventory[],
-  ): Promise<ApiResponse> {
+  ): Promise<IApiResponse> {
     const url = `/order/${id}/send`;
     const method = 'PUT';
     const headers = {};
-    const processedFilledInventory = filledInventory
-      .filter((item) => {
-        return item.real_quantity > 0;
-      });
+    const processedFilledInventory = filledInventory.filter((item) => {
+      return item.real_quantity > 0;
+    });
     const body = { filled_inventories: processedFilledInventory };
 
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({ url, method, body, headers });
   }
 
-  public async sendOrderPreview(id: number): Promise<ApiResponse> {
+  public async sendOrderPreview(id: number): Promise<IApiResponse> {
     const url = `/order/${id}/send/preview`;
-    const method = 'GET';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({
+      url,
+      method: 'GET',
+      body: {},
+      headers: {},
+    });
   }
 
-  public async updateOrder(body: IAddOrder, id: number): Promise<ApiResponse> {
-    const url = '/order/' + id;
-    const method = 'PUT';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async updateOrder(body: IAddOrder, id: number): Promise<IApiResponse> {
+    return await this.update(id, body, 'order');
   }
 
   public async lostItems(
     id: number,
     status: 'lost' | 'damaged',
     filledInventory: IFilledInventory[],
-  ): Promise<ApiResponse> {
+  ): Promise<IApiResponse> {
     const url = '/order/' + id + '/lost-items';
     const method = 'POST';
     const headers = {};
 
-    return await this.handleApiRequestWithToken({
+    return await this.genericRequest({
       url,
       method,
       body: { status, items: filledInventory },
