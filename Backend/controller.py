@@ -230,6 +230,8 @@ def controller(request: dict) -> dict:
             if method == Method.GET.value:
                 if "/suitable-warehouses-for-orders" in url:
                     return warehouse_view.suitable_for_order(request=request)
+                elif "/stats/warehouse" in url:
+                    return warehouse_view.most_used_warehouses(request=request, **filters)
                 return warehouse_view.get(request=request)
             elif method == Method.DELETE.value:
                 return warehouse_view.delete(request=request)
