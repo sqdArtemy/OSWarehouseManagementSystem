@@ -11,6 +11,7 @@ client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
 
 SERVER_IP = sys.argv[1]
 PORT = int(sys.argv[2])
+accumulated_data = b""
 
 try:
     client_socket.connect((SERVER_IP, PORT))
@@ -29,9 +30,19 @@ try:
             # receive data
             data = client_socket.recv(1048576)
             request = dict()
+            accumulated_data += data
+            accumulated_message = ''
+
+            while b'\n' in accumulated_data:
+                message, accumulated_data = accumulated_data.split(b'\n', 1)
+                accumulated_message += message.decode() + '\n'
+
+            data = accumulated_message + accumulated_data.decode()
+            accumulated_data = b""
+            accumulated_message = ''
 
             try:
-                request = json.loads(data.decode())
+                request = json.loads(data)
                 response = controller(request)
             except JSONDecodeError:
                 response = {
