@@ -1,10 +1,10 @@
 from sqlite3 import IntegrityError
 
-from sqlalchemy import func
+from sqlalchemy import func, or_, and_
 
 from db_config import get_session
-from models import Warehouse, User, Rack, Product, Inventory
-from services import view_function_middleware, check_allowed_methods_middleware
+from models import Warehouse, User, Rack, Product, Inventory, OrderItem, Order
+from services import view_function_middleware, check_allowed_methods_middleware, check_allowed_roles_middleware
 from services.generics import GenericView
 from utilities import ValidationError, DatabaseError, decode_token, extract_id_from_url, is_instance_already_exists
 from utilities.enums.data_related_enums import UserRole
@@ -325,4 +325,62 @@ class WarehouseView(GenericView):
             body = [warehouse.to_dict() for warehouse in warehouses]
             self.response.status_code = 200
             self.response.data = body
+            return self.response.create_response()
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.GET.value])
+    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"]])
+    def most_used_warehouses(self, request: dict, **kwargs) -> dict:
+        """
+        Returns a list of warehouses that are most used.
+        """
+        with get_session() as session:
+            # get company_id of manager
+            company_id = session.query(User.company_id).filter_by(user_id=self.requester_id).scalar()
+
+            # actual query
+            query = (
+                session.query(
+                    Warehouse.warehouse_name,
+                    func.count(),
+                    func.sum(Product.volume * OrderItem.quantity),
+                    func.sum(Order.total_price)
+                )
+                .join(Order, or_(
+                    and_(Order.order_type == 'to_warehouse', Order.recipient_id == Warehouse.warehouse_id),
+                    and_(Order.order_type == 'from_warehouse', Order.supplier_id == Warehouse.warehouse_id)
+                ))
+                .join(OrderItem, OrderItem.order_id == Order.order_id)
+                .join(Product, Product.product_id == OrderItem.product_id)
+                .filter(Order.order_status == 'finished', Warehouse.company_id == company_id)
+                .group_by(Warehouse.warehouse_name)
+            )
+
+            # if there are filters apply them
+            for column, value in kwargs.items():
+                if column == "created_at_gte":
+                    query = query.filter(Order.created_at >= value)
+                elif column == "created_at_lte":
+                    query = query.filter(Order.created_at <= value)
+
+            result = query.all()
+
+            # create response
+            orders_count = dict()
+            orders_volume = dict()
+            orders_price = dict()
+
+            data = dict()
+
+            for row in result:
+                orders_count[row[0]] = row[1]
+                orders_volume[row[0]] = row[2]
+                orders_price[row[0]] = row[3]
+
+            data["orders_count"] = orders_count
+            data["orders_volume"] = orders_volume
+            data["orders_price"] = orders_price
+
+            self.response.status_code = 200
+            self.response.data = data
             return self.response.create_response()
