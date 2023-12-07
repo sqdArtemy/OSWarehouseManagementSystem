@@ -1,80 +1,43 @@
 import { IAddWarehouse, IFindWarehousesRequest, IWarehouse, IWarehouseFilters } from '../interfaces/warehouseInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
-import { userApi } from '../../index';
-import { ISendData } from '../sendDataInterface';
+import { IApiResponse, handleApiRequest } from '../apiRequestHandler';
+import { GenericApi } from './genericApi';
 
-export class WarehouseApi implements IWarehouse {
-  private readonly token: string;
+export class WarehouseApi extends GenericApi implements IWarehouse {
   public warehouseData: IAddWarehouse;
   constructor() {
-    this.token = userApi.getToken;
+    super();
   }
 
-  private async handleApiRequestWithToken(
-    data: ISendData,
-  ): Promise<ApiResponse> {
-    data.headers.token = this.token || userApi.getToken;
-    return await handleApiRequest({
-      url: data.url,
-      method: data.method,
-      body: data.body,
-      headers: data.headers,
-    });
+  public async addWarehouse(body: IAddWarehouse): Promise<IApiResponse> {
+    return await this.create(body, 'warehouses');
   }
 
-  public async addWarehouse(body: IAddWarehouse): Promise<ApiResponse> {
-    const url = '/warehouses';
-    const method = 'POST';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async deleteWarehouse(id: number): Promise<IApiResponse> {
+    return await this.delete(id, 'warehouse');
   }
 
-  public async deleteWarehouse(id: number): Promise<ApiResponse> {
-    const url = '/warehouse/' + id;
-    const method = 'DELETE';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getAllWarehouses(filters: IWarehouseFilters): Promise<IApiResponse> {
+    return await this.getAll('warehouses',filters);
   }
 
-  public async getAllWarehouses(filters: IWarehouseFilters): Promise<ApiResponse> {
-    const url = '/warehouses';
-    const method = 'GET';
-    const headers = { filters };
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
-  }
-
-  public async getWarehouse(id: number): Promise<ApiResponse> {
+  public async getWarehouse(id: number): Promise<IApiResponse> {
     const url = '/warehouse/' + id;
     const method = 'GET';
-    const headers = {};
-    const body = {};
 
-    const response = await this.handleApiRequestWithToken({ url, method, body, headers });
+    const response = await this.genericRequest({ url, method, body: {}, headers: {} });
     if(response.success){
       this.warehouseData = response.data.data;
     }
     return response;
   }
 
-  public async updateWarehouse(body: IAddWarehouse, id: number): Promise<ApiResponse> {
-    const url = '/warehouse/' + id;
-    const method = 'PUT';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async updateWarehouse(body: IAddWarehouse, id: number): Promise<IApiResponse> {
+    return await this.update(id, body, 'warehouse');
   }
 
-  public async findSuitableWarehousesForOrders(body: IFindWarehousesRequest): Promise<ApiResponse> {
+  public async findSuitableWarehousesForOrders(body: IFindWarehousesRequest): Promise<IApiResponse> {
     const url = '/warehouse/suitable-warehouses-for-orders';
-    const method = 'GET';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+    return await this.genericRequest({ url, method: 'GET', body, headers: {} });
   }
 
 }

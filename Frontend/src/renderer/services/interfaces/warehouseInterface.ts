@@ -1,12 +1,12 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 
 export interface IWarehouse {
-  addWarehouse(body: IAddWarehouse): Promise<ApiResponse>;
-  deleteWarehouse(id: number): Promise<ApiResponse>;
-  updateWarehouse(body: IAddWarehouse, id: number): Promise<ApiResponse>;
-  getWarehouse(id: number): Promise<ApiResponse>;
-  getAllWarehouses(filters: IWarehouseFilters): Promise<ApiResponse>;
-  findSuitableWarehousesForOrders(body: IFindWarehousesRequest): Promise<ApiResponse>
+  addWarehouse(body: IAddWarehouse): Promise<IApiResponse>;
+  deleteWarehouse(id: number): Promise<IApiResponse>;
+  updateWarehouse(body: IAddWarehouse, id: number): Promise<IApiResponse>;
+  getWarehouse(id: number): Promise<IApiResponse>;
+  getAllWarehouses(filters: IWarehouseFilters): Promise<IApiResponse>;
+  findSuitableWarehousesForOrders(body: IFindWarehousesRequest): Promise<IApiResponse>
 }
 
 

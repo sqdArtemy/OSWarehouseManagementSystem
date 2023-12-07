@@ -1,11 +1,11 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 
 export interface IVendor {
-  addVendor(body: IAddVendor): Promise<ApiResponse>;
-  deleteVendor(id: number): Promise<ApiResponse>;
-  updateVendor(body: IAddVendor, id: number): Promise<ApiResponse>;
-  getVendor(id: number): Promise<ApiResponse>;
-  getAllVendors(filters: IVendorFilters): Promise<ApiResponse>;
+  addVendor(body: IAddVendor): Promise<IApiResponse>;
+  deleteVendor(id: number): Promise<IApiResponse>;
+  updateVendor(body: IAddVendor, id: number): Promise<IApiResponse>;
+  getVendor(id: number): Promise<IApiResponse>;
+  getAllVendors(filters: IVendorFilters): Promise<IApiResponse>;
 }
 
 

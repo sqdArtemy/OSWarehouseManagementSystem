@@ -1,7 +1,7 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 import { IFilledInventory } from './ordersInterface';
 
 export interface IInventory {
-  addInventory(item: IFilledInventory): Promise<ApiResponse>;
-  deleteInventory(item: IFilledInventory): Promise<ApiResponse>;
+  addInventory(item: IFilledInventory): Promise<IApiResponse>;
+  deleteInventory(item: IFilledInventory): Promise<IApiResponse>;
 }

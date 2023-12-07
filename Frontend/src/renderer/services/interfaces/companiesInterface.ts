@@ -1,5 +1,5 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 
 export interface ICompany {
-  getAll(): Promise<ApiResponse>
+  getAll(): Promise<IApiResponse>
 }

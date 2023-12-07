@@ -1,5 +1,5 @@
 import { IAddUser, ISignUp, IUser } from '../interfaces/usersInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
+import { IApiResponse, handleApiRequest } from '../apiRequestHandler';
 
 export class UserApi implements IUser {
   private token: string;
@@ -17,7 +17,7 @@ export class UserApi implements IUser {
     return this.userData;
   }
 
-  public async addUser(body: IAddUser): Promise<ApiResponse> {
+  public async addUser(body: IAddUser): Promise<IApiResponse> {
     const url = '/users';
     const method = 'POST';
     const headers = { token: this.token } ;
@@ -25,7 +25,7 @@ export class UserApi implements IUser {
     return await handleApiRequest({ url, method, body, headers});
   }
 
-  public async deleteUser(id: number): Promise<ApiResponse> {
+  public async deleteUser(id: number): Promise<IApiResponse> {
     const url = '/user/' + id;
     const method = 'DELETE';
     const body = {};
@@ -34,7 +34,7 @@ export class UserApi implements IUser {
     return await handleApiRequest({ url, method, body, headers});
   }
 
-  public async getAllUsers(filters: { [p: string]: any }): Promise<ApiResponse> {
+  public async getAllUsers(filters: { [p: string]: any }): Promise<IApiResponse> {
     const url = '/users';
     const method = 'GET';
     const body = {};
@@ -44,7 +44,7 @@ export class UserApi implements IUser {
     return await handleApiRequest({ url, method, body, headers});
   }
 
-  public async getUser(id: number): Promise<ApiResponse> {
+  public async getUser(id: number): Promise<IApiResponse> {
     const url = '/user/' + id;
     const method = 'GET';
     const body = {};
@@ -57,7 +57,7 @@ export class UserApi implements IUser {
     oldPassword: string,
     newPassword: string,
     passwordConfirm: string,
-  ): Promise<ApiResponse> {
+  ): Promise<IApiResponse> {
     const url = '/user/change_password';
     const method = 'PUT'; // Adjust the method based on your API requirements
     const body = { old_password: oldPassword, new_password: newPassword, confirm_password: passwordConfirm};
@@ -66,7 +66,7 @@ export class UserApi implements IUser {
     return await handleApiRequest({ url, method, body, headers});
   }
 
-  public async signIn(email: string, password: string): Promise<ApiResponse> {
+  public async signIn(email: string, password: string): Promise<IApiResponse> {
     const url = '/user/login';
     const method = 'POST';
     const body = {
@@ -89,7 +89,7 @@ export class UserApi implements IUser {
     }
   }
 
-  public async signUp(body: ISignUp): Promise<ApiResponse> {
+  public async signUp(body: ISignUp): Promise<IApiResponse> {
     const url = '/user/register';
     const method = 'POST';
 
@@ -108,7 +108,7 @@ export class UserApi implements IUser {
     }
   }
 
-  public async updateUser(body: IAddUser, id: number): Promise<ApiResponse> {
+  public async updateUser(body: IAddUser, id: number): Promise<IApiResponse> {
     const url = '/user/' + id;
     const method = 'PUT';
     const headers = { token: this.token } ;

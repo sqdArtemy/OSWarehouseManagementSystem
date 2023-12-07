@@ -444,12 +444,14 @@ class OrderView(GenericView):
             if requester_role == UserRole.SUPERVISOR.value["code"] or (
                     (
                             requester_role == UserRole.VENDOR.value["code"] and (
-                            (order.order_type == "from_warehouse" and order.recipient_id not in requester_vendors) or
-                            (order.order_type == "to_warehouse" and order.supplier_id not in requester_vendors)
+                            (
+                                    order.order_type == "from_warehouse" and order.recipient_id not in requester_vendors) or
+                            (
+                                    order.order_type == "to_warehouse" and order.supplier_id not in requester_vendors)
                     )
                     ) or (
                             (requester_role in (
-                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                             UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
                                     (
                                             order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
                                     (
@@ -697,6 +699,12 @@ class OrderView(GenericView):
 
                     if total_quantity == 0:
                         break
+
+                if total_quantity > 0:
+                    raise ValidationError(
+                        f"Not enough capacity to place remaining {total_quantity} of {product.product_name}",
+                        400
+                    )
 
             self.response.status_code = 200
             self.response.data["filled_inventories"] = filled_inventories

@@ -1,68 +1,36 @@
-import { IAddVendor, IVendor, IVendorFilters } from '../interfaces/VendorInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
-import { userApi } from '../../index';
-import { ISendData } from '../sendDataInterface';
+import {
+  IAddVendor,
+  IVendor,
+  IVendorFilters,
+} from '../interfaces/VendorInterface';
+import { IApiResponse, handleApiRequest } from '../apiRequestHandler';
+import { GenericApi } from './genericApi';
 
-export class VendorApi implements IVendor {
-  private readonly token: string;
+export class VendorApi extends GenericApi implements IVendor {
   constructor() {
-    this.token = userApi.getToken;
+    super();
   }
 
-  private async handleApiRequestWithToken(
-    data: ISendData,
-  ): Promise<ApiResponse> {
-    data.headers.token = this.token || userApi.getToken;
-    console.log(data);
-    return await handleApiRequest({
-      url: data.url,
-      method: data.method,
-      body: data.body,
-      headers: data.headers,
-    });
+  public async addVendor(body: IAddVendor): Promise<IApiResponse> {
+    return await this.create(body, 'vendors');
   }
 
-  public async addVendor(body: IAddVendor): Promise<ApiResponse> {
-    const url = '/vendors';
-    const method = 'POST';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async deleteVendor(id: number): Promise<IApiResponse> {
+    return await this.delete(id, 'vendor');
   }
 
-  public async deleteVendor(id: number): Promise<ApiResponse> {
-    const url = '/vendor/' + id;
-    const method = 'DELETE';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getAllVendors(filters: IVendorFilters): Promise<IApiResponse> {
+    return await this.getAll('vendors', filters);
   }
 
-  public async getAllVendors(filters: IVendorFilters): Promise<ApiResponse> {
-    const url = '/vendors';
-    const method = 'GET';
-    const headers = { filters };
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getVendor(id: number): Promise<IApiResponse> {
+    return await this.getOne(id, 'vendor');
   }
 
-  public async getVendor(id: number): Promise<ApiResponse> {
-    const url = '/vendor/' + id;
-    const method = 'GET';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async updateVendor(
+    body: IAddVendor,
+    id: number,
+  ): Promise<IApiResponse> {
+    return await this.update(id, body, 'vendor');
   }
-
-  public async updateVendor(body: IAddVendor, id: number): Promise<ApiResponse> {
-    const url = '/vendor/' + id;
-    const method = 'PUT';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
-  }
-
 }

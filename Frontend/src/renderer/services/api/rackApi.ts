@@ -1,72 +1,44 @@
 import {
   IAddMultipleRacks,
   IAddRack,
-  IRack, IRackFilter
+  IRack,
+  IRackFilter,
 } from '../interfaces/rackInterface';
-import { ApiResponse, handleApiRequest } from '../apiRequestHandler';
+import { IApiResponse, handleApiRequest } from '../apiRequestHandler';
 import { userApi, warehouseApi } from '../../index';
 import { ISendData } from '../sendDataInterface';
 import { IVendorFilters } from '../interfaces/vendorInterface';
+import { GenericApi } from './genericApi';
 
-export class RackApi implements IRack {
-  private readonly token: string;
+export class RackApi extends GenericApi implements IRack {
   constructor() {
-    this.token = userApi.getToken;
+    super();
   }
 
-  private async handleApiRequestWithToken(
-    data: ISendData,
-  ): Promise<ApiResponse> {
-    data.headers.token = this.token || userApi.getToken;
-    console.log(data);
-    return await handleApiRequest({
-      url: data.url,
-      method: data.method,
-      body: data.body,
-      headers: data.headers,
-    });
+  public async addRack(body: IAddRack): Promise<IApiResponse> {
+    return await this.create(body, 'racks');
   }
 
-  public async addRack(body: IAddRack): Promise<ApiResponse> {
-    const url = '/racks';
-    const method = 'POST';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async deleteRack(id: number): Promise<IApiResponse> {
+    return await this.delete(id, 'rack');
   }
 
-  public async deleteRack(id: number): Promise<ApiResponse> {
-    const url = '/rack/' + id;
-    const method = 'DELETE';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getRack(id: number): Promise<IApiResponse> {
+    return await this.getOne(id, 'rack');
   }
 
-  public async getRack(id: number): Promise<ApiResponse> {
-    const url = '/rack/' + id;
-    const method = 'GET';
-    const headers = {};
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async updateRack(body: IAddRack, id: number): Promise<IApiResponse> {
+    return await this.update(id, body, 'rack');
   }
 
-  public async updateRack(body: IAddRack, id: number): Promise<ApiResponse> {
-    const url = '/rack/' + id;
-    const method = 'PUT';
-    const headers = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
-  }
-
-  public async addMultipleRacks(body: IAddMultipleRacks): Promise<ApiResponse> {
+  public async addMultipleRacks(
+    body: IAddMultipleRacks,
+  ): Promise<IApiResponse> {
     const warehouse = await warehouseApi.getWarehouse(body.warehouse_id);
     const url = '/rack/multiple';
     const method = 'POST';
     const headers = {};
-    console.log(warehouse);
+
     if (!warehouse.success) {
       return {
         success: false,
@@ -103,11 +75,15 @@ export class RackApi implements IRack {
             ) + j,
           );
 
-          if(startingLetter.toUpperCase().charCodeAt(0) + i > 'Z'.charCodeAt(0)){
+          if (
+            startingLetter.toUpperCase().charCodeAt(0) + i >
+            'Z'.charCodeAt(0)
+          ) {
             return {
-              message: 'Maximum racks reached. Please choose the smaller Number',
-              success: false
-            }
+              message:
+                'Maximum racks reached. Please choose the smaller Number',
+              success: false,
+            };
           }
         }
       }
@@ -115,7 +91,7 @@ export class RackApi implements IRack {
       body = { ...body, rack_positions: positions };
       delete body.rows;
       delete body.columns;
-      return await this.handleApiRequestWithToken({
+      return await this.genericRequest({
         url,
         method,
         body,
@@ -124,12 +100,7 @@ export class RackApi implements IRack {
     }
   }
 
-  public async getAll(filters: IRackFilter): Promise<ApiResponse> {
-    const url = '/racks';
-    const method = 'GET';
-    const headers = { filters };
-    const body = {};
-
-    return await this.handleApiRequestWithToken({ url, method, body, headers });
+  public async getAll(filters: IRackFilter): Promise<IApiResponse> {
+    return await super.getAll('racks', filters);
   }
 }
