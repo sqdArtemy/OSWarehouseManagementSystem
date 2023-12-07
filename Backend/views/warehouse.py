@@ -314,8 +314,20 @@ class WarehouseView(GenericView):
                     func.sum(Inventory.quantity).label('total_quantity')
                 ).group_by(Warehouse.warehouse_id, Inventory.product_id).all()
 
+                warehouse_products = {}
+                for w in warehouses:
+                    warehouse_id = w[0]
+                    product_id = w[1]
+                    quantity = w[2]
+
+                    if warehouse_id in warehouse_products:
+                        warehouse_products[warehouse_id][product_id] = quantity
+                    else:
+                        warehouse_products[warehouse_id] = {product_id: quantity}
+
                 warehouses = [
-                    w[0] for w in warehouses if w[2] >= products_to_order[w[1]]
+                    warehouse for warehouse, products in warehouse_products.items()
+                    if all(products_to_order[product_id] <= quantity for product_id, quantity in products.items())
                 ]
 
             elif order_type == "to_warehouse":
