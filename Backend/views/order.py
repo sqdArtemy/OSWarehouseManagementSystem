@@ -114,9 +114,12 @@ class OrderView(GenericView):
                             (order.order_type == "to_warehouse" and order.supplier_id not in requester_vendors)
                     )
                     ) or (
-                            (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            (requester_role in (
+                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    (
+                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                                    (
+                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
                             )
                     )
             ):
@@ -436,15 +439,18 @@ class OrderView(GenericView):
 
             if requester_role == UserRole.SUPERVISOR.value["code"] or (
                     (
-                    requester_role == UserRole.VENDOR.value["code"] and (
-                    (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
-                    (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
-                       )
+                            requester_role == UserRole.VENDOR.value["code"] and (
+                            (order.order_type == "from_warehouse" and order.supplier_id not in requester_vendors) or
+                            (order.order_type == "to_warehouse" and order.recipient_id not in requester_vendors)
+                    )
                     ) or (
-                    (requester_role in (UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
-                        (order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
-                        (order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
-                       )
+                            (requester_role in (
+                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    (
+                                            order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
+                                    (
+                                            order.order_type == "from_warehouse" and order.supplier_id not in requester_warehouses)
+                            )
                     )
             ):
                 raise ValidationError("Order not found.", 404)
@@ -571,7 +577,7 @@ class OrderView(GenericView):
                     {"remaining_capacity": warehouse.remaining_capacity + changed_volume})
 
             session.query(Order).filter_by(order_id=order_id).update(
-                    {"order_status": "processing", "updated_at": datetime.now()})
+                {"order_status": "processing", "updated_at": datetime.now()})
 
             session.commit()
 
@@ -638,26 +644,41 @@ class OrderView(GenericView):
                 total_quantity = order_item.quantity
 
                 if product.is_stackable:
-                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
-                      Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id,
-                      or_(
-                        and_(
-                          Inventory.inventory_id != None,
-                          Product.is_stackable == 1
-                        ),
-                        Inventory.inventory_id == None
-                      )
+                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(
+                        Product, Inventory.product_id == Product.product_id).filter(
+                        Rack.remaining_capacity > 0, Rack.warehouse_id == order.recipient_id,
+                        or_(
+                            and_(
+                                Inventory.inventory_id != None,
+                                Product.is_stackable == 1
+                            ),
+                            Inventory.inventory_id == None
+                        )
                     ).order_by(desc(Rack.rack_position)).all()
                 else:
-                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(Product, Inventory.product_id == Product.product_id).filter(
-                      Rack.remaining_capacity > 0,  Rack.warehouse_id == order.recipient_id, Rack.remaining_capacity == Rack.overall_capacity
+                    racks = session.query(Rack).outerjoin(Inventory, Rack.rack_id == Inventory.rack_id).outerjoin(
+                        Product, Inventory.product_id == Product.product_id).filter(
+                        Rack.remaining_capacity > 0, Rack.warehouse_id == order.recipient_id,
+                        Rack.remaining_capacity == Rack.overall_capacity
                     ).order_by(desc(Rack.rack_position)).all()
 
                 for rack in racks:
                     if rack.remaining_capacity == 0:
                         continue
 
-                    max_volume = rack.remaining_capacity if total_volume > rack.remaining_capacity else total_volume
+                    if rack.rack_id in [filled_inventory['rack_id'] for filled_inventory in filled_inventories]:
+                        quantity = next(
+                            (filled_inventory['real_quantity'] for filled_inventory in filled_inventories if
+                             filled_inventory['rack_id'] == rack.rack_id),
+                            0)
+                        if quantity == 0:
+                            continue
+
+                        updated_remaining_capacity = rack.remaining_capacity - product.volume * quantity
+                        max_volume = updated_remaining_capacity if total_volume > updated_remaining_capacity else total_volume
+
+                    else:
+                        max_volume = rack.remaining_capacity if total_volume > rack.remaining_capacity else total_volume
 
                     real_quantity = floor(max_volume / product.volume)
 
