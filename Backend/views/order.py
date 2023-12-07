@@ -698,6 +698,12 @@ class OrderView(GenericView):
                     if total_quantity == 0:
                         break
 
+                if total_quantity > 0:
+                    raise ValidationError(
+                        f"Not enough capacity to place remaining {total_quantity} of {product.product_name}",
+                        400
+                    )
+
             self.response.status_code = 200
             self.response.data["filled_inventories"] = filled_inventories
 
