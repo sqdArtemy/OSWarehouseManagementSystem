@@ -38,7 +38,7 @@ try:
                     "status_code": 400,
                     "message": "Invalid JSON.",
                     "body": {},
-                    "headers": request.get("headers", {})
+                    "headers": request.get("headers", { "socket_fd: 0 "})
                 }
 
             client_socket.send(json.dumps(response).encode() + "\n".encode())
