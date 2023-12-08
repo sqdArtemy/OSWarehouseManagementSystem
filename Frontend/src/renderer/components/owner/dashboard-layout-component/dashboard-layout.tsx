@@ -11,7 +11,7 @@ import { userApi } from '../../../index';
 
 export function OwnerDashboardLayout() {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(0);
   const [name, setName] = useState('Gentlemanbek');
   const sideBarElements = [
     { iconSrc: DashboardIcon, text: 'Dashboard' },
@@ -32,7 +32,7 @@ export function OwnerDashboardLayout() {
   };
 
   useEffect(() => {
-    if(userApi.getUserData){
+    if (userApi.getUserData) {
       setName(
         userApi.getUserData.user_name + ' ' + userApi.getUserData.user_surname,
       );

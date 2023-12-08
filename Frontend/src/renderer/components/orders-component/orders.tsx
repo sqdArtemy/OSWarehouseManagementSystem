@@ -8,6 +8,9 @@ import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
 import { IWarehouseData } from '../owner/warehouses-component/warehouses';
 import OrderActiveDetails from './order-detail-component/active-order-detail';
+import { DatePicker } from 'antd';
+
+const { RangePicker } = DatePicker;
 
 export default function Orders() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
@@ -15,6 +18,7 @@ export default function Orders() {
   const [finishedOrders, setFinishedOrders] = useState([]);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null); // Track active order id
   const [isOrderDetailsVisible, setOrderDetailsVisible] = useState(false);
+  const [dates, setDates] = useState([]);
 
   const navigate = useNavigate();
   let filters: IOrderFilters = {};
@@ -171,7 +175,7 @@ export default function Orders() {
 
       setScrollSize({
         x: vw * 0.35,
-        y: vh * 0.6,
+        y: vh * 0.175,
       });
     };
 
@@ -229,23 +233,92 @@ export default function Orders() {
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
+  const ordersStatsColumns = [
+    {
+      title: 'Total',
+      dataIndex: 'total',
+      key: 'total',
+    },
+    {
+      title: 'New',
+      dataIndex: 'new',
+      key: 'new',
+    },
+    {
+      title: 'Finished',
+      dataIndex: 'finished',
+      key: 'finished',
+    },
+    {
+      title: 'Cancelled',
+      dataIndex: 'cancelled',
+      key: 'cancelled',
+    },
+    {
+      title: 'Processing',
+      dataIndex: 'processing',
+      key: 'processing',
+    },
+    {
+      title: 'Delivered',
+      dataIndex: 'delivered',
+      key: 'delivered',
+    },
+    {
+      title: 'Lost',
+      dataIndex: 'lost',
+      key: 'lost',
+    },
+    {
+      title: 'Submitted',
+      dataIndex: 'submitted',
+      key: 'submitted',
+    },
+    {
+      title: 'Damaged',
+      dataIndex: 'damaged',
+      key: 'damaged',
+    },
+  ];
+
+  const ordersStatsTableData = [
+    {
+      key: '1',
+      total: currentOrders.length + finishedOrders.length,
+      new: currentOrders.length,
+      finished: finishedOrders.length,
+      cancelled: 0,
+      processing: 0,
+      delivered: 0,
+      lost: 0,
+      submitted: 0,
+      damaged: 0,
+    },
+  ];
+
   return (
     <div className="orders-container">
       <div className={'orders-table-container'}>
         <div className={'orders-table-header-container'}>
           <span className={'orders-table-header'}>ORDERS</span>
-          <div className={'options-container'}>
+          <div className={'orders-options-container'}>
             {userApi.getUserData &&
               userApi.getUserData.user_role === 'vendor' && (
-                <button
-                  className={'add-btn'}
-                  onClick={(e) => handleAddOrder(e)}
-                >
-                  <img src={PlusIcon} alt={'Add Button'}></img>
-                  <span className={'add-btn-text'}>Add Order</span>
-                </button>
+                <>
+                  <RangePicker
+                    allowEmpty={[true, true]}
+                    onChange={(dates) => setDates(dates)}
+                    className={'orders-date-picker'}
+                  />
+                  <button
+                    className={'add-btn'}
+                    onClick={(e) => handleAddOrder(e)}
+                  >
+                    <img src={PlusIcon} alt={'Add Button'}></img>
+                    <span className={'add-btn-text'}>Add Order</span>
+                  </button>
+                </>
               )}
-            {/* AddOrder component and related logic */}
           </div>
         </div>
         <div className="orders-table">
@@ -286,6 +359,29 @@ export default function Orders() {
                   handleOnFinishRowClick(event, record, rowIndex), // click row
               };
             }}
+          />
+        </div>
+        <div className="orders-stats-table">
+          <Table
+            title={() => (
+              <p
+                style={{
+                  fontSize: '1.1vw',
+                  textAlign: 'center',
+                  maxHeight: '1vw',
+                }}
+              >
+                Orders Status Statistics (All Time)
+              </p>
+            )}
+            dataSource={ordersStatsTableData as []}
+            columns={ordersStatsColumns as []}
+            pagination={false}
+            size={'small'}
+            bordered={true}
+            style={{ fontSize: '0.8vw' }}
+            rootClassName={'orders-stats-table'}
+            rowClassName={'default-table-row-height'}
           />
         </div>
       </div>

@@ -4,8 +4,16 @@
 
 .generalized-detail-footer-btns {
   button {
-    font-size: 1.2vw;
+    font-size: 1vw;
     width: 9vw;
-    height: 2.5vw;
+    height: 2.2vw;
   }
+}
+
+.ant-select-selection-item{
+  font-size: 0.9vw;
+}
+
+.ant-select-item-option-content{
+  font-size: 0.9vw;
 }

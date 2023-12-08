@@ -114,11 +114,18 @@ export default function Requests() {
           warehouseId: warehouse?.warehouse_id,
         };
 
-        if (order.order_type === 'from_warehouse' && order.order_status === 'submitted') {
+        if (
+          order.order_type === 'from_warehouse' &&
+          order.order_status === 'submitted'
+        ) {
           orderItem.key = (activeKey++).toString();
           activeItems.push(orderItem);
-        } else if (order.order_type === 'to_warehouse'
-          && ['processing', 'delivered', 'lost', 'damaged'].includes(order.order_status) ){
+        } else if (
+          order.order_type === 'to_warehouse' &&
+          ['processing', 'delivered', 'lost', 'damaged'].includes(
+            order.order_status,
+          )
+        ) {
           orderItem.key = (finishKey++).toString();
           finishedItems.push(orderItem);
         }
@@ -130,14 +137,14 @@ export default function Requests() {
       setFromTo([]);
       setToFrom([]);
     }
-  }
+  };
 
   const setOrders = async () => {
     const response = await orderApi.getAllOrders({});
-    if(response.success){
+    if (response.success) {
       separateOrders(response.data.body);
     }
-  }
+  };
   const columns = [
     {
       title: 'Vendor',
@@ -235,8 +242,8 @@ export default function Requests() {
 
   return (
     <div className="orders-container">
-      <div className={'orders-table-container'}>
-        <div className={'orders-table-header-container'}>
+      <div className={'requests-table-container'}>
+        <div className={'requests-table-header-container'}>
           <span className={'orders-table-header'}>
             WAREHOUSE {nameOfWarehouse}
           </span>

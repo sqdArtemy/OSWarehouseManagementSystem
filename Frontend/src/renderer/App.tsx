@@ -14,8 +14,8 @@ import OwnerDashboard from './components/owner/dashboard-component/dashboard';
 import OwnerItems from './components/owner/items-component/items';
 import { SignUp } from './components/sign-up-components/sign-up-component/sign-up';
 import { SignUpDetails } from './components/sign-up-components/sign-up-details-component/sign-up-details';
-import Profile from './components/owner/profile-component/profile';
-import OwnerProfile from './components/owner/profile-component/profile';
+import Profile from './components/profile-component/profile';
+import OwnerProfile from './components/profile-component/profile';
 import OwnerWarehouses from './components/owner/warehouses-component/warehouses';
 // import WarehousesAdd from './components/owner/warehouses-component/warehouses-add/warehouses-add';
 import { AdminDashboardLayout } from './components/admin/dashboard-layout-component/dashboard-layout';
@@ -88,7 +88,7 @@ export default function App() {
                 path="warehouses/:warehouse_id"
                 element={<SupervisorWarehouses />}
               />
-              <Route path="requests" element={<SupervisorRequests />}/>
+              <Route path="requests" element={<SupervisorRequests />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="admin/*" element={<AdminDashboardLayout />}>

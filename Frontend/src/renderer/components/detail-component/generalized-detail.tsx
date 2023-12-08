@@ -337,11 +337,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
               size={'small'}
               bordered={true}
               style={{ fontSize: '1.5vw' }}
-              onRow={(record, rowIndex) => {
-                return {
-                  onClick: (event) => handleOnRowClick(event, record, rowIndex), // click row
-                };
-              }}
+              rowClassName={'default-table-row-height'}
             />
           </div>
         </div>

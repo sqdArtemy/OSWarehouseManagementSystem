@@ -3,8 +3,8 @@ import { useState } from 'react';
 import './profile.scss';
 import { Button, Form, FormInstance, Input, Space } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { userApi } from '../../../index';
-import { useError } from '../../error-component/error-context';
+import { userApi } from '../../index';
+import { useError } from '../error-component/error-context';
 import { useNavigate } from 'react-router-dom';
 
 export default function OwnerProfile() {
@@ -31,8 +31,12 @@ export default function OwnerProfile() {
       );
 
       if (!response.success) {
-        showError(response.message);
+        return showError(response.message);
       }
+      formRef.current?.setFieldValue('Current Password' as any, '');
+      formRef.current?.setFieldValue('New Password' as any, '');
+      formRef.current?.setFieldValue('Confirm Password' as any, '');
+      setChangePassDisplay(false);
     } else {
       const response = await userApi.updateUser(
         {
@@ -52,12 +56,12 @@ export default function OwnerProfile() {
 
   const handleDelete = async () => {
     const response = await userApi.deleteUser(userApi.userData.user_id);
-    if(!response.success){
+    if (!response.success) {
       showError(response.message);
     } else {
       navigate('/sign-in');
     }
-  }
+  };
 
   useEffect(() => {
     const data = userApi.getUserData;
@@ -101,7 +105,12 @@ export default function OwnerProfile() {
         onFinish={onFinish}
       >
         <Form.Item>
-          <Button htmlType="button" type={'primary'} danger={} onClick={handleDelete}>
+          <Button
+            htmlType="button"
+            type={'primary'}
+            danger={}
+            onClick={handleDelete}
+          >
             Delete account
           </Button>
         </Form.Item>

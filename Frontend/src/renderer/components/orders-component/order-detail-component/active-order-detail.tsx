@@ -7,6 +7,7 @@ import { useError } from '../../error-component/error-context';
 import ChooseTransport from '../../owner/confirm-order-component/choose-transport-component/choose-transport';
 import Accept from '../../supervisor/requests-component/accept-component/accept';
 import { IOrderData } from '../../supervisor/requests-component/requests';
+import { getLostItems } from '../../supervisor/requests-component/util';
 
 interface OrderActiveDetailsProps {
   id: string;
@@ -24,7 +25,7 @@ const convertToIOrderData = (orderItem: any): IOrderData => {
     vendorId: orderItem.vendor?.vendor_id || 0, // Provide a default value if vendor_id is undefined
     warehouse: orderItem.warehouse?.warehouse_name || '', // Provide a default value if warehouse is undefined
     warehouseId: orderItem.warehouse?.warehouse_id || 0, // Provide a default value if warehouse_id is undefined
-    items: orderItem.items
+    items: orderItem.items,
   };
 };
 
@@ -43,6 +44,8 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
   const [showTransportConfirmationModal, setShowTransportConfirmationModal] =
     useState(false);
   const navigate = useNavigate();
+  const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
+  const [lostItemsDataSource, setLostItemsDataSource] = useState([]);
 
   useEffect(() => {
     if (isActiveOrderVisible && id) {
@@ -55,7 +58,9 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
             const processedItems = [];
 
             for (let item of itemsList) {
-              const product = productsList?.find((product) => product.product_id == item.product);
+              const product = productsList?.find(
+                (product) => product.product_id == item.product,
+              );
 
               if (product) {
                 processedItems.push({
@@ -71,7 +76,10 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
 
           const orderDetails = data.data?.body;
           const orderItems = processItems(data.data?.body?.items, products);
-          const orderLostItems = processItems(data.data?.body?.lost_items, products);
+          const orderLostItems = processItems(
+            data.data?.body?.lost_items,
+            products,
+          );
 
           const vendor =
             orderDetails.order_type === 'to_warehouse'
@@ -95,6 +103,36 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
       });
     }
   }, [id, showError]);
+
+  useEffect(() => {
+    const calculateScrollSize = () => {
+      const vw = Math.max(
+        document.documentElement.clientWidth || 0,
+        window.innerWidth || 0,
+      );
+      const vh = Math.max(
+        document.documentElement.clientHeight || 0,
+        window.innerHeight || 0,
+      );
+
+      setScrollSize({
+        x: vw * 0.1,
+        y: vh * 0.4,
+      });
+    };
+    calculateScrollSize();
+    window.addEventListener('resize', calculateScrollSize);
+
+    return () => window.removeEventListener('resize', calculateScrollSize);
+  }, []);
+
+  useEffect(() => {
+    // const fetchData = async () => {
+    //   const lostItemsResponse = await getLostItems(orderData);
+    //   setLostItemsDataSource(lostItemsResponse);
+    // };
+    // fetchData();
+  }, [isActiveOrderVisible]);
 
   const columns = [
     { title: 'Product Name', dataIndex: 'product_name', key: 'product_name' },
@@ -135,10 +173,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
     });
   }
 
-  const layout = {
-    labelCol: { span: 8 },
-    wrapperCol: { span: 16 },
-  };
+  const layout = { labelCol: { span: 12 }, wrapperCol: { span: 16 } };
 
   const hidePopup = () => {
     setShowTransportConfirmationModal(false);
@@ -251,41 +286,129 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
     setTimeout(() => {
       navigate('/vendor/orders');
     }, 100);
+  };
+
+  const lostItemsColumns = [
+    {
+      title: 'Name',
+      dataIndex: 'name',
+      key: 'name',
+      align: 'center',
+    },
+    {
+      title: 'Amount',
+      dataIndex: 'amount',
+      key: 'amount',
+      align: 'center',
+    },
+  ];
+
+  const placeholderRowCount = 30;
+
+  const placeholderData = Array.from(
+    { length: placeholderRowCount },
+    (_, index) => ({
+      key: (index + 1).toString(),
+      name: '',
+      amount: '',
+    }),
+  );
+
+  let lostItemsTableData =
+    lostItemsDataSource.length > 0 ? lostItemsDataSource : placeholderData;
+  if (lostItemsTableData.length < placeholderRowCount) {
+    lostItemsTableData = [
+      ...lostItemsTableData,
+      ...placeholderData.slice(lostItemsTableData.length + 1),
+    ];
   }
 
   return (
     <Modal
-      title={`Order Active Details ${editMode ? '(Editing)' : ''}`}
+      title={
+        <p style={{ fontSize: '1.3vw' }}>{`Order Active Details ${
+          editMode ? '(Editing)' : ''
+        }`}</p>
+      }
       open={isActiveOrderVisible}
       onCancel={onClose}
       footer={null}
+      centered={true}
+      width={'65vw'}
     >
-      <Form {...layout} initialValues={orderDetails} colon={false}>
-        <Form.Item label="Created At" name="created_at">
-          <span className="form-value">{orderDetails?.created_at}</span>
-        </Form.Item>
-        <Form.Item label="Destination" name="order_type">
-          <span className="form-value">
-            {String(orderDetails?.order_type).replace(/_/g, ' ')}
-          </span>
-        </Form.Item>
-        <Form.Item label="Vendor Name" name="vendor">
-          <span className="form-value">{orderDetails?.vendor}</span>
-        </Form.Item>
-        <Form.Item label="Warehouse Name" name="warehouse">
-          <span className="form-value">{orderDetails?.warehouse}</span>
-        </Form.Item>
-        <Form.Item label="Order Status" name="order_status">
-          <span className="form-value">{orderDetails?.order_status}</span>
-        </Form.Item>
-        <Form.Item label="Total Price" name="total_price">
-          <span className="form-value">{orderDetails?.total_price}</span>
-        </Form.Item>
-        <Form.Item label="Total Volume" name="total_volume">
-          <span className="form-value">{orderDetails?.total_volume}</span>
-        </Form.Item>
-      </Form>
-
+      <div className={'active-order-upper-container'}>
+        <Form
+          {...layout}
+          labelAlign={'left'}
+          initialValues={orderDetails}
+          colon={false}
+        >
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Created At</p>}
+            name="created_at"
+          >
+            <span className="form-value">{orderDetails?.created_at}</span>
+          </Form.Item>
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Destination</p>}
+            name="order_type"
+          >
+            <span className="form-value">
+              {String(orderDetails?.order_type).replace(/_/g, ' ')}
+            </span>
+          </Form.Item>
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Vendor Name</p>}
+            name="vendor"
+          >
+            <span className="form-value">{orderDetails?.vendor}</span>
+          </Form.Item>
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Warehouse Name</p>}
+            name="warehouse"
+          >
+            <span className="form-value">{orderDetails?.warehouse}</span>
+          </Form.Item>
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Order Status</p>}
+            name="order_status"
+          >
+            <span className="form-value">{orderDetails?.order_status}</span>
+          </Form.Item>
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Total Price</p>}
+            name="total_price"
+          >
+            <span className="form-value">{orderDetails?.total_price}</span>
+          </Form.Item>
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Total Volume</p>}
+            name="total_volume"
+          >
+            <span className="form-value">{orderDetails?.total_volume}</span>
+          </Form.Item>
+        </Form>
+        <Table
+          title={() => (
+            <p
+              style={{
+                fontSize: '1.1vw',
+                textAlign: 'center',
+              }}
+            >
+              Lost Items List
+            </p>
+          )}
+          dataSource={lostItemsTableData as []}
+          columns={lostItemsColumns as []}
+          scroll={scrollSize}
+          pagination={false}
+          size={'small'}
+          bordered={true}
+          className={'order-preview-right-items-table'}
+          rowClassName={'default-table-row-height'}
+        />
+      </div>
       <Table
         pagination={false}
         dataSource={orderDetails?.items}
@@ -301,7 +424,11 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
           >
             Update Order
           </Button>
-          <Button onClick={handleCancelEdit} style={{ marginLeft: '8px' }}>
+          <Button
+            danger
+            onClick={handleCancelEdit}
+            style={{ marginLeft: '8px' }}
+          >
             Cancel update
           </Button>
         </>
@@ -359,13 +486,17 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
             </>
           )}
       </div>
-      { orderDetails && (
+      {orderDetails && (
         <Accept
-        isPopupVisible={showConfirmationModal}
-        hidePopup={hideDeliveryPopup}
-        orderData={ { orderData: convertToIOrderData(orderDetails), setOrderData: setOrderDetails }}
-        onSuccessDeliver={handleSuccessDeliver}>
-      </Accept>)}
+          isPopupVisible={showConfirmationModal}
+          hidePopup={hideDeliveryPopup}
+          orderData={{
+            orderData: convertToIOrderData(orderDetails),
+            setOrderData: setOrderDetails,
+          }}
+          onSuccessDeliver={handleSuccessDeliver}
+        ></Accept>
+      )}
 
       {orderDetails && (
         <ChooseTransport

@@ -5,7 +5,7 @@
   min-height: 100vh;
   align-items: center;
 
-  .orders-table-container {
+  .requests-table-container {
     display: flex;
     flex-direction: column;
     gap: 0.5vw;
@@ -14,7 +14,7 @@
     padding-top: 3vw;
     padding-left: 3vw;
 
-    .orders-table-header-container {
+    .requests-table-header-container {
       display: flex;
       flex-direction: column;
       gap: 3vw;

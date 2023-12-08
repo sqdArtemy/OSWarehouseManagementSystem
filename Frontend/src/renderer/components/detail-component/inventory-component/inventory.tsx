@@ -19,7 +19,7 @@ export default function Inventory({
   rackData,
   inventoryData,
   updateChartData,
-  updateGridData
+  updateGridData,
 }: {
   isInventoryPopupVisible: boolean;
   hidePopup: () => void;
@@ -125,6 +125,7 @@ export default function Inventory({
       render: (_, record) =>
         isEditMode ? (
           <InputNumber
+            style={{ fontSize: '0.9vw' }}
             value={record.totalCount}
             onChange={(value) => handleUpdateTotalCount(record.itemName, value)}
           />
@@ -145,6 +146,7 @@ export default function Inventory({
           type="link"
           danger
           onClick={() => handleRemoveProduct(record.itemName)}
+          style={{ fontSize: '0.9vw' }}
         >
           Delete
         </Button>
@@ -167,7 +169,9 @@ export default function Inventory({
       showError(response.message);
     }
 
-    const warehouse = await warehouseApi.getWarehouse(Number(warehouseApi.warehouseData.warehouse_id));
+    const warehouse = await warehouseApi.getWarehouse(
+      Number(warehouseApi.warehouseData.warehouse_id),
+    );
     if (warehouse.success && warehouse.data?.data) {
       updateGridData(normalizeRacksForGrid(warehouse.data.data.racks));
     }
@@ -288,7 +292,9 @@ export default function Inventory({
       setSelectedProducts([]);
       updateChartData();
 
-      const warehouse = await warehouseApi.getWarehouse(Number(warehouseApi.warehouseData.warehouse_id));
+      const warehouse = await warehouseApi.getWarehouse(
+        Number(warehouseApi.warehouseData.warehouse_id),
+      );
       if (warehouse.success && warehouse.data?.data) {
         updateGridData(normalizeRacksForGrid(warehouse.data.data.racks));
       }
@@ -387,7 +393,7 @@ export default function Inventory({
             {/* Add a search input for products */}
             <Select
               showSearch
-              style={{ width: 200 }}
+              style={{ width: 200, minHeight: '2vw' }}
               placeholder="Search for products"
               optionFilterProp="label"
               onSelect={handleSearchProducts}
@@ -398,7 +404,15 @@ export default function Inventory({
                 </Select.Option>
               ))}
             </Select>
-            <Button type={'primary'} onClick={handleUpdateInventory}>
+            <Button
+              style={{
+                fontSize: '0.9vw',
+                width: '8vw',
+                height: '2.1vw',
+              }}
+              type={'primary'}
+              onClick={handleUpdateInventory}
+            >
               {isEditMode ? 'Save Changes' : 'Update Inventory'}
             </Button>
           </>
@@ -418,14 +432,23 @@ export default function Inventory({
         >
           {userApi.getUserData.user_role === 'supervisor' && (
             <>
-              <Button type={'primary'} onClick={showEditRackPopup}>
-                Edit Rack
-              </Button>
-              <Button danger onClick={handleDeleteRack}>
-                Delete Rack
-              </Button>
-              <Button type="primary" style={} onClick={handleToggleEditMode}>
-                {isEditMode ? 'Disable Update' : 'Enable Update'}
+              {isEditMode ? null : (
+                <>
+                  <Button type={'primary'} onClick={showEditRackPopup}>
+                    Edit Rack
+                  </Button>
+                  <Button danger onClick={handleDeleteRack}>
+                    Delete Rack
+                  </Button>
+                </>
+              )}
+              <Button
+                danger={isEditMode}
+                type="primary"
+                onClick={handleToggleEditMode}
+                style={{ width: '15vw' }}
+              >
+                {isEditMode ? 'Cancel Update' : 'Update Inventory'}
               </Button>
             </>
           )}
