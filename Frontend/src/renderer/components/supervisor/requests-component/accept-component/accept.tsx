@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, FormInstance, Input, Modal, Select, Table } from 'antd';
-import { orderApi, productApi } from '../../../../index';
+import { orderApi, productApi, userApi } from '../../../../index';
 import { IOrderData } from '../requests';
 import { IApiResponse } from '../../../../services/apiRequestHandler';
 import { getItems } from '../util';
@@ -80,7 +80,7 @@ export default function Accept({
   ];
 
   const [currentColumns, setCurrentColumns] = useState(columns);
-
+  console.log(orderData);
   useEffect(() => {
     const calculateScrollSize = () => {
       const vw = Math.max(
@@ -140,12 +140,15 @@ export default function Accept({
 
   const formRef = React.useRef<FormInstance>(null);
   const onFinish = async () => {
-    if (selectedStatus === 'delivered') {
-      await orderApi.changeStatusOfOrder(
+    let response;
+    if (selectedStatus === 'delivered' || userApi.userData.user_role === 'vendor') {
+      response = await orderApi.changeStatusOfOrder(
         orderData.orderData.orderId,
         'delivered',
       );
-    } else if (selectedStatus == 'damaged') {
+    }
+
+    if (selectedStatus == 'damaged') {
       const items = itemsData
         .map((value) => {
           return {
@@ -154,7 +157,7 @@ export default function Accept({
           };
         })
         .filter((item) => item.name !== '' && item.damaged !== 0);
-      await orderApi.lostItems(orderData.orderData.orderId, 'damaged', items);
+      response = await orderApi.lostItems(orderData.orderData.orderId, 'damaged', items);
     } else if (selectedStatus == 'lost') {
       const items = itemsData
         .map((value) => {
@@ -164,8 +167,13 @@ export default function Accept({
           };
         })
         .filter((item) => item.name !== '' && item.lost !== 0);
-      await orderApi.lostItems(orderData.orderData.orderId, 'lost', items);
+      response = await orderApi.lostItems(orderData.orderData.orderId, 'lost', items);
     }
+
+    if(response.success && userApi.userData.user_role === 'vendor'){
+      await orderApi.changeStatusOfOrder(orderData.orderData.orderId, 'finished');
+    }
+
     onSuccessDeliver();
     hidePopup();
   };

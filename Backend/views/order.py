@@ -743,10 +743,13 @@ class OrderView(GenericView):
 
             # check if recipient has access to the order
             if order_type == "from_warehouse" and self.requester_role == UserRole.VENDOR.value["code"]:
-                vendor = session.query(Vendor).filter_by(vendor_owner_id=self.requester_id).first()
-                if vendor is None:
+                vendor = session.query(Vendor).filter_by(vendor_owner_id=self.requester_id).all()
+
+                if not vendor:
                     raise ValidationError("Order Not Found", 404)
-                order = order.filter(Order.recipient_id == vendor.vendor_id)
+
+                vendor_ids = [v.vendor_id for v in vendor]
+                order = order.filter(Order.recipient_id.in_(vendor_ids))
 
             elif order_type == "to_warehouse":
                 warehouse = order.first().recipient_warehouse
