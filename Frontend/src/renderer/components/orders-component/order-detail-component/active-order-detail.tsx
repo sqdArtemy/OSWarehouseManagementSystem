@@ -51,25 +51,27 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
           const productsResponse = await productApi.getAllProducts({});
           const products = productsResponse.data?.body;
 
-          const items = data.data?.body?.items;
-          const orderDetails = data.data?.body;
-          const orderItems = [];
+          const processItems = (itemsList, productsList) => {
+            const processedItems = [];
 
-          if (items) {
-            for (let item of items) {
-              const product = products?.find((product) => {
-                return product.product_id == item.product;
-              });
+            for (let item of itemsList) {
+              const product = productsList?.find((product) => product.product_id == item.product);
 
               if (product) {
-                orderItems.push({
+                processedItems.push({
                   product_name: product?.product_name,
                   product_id: item.product,
                   quantity: item.quantity,
                 });
               }
             }
-          }
+
+            return processedItems;
+          };
+
+          const orderDetails = data.data?.body;
+          const orderItems = processItems(data.data?.body?.items, products);
+          const orderLostItems = processItems(data.data?.body?.lost_items, products);
 
           const vendor =
             orderDetails.order_type === 'to_warehouse'
@@ -81,9 +83,11 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
               : orderDetails.recipient;
 
           orderDetails.items = orderItems ?? [];
+          orderDetails.lost_items = orderLostItems ?? [];
           orderDetails.vendor = vendor?.vendor_name;
           orderDetails.vendor_id = vendor?.vendor_id;
           orderDetails.warehouse = warehouse?.warehouse_name;
+          console.log(orderDetails);
           setOrderDetails(data.data?.body);
         } else {
           showError(data.message);
