@@ -226,6 +226,11 @@ class UserView(GenericView):
             ):
                 raise ValidationError("Only managers can be added to the company.")
 
+            if self.requester_role == UserRole.ADMIN.value["code"] and self.body.get("company_id"):
+                company_id = self.body.get("company_id")
+                if not is_instance_already_exists(Company, company_id=company_id):
+                    raise ValidationError("Company with given id does not exist.")
+
             new_body = dict(
                 user_name=employee_name,
                 user_surname=employee_surname,

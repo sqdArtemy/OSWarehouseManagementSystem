@@ -5,12 +5,28 @@ import './active-order-detail.scss';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../error-component/error-context';
 import ChooseTransport from '../../owner/confirm-order-component/choose-transport-component/choose-transport';
+import Accept from '../../supervisor/requests-component/accept-component/accept';
+import { IOrderData } from '../../supervisor/requests-component/requests';
 
 interface OrderActiveDetailsProps {
   id: string;
   onClose: () => void;
   isActiveOrderVisible: boolean;
 }
+
+const convertToIOrderData = (orderItem: any): IOrderData => {
+  return {
+    orderStatus: orderItem.order_status,
+    orderType: orderItem.order_type,
+    createdAt: orderItem.created_at,
+    orderId: orderItem.order_id,
+    vendor: orderItem.vendor?.vendor_name || '', // Provide a default value if vendor is undefined
+    vendorId: orderItem.vendor?.vendor_id || 0, // Provide a default value if vendor_id is undefined
+    warehouse: orderItem.warehouse?.warehouse_name || '', // Provide a default value if warehouse is undefined
+    warehouseId: orderItem.warehouse?.warehouse_id || 0, // Provide a default value if warehouse_id is undefined
+    items: orderItem.items
+  };
+};
 
 const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
   id,
@@ -26,6 +42,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
     useState(false);
   const [showTransportConfirmationModal, setShowTransportConfirmationModal] =
     useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isActiveOrderVisible && id) {
@@ -123,6 +140,10 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
     setShowTransportConfirmationModal(false);
   };
 
+  const hideDeliveryPopup = () => {
+    setShowConfirmationModal(false);
+  };
+
   const handleEditOrder = () => {
     setEditMode(true);
     console.log('Edit Order clicked');
@@ -195,15 +216,6 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
     });
   };
 
-  const handleConfirmDelivery = async () => {
-    const response = await orderApi.changeStatusOfOrder(Number(id), 'finished');
-    if (response.success) {
-      setShowConfirmationModal(false);
-    } else {
-      showError(response.message);
-    }
-  };
-
   const userRole = userApi.getUserData.user_role;
 
   const handleConfirmOrder = async () => {
@@ -228,6 +240,15 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
     onCancelSuccess();
     onClose();
   };
+
+  const handleSuccessDeliver = async () => {
+    setShowConfirmationModal(false);
+    navigate('/vendor');
+    setTimeout(() => {
+      navigate('/vendor/orders');
+    }, 100);
+  }
+
   return (
     <Modal
       title={`Order Active Details ${editMode ? '(Editing)' : ''}`}
@@ -334,14 +355,14 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
             </>
           )}
       </div>
-      <Modal
-        title="Confirm Delivery"
-        open={showConfirmationModal}
-        onOk={handleConfirmDelivery}
-        onCancel={() => setShowConfirmationModal(false)}
-      >
-        <p>Are you sure you want to confirm delivery?</p>
-      </Modal>
+      { orderDetails && (
+        <Accept
+        isPopupVisible={showConfirmationModal}
+        hidePopup={hideDeliveryPopup}
+        orderData={ { orderData: convertToIOrderData(orderDetails), setOrderData: setOrderDetails }}
+        onSuccessDeliver={handleSuccessDeliver}>
+      </Accept>)}
+
       {orderDetails && (
         <ChooseTransport
           acceptData={orderDetails}

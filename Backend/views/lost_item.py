@@ -6,7 +6,7 @@ from sqlalchemy import func, or_, and_, desc
 from sqlalchemy.orm import joinedload
 
 from db_config import get_session
-from models import LostItem, User, Warehouse, Order, Product, OrderItem
+from models import LostItem, User, Warehouse, Order, Product, OrderItem, Vendor
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities import extract_id_from_url, ValidationError
@@ -39,7 +39,12 @@ class LostItemView(GenericView):
                 raise ValidationError("Order with given id does not exist.", 404)
 
             requester = session.query(User).filter_by(user_id=requester_id).first()
-            if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+
+            if requester_role == UserRole.VENDOR.value["code"]:
+                requester_vendors = session.query(Vendor.vendor_id).filter_by(
+                    vendor_owner_id=requester_id).all()
+                requester_vendors = [vendor[0] for vendor in requester_vendors]
+            elif self.requester_role == UserRole.SUPERVISOR.value["code"]:
                 requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
                     supervisor_id=requester_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
