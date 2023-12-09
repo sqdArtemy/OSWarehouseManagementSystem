@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from sqlalchemy import func, or_, and_, desc, text
+from sqlalchemy import func, cast, Float
 
 from db_config import get_session
 from models import Inventory, User, Warehouse, Rack, Product
@@ -167,14 +167,15 @@ class InventoryView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: fix Decimal which is returned from func.avg(func.datediff())
         with (get_session() as session):
 
             result = session.query(Inventory.product_id, Product.product_name,
                                    func.count(Inventory.product_id).label("products_number"),
-                                   func.sum(Inventory.total_volume).label("total_volume_sum"),
-                                   func.avg(func.datediff(Inventory.expiry_date, Inventory.arrival_date))
-                                   .label("average_expiry_date"),
+                                   cast(func.sum(Inventory.total_volume).label("total_volume_sum"), Float),
+                                   cast(
+                                       func.avg(func.datediff(Inventory.expiry_date, Inventory.arrival_date)),
+                                       Float
+                                   ).label("average_expiry_date"),
                                    ).join(Product).group_by(Inventory.product_id)
 
             # if admin - return everything

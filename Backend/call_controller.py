@@ -25,9 +25,21 @@ try:
     while True:
         ready, _, _ = select.select([client_socket], [], [], 1)  # Wait for up to 1 second for data
         if ready:
-            # receive data
-            data = client_socket.recv(1024)
-            request = dict()
+            # Receive data
+            accumulated_data = b''
+
+            data = client_socket.recv(1048576)
+            accumulated_data += data
+            accumulated_message = ''
+
+            # Receive data until the message is complete (i.e. ends with a newline)
+            while b'\n' in accumulated_data:
+                message, accumulated_data = accumulated_data.split(b'\n', 1)
+                accumulated_message += message.decode() + '\n'
+
+            data = accumulated_message + accumulated_data.decode()
+
+        request = dict()
 
             try:
                 request = json.loads(data.decode())
