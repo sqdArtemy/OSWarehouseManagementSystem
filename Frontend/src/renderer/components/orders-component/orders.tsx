@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './orders.scss';
 import { Table } from 'antd';
 import PlusIcon from '../../../../assets/icons/users-plus-icon.png';
-import { orderApi, userApi, vendorApi, warehouseApi } from '../../index';
+import { orderApi, statsApi, userApi, vendorApi, warehouseApi } from '../../index';
 import { IOrderFilters } from '../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
@@ -120,6 +120,11 @@ export default function Orders() {
     await getAllOrders(filters);
   };
 
+  const getOrderStats = async () => {
+    const response = await statsApi.getOrderStats();
+    console.log(response);
+  }
+
   const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
@@ -198,7 +203,7 @@ export default function Orders() {
     orderApi.getAllOrders(filters).then(async (data) => {
       const orders = data.data?.body;
       console.log(orders);
-
+      await getOrderStats();
       if (orders?.length) {
         const finishedItems = [];
         const activeItems = [];
