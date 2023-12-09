@@ -46,8 +46,8 @@ export interface IOrderFilters {
     | 'delivered'
     | 'lost'
     | 'damaged';
-  created_at_gte?: Date;
-  created_at_lte?: Date;
+  created_at_gte?: Date | string;
+  created_at_lte?: Date | string;
   order_type?: 'from_warehouse' | 'to_warehouse';
   transport_id?: number;
 }

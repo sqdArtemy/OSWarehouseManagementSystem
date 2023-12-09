@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { IWarehouseData } from '../owner/warehouses-component/warehouses';
 import OrderActiveDetails from './order-detail-component/active-order-detail';
 import { DatePicker } from 'antd';
+import moment from 'moment/moment';
 
 const { RangePicker } = DatePicker;
 
@@ -25,6 +26,18 @@ export default function Orders() {
 
   const hideOrderDetailsPopup = () => {
     setOrderDetailsVisible(false);
+  };
+
+  const handleDateChange = async (dates: any) => {
+    setDates(dates);
+    if(dates[0] && dates[0]['$d']){
+      filters.created_at_gte = moment(dates[0]['$d'] as any).format('YYYY-MM-DD');
+    }
+
+    if(dates[1] && dates[1]['$d']){
+      filters.created_at_lte = moment(dates[1]['$d'] as any).format('YYYY-MM-DD');
+    }
+    await getAllOrders(filters);
   };
 
   const getAllOrders = async (filters: IOrderFilters) => {
@@ -302,23 +315,21 @@ export default function Orders() {
         <div className={'orders-table-header-container'}>
           <span className={'orders-table-header'}>ORDERS</span>
           <div className={'orders-options-container'}>
-            {userApi.getUserData &&
-              userApi.getUserData.user_role === 'vendor' && (
-                <>
                   <RangePicker
                     allowEmpty={[true, true]}
-                    onChange={(dates) => setDates(dates)}
+                    onChange={handleDateChange}
                     className={'orders-date-picker'}
                   />
-                  <button
-                    className={'add-btn'}
-                    onClick={(e) => handleAddOrder(e)}
-                  >
-                    <img src={PlusIcon} alt={'Add Button'}></img>
-                    <span className={'add-btn-text'}>Add Order</span>
-                  </button>
-                </>
-              )}
+                  {userApi.getUserData &&
+                    userApi.getUserData.user_role === 'vendor' && (
+                        <button
+                          className={'add-btn'}
+                          onClick={(e) => handleAddOrder(e)}
+                        >
+                          <img src={PlusIcon} alt={'Add Button'}></img>
+                          <span className={'add-btn-text'}>Add Order</span>
+                        </button>
+                    )}
           </div>
         </div>
         <div className="orders-table">
