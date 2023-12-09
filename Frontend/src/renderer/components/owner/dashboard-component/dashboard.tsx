@@ -15,6 +15,7 @@ import { ChartData } from 'chart.js';
 import { Badge, Descriptions, Table } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { getLostItems } from '../../supervisor/requests-component/util';
+import { statsApi } from '../../../index';
 
 ChartJS.register(
   CategoryScale,
@@ -34,14 +35,32 @@ export default function OwnerDashboard() {
   const [dataSource, setDataSource] = useState([]);
 
   useEffect(() => {
-    // const fetchData = async () => {
-    //   const lostItemsResponse = await getLostItems(orderData);
-    //   setLostItemsDataSource(lostItemsResponse);
-    // };
-    //
-    // fetchData();
+    const fetchData = async () => {
+      const lostItemsResponse = await statsApi.getLostItems({});
+      if(lostItemsResponse.success) {
+        setLostItemsDataSource(lostItemsResponse.data.body.map(item => {
+          return {
+            name: item.product_name,
+            amount: item.total_quantity
+          }
+        }));
+      }
 
-    console.log(true);
+      const productsStatsResponse = await statsApi.getProductsStats();
+      if(productsStatsResponse.success) {
+        setDataSource(productsStatsResponse.data.body.map(item => {
+          return {
+            itemName: item.product_name,
+            itemVolume: item.total_volume_sum,
+            itemCount: item.products_number,
+            expiry: item.average_expiry_date
+          }
+        }));
+      }
+    };
+
+    fetchData();
+
     const calculateScrollSize = () => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -179,9 +198,9 @@ export default function OwnerDashboard() {
       align: 'center',
     },
     {
-      title: 'Weight',
-      dataIndex: 'itemWeight',
-      key: 'itemWeight',
+      title: 'Average Expiry',
+      dataIndex: 'expiry',
+      key: 'expiry',
       align: 'center',
     },
     {

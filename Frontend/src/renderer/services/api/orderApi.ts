@@ -46,7 +46,7 @@ export class OrderApi extends GenericApi implements IOrder {
   }
 
   public async getAllOrders(filters: IOrderFilters): Promise<IApiResponse> {
-    return await this.getAll('/orders', filters);
+    return await this.getAll('orders', filters);
   }
 
   public async getOrder(id: number): Promise<IApiResponse> {
