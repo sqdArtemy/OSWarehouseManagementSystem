@@ -13,6 +13,35 @@ SERVER_IP = sys.argv[1]
 PORT = int(sys.argv[2])
 accumulated_data = b""
 
+def receive_messages(client_socket):
+    accumulated_data = b""
+    accumulated_message = ''
+
+    while True:
+        ready, _, _ = select.select([client_socket], [], [], 0.05)  # Check every 50 ms
+
+        if not ready:
+            # No data received within the timeout, break out of the loop
+            break
+
+        data = client_socket.recv(1048576)
+
+        if not data:
+            # Check if the socket is still open
+            if client_socket.fileno() == -1:
+                break  # Connection closed, break out of the loop
+            else:
+                continue  # No data received, continue the loop
+
+        accumulated_data += data
+
+        while b'\n' in accumulated_data:
+            message, accumulated_data = accumulated_data.split(b'\n', 1)
+            accumulated_message += message.decode() + '\n'
+
+    accumulated_message = accumulated_message + accumulated_data.decode()
+    return accumulated_message.rstrip()
+
 try:
     client_socket.connect((SERVER_IP, PORT))
     print("Connected to the server.")
@@ -28,18 +57,7 @@ try:
         ready, _, _ = select.select([client_socket], [], [], 1)  # Wait for up to 1 second for data
         if ready:
             # receive data
-            data = client_socket.recv(1048576)
-            request = dict()
-            accumulated_data += data
-            accumulated_message = ''
-
-            while b'\n' in accumulated_data:
-                message, accumulated_data = accumulated_data.split(b'\n', 1)
-                accumulated_message += message.decode() + '\n'
-
-            data = accumulated_message + accumulated_data.decode()
-            accumulated_data = b""
-            accumulated_message = ''
+            data = receive_messages(client_socket)
 
             try:
                 request = json.loads(data)
