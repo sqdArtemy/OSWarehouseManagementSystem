@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from sqlalchemy import func, cast, Float
+from sqlalchemy import func, or_, and_, desc, text, cast, Float
 
 from db_config import get_session
 from models import Inventory, User, Warehouse, Rack, Product
@@ -55,7 +55,7 @@ class InventoryView(GenericView):
             is_stackable = session.query(Product.is_stackable).filter_by(
                 product_id=product_id).scalar()
 
-            if is_stackable == 0 and products_from_rack is not None:
+            if is_stackable == 0 and len(products_from_rack) != 0:
                 raise ValidationError("Cannot stack non-stackable product", 400)
 
             if warehouse.warehouse_type != product.product_type:

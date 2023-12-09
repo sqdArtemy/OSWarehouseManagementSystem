@@ -1,0 +1,82 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: row;
+  gap: 5vw;
+  width: 85vw;
+  max-height: 100vh;
+  overflow: auto;
+  padding-right: 3vw;
+  padding-left: 3vw;
+  padding-bottom: 2vw;
+
+  .dashboard-left-side-container {
+    padding-top: 3vw;
+    display: flex;
+    flex-direction: column;
+    gap: 1vw;
+    width: 50vw;
+
+    .dashboard-left-side-header {
+      font-size: 3vw;
+    }
+
+    .dashboard-left-side-charts-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%; // Set the height to 100% of the parent container
+
+      .chart-container {
+        flex: 1; // Each chart container will take equal space
+        max-height: 33%; // Limit the max height of each chart container
+      }
+
+
+    }
+  }
+
+  .dashboard-right-side-container {
+    padding-top: 3vw;
+    display: flex;
+    flex-direction: row;
+    gap: 2vw;
+    width: 50vw;
+    align-items: center;
+
+
+    .dashboard-right-side-left-tables-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2vw;
+      width: 100%;
+      align-items: center;
+
+      .dashboard-right-side-products-distribution-table {
+        width: 100%;
+      }
+
+      .dashboard-right-side-lost-items-table {
+        width: 100%;
+      }
+
+
+    }
+
+  }
+}
+
+.ant-descriptions-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ant-descriptions-item-label {
+  flex-basis: 50%;
+}
+
+.ant-descriptions-item-content {
+  flex-basis: 50%;
+}
+
+.dashboard-right-side-lost-items-table {
+  width: 30vw;
+}

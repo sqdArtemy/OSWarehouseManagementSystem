@@ -1,29 +1,82 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../index';
 import './sign-in.scss';
+import { Button, Form, Input, Tooltip } from 'antd';
+import { useError } from '../error-component/error-context';
+import { useLoading } from '../loading-component/loading';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
 export function SignIn() {
+  const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { startLoading, stopLoading } = useLoading();
   const navigate = useNavigate();
+  const { state } = location;
+  const {
+    locLoginEmail,
+    locLoginPassword,
+    locName,
+    locEmail,
+    locAddress,
+    locFirstName,
+    locLastName,
+    locUserEmail,
+    locPhoneNumber,
+    locPassword,
+    locRePassword,
+    locRole,
+  } = state || {};
+  const { showError } = useError();
   const handleSignIn = async () => {
     console.log('email', email);
     console.log('password', password);
+    if (!email && !password) {
+      showError('Please input email and password');
+      return;
+    } else if (!email) {
+      showError('Please input email');
+      return;
+    } else if (!password) {
+      showError('Please input password');
+      return;
+    }
+    startLoading();
     const response = await userApi.signIn(email, password);
-
+    console.log('response', response);
     if (response.success) {
+      stopLoading();
       switch (response.data?.user_role) {
-        case 'owner':
+        case 'manager':
           navigate('/owner');
+          break;
+        case 'vendor':
+          stopLoading();
+          navigate('/vendor');
+          break;
+        case 'supervisor':
+          stopLoading();
+          navigate('/supervisor');
+          break;
+        case 'admin':
+          stopLoading();
+          navigate('/admin');
           break;
         default:
           break;
       }
     } else {
+      stopLoading();
+      showError(response.message);
       // some error message
     }
   };
+
+  useEffect(() => {
+    setEmail(locLoginEmail || ''); // Use empty string as a fallback
+    setPassword(locLoginPassword || ''); // Use empty string as a fallback
+  }, [locLoginEmail, locLoginPassword]);
 
   return (
     <div className="sign-in-container">
@@ -41,30 +94,56 @@ export function SignIn() {
                 className="disabled"
                 id="sign-up"
                 onClick={() => {
-                  navigate('/sign-up');
+                  navigate('/sign-up', {
+                    state: {
+                      locLoginEmail: email,
+                      locLoginPassword: password,
+                      locName: locName,
+                      locEmail: locEmail,
+                      locAddress: locAddress,
+                      locFirstName: locFirstName,
+                      locLastName: locLastName,
+                      locUserEmail: locUserEmail,
+                      locPhoneNumber: locPhoneNumber,
+                      locPassword: locPassword,
+                      locRePassword: locRePassword,
+                      locRole: locRole,
+                    },
+                  });
                 }}
               >
                 Sign Up
               </span>
             </div>
           </div>
-          <form>
-            <input
-              type="email"
-              id="email"
-              placeholder={'Email'}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              type="password"
-              id="password"
-              placeholder={'Password'}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <button type="button" onClick={async () => handleSignIn()}>
+          <Form>
+            <Form.Item>
+              <Tooltip title={'Input Email'} placement={'topLeft'}>
+                <Input
+                  type="email"
+                  placeholder={'Email'}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Tooltip>
+            </Form.Item>
+            <Form.Item>
+              <Tooltip title={'Input Password'} placement={'topLeft'}>
+                <Input.Password
+                  placeholder={'Password'}
+                  value={password}
+                  iconRender={(visible) =>
+                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  }
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Tooltip>
+            </Form.Item>
+
+            <Button type="primary" onClick={async () => handleSignIn()}>
               SIGN IN
-            </button>
-          </form>
+            </Button>
+          </Form>
         </div>
       </div>
     </div>

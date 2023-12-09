@@ -1,13 +1,13 @@
 import { apiClient } from '../index';
 import { ISendData } from './sendDataInterface';
 
-export interface ApiResponse{
+export interface IApiResponse {
   success: boolean;
   message?: string;
   data?: { [key: string]: any };
 }
 
-export async function handleApiRequest(data: ISendData): Promise<ApiResponse> {
+export async function handleApiRequest(data: ISendData): Promise<IApiResponse> {
   try {
     const request = await apiClient.send({
       headers: data.headers,

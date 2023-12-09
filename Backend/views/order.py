@@ -97,11 +97,15 @@ class OrderView(GenericView):
         with get_session() as session:
             requester = session.query(User).filter_by(user_id=requester_id).first()
 
-            if self.requester_role == UserRole.SUPERVISOR.value["code"]:
+            if requester_role == UserRole.VENDOR.value["code"]:
+                requester_vendors = session.query(Vendor.vendor_id).filter_by(
+                    vendor_owner_id=requester_id).all()
+                requester_vendors = [vendor[0] for vendor in requester_vendors]
+            elif self.requester_role == UserRole.SUPERVISOR.value["code"]:
                 requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
                     supervisor_id=requester_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
-            else:
+            elif self.requester_role == UserRole.MANAGER.value["code"]:
                 requester_warehouses = session.query(Warehouse.warehouse_id).filter_by(
                     company_id=requester.company.company_id).all()
                 requester_warehouses = [warehouse[0] for warehouse in requester_warehouses]
@@ -738,10 +742,13 @@ class OrderView(GenericView):
 
             # check if recipient has access to the order
             if order_type == "from_warehouse" and self.requester_role == UserRole.VENDOR.value["code"]:
-                vendor = session.query(Vendor).filter_by(vendor_owner_id=self.requester_id).first()
-                if vendor is None:
+                vendor = session.query(Vendor).filter_by(vendor_owner_id=self.requester_id).all()
+
+                if not vendor:
                     raise ValidationError("Order Not Found", 404)
-                order = order.filter(Order.recipient_id == vendor.vendor_id)
+
+                vendor_ids = [v.vendor_id for v in vendor]
+                order = order.filter(Order.recipient_id.in_(vendor_ids))
 
             elif order_type == "to_warehouse":
                 warehouse = order.first().recipient_warehouse
@@ -923,15 +930,20 @@ class OrderView(GenericView):
                 )
 
             result = (
-                session.query(Order.order_status, func.count().label('order_count'))
-                .filter(Order.order_id.in_(orders))
-                .group_by(Order.order_status)
-                .all()
-            )
+                    session.query(Order.order_status, func.count().label('order_count'))
+                    .filter(Order.order_id.in_(orders))
+                    .group_by(Order.order_status)
+                    .all()
+                )
 
-        self.response.status_code = 200
-        self.response.data = result
-        return self.response.create_response()
+            data = dict()
+            for status, count in result:
+                data[status] = count
+
+            self.response.status_code = 200
+            self.response.data = data
+            return self.response.create_response()
+
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
