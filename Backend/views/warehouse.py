@@ -1,6 +1,6 @@
 from sqlite3 import IntegrityError
 
-from sqlalchemy import func, or_, and_
+from sqlalchemy import func, or_, and_, cast, Float, Integer
 
 from db_config import get_session
 from models import Warehouse, User, Rack, Product, Inventory, OrderItem, Order
@@ -129,8 +129,8 @@ class WarehouseView(GenericView):
             # Check if the overall capacity is being reduced
             if overall_capacity < warehouse.overall_capacity:
                 racks_sum = session.query(
-                    func.sum(Rack.overall_capacity),
-                    func.sum(Rack.remaining_capacity)
+                    cast(func.sum(Rack.overall_capacity), Float),
+                    cast(func.sum(Rack.remaining_capacity), Float)
                 ).filter_by(warehouse_id=warehouse_id).first()
                 if racks_sum[0] is not None and overall_capacity < racks_sum[0]:
                     raise ValidationError("Overall capacity cannot be less than the overall capacity in racks", 400)
@@ -311,7 +311,7 @@ class WarehouseView(GenericView):
                     with_entities(
                     Warehouse,
                     Inventory.product_id,
-                    func.sum(Inventory.quantity).label('total_quantity')
+                    cast(func.sum(Inventory.quantity), Float).label('total_quantity')
                 ).group_by(Warehouse.warehouse_id, Inventory.product_id).all()
 
                 warehouse_products = {}
@@ -354,9 +354,9 @@ class WarehouseView(GenericView):
             query = (
                 session.query(
                     Warehouse.warehouse_name,
-                    func.count(),
-                    func.sum(Product.volume * OrderItem.quantity),
-                    func.sum(Order.total_price)
+                    cast(func.count(), Integer),
+                    cast(func.sum(Product.volume * OrderItem.quantity), Float),
+                    cast(func.sum(Order.total_price), Float)
                 )
                 .join(Order, or_(
                     and_(Order.order_type == 'to_warehouse', Order.recipient_id == Warehouse.warehouse_id),
