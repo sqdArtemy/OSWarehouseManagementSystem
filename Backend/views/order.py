@@ -930,15 +930,20 @@ class OrderView(GenericView):
                 )
 
             result = (
-                session.query(Order.order_status, func.count().label('order_count'))
-                .filter(Order.order_id.in_(orders))
-                .group_by(Order.order_status)
-                .all()
-            )
+                    session.query(Order.order_status, func.count().label('order_count'))
+                    .filter(Order.order_id.in_(orders))
+                    .group_by(Order.order_status)
+                    .all()
+                )
 
-        self.response.status_code = 200
-        self.response.data = result
-        return self.response.create_response()
+            data = dict()
+            for status, count in result:
+                data[status] = count
+
+            self.response.status_code = 200
+            self.response.data = data
+            return self.response.create_response()
+
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])

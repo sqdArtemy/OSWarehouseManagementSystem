@@ -20,6 +20,7 @@ export default function Orders() {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null); // Track active order id
   const [isOrderDetailsVisible, setOrderDetailsVisible] = useState(false);
   const [dates, setDates] = useState([]);
+  const [ordersStatsTableData, setOrdersStatsTableData] = useState([]);
 
   const navigate = useNavigate();
   let filters: IOrderFilters = {};
@@ -86,6 +87,8 @@ export default function Orders() {
       setCurrentOrders([]);
       setFinishedOrders([]);
     }
+
+    await getOrderStats();
   };
 
   const debouncedSearch = debounce(async (filters) => {
@@ -122,7 +125,20 @@ export default function Orders() {
 
   const getOrderStats = async () => {
     const response = await statsApi.getOrderStats();
-    console.log(response);
+    if(response.success && response.data.body){
+      const data: any = [{}];
+      let total = 0;
+
+      for (const column of ordersStatsColumns) {
+        const key = column.dataIndex;
+        const value = response.data.body[key] || 0;
+        data[0][key] = value;
+        total += value;
+      }
+
+      data[0].total = total;
+      setOrdersStatsTableData(data);
+    }
   }
 
   const placeholderRowCount = 5;
@@ -299,20 +315,6 @@ export default function Orders() {
     },
   ];
 
-  const ordersStatsTableData = [
-    {
-      key: '1',
-      total: currentOrders.length + finishedOrders.length,
-      new: currentOrders.length,
-      finished: finishedOrders.length,
-      cancelled: 0,
-      processing: 0,
-      delivered: 0,
-      lost: 0,
-      submitted: 0,
-      damaged: 0,
-    },
-  ];
 
   return (
     <div className="orders-container">
@@ -378,7 +380,7 @@ export default function Orders() {
           />
         </div>
         <div className="orders-stats-table">
-          <Table
+          { ordersStatsTableData.length && (<Table
             title={() => (
               <p
                 style={{
@@ -398,7 +400,7 @@ export default function Orders() {
             style={{ fontSize: '0.8vw' }}
             rootClassName={'orders-stats-table'}
             rowClassName={'default-table-row-height'}
-          />
+          />)}
         </div>
       </div>
       {activeOrderId && (
