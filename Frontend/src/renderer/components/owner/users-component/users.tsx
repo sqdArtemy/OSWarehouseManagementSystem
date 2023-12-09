@@ -2,19 +2,39 @@ import React, { useEffect, useState } from 'react';
 import './users.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
 import { Button, Dropdown, Space, Table } from 'antd';
-import { DownOutlined } from '@ant-design/icons';
+import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
 import PlusIcon from '../../../../../assets/icons/users-plus-icon.png';
+import { userApi } from '../../../index';
+import debounce from 'lodash.debounce';
+import AddUser from './add-user-component/add-user';
+import EditUser from './edit-user-component/edit-user';
+import { useLoading } from '../../loading-component/loading';
+import { useError } from '../../error-component/error-context';
 
-export default function Users() {
+export interface IUserData {
+  fullName: string;
+  role: string;
+  phoneNumber: string;
+  email: string;
+  user_id: number;
+}
+
+export default function OwnerUsers() {
   const [selectedRole, setSelectedRole] = useState('All');
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
   const [deleteBtn, setDeleteBtn] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
   const [searchValue, setSearchValue] = useState('');
   const [dataSource, setDataSource] = useState([]);
+  const [isAddUserVisible, setIsAddUserVisible] = useState(false);
+  const [isEditUserVisible, setIsEditUserVisible] = useState(false);
+  const [userData, setUserData] = useState({});
+  const { startLoading, stopLoading } = useLoading();
+  const { showError } = useError();
+  let filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
@@ -22,20 +42,77 @@ export default function Users() {
     e.domEvent.target.innerText = selectedRole;
   };
 
-  const handleDelete = () => {
+  const handleDeleteUser = async (record?) => {
     if (selectedRows.length > 0) {
-      console.log('delete', selectedRows);
+      startLoading();
+      for (let user of selectedRows) {
+        const response = await userApi.deleteUser(user.user_id);
+        if(!response.success){
+          showError(response.message);
+          break;
+        }
+      }
+      stopLoading();
     }
+    if (record) {
+      startLoading();
+      const response = await userApi.deleteUser(record.user_id);
+      if(!response.success){
+        showError(response.message);
+      }
+      stopLoading();
+    }
+
+    await getAllUsers(filters);
   };
 
-  const handleSearchClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const getAllUsers = async (filters: { [key: string]: any }) => {
+    const result = await userApi.getAllUsers(filters);
+    const users = result.data?.body;
+    const dataItems = [];
+
+    if (users?.length) {
+      for (let i = 0; i < users.length; i++) {
+        dataItems.push({
+          key: (i + 1).toString(),
+          fullName: users[i].user_name + ' ' + users[i].user_surname,
+          role: users[i].user_role,
+          phoneNumber: users[i].user_phone,
+          email: users[i].user_email,
+          user_id: users[i].user_id,
+        });
+      }
+
+      setDataSource(dataItems);
+    } else {
+      setDataSource([]);
+    }
+  };
+  const debouncedSearch = debounce(async (filters) => {
+    await getAllUsers(filters);
+  }, 1000);
+
+  const handleSearchClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
         (e.target as HTMLImageElement).parentElement?.blur();
       }
     }, 100);
-    console.log('search', searchValue);
+
+    filters = {};
+    if (selectedRole) {
+      filters.user_role = selectedRole.toLowerCase();
+    }
+
+    if (selectedRole === 'All' && filters.user_role) {
+      delete filters.user_role;
+    }
+
+    if (searchValue) {
+      filters.user_name_like = searchValue;
+    }
+    debouncedSearch(filters);
   };
 
   const handleRowSelectionChange = (selectedRowKeys, selectedRows) => {
@@ -52,6 +129,38 @@ export default function Users() {
     }
   };
 
+  const handleAddUser = (e) => {
+    setTimeout(() => {
+      if (e.target instanceof HTMLButtonElement) e.target.blur();
+      else {
+        (e.target as HTMLImageElement).parentElement?.blur();
+      }
+    }, 100);
+    setIsAddUserVisible(true);
+  };
+
+  const handleAddUserSuccess = async () => {
+    await getAllUsers(filters);
+  };
+
+  const handleEditUserSuccess = async () => {
+    await getAllUsers(filters);
+  };
+
+  const handleEditUser = (record) => {
+    console.log('edit', record);
+    setUserData(record);
+    setIsEditUserVisible(true);
+  };
+
+  const hideAddUser = () => {
+    setIsAddUserVisible(false);
+  };
+
+  const hideEditUser = () => {
+    setIsEditUserVisible(false);
+  };
+
   const placeholderRowCount = 30;
 
   const placeholderData = Array.from(
@@ -59,7 +168,7 @@ export default function Users() {
     (_, index) => ({
       key: (index + 1).toString(),
       fullName: '',
-      duty: '',
+      role: '',
       phoneNumber: '',
       email: '',
     }),
@@ -69,32 +178,57 @@ export default function Users() {
   if (tableData.length < placeholderRowCount) {
     tableData = [...tableData, ...placeholderData.slice(tableData.length + 1)];
   }
+
   const columns = [
+    {
+      title: 'Action',
+      dataIndex: 'action',
+      key: 'action',
+      width: '10%',
+      align: 'center',
+      render: (_, record) =>
+        record.fullName && record.user_id !== userApi.userData.user_id ? (
+          <span className={'table-actions-container'}>
+            <EditOutlined
+              onClick={() => handleEditUser(record)}
+              style={{ color: 'blue', cursor: 'pointer' }}
+            />
+            <DeleteOutlined
+              onClick={() => handleDeleteUser(record)}
+              style={{ color: 'red', cursor: 'pointer' }}
+            />
+          </span>
+        ) : null,
+    },
     {
       title: 'Full name',
       dataIndex: 'fullName',
       key: 'fullName',
+      align: 'center',
     },
     {
-      title: 'Duty',
-      dataIndex: 'duty',
-      key: 'duty',
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      align: 'center',
     },
     {
       title: 'Phone number',
       dataIndex: 'phoneNumber',
       key: 'phoneNumber',
+      align: 'center',
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      align: 'center',
     },
   ];
 
   const items = [
     {
-      label: 'Shipper',
+      label: 'Supervisor',
     },
     {
       label: 'Manager',
@@ -108,14 +242,19 @@ export default function Users() {
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
+      selectedRows = selectedRows.filter(row => {
+        return row.user_id !== userApi.userData.user_id
+      })
+
       handleRowSelectionChange(selectedRowKeys, selectedRows);
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.fullName === '',
+      disabled: record.user_id === userApi.userData.user_id || record.fullName === '',
     }),
   };
 
+  let data = [];
   useEffect(() => {
     const calculateScrollSize = () => {
       const vw = Math.max(
@@ -136,38 +275,36 @@ export default function Users() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    setDataSource([
-      {
-        key: '1',
-        fullName: 'Mike',
-        duty: 'Shipper',
-        phoneNumber: '123456789',
-        email: '1213@abc.com',
-      },
-      {
-        key: '2',
-        fullName: 'Jesse',
-        duty: 'Manager',
-        phoneNumber: '987654321',
-        email: '3311@abc.com',
-      },
-      {
-        key: '3',
-        fullName: 'Mike',
-        duty: 'Shipper',
-        phoneNumber: '123456789',
-        email: '1213@mmal.com',
-      },
-    ]);
+    userApi.getAllUsers(filters).then((result) => {
+      const users = result.data?.body;
+      const dataItems = [];
+
+      if (users?.length) {
+        for (let i = 0; i < users.length; i++) {
+          dataItems.push({
+            key: (i + 1).toString(),
+            fullName: users[i].user_name + ' ' + users[i].user_surname,
+            role: users[i].user_role,
+            phoneNumber: users[i].user_phone,
+            email: users[i].user_email,
+            user_id: users[i].user_id,
+          });
+        }
+
+        setDataSource(dataItems);
+      } else {
+        setDataSource([]);
+      }
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
   return (
-    <div className="users-container">
-      <div className={'users-table-container'}>
-        <div className={'users-table-header-container'}>
-          <span className={'users-table-header'}>USERS</span>
+    <div className="warehouses-container">
+      <div className={'warehouses-table-container'}>
+        <div className={'warehouses-table-header-container'}>
+          <span className={'warehouses-table-header'}>USERS</span>
           <div className={'options-container'}>
             <div className="search-bar-container">
               <Dropdown
@@ -199,22 +336,24 @@ export default function Users() {
               className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
-              onClick={() => handleDelete()}
+              onClick={() => handleDeleteUser()}
             ></img>
-            <button
-              className={'add-btn'}
-              onClick={(e) => {
-                setTimeout(() => {
-                  if (e.target instanceof HTMLButtonElement) e.target.blur();
-                  else {
-                    (e.target as HTMLImageElement).parentElement?.blur();
-                  }
-                }, 100);
-              }}
-            >
+            <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add User</span>
             </button>
+            <AddUser
+              hidePopup={hideAddUser}
+              isPopupVisible={isAddUserVisible}
+              userData={{ userData: userData, setUserData: setUserData }}
+              onAddUserSuccess={handleAddUserSuccess}
+            />
+            <EditUser
+              hidePopup={hideEditUser}
+              isPopupVisible={isEditUserVisible}
+              userData={{ userData: userData, setUserData: setUserData }}
+              onEditUserSuccess={handleEditUserSuccess}
+            />
           </div>
         </div>
         <Table
@@ -222,12 +361,13 @@ export default function Users() {
             ...rowSelection,
           }}
           dataSource={tableData as []}
-          columns={columns}
+          columns={columns as []}
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'users-table'}
+          className={'warehouses-table'}
           bordered={true}
+          style={{ fontSize: '1.5vw' }}
           rowClassName={'highlight-bottom-border highlight-left-border'}
         />
       </div>

@@ -107,29 +107,15 @@
         }
 
         input {
-          padding: 10px;
-          margin-bottom: 20px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          font-size: 1vw;
+          font-size: 1.2vw;
         }
 
         button {
           align-self: center;
-          padding: 10px 30px;
-          background-color: #0013C0;
-          color: white;
-          border: none;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: background-color 0.3s;
           width: 55%;
           font-size: 1vw;
           margin-top: 1.5rem;
-
-          &:hover {
-            background-color: darken(#0013C0, 10%);
-          }
+          min-height: 2vw;
         }
       }
     }

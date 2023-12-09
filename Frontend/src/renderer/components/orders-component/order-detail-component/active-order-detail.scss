@@ -1,0 +1,76 @@
+// active-order-detail.scss
+
+.active-order-detail-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+
+  width: 70%; // Adjust the width as needed
+  margin: 0 auto; // This will center the component horizontally
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+
+  .cancel-order-button {
+    margin-left: auto;
+  }
+
+  .edit-order-button {
+    margin-left: 10px;
+  }
+}
+
+.order-details {
+  background-color: #f7f7f7;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  width: 100%;
+
+  p {
+    margin: 0;
+    font-size: 16px;
+
+    .detail-label {
+      font-weight: bold;
+      margin-right: 8px;
+    }
+  }
+}
+
+.table-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  width: 100%;
+
+  h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+}
+
+.form-value {
+  font-size: 1vw;
+}
+
+.active-order-upper-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 5vw;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  form {
+    width: 50%;
+  }
+}

@@ -1,0 +1,161 @@
+.admin-orders-container {
+  display: flex;
+  flex-direction: row;
+  width: 85%;
+  min-height: 100vh;
+  align-items: center;
+
+  .admin-orders-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5vw;
+    min-height: 100vh;
+    width: 100%;
+    padding-top: 3vw;
+    padding-left: 3vw;
+
+
+    .admin-orders-table-header-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3vw;
+
+      .admin-orders-table-header {
+        font-size: 3vw;
+      }
+
+      .admin-orders-options-container {
+        display: flex;
+        flex-direction: row;
+        gap: 10vw;
+        width: 100%;
+        align-items: center;
+
+
+        .admin-orders-search-bar-container {
+          display: flex;
+          flex-direction: row;
+          align-items: end;
+          .admin-orders-filter {
+            display: flex;
+            flex-direction: column;
+            margin-right: 1.5vw;
+            .admin-orders-filter-labels {
+              width: 10vw;
+              text-align: center;
+              font-size: 1vw;
+            }
+            .admin-orders-filter-duration-labels {
+              width: 7vw;
+              text-align: center;
+              font-size: 1vw;
+            }
+          }
+          .admin-orders-search-bar-dropdown-container {
+            min-height: 3vw;
+            width: 10vw;
+            font-size: 1vw;
+            border: 0.5px solid #000000;
+          }
+          .admin-orders-datepicker{
+            min-height: 3vw;
+            width: 7vw;
+            font-size: 1.5vw;
+            border: 0.5px solid #000000;
+          }
+        }
+
+        .admin-orders-delete-btn {
+          width: 2.2vw;
+          min-height: 2.2vw;
+        }
+
+        .admin-orders-add-btn {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5vw;
+
+          width: 12vw;
+          min-height: 2.2vw;
+          border: 0.5px solid #000000;
+
+
+          color: #FFFFFF;
+          background-color: #378BA4;
+          border-radius: 0.3rem;
+
+          cursor: pointer;
+
+          .admin-orders-add-btn-text {
+            font-size: 1.3vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          &:hover {
+            background-color: #2C7A8B;
+          }
+
+          &:focus {
+            background-color: #2C7A8B;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+          }
+        }
+      }
+    }
+
+    .admin-orders-table {
+      width: 85%;
+      min-height: 70%;
+
+    }
+
+  }
+
+  .admin-orders-form {
+    min-height: 100vh;
+    width: 40%;
+  }
+}
+
+.highlight-bottom-border > td {
+  border-bottom: solid 1px black !important
+}
+
+.highlight-left-border > td {
+  border-left: solid 1px black !important
+}
+
+.enabled {
+  cursor: pointer;
+}
+
+.table-actions-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  align-items: center;
+  justify-content: center;
+
+  .delete-icon {
+    display: block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #ff0000;
+
+
+
+  }
+}
+
+.delete-icon-light {
+  color: #ff8080;
+  display: block;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ant-table table { font-size: 1vw; }

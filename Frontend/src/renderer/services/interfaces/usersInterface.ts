@@ -1,18 +1,18 @@
-import { ApiResponse } from '../apiRequestHandler';
+import { IApiResponse } from '../apiRequestHandler';
 
 export interface IUser {
-  signIn(email: string, password: string): Promise<ApiResponse>;
-  signUp(body: ISignUp): Promise<ApiResponse>;
-  addUser(body: IAddUser): Promise<ApiResponse>;
-  deleteUser(id: number): Promise<ApiResponse>;
-  updateUser(body: IAddUser, id: number): Promise<ApiResponse>;
-  getUser(id: number): Promise<ApiResponse>;
-  getAllUsers(filters: { [key: string]: any }): Promise<ApiResponse>;
+  signIn(email: string, password: string): Promise<IApiResponse>;
+  signUp(body: ISignUp): Promise<IApiResponse>;
+  addUser(body: IAddUser): Promise<IApiResponse>;
+  deleteUser(id: number): Promise<IApiResponse>;
+  updateUser(body: IAddUser, id: number): Promise<IApiResponse>;
+  getUser(id: number): Promise<IApiResponse>;
+  getAllUsers(filters: { [key: string]: any }): Promise<IApiResponse>;
   resetPassword(
     oldPassword: string,
     newPassword: string,
     passwordConfirm: string,
-  ): Promise<ApiResponse>;
+  ): Promise<IApiResponse>;
 }
 
 export interface ISignUp {
@@ -29,11 +29,13 @@ export interface ISignUp {
 }
 
 export interface IAddUser {
-  user_name: string;
-  user_surname: string;
-  user_email: string;
-  user_role: string;
-  user_phone: string;
+  user_name?: string;
+  user_surname?: string;
+  user_email?: string;
+  user_role?: string;
+  user_phone?: string;
+  user_id?: number;
+  company_id?: number
 }
 
 interface IGetUsersFilters {}

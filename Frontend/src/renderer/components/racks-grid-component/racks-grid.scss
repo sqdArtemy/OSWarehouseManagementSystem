@@ -1,0 +1,39 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr); /* Adjusted as needed */
+  grid-template-rows: repeat(10, 1fr); /* Adjusted as needed */
+  width: 100%; /* Set a fixed width */
+  height: 100%; /* Set a fixed height */
+  gap: 0.7vw;
+  overflow: auto; /* Enables scrolling */
+
+  .grid-row {
+    display: contents;
+
+    .grid-cell {
+      background-color: #f0f0f0;
+      aspect-ratio: 1;
+      border: 1px solid #d9d9d9;
+      border-radius: 0.5vw;
+      cursor: pointer;
+      height: 2.8vw;
+    }
+
+    .grid-cell.full {
+      background-color: red;
+    }
+
+    .grid-cell.nonempty {
+      background-color: yellow;
+    }
+
+    .grid-cell.selected {
+      background-color: #1890ff;
+    }
+
+  }
+}
+
+.hidden {
+  display: none !important;
+}
