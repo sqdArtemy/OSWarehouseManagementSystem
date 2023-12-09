@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlite3 import IntegrityError
 
 from sqlalchemy import func
-from sqlalchemy import func, or_, and_, desc
+from sqlalchemy import func, or_, and_, desc, Float, cast
 from sqlalchemy.orm import joinedload
 
 from db_config import get_session
@@ -169,7 +169,7 @@ class LostItemView(GenericView):
                 session.query(
                     Product.product_id.label('product_id'),
                     Warehouse.warehouse_id.label('warehouse_id'),
-                    func.sum(LostItem.quantity).label('total_quantity'),
+                    cast(func.sum(LostItem.quantity), Float).label('total_quantity'),
                     Warehouse.warehouse_name.label('warehouse_name'),
                     Product.product_name.label('product_name')
                 )

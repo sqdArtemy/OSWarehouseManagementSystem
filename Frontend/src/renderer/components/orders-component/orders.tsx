@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import './orders.scss';
 import { Table } from 'antd';
 import PlusIcon from '../../../../assets/icons/users-plus-icon.png';
-import { orderApi, userApi, vendorApi, warehouseApi } from '../../index';
+import { orderApi, statsApi, userApi, vendorApi, warehouseApi } from '../../index';
 import { IOrderFilters } from '../../services/interfaces/ordersInterface';
 import debounce from 'lodash.debounce';
 import { useNavigate } from 'react-router-dom';
 import { IWarehouseData } from '../owner/warehouses-component/warehouses';
 import OrderActiveDetails from './order-detail-component/active-order-detail';
 import { DatePicker } from 'antd';
+import moment from 'moment/moment';
 
 const { RangePicker } = DatePicker;
 
@@ -19,12 +20,25 @@ export default function Orders() {
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null); // Track active order id
   const [isOrderDetailsVisible, setOrderDetailsVisible] = useState(false);
   const [dates, setDates] = useState([]);
+  const [ordersStatsTableData, setOrdersStatsTableData] = useState([]);
 
   const navigate = useNavigate();
   let filters: IOrderFilters = {};
 
   const hideOrderDetailsPopup = () => {
     setOrderDetailsVisible(false);
+  };
+
+  const handleDateChange = async (dates: any) => {
+    setDates(dates);
+    if(dates[0] && dates[0]['$d']){
+      filters.created_at_gte = moment(dates[0]['$d'] as any).format('YYYY-MM-DD');
+    }
+
+    if(dates[1] && dates[1]['$d']){
+      filters.created_at_lte = moment(dates[1]['$d'] as any).format('YYYY-MM-DD');
+    }
+    await getAllOrders(filters);
   };
 
   const getAllOrders = async (filters: IOrderFilters) => {
@@ -73,6 +87,8 @@ export default function Orders() {
       setCurrentOrders([]);
       setFinishedOrders([]);
     }
+
+    await getOrderStats();
   };
 
   const debouncedSearch = debounce(async (filters) => {
@@ -106,6 +122,24 @@ export default function Orders() {
   const handleCancelSuccess = async () => {
     await getAllOrders(filters);
   };
+
+  const getOrderStats = async () => {
+    const response = await statsApi.getOrderStats();
+    if(response.success && response.data.body){
+      const data: any = [{}];
+      let total = 0;
+
+      for (const column of ordersStatsColumns) {
+        const key = column.dataIndex;
+        const value = response.data.body[key] || 0;
+        data[0][key] = value;
+        total += value;
+      }
+
+      data[0].total = total;
+      setOrdersStatsTableData(data);
+    }
+  }
 
   const placeholderRowCount = 5;
 
@@ -185,7 +219,7 @@ export default function Orders() {
     orderApi.getAllOrders(filters).then(async (data) => {
       const orders = data.data?.body;
       console.log(orders);
-
+      await getOrderStats();
       if (orders?.length) {
         const finishedItems = [];
         const activeItems = [];
@@ -281,20 +315,6 @@ export default function Orders() {
     },
   ];
 
-  const ordersStatsTableData = [
-    {
-      key: '1',
-      total: currentOrders.length + finishedOrders.length,
-      new: currentOrders.length,
-      finished: finishedOrders.length,
-      cancelled: 0,
-      processing: 0,
-      delivered: 0,
-      lost: 0,
-      submitted: 0,
-      damaged: 0,
-    },
-  ];
 
   return (
     <div className="orders-container">
@@ -302,23 +322,21 @@ export default function Orders() {
         <div className={'orders-table-header-container'}>
           <span className={'orders-table-header'}>ORDERS</span>
           <div className={'orders-options-container'}>
-            {userApi.getUserData &&
-              userApi.getUserData.user_role === 'vendor' && (
-                <>
                   <RangePicker
                     allowEmpty={[true, true]}
-                    onChange={(dates) => setDates(dates)}
+                    onChange={handleDateChange}
                     className={'orders-date-picker'}
                   />
-                  <button
-                    className={'add-btn'}
-                    onClick={(e) => handleAddOrder(e)}
-                  >
-                    <img src={PlusIcon} alt={'Add Button'}></img>
-                    <span className={'add-btn-text'}>Add Order</span>
-                  </button>
-                </>
-              )}
+                  {userApi.getUserData &&
+                    userApi.getUserData.user_role === 'vendor' && (
+                        <button
+                          className={'add-btn'}
+                          onClick={(e) => handleAddOrder(e)}
+                        >
+                          <img src={PlusIcon} alt={'Add Button'}></img>
+                          <span className={'add-btn-text'}>Add Order</span>
+                        </button>
+                    )}
           </div>
         </div>
         <div className="orders-table">
@@ -362,7 +380,7 @@ export default function Orders() {
           />
         </div>
         <div className="orders-stats-table">
-          <Table
+          { ordersStatsTableData.length && (<Table
             title={() => (
               <p
                 style={{
@@ -382,7 +400,7 @@ export default function Orders() {
             style={{ fontSize: '0.8vw' }}
             rootClassName={'orders-stats-table'}
             rowClassName={'default-table-row-height'}
-          />
+          />)}
         </div>
       </div>
       {activeOrderId && (

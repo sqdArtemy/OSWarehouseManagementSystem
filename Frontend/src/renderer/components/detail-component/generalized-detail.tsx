@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import { Button, Table } from 'antd';
 import Inventory from './inventory-component/inventory';
-import { productApi, rackApi, warehouseApi } from '../../index';
+import { productApi, rackApi, statsApi, warehouseApi } from '../../index';
 import { normalizeRacksForGrid } from '../../services/utils/normalizeRacksForGrid';
 import AddRack from './add-rack-component/add-rack';
 import AddMultipleRacks from './add-multiple-racks-component/add-multiple-racks';
@@ -100,7 +100,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     console.log('Warehouse ID: ', warehouse_id);
 
     startLoading();
-    warehouseApi.getWarehouse(Number(warehouse_id)).then((data) => {
+    warehouseApi.getWarehouse(Number(warehouse_id)).then(async (data) => {
       if (data.success && data.data?.data) {
         setGridData(normalizeRacksForGrid(data.data.data.racks));
       } else {
@@ -122,6 +122,18 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
           },
         ],
       });
+
+      const productsStatsResponse = await statsApi.getProductsStats();
+      if(productsStatsResponse.success) {
+        setDataSource(productsStatsResponse.data.body.map(item => {
+          return {
+            itemName: item.product_name,
+            itemVolume: item.total_volume_sum,
+            itemCount: item.products_number,
+            expiry: item.average_expiry_date
+          }
+        }));
+      }
     });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
@@ -139,9 +151,9 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       align: 'center',
     },
     {
-      title: 'Weight',
-      dataIndex: 'itemWeight',
-      key: 'itemWeight',
+      title: 'Average Expiry',
+      dataIndex: 'expiry',
+      key: 'expiry',
       align: 'center',
     },
     {
@@ -182,10 +194,10 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     { length: placeholderRowCount },
     (_, index) => ({
       key: (index + 1).toString(),
-      itemName: 'Ravshanbek',
-      itemWeight: '65 kg',
-      itemVolume: '60 m3',
-      itemCount: '1',
+      itemName: '',
+      expiry: '',
+      itemVolume: '',
+      itemCount: '',
     }),
   );
 

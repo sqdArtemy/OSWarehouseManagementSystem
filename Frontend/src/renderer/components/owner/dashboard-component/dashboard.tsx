@@ -15,6 +15,7 @@ import { ChartData } from 'chart.js';
 import { Badge, Descriptions, Table } from 'antd';
 import type { DescriptionsProps } from 'antd';
 import { getLostItems } from '../../supervisor/requests-component/util';
+import { statsApi } from '../../../index';
 
 ChartJS.register(
   CategoryScale,
@@ -32,16 +33,41 @@ export default function OwnerDashboard() {
   });
   const [lostItemsDataSource, setLostItemsDataSource] = useState([]);
   const [dataSource, setDataSource] = useState([]);
+  const [dataFromBackend, setDataFromBackend] = useState({});
 
   useEffect(() => {
-    // const fetchData = async () => {
-    //   const lostItemsResponse = await getLostItems(orderData);
-    //   setLostItemsDataSource(lostItemsResponse);
-    // };
-    //
-    // fetchData();
+    const fetchData = async () => {
+      const lostItemsResponse = await statsApi.getLostItems({});
+      if(lostItemsResponse.success) {
+        setLostItemsDataSource(lostItemsResponse.data.body.map(item => {
+          return {
+            name: item.product_name,
+            amount: item.total_quantity
+          }
+        }));
+      }
 
-    console.log(true);
+      const productsStatsResponse = await statsApi.getProductsStats();
+      if(productsStatsResponse.success) {
+        setDataSource(productsStatsResponse.data.body.map(item => {
+          return {
+            itemName: item.product_name,
+            itemVolume: item.total_volume_sum,
+            itemCount: item.products_number,
+            expiry: item.average_expiry_date
+          }
+        }));
+      }
+
+      const barChartResponse = await statsApi.getWarehouseItems({});
+      console.log(barChartResponse);
+      if(barChartResponse.success){
+        setDataFromBackend(barChartResponse.data.body);
+      }
+    };
+
+    fetchData();
+
     const calculateScrollSize = () => {
       const vw = Math.max(
         document.documentElement.clientWidth || 0,
@@ -66,27 +92,6 @@ export default function OwnerDashboard() {
     window.addEventListener('resize', calculateScrollSize);
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
-
-  const dataFromBackend = {
-    orders_count: {
-      warehouse_name1: 10,
-      warehouse_name2: 15,
-      warehouse_name3: 20,
-      warehouse_name4: 9,
-    },
-    orders_volume: {
-      warehouse_name1: 1000,
-      warehouse_name2: 1500,
-      warehouse_name3: 2000,
-      warehouse_name4: 900,
-    },
-    orders_price: {
-      warehouse_name1: 10000,
-      warehouse_name2: 15000,
-      warehouse_name3: 20000,
-      warehouse_name4: 9000,
-    },
-  };
 
   // Preparing data for the charts
   const chartData = (object, key) =>
@@ -179,9 +184,9 @@ export default function OwnerDashboard() {
       align: 'center',
     },
     {
-      title: 'Weight',
-      dataIndex: 'itemWeight',
-      key: 'itemWeight',
+      title: 'Average Expiry',
+      dataIndex: 'expiry',
+      key: 'expiry',
       align: 'center',
     },
     {
@@ -207,7 +212,7 @@ export default function OwnerDashboard() {
     <div className="dashboard-container">
       <div className="dashboard-left-side-container">
         <span className="dashboard-left-side-header">DASHBOARD</span>
-        <div className="dashboard-left-side-charts-container">
+        {Object.keys(dataFromBackend).length > 0 && (<div className="dashboard-left-side-charts-container">
           <div className="chart-container">
             <Bar
               data={chartData(dataFromBackend, 'orders_count')}
@@ -226,7 +231,7 @@ export default function OwnerDashboard() {
               options={options('Orders Price Statistics')}
             />
           </div>
-        </div>
+        </div>)}
       </div>
       <div className="dashboard-right-side-container">
         <div className={'dashboard-right-side-left-tables-container'}>

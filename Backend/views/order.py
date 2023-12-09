@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta
 from math import floor
-from typing import Dict, List, Any
 
-from sqlalchemy import func, or_, and_, desc
+from sqlalchemy import func, or_, and_, desc, cast, Float
 
 from db_config import get_session
 from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User, Inventory, Rack
@@ -26,7 +25,7 @@ class OrderView(GenericView):
             remaining_volume = (
                 session.query(
                     Warehouse.remaining_capacity - func.coalesce(
-                        func.sum(OrderItem.quantity * Product.volume),
+                        cast(func.sum(OrderItem.quantity * Product.volume), Float),
                         0
                     )
                 )
@@ -931,15 +930,20 @@ class OrderView(GenericView):
                 )
 
             result = (
-                session.query(Order.order_status, func.count().label('order_count'))
-                .filter(Order.order_id.in_(orders))
-                .group_by(Order.order_status)
-                .all()
-            )
+                    session.query(Order.order_status, func.count().label('order_count'))
+                    .filter(Order.order_id.in_(orders))
+                    .group_by(Order.order_status)
+                    .all()
+                )
 
-        self.response.status_code = 200
-        self.response.data = result
-        return self.response.create_response()
+            data = dict()
+            for status, count in result:
+                data[status] = count
+
+            self.response.status_code = 200
+            self.response.data = data
+            return self.response.create_response()
+
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])

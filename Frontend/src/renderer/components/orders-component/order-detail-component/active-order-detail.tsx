@@ -97,6 +97,12 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
           orderDetails.warehouse = warehouse?.warehouse_name;
           console.log(orderDetails);
           setOrderDetails(data.data?.body);
+          setLostItemsDataSource(orderLostItems.map(item => {
+            return {
+              name: item.product_name,
+              amount: item.quantity
+            }
+          }));
         } else {
           showError(data.message);
         }
