@@ -167,14 +167,15 @@ class InventoryView(GenericView):
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
-        # TODO: fix Decimal which is returned from func.avg(func.datediff())
         with (get_session() as session):
 
             result = session.query(Inventory.product_id, Product.product_name,
                                    func.count(Inventory.product_id).label("products_number"),
-                                   cast(func.sum(Inventory.total_volume), Float).label("total_volume_sum"),
-                                   cast(func.avg(func.datediff(Inventory.expiry_date, Inventory.arrival_date)), Float)
-                                   .label("average_expiry_date"),
+                                   cast(func.sum(Inventory.total_volume).label("total_volume_sum"), Float),
+                                   cast(
+                                       func.avg(func.datediff(Inventory.expiry_date, Inventory.arrival_date)),
+                                       Float
+                                   ).label("average_expiry_date"),
                                    ).join(Product).group_by(Inventory.product_id)
 
             # if admin - return everything
