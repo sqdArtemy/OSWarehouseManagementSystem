@@ -43,7 +43,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     labels: ['Occupied', 'Free'],
     datasets: [
       {
-        label: 'Capacity of warehouse',
+        label: 'Capacity of warehouse (m³)',
         data: [
           state.locWarehouseData.capacity - state.locWarehouseData.remaining,
           state.locWarehouseData.remaining,
@@ -63,7 +63,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         labels: ['Occupied', 'Free'],
         datasets: [
           {
-            label: 'Capacity of warehouse',
+            label: 'Capacity of warehouse (m³)',
             data: [
               data.overall_capacity - data.remaining_capacity,
               data.remaining_capacity,
@@ -112,7 +112,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         labels: ['Occupied', 'Free'],
         datasets: [
           {
-            label: 'Capacity of warehouse',
+            label: 'Capacity of warehouse (m³)',
             data: [
               warehouseApi.warehouseData.overall_capacity -
                 warehouseApi.warehouseData.remaining_capacity,

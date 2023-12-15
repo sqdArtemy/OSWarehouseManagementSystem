@@ -116,7 +116,11 @@ export default function AdminAddTransport({
       >
         <Form.Item
           name="Capacity"
-          label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Capacity m<sup>3</sup>
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <InputNumber style={{ fontSize: '0.9vw' }} min={0 as any} />

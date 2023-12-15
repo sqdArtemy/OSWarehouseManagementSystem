@@ -195,7 +195,7 @@ export default function AdminTransport() {
       align: 'center',
     },
     {
-      title: 'Capacity',
+      title: 'Capacity m³',
       dataIndex: 'capacity',
       key: 'capacity',
       align: 'center',

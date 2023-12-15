@@ -153,7 +153,11 @@ export default function AddWarehouse({
         </Form.Item>
         <Form.Item
           name="Capacity"
-          label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Capacity m<sup>3</sup>
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

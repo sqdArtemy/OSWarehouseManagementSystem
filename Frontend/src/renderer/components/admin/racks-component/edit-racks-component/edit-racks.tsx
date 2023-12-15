@@ -9,7 +9,8 @@ import { useError } from '../../../error-component/error-context';
 export default function EditRacks({
   isPopupVisible,
   hidePopup,
-  racksData, onEditRackSuccess
+  racksData,
+  onEditRackSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -57,14 +58,15 @@ export default function EditRacks({
     const newRackData = formRef.current?.getFieldsValue();
     hidePopup();
 
-    const response = await rackApi.updateRack({
-      rack_position: newRackData['rackPosition'],
-      overall_capacity: Number(newRackData['overallCapacity']),
+    const response = await rackApi.updateRack(
+      {
+        rack_position: newRackData['rackPosition'],
+        overall_capacity: Number(newRackData['overallCapacity']),
+      },
+      racksData.racksData?.rack_id,
+    );
 
-    }, racksData.racksData?.rack_id);
-
-
-    if(response?.success){
+    if (response?.success) {
       onEditRackSuccess();
     } else {
       showError(response.message);
@@ -104,7 +106,11 @@ export default function EditRacks({
         </Form.Item>
         <Form.Item
           name="overallCapacity"
-          label={<p style={{ fontSize: '1vw' }}>Overall Capacity</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Overall Capacity (m<sup>3</sup>)
+            </p>
+          }
         >
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
