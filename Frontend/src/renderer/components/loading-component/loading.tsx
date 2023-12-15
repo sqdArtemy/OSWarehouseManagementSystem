@@ -41,7 +41,7 @@ export const LoadingComponent = () => {
         backgroundColor: 'rgba(0, 0, 0, 0.1)', // Dark semi-transparent background
       }}
     >
-      <Spin indicator={<LoadingOutlined style={{ fontSize: '20vw' }} spin />} />
+      <Spin indicator={<LoadingOutlined style={{ fontSize: '15vw' }} spin />} />
     </div>
   );
 };
