@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, FormInstance, Select, Tag, InputNumber } from 'antd';
-import { vendorApi, companyApi, warehouseApi, productApi } from '../../../../index';
+import {
+  Button,
+  Form,
+  FormInstance,
+  Select,
+  Tag,
+  InputNumber,
+  Space,
+} from 'antd';
+import {
+  vendorApi,
+  companyApi,
+  warehouseApi,
+  productApi,
+} from '../../../../index';
 import { useError } from '../../../error-component/error-context';
 import './create-order.scss';
 import { IProductFilters } from '../../../../services/interfaces/productsInterface';
@@ -9,9 +22,9 @@ import AddVendor from '../../vendors-component/add-vendor-component/add-vendor';
 import CreateOrderDetails from './create-order-details';
 
 export default function CreateOrder({
-                                      onAddOrderSuccess,
-                                      onCancel,
-                                    }: {
+  onAddOrderSuccess,
+  onCancel,
+}: {
   onAddOrderSuccess: () => void;
   onCancel: () => void;
 }) {
@@ -25,18 +38,17 @@ export default function CreateOrder({
   const [products, setProducts] = useState<Select['OptionType'][]>([]);
   const [selectedProducts, setSelectedProducts] = useState<
     { product: Select['OptionType']; quantity: number }[]
-    >([]);
+  >([]);
 
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [newOrderData, setNewOrderData] = useState({});
-
 
   const hideAddPopup = () => {
     setIsPopupVisible(false);
   };
   const handleProductSelect = (value, option) => {
     const isProductAlreadySelected = selectedProducts.some(
-      (item) => item.product.value === option.value
+      (item) => item.product.value === option.value,
     );
 
     // If the product is not in the array, add it
@@ -49,14 +61,16 @@ export default function CreateOrder({
   const handleQuantityChange = (productId, quantity) => {
     // Update the quantity for a selected product
     const updatedProducts = selectedProducts.map((item) =>
-      item.product.value === productId ? { ...item, quantity } : item
+      item.product.value === productId ? { ...item, quantity } : item,
     );
     setSelectedProducts(updatedProducts);
   };
 
   const handleRemoveProduct = (productId) => {
     // Remove a selected product
-    const updatedProducts = selectedProducts.filter((item) => item.product.value !== productId);
+    const updatedProducts = selectedProducts.filter(
+      (item) => item.product.value !== productId,
+    );
     setSelectedProducts(updatedProducts);
   };
 
@@ -69,7 +83,7 @@ export default function CreateOrder({
         label: item.product_name,
         volume: item.volume,
         weight: item.weight,
-        price: item.price
+        price: item.price,
       }));
     };
 
@@ -86,7 +100,7 @@ export default function CreateOrder({
     const productType = formRef.current.getFieldsValue(['Type'] as any).Type;
     setSelectedProducts([]);
     if (companyId && productTypes) {
-      await getProducts({ company_id: companyId, product_type: productType});
+      await getProducts({ company_id: companyId, product_type: productType });
     }
   };
 
@@ -146,11 +160,11 @@ export default function CreateOrder({
     const items = [];
 
     let totalPrice = 0;
-    for (let product of selectedProducts){
+    for (let product of selectedProducts) {
       items.push({
         quantity: product.quantity,
-        product_id: product.product.value
-      })
+        product_id: product.product.value,
+      });
       totalPrice += Number(product.quantity) * Number(product.product.price);
     }
 
@@ -160,12 +174,12 @@ export default function CreateOrder({
       items,
     });
 
-
     if (response.success) {
       const data = {
         warehouses: response.data.body,
         totalPrice,
-        orderDetails: {  // Include the order details here
+        orderDetails: {
+          // Include the order details here
           vendor_id: newOrderData['Vendor'],
           items,
           order_type: newOrderData['Warehouse'],
@@ -215,14 +229,22 @@ export default function CreateOrder({
           label={<p className="form-label">Select Company</p>}
           rules={[{ required: true }]}
         >
-          <Select options={companies} className="form-input" onChange={fetchProducts} />
+          <Select
+            options={companies}
+            className="form-input"
+            onChange={fetchProducts}
+          />
         </Form.Item>
         <Form.Item
           name="Type"
           label={<p className="form-label">Select type of products</p>}
           rules={[{ required: true }]}
         >
-          <Select options={productTypes} className="form-input" onChange={fetchProducts} />
+          <Select
+            options={productTypes}
+            className="form-input"
+            onChange={fetchProducts}
+          />
         </Form.Item>
         <Form.Item
           name="Product"
@@ -245,37 +267,42 @@ export default function CreateOrder({
           {selectedProducts.length > 0 && (
             <table className="selected-products-table">
               <thead>
-              <tr>
-                <th>Name</th>
-                <th>Volume</th>
-                <th>Weight</th>
-                <th>Price per 1 unit</th>
-                <th>Quantity</th>
-                <th>Action</th>
-              </tr>
+                <tr>
+                  <th>Name</th>
+                  <th>Volume</th>
+                  <th>Weight</th>
+                  <th>Price per 1 unit</th>
+                  <th>Quantity</th>
+                  <th>Action</th>
+                </tr>
               </thead>
               <tbody>
-              {selectedProducts.map((item) => (
-                <tr key={item.product.value}>
-                  <td>{item.product.label}</td>
-                  {/* Assuming that volume and weight are available as separate properties */}
-                  <td>{item.product.volume} m^3</td>
-                  <td>{item.product.weight} kg</td>
-                  <td>{item.product.price} kg</td>
-                  <td>
-                    <InputNumber
-                      min={1}
-                      value={item.quantity}
-                      onChange={(value) => handleQuantityChange(item.product.value, value)}
-                    />
-                  </td>
-                  <td>
-                    <Button type="link" onClick={() => handleRemoveProduct(item.product.value)}>
-                      Remove
-                    </Button>
-                  </td>
-                </tr>
-              ))}
+                {selectedProducts.map((item) => (
+                  <tr key={item.product.value}>
+                    <td>{item.product.label}</td>
+                    {/* Assuming that volume and weight are available as separate properties */}
+                    <td>{item.product.volume} m^3</td>
+                    <td>{item.product.weight} kg</td>
+                    <td>{item.product.price} kg</td>
+                    <td>
+                      <InputNumber
+                        min={1 as any}
+                        value={item.quantity as any}
+                        onChange={(value) =>
+                          handleQuantityChange(item.product.value, value)
+                        }
+                      />
+                    </td>
+                    <td>
+                      <Button
+                        type="link"
+                        onClick={() => handleRemoveProduct(item.product.value)}
+                      >
+                        Remove
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}
@@ -286,22 +313,24 @@ export default function CreateOrder({
           labelAlign={'right'}
           style={{ marginBottom: '1vw' }}
         >
-          <Button
-            htmlType="button"
-            onClick={handleReset}
-            className="form-button" // Apply the button class
-          >
-            Reset
-          </Button>
+          <Space direction={'horizontal'} size={100}>
+            <Button
+              htmlType="button"
+              onClick={handleReset}
+              className="form-button" // Apply the button class
+            >
+              Reset
+            </Button>
 
-          <Button type="primary" htmlType="submit" className="form-button">
-            Submit
-          </Button>
+            <Button type="primary" htmlType="submit" className="form-button">
+              Submit
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
       <Modal
         title="Order Details"
-        visible={isPopupVisible}
+        open={isPopupVisible}
         onCancel={hideAddPopup}
         footer={null}
       >
