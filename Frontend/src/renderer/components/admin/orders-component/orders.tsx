@@ -45,12 +45,10 @@ export default function AdminOrders() {
     e.domEvent.target.innerText = selectedType;
   };
 
-
   const handleEditOrder = (record) => {
     setOrdersData(record);
     setIsEditTransportVisible(true);
   };
-
 
   const hideEditTransport = () => {
     setIsEditTransportVisible(false);
@@ -59,49 +57,54 @@ export default function AdminOrders() {
   const handleSearch = async () => {
     const filters = {};
 
-    if(selectedStatus.toLowerCase() === 'all'){
+    if (selectedStatus.toLowerCase() === 'all') {
       delete filters.order_status;
-    }
-    else {
+    } else {
       filters.order_status = selectedStatus.toLowerCase();
     }
 
     const transportsResponse = await transportApi.getAllTransports({});
-    if(transportsResponse.success) {
+    if (transportsResponse.success) {
       const transports = transportsResponse.data.body;
 
-      const transport = transports.find(transport => {
-        return transport.transport_type.toLowerCase() === selectedTransportType.toLowerCase();
-      })
+      const transport = transports.find((transport) => {
+        return (
+          transport.transport_type.toLowerCase() ===
+          selectedTransportType.toLowerCase()
+        );
+      });
 
-      if(transport) {
+      if (transport) {
         filters.transport_id = transport.transport_id;
-      }
-      else {
-        if(filters.transport_id){
+      } else {
+        if (filters.transport_id) {
           delete filters.transport_id;
         }
       }
     }
 
-    if(selectedType === 'All') {
+    if (selectedType === 'All') {
       delete filters.order_type;
-    } else if(selectedType.includes('From')){
+    } else if (selectedType.includes('From')) {
       filters.order_type = 'from_warehouse';
     } else {
       filters.order_type = 'to_warehouse';
     }
 
-    if(startDate){
-      filters.created_at_gte = moment(startDate['$d'] as any).format('YYYY-MM-DD');
+    if (startDate) {
+      filters.created_at_gte = moment(startDate['$d'] as any).format(
+        'YYYY-MM-DD',
+      );
     }
 
-    if(endDate){
-      filters.created_at_lte = moment(endDate['$d'] as any).format('YYYY-MM-DD');
+    if (endDate) {
+      filters.created_at_lte = moment(endDate['$d'] as any).format(
+        'YYYY-MM-DD',
+      );
     }
 
     await getAllOrders(filters);
-  }
+  };
 
   const getAllOrders = async (filters) => {
     const response = await orderApi.getAllOrders(filters);
@@ -110,22 +113,27 @@ export default function AdminOrders() {
     let transports = [];
 
     const transportsResponse = await transportApi.getAllTransports({});
-    if(transportsResponse.success) {
+    if (transportsResponse.success) {
       transports = transportsResponse.data.body;
     }
 
     if (orders?.length) {
-
       for (let i = 0; i < orders.length; i++) {
         let order = orders[i];
-        const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
-        const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
-        const transport = transports.find(transport => {
-          return transport.transport_id === order.transport
+        const vendor =
+          order.order_type === 'to_warehouse'
+            ? order.supplier
+            : order.recipient;
+        const warehouse =
+          order.order_type === 'from_warehouse'
+            ? order.supplier
+            : order.recipient;
+        const transport = transports.find((transport) => {
+          return transport.transport_id === order.transport;
         });
 
         dataSource.push({
-          key: (i+1).toString(),
+          key: (i + 1).toString(),
           status: orders[i].order_status,
           order_type: orders[i].order_type,
           created_at: orders[i].created_at,
@@ -134,15 +142,15 @@ export default function AdminOrders() {
           vendor_id: vendor?.vendor_id,
           warehouse: warehouse?.warehouse_name,
           warehouse_id: warehouse?.warehouse_id,
-          transport_type: transport ? transport.transport_type : "No transport",
-          price: order.total_price
-        })
+          transport_type: transport ? transport.transport_type : 'No transport',
+          price: order.total_price,
+        });
       }
       setDataSource(dataSource);
     } else {
       setDataSource([]);
     }
-  }
+  };
 
   const debouncedSearch = debounce(async (filters) => {
     await getAllOrders(filters);
@@ -198,7 +206,7 @@ export default function AdminOrders() {
       align: 'center',
     },
     {
-      title: 'Price',
+      title: 'Price $',
       dataIndex: 'price',
       key: 'price',
       align: 'center',
@@ -259,15 +267,15 @@ export default function AdminOrders() {
     {
       label: 'Cancelled',
     },
-  ]
+  ];
   const fromToWarehouse = [
     {
       label: 'From Warehouse',
     },
     {
-      label: 'To Warehouse'
-    }
-  ]
+      label: 'To Warehouse',
+    },
+  ];
 
   const transportTypesProps = {
     items: transport_types,
@@ -276,11 +284,11 @@ export default function AdminOrders() {
   const orderStatusProps = {
     items: order_statuses,
     onClick: handleStatusClick,
-  }
+  };
   const orderTypeProps = {
     items: fromToWarehouse,
     onClick: handleFromToWarehouseClick,
-  }
+  };
 
   useEffect(() => {
     const calculateScrollSize = () => {
@@ -308,22 +316,27 @@ export default function AdminOrders() {
       let transports = [];
 
       const transportsResponse = await transportApi.getAllTransports({});
-      if(transportsResponse.success) {
+      if (transportsResponse.success) {
         transports = transportsResponse.data.body;
       }
 
       if (orders?.length) {
-
         for (let i = 0; i < orders.length; i++) {
           let order = orders[i];
-          const vendor = order.order_type === 'to_warehouse' ? order.supplier : order.recipient;
-          const warehouse = order.order_type === 'from_warehouse' ? order.supplier : order.recipient;
-          const transport = transports.find(transport => {
-            return transport.transport_id === order.transport
+          const vendor =
+            order.order_type === 'to_warehouse'
+              ? order.supplier
+              : order.recipient;
+          const warehouse =
+            order.order_type === 'from_warehouse'
+              ? order.supplier
+              : order.recipient;
+          const transport = transports.find((transport) => {
+            return transport.transport_id === order.transport;
           });
 
           dataSource.push({
-            key: (i+1).toString(),
+            key: (i + 1).toString(),
             status: orders[i].order_status,
             order_type: orders[i].order_type,
             created_at: orders[i].created_at,
@@ -332,9 +345,11 @@ export default function AdminOrders() {
             vendor_id: vendor?.vendor_id,
             warehouse: warehouse?.warehouse_name,
             warehouse_id: warehouse?.warehouse_id,
-            transport_type: transport ? transport.transport_type : "No transport",
-            price: order.total_price
-          })
+            transport_type: transport
+              ? transport.transport_type
+              : 'No transport',
+            price: order.total_price,
+          });
         }
         setDataSource(dataSource);
       } else {
@@ -395,7 +410,9 @@ export default function AdminOrders() {
                 </Dropdown>
               </div>
               <div className="admin-orders-filter">
-                <label className="admin-orders-filter-duration-labels">Date From</label>
+                <label className="admin-orders-filter-duration-labels">
+                  Date From
+                </label>
                 <DatePicker
                   className={'admin-orders-datepicker'}
                   size={'small'}
@@ -404,7 +421,9 @@ export default function AdminOrders() {
                 />
               </div>
               <div className="admin-orders-filter">
-                <label className="admin-orders-filter-duration-labels">Date To</label>
+                <label className="admin-orders-filter-duration-labels">
+                  Date To
+                </label>
                 <DatePicker
                   className={'admin-orders-datepicker'}
                   size={'small'}
@@ -412,9 +431,7 @@ export default function AdminOrders() {
                   onChange={(date) => setEndDate(date)}
                 />
               </div>
-              <Button onClick={handleSearch}>
-                Search
-              </Button>
+              <Button onClick={handleSearch}>Search</Button>
             </div>
             <EditOrders
               hidePopup={hideEditTransport}
@@ -427,9 +444,7 @@ export default function AdminOrders() {
           </div>
         </div>
         <Table
-          rowSelection={{
-
-          }}
+          rowSelection={{}}
           dataSource={tableData as []}
           columns={columns as []}
           scroll={scrollSize}

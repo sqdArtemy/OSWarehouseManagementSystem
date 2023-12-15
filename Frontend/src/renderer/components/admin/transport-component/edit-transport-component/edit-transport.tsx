@@ -7,11 +7,11 @@ import { ITransportData } from '../transport';
 import { useError } from '../../../error-component/error-context';
 
 export default function EditTransport({
-                                        isPopupVisible,
-                                        hidePopup,
-                                        transportData,
-                                        onEditSuccess
-                                      }: {
+  isPopupVisible,
+  hidePopup,
+  transportData,
+  onEditSuccess,
+}: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   transportData: {
@@ -68,13 +68,13 @@ export default function EditTransport({
         transport_speed: Number(newTransportData.maxSpeed),
         transport_type: newTransportData.Type,
         price_per_weight: Number(newTransportData.price_weight),
-      }
+      },
     );
 
     if (response.success) {
       onEditSuccess();
     } else {
-      showError(response.message)
+      showError(response.message);
     }
 
     transportData.setTransportData(newTransportData);
@@ -103,51 +103,60 @@ export default function EditTransport({
           label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
           rules={[
             { required: true },
-            { type: 'number', min: 0, message: 'Value must be greater than or equal to 0' },
+            {
+              type: 'number',
+              min: 0,
+              message: 'Value must be greater than or equal to 0',
+            },
           ]}
         >
-          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0 as any} />
         </Form.Item>
         <Form.Item
           name="maxSpeed"
           label={<p style={{ fontSize: '1vw' }}>Max Speed</p>}
           rules={[
             { required: true },
-            { type: 'number', min: 0, message: 'Value must be greater than or equal to 0' },
+            {
+              type: 'number',
+              min: 0,
+              message: 'Value must be greater than or equal to 0',
+            },
           ]}
         >
-          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0 as any} />
         </Form.Item>
         <Form.Item
           name="price_weight"
-          label={<p style={{ fontSize: '1vw' }}>Price/weight</p>}
+          label={<p style={{ fontSize: '1vw' }}>Price/weight ($/kg)</p>}
           rules={[
             { required: true },
-            { type: 'number', min: 0, message: 'Value must be greater than or equal to 0' },
+            {
+              type: 'number',
+              min: 0,
+              message: 'Value must be greater than or equal to 0',
+            },
           ]}
         >
-          <InputNumber style={{ fontSize: '0.9vw' }} min={0} step="any" />
+          <InputNumber
+            style={{ fontSize: '0.9vw' }}
+            min={0 as any}
+            step="any"
+          />
         </Form.Item>
         <Form.Item
           name="Type"
           label={<p style={{ fontSize: '1vw' }}>Type</p>}
           rules={[{ required: true }]}
         >
-          <InputNumber
-            style={{ fontSize: '0.9vw' }}
-            disabled
-            min={0}
-          />
+          <InputNumber style={{ fontSize: '0.9vw' }} disabled min={0 as any} />
         </Form.Item>
         <Form.Item
           {...tailLayout}
           labelAlign={'right'}
           style={{ marginBottom: '1vw' }}
         >
-          <Button
-            type="primary"
-            htmlType="submit"
-          >
+          <Button type="primary" htmlType="submit">
             Submit
           </Button>
         </Form.Item>

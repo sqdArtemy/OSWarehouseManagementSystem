@@ -46,12 +46,19 @@ export default function EditOrders({
     {
       label: 'cancelled',
     },
-  ]
+  ];
 
   useEffect(() => {
     if (isPopupVisible && orderData.ordersData && formRef.current) {
-      const { vendor, warehouse, amount, price,created_at,transport_type, status } =
-        orderData.ordersData;
+      const {
+        vendor,
+        warehouse,
+        amount,
+        price,
+        created_at,
+        transport_type,
+        status,
+      } = orderData.ordersData;
 
       formRef.current.setFieldsValue({
         vendor: vendor,
@@ -63,13 +70,13 @@ export default function EditOrders({
         status: status,
       });
 
-      orderApi.getOrder(orderData.ordersData.order_id).then(data => {
-        if(data.success){
+      orderApi.getOrder(orderData.ordersData.order_id).then((data) => {
+        if (data.success) {
           const order = data.data.body;
 
-          formRef.current.setFieldsValue({ amount : order.total_volume });
+          formRef.current.setFieldsValue({ amount: order.total_volume });
         }
-      })
+      });
     }
   }, [orderData]);
 
@@ -96,9 +103,10 @@ export default function EditOrders({
     hidePopup();
 
     const response = await orderApi.changeStatusOfOrder(
-      orderData.ordersData.order_id, newOrderData['status']
-    )
-    if(!response.success){
+      orderData.ordersData.order_id,
+      newOrderData['status'],
+    );
+    if (!response.success) {
       showError(response.message);
     }
 
@@ -126,42 +134,36 @@ export default function EditOrders({
         <Form.Item
           name="vendor"
           label={<p style={{ fontSize: '1vw' }}>From </p>}
-
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           name="warehouse"
           label={<p style={{ fontSize: '1vw' }}>To </p>}
-
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           name="amount"
           label={<p style={{ fontSize: '1vw' }}>Total Volume </p>}
-
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           name="price"
-          label={<p style={{ fontSize: '1vw' }}>Price </p>}
-
+          label={<p style={{ fontSize: '1vw' }}>Price $</p>}
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           name="created_at"
           label={<p style={{ fontSize: '1vw' }}>Date </p>}
-
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           name="transport_type"
           label={<p style={{ fontSize: '1vw' }}>Transport </p>}
-
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>

@@ -1,6 +1,14 @@
 import React from 'react';
 import './add-transport.scss';
-import { Button, Form, FormInstance, Input, InputNumber, Modal, Select } from 'antd';
+import {
+  Button,
+  Form,
+  FormInstance,
+  Input,
+  InputNumber,
+  Modal,
+  Select,
+} from 'antd';
 import { transportApi, userApi } from '../../../../index';
 import { useError } from '../../../error-component/error-context';
 
@@ -13,18 +21,18 @@ export interface INewTransportData {
 }
 
 export default function AdminAddTransport({
-                                            isPopupVisible,
-                                            hidePopup,
-                                            warehouseData,
-                                            onAddSuccess
-                                          }: {
+  isPopupVisible,
+  hidePopup,
+  warehouseData,
+  onAddSuccess,
+}: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   warehouseData: {
     transportData: INewTransportData;
     setTransportData: (userData: unknown) => void;
   };
-  onAddSuccess: () => void
+  onAddSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
   const { showError } = useError();
@@ -53,7 +61,10 @@ export default function AdminAddTransport({
     const newTransportData = formRef.current?.getFieldsValue();
     let check = false;
     for (let key in newTransportData) {
-      if (newTransportData[key] !== undefined && newTransportData[key] !== null) {
+      if (
+        newTransportData[key] !== undefined &&
+        newTransportData[key] !== null
+      ) {
         check = true;
       }
     }
@@ -62,14 +73,13 @@ export default function AdminAddTransport({
       transport_capacity: Number(newTransportData.Capacity),
       transport_speed: Number(newTransportData['Max Speed']),
       transport_type: newTransportData.Type,
-      price_per_weight: Number(newTransportData['Price_weight'])
+      price_per_weight: Number(newTransportData['Price_weight']),
     });
 
-    if(response.success){
+    if (response.success) {
       onAddSuccess();
-    }
-    else {
-      showError(response.message)
+    } else {
+      showError(response.message);
     }
     warehouseData.setTransportData(newTransportData);
 
@@ -109,21 +119,21 @@ export default function AdminAddTransport({
           label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
           rules={[{ required: true }]}
         >
-          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0 as any} />
         </Form.Item>
         <Form.Item
           name="Max Speed"
           label={<p style={{ fontSize: '1vw' }}>Max Speed</p>}
           rules={[{ required: true }]}
         >
-          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0 as any} />
         </Form.Item>
         <Form.Item
           name="Price_weight"
-          label={<p style={{ fontSize: '1vw' }}>Price/weight</p>}
+          label={<p style={{ fontSize: '1vw' }}>Price/weight ($/kg)</p>}
           rules={[{ required: true }]}
         >
-          <InputNumber style={{ fontSize: '0.9vw' }} min={0} />
+          <InputNumber style={{ fontSize: '0.9vw' }} min={0 as any} />
         </Form.Item>
         <Form.Item
           name="Type"

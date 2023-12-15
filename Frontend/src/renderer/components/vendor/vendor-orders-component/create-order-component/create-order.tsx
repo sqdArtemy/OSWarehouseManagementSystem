@@ -271,7 +271,7 @@ export default function CreateOrder({
                   <th>Name</th>
                   <th>Volume</th>
                   <th>Weight</th>
-                  <th>Price per 1 unit</th>
+                  <th>Price per 1 unit ($)</th>
                   <th>Quantity</th>
                   <th>Action</th>
                 </tr>
