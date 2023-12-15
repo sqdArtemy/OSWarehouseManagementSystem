@@ -678,10 +678,18 @@ class OrderView(GenericView):
                             (filled_inventory['real_quantity'] for filled_inventory in filled_inventories if
                              filled_inventory['rack_id'] == rack.rack_id),
                             0)
+
+                        product_id = next(
+                            (filled_inventory['product_id'] for filled_inventory in filled_inventories if
+                             filled_inventory['rack_id'] == rack.rack_id),
+                            0)
+
+                        product_in_rack = session.query(Product).filter_by(product_id=product_id).first()
+
                         if quantity == 0:
                             continue
 
-                        updated_remaining_capacity = rack.remaining_capacity - product.volume * quantity
+                        updated_remaining_capacity = rack.remaining_capacity - product_in_rack.volume * quantity
                         max_volume = updated_remaining_capacity if total_volume > updated_remaining_capacity else total_volume
 
                     else:
