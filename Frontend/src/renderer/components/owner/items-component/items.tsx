@@ -227,26 +227,31 @@ export default function OwnerItems() {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      align: 'center',
     },
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      align: 'center',
     },
     {
       title: 'Volume (m³)',
       dataIndex: 'volume',
       key: 'volume',
+      align: 'center',
     },
     {
       title: 'Weight (kg)',
       dataIndex: 'weight',
       key: 'weight',
+      align: 'center',
     },
     {
       title: 'Expiry Duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
+      align: 'center',
     },
   ];
 
