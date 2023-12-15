@@ -65,7 +65,6 @@ export default function App() {
                 element={<WarehouseDetail />}
               />
               <Route path="items" element={<OwnerItems />} />
-              {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
               <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="vendor/*" element={<VendorLayout />}>
@@ -77,7 +76,6 @@ export default function App() {
               <Route path="orders" element={<VendorOrders />} />
               <Route path="orders-add" element={<CreateOrder />} />
               <Route path="profile" element={<Profile />} />
-              {/*<Route path="warehouses-add" element={<WarehousesAdd />} />*/}
             </Route>
             <Route path="supervisor/*" element={<SupervisorLayout />}>
               <Route
