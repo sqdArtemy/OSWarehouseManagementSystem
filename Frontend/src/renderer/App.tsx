@@ -40,74 +40,83 @@ import WarehouseDetail from './components/owner/warehouses-component/warehouse-d
 import SupervisorWarehouses from './components/supervisor/warehouses-component/warehouses';
 import SupervisorRequests from './components/supervisor/requests-component/requests';
 import { SupervisorLayout } from './components/supervisor/supervisor-layout-component/supervisor-layout';
+import { ConfigProvider } from 'antd';
 
 export default function App() {
   return (
-    <ErrorProvider>
-      <LoadingProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<Navigate to="/sign-in" replace />} />
-            <Route path="sign-in" element={<SignIn />} />
-            <Route path="sign-up" element={<SignUp />} />
-            <Route path="sign-up-details" element={<SignUpDetails />} />
-            <Route path="owner/*" element={<OwnerDashboardLayout />}>
-              <Route
-                index
-                element={<Navigate to="/owner/dashboard" replace />}
-              />
-              <Route path="dashboard" element={<OwnerDashboard />} />
-              <Route path="orders" element={<VendorOrders />} />
-              <Route path="users" element={<OwnerUsers />} />
-              <Route path="warehouses" element={<OwnerWarehouses />} />
-              <Route
-                path="warehouses/:warehouse_id"
-                element={<WarehouseDetail />}
-              />
-              <Route path="items" element={<OwnerItems />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
-            <Route path="vendor/*" element={<VendorLayout />}>
-              <Route
-                index
-                element={<Navigate to="/vendor/vendors" replace />}
-              />
-              <Route path="vendors" element={<Vendors />} />
-              <Route path="orders" element={<VendorOrders />} />
-              <Route path="orders-add" element={<CreateOrder />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
-            <Route path="supervisor/*" element={<SupervisorLayout />}>
-              <Route
-                index
-                element={<Navigate to="/supervisor/requests" replace />}
-              />
-              <Route
-                path="warehouses/:warehouse_id"
-                element={<SupervisorWarehouses />}
-              />
-              <Route path="requests" element={<SupervisorRequests />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
-            <Route path="admin/*" element={<AdminDashboardLayout />}>
-              <Route
-                index
-                element={<Navigate to="/admin/companies" replace />}
-              />
-              <Route path="companies" element={<AdminCompanies />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="warehouses" element={<AdminWarehouses />} />
-              <Route path="vendors" element={<AdminVendors />} />
-              <Route path="transport" element={<AdminTransport />} />
-              <Route path="profile" element={<AdminProfile />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="racks" element={<AdminRacks />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
-          </Routes>
-        </Router>
-      </LoadingProvider>
-    </ErrorProvider>
+    <ConfigProvider
+      theme={{
+        token: {
+          fontFamily: 'Segoe UI',
+        },
+      }}
+    >
+      <ErrorProvider>
+        <LoadingProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Navigate to="/sign-in" replace />} />
+              <Route path="sign-in" element={<SignIn />} />
+              <Route path="sign-up" element={<SignUp />} />
+              <Route path="sign-up-details" element={<SignUpDetails />} />
+              <Route path="owner/*" element={<OwnerDashboardLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/owner/dashboard" replace />}
+                />
+                <Route path="dashboard" element={<OwnerDashboard />} />
+                <Route path="orders" element={<VendorOrders />} />
+                <Route path="users" element={<OwnerUsers />} />
+                <Route path="warehouses" element={<OwnerWarehouses />} />
+                <Route
+                  path="warehouses/:warehouse_id"
+                  element={<WarehouseDetail />}
+                />
+                <Route path="items" element={<OwnerItems />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+              <Route path="vendor/*" element={<VendorLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/vendor/vendors" replace />}
+                />
+                <Route path="vendors" element={<Vendors />} />
+                <Route path="orders" element={<VendorOrders />} />
+                <Route path="orders-add" element={<CreateOrder />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+              <Route path="supervisor/*" element={<SupervisorLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/supervisor/requests" replace />}
+                />
+                <Route
+                  path="warehouses/:warehouse_id"
+                  element={<SupervisorWarehouses />}
+                />
+                <Route path="requests" element={<SupervisorRequests />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+              <Route path="admin/*" element={<AdminDashboardLayout />}>
+                <Route
+                  index
+                  element={<Navigate to="/admin/companies" replace />}
+                />
+                <Route path="companies" element={<AdminCompanies />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="warehouses" element={<AdminWarehouses />} />
+                <Route path="vendors" element={<AdminVendors />} />
+                <Route path="transport" element={<AdminTransport />} />
+                <Route path="profile" element={<AdminProfile />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="racks" element={<AdminRacks />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
+            </Routes>
+          </Router>
+        </LoadingProvider>
+      </ErrorProvider>
+    </ConfigProvider>
   );
 }
