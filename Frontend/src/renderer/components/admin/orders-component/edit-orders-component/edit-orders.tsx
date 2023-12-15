@@ -145,7 +145,11 @@ export default function EditOrders({
         </Form.Item>
         <Form.Item
           name="amount"
-          label={<p style={{ fontSize: '1vw' }}>Total Volume </p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Total Volume m<sup>3</sup>{' '}
+            </p>
+          }
         >
           <Input disabled={true} style={{ fontSize: '0.9vw' }} />
         </Form.Item>

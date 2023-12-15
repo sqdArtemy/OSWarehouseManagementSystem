@@ -159,7 +159,15 @@ export default function EditItem({
         <Form.Item name="Weight" label="Weight" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="Volume" label="Volume" rules={[{ required: true }]}>
+        <Form.Item
+          name="Volume"
+          label={
+            <p>
+              Volume m<sup>3</sup>
+            </p>
+          }
+          rules={[{ required: true }]}
+        >
           <Input />
         </Form.Item>
         <Form.Item name="Price" label="Price $" rules={[{ required: true }]}>

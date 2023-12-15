@@ -234,7 +234,11 @@ export default function OwnerItems() {
       key: 'name',
     },
     {
-      title: 'Volume (m^3)',
+      render: () => (
+        <p>
+          Volume m<sup>3</sup>
+        </p>
+      ),
       dataIndex: 'volume',
       key: 'volume',
     },

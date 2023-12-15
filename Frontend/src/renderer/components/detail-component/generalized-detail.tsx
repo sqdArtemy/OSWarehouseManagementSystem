@@ -159,7 +159,11 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       align: 'center',
     },
     {
-      title: 'Volume',
+      render: () => (
+        <p>
+          Volume m<sup>3</sup>
+        </p>
+      ),
       dataIndex: 'itemVolume',
       key: 'itemVolume',
       align: 'center',

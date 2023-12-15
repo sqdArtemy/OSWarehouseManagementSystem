@@ -114,7 +114,11 @@ export default function Inventory({
       key: 'totalWeight',
     },
     {
-      title: 'Total Volume',
+      render: () => (
+        <p>
+          Total Volume m<sup>3</sup>
+        </p>
+      ),
       dataIndex: 'totalVolume',
       key: 'totalVolume',
     },
