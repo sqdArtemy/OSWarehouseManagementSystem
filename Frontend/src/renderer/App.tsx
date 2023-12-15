@@ -53,7 +53,7 @@ export default function App() {
             <Route path="sign-up-details" element={<SignUpDetails />} />
             <Route path="owner/*" element={<OwnerDashboardLayout />}>
               <Route
-                path="./"
+                index
                 element={<Navigate to="/owner/dashboard" replace />}
               />
               <Route path="dashboard" element={<OwnerDashboard />} />
@@ -69,7 +69,7 @@ export default function App() {
             </Route>
             <Route path="vendor/*" element={<VendorLayout />}>
               <Route
-                path="./"
+                index
                 element={<Navigate to="/vendor/vendors" replace />}
               />
               <Route path="vendors" element={<Vendors />} />
@@ -79,7 +79,7 @@ export default function App() {
             </Route>
             <Route path="supervisor/*" element={<SupervisorLayout />}>
               <Route
-                path="./"
+                index
                 element={<Navigate to="/supervisor/warehouses" replace />}
               />
               <Route
@@ -91,7 +91,7 @@ export default function App() {
             </Route>
             <Route path="admin/*" element={<AdminDashboardLayout />}>
               <Route
-                path="./"
+                index
                 element={<Navigate to="/admin/companies" replace />}
               />
               <Route path="companies" element={<AdminCompanies />} />
