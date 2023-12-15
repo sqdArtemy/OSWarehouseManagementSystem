@@ -1,6 +1,6 @@
 from sqlite3 import IntegrityError
 
-from sqlalchemy import func, or_, and_, cast, Float, Integer
+from sqlalchemy import func, cast, Float, Integer, text, distinct
 
 from db_config import get_session
 from models import Warehouse, User, Rack, Product, Inventory, OrderItem, Order
@@ -354,13 +354,14 @@ class WarehouseView(GenericView):
             query = (
                 session.query(
                     Warehouse.warehouse_name,
-                    cast(func.count(), Integer),
+                    cast(func.count(distinct(Order.order_id)), Integer),
                     cast(func.sum(Product.volume * OrderItem.quantity), Float),
                     cast(func.sum(Order.total_price), Float)
                 )
-                .join(Order, or_(
-                    and_(Order.order_type == 'to_warehouse', Order.recipient_id == Warehouse.warehouse_id),
-                    and_(Order.order_type == 'from_warehouse', Order.supplier_id == Warehouse.warehouse_id)
+                .select_from(Warehouse)
+                .join(Order, text(
+                    "((orders.order_type = 'to_warehouse' AND orders.recipient_id = warehouses.warehouse_id) "
+                    "OR (orders.order_type = 'from_warehouse' AND orders.supplier_id = warehouses.warehouse_id))"
                 ))
                 .join(OrderItem, OrderItem.order_id == Order.order_id)
                 .join(Product, Product.product_id == OrderItem.product_id)
