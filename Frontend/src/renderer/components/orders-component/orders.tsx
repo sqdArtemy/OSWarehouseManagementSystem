@@ -191,7 +191,7 @@ export default function Orders() {
       key: 'warehouse',
     },
     {
-      title: 'status',
+      title: 'Status',
       dataIndex: 'order_status',
       key: 'order_status',
       render: (text, record) => {
