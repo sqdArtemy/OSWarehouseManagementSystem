@@ -153,7 +153,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       align: 'center',
     },
     {
-      title: 'Average Expiry',
+      title: 'Expiry Duration (days)',
       dataIndex: 'expiry',
       key: 'expiry',
       align: 'center',

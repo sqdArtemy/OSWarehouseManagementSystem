@@ -248,7 +248,7 @@ export default function OwnerItems() {
       key: 'weight',
     },
     {
-      title: 'Expiry duration (days)',
+      title: 'Expiry Duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
     },

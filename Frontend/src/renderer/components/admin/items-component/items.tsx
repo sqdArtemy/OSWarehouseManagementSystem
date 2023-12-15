@@ -244,7 +244,7 @@ export default function AdminItems() {
       key: 'weight',
     },
     {
-      title: 'Expiry duration (days)',
+      title: 'Expiry Duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
     },
@@ -395,12 +395,17 @@ export default function AdminItems() {
               </button>
             </div>
             <img
-              className={'admin-items-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={
+                'admin-items-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')
+              }
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handleDeleteItem()}
             ></img>
-            <button className={'admin-items-add-btn'} onClick={(e) => handleAddItem(e)}>
+            <button
+              className={'admin-items-add-btn'}
+              onClick={(e) => handleAddItem(e)}
+            >
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'admin-items-add-btn-text'}>Add Item</span>
             </button>
