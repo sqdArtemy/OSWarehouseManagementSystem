@@ -80,7 +80,7 @@ export default function App() {
             <Route path="supervisor/*" element={<SupervisorLayout />}>
               <Route
                 index
-                element={<Navigate to="/supervisor/warehouses" replace />}
+                element={<Navigate to="/supervisor/requests" replace />}
               />
               <Route
                 path="warehouses/:warehouse_id"
