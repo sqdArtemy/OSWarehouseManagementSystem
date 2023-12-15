@@ -104,16 +104,16 @@ export default function OwnerProfile() {
         style={{ maxWidth: '100%', textAlign: 'start', fontSize: '3vw' }}
         onFinish={onFinish}
       >
-        <Form.Item>
-          <Button
-            htmlType="button"
-            type={'primary'}
-            danger={}
-            onClick={handleDelete}
-          >
-            Delete account
-          </Button>
-        </Form.Item>
+        {/*<Form.Item>*/}
+        {/*  <Button*/}
+        {/*    htmlType="button"*/}
+        {/*    type={'primary'}*/}
+        {/*    danger={}*/}
+        {/*    onClick={handleDelete}*/}
+        {/*  >*/}
+        {/*    Delete account*/}
+        {/*  </Button>*/}
+        {/*</Form.Item>*/}
         <Form.Item
           name="First Name"
           label={<p style={{ fontSize: '1vw' }}>First Name</p>}
