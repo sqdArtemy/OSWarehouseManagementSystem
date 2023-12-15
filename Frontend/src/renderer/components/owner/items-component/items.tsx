@@ -234,7 +234,7 @@ export default function OwnerItems() {
       key: 'name',
     },
     {
-      render: () => (
+      label: (
         <p>
           Volume m<sup>3</sup>
         </p>

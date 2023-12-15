@@ -61,11 +61,7 @@ export default function ChooseTransport({
       align: 'center',
     },
     {
-      render: () => (
-        <p>
-          Total Capacity (m<sup>3</sup>)
-        </p>
-      ),
+      title: 'Total Capacity m³',
       dataIndex: 'totalVolume',
       key: 'totalVolume',
       align: 'center',

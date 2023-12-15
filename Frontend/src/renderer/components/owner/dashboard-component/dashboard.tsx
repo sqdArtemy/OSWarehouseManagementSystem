@@ -194,11 +194,7 @@ export default function OwnerDashboard() {
       align: 'center',
     },
     {
-      render: () => (
-        <p>
-          Volume m<sup>3</sup>
-        </p>
-      ),
+      title: 'Volume m³',
       dataIndex: 'itemVolume',
       key: 'itemVolume',
       align: 'center',
