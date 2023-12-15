@@ -32,7 +32,7 @@ def upgrade() -> None:
                                       'damaged', name='order_status'), nullable=False),
                     sa.Column('order_type', sa.Enum('from_warehouse', 'to_warehouse', name='order_type'),
                               nullable=False),
-                    sa.CheckConstraint('total_price > 0', name='check_total_price'),
+                    sa.CheckConstraint('total_price >= 0', name='check_total_price'),
                     sa.PrimaryKeyConstraint('order_id')
                     )
     op.create_index(op.f('ix_orders_order_id'), 'orders', ['order_id'], unique=False)

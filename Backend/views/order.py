@@ -29,14 +29,16 @@ class OrderView(GenericView):
                         0
                     )
                 )
-                .join(Order, Order.recipient_id == Warehouse.warehouse_id)
-                .join(OrderItem, OrderItem.order_id == Order.order_id)
-                .join(Product, Product.product_id == OrderItem.product_id)
-                .filter(Order.order_status.in_(["processing", "delivered", "submitted"]))
+                .outerjoin(Order, and_(
+                    Order.recipient_id == Warehouse.warehouse_id,
+                    Order.order_status.in_(["processing", "delivered", "submitted"]))
+                      )
+                .outerjoin(OrderItem, OrderItem.order_id == Order.order_id)
+                .outerjoin(Product, Product.product_id == OrderItem.product_id)
                 .filter(Warehouse.warehouse_id == warehouse_id)
             ).scalar()
 
-            return remaining_volume
+            return remaining_volume if remaining_volume else 0
 
     @staticmethod
     def __get_remaining_products(warehouse_id: int) -> list[tuple]:
@@ -672,14 +674,25 @@ class OrderView(GenericView):
                         continue
 
                     if rack.rack_id in [filled_inventory['rack_id'] for filled_inventory in filled_inventories]:
+                        if product.is_stackable:
+                            continue
+
                         quantity = next(
                             (filled_inventory['real_quantity'] for filled_inventory in filled_inventories if
                              filled_inventory['rack_id'] == rack.rack_id),
                             0)
+
+                        product_id = next(
+                            (filled_inventory['product_id'] for filled_inventory in filled_inventories if
+                             filled_inventory['rack_id'] == rack.rack_id),
+                            0)
+
+                        product_in_rack = session.query(Product).filter_by(product_id=product_id).first()
+
                         if quantity == 0:
                             continue
 
-                        updated_remaining_capacity = rack.remaining_capacity - product.volume * quantity
+                        updated_remaining_capacity = rack.remaining_capacity - product_in_rack.volume * quantity
                         max_volume = updated_remaining_capacity if total_volume > updated_remaining_capacity else total_volume
 
                     else:

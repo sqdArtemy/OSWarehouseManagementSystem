@@ -60,7 +60,7 @@ class Order(Base):
 
     # Constraints
     __table_args__ = (
-        CheckConstraint("total_price > 0", name="check_total_price"),
+        CheckConstraint("total_price >= 0", name="check_total_price"),
     )
 
     def to_dict(self, cascade_fields: list[str] = ("supplier", "recipient", "transport")):
