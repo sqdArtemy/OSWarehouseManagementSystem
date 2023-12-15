@@ -29,14 +29,16 @@ class OrderView(GenericView):
                         0
                     )
                 )
-                .join(Order, Order.recipient_id == Warehouse.warehouse_id)
-                .join(OrderItem, OrderItem.order_id == Order.order_id)
-                .join(Product, Product.product_id == OrderItem.product_id)
-                .filter(Order.order_status.in_(["processing", "delivered", "submitted"]))
+                .outerjoin(Order, and_(
+                    Order.recipient_id == Warehouse.warehouse_id,
+                    Order.order_status.in_(["processing", "delivered", "submitted"]))
+                      )
+                .outerjoin(OrderItem, OrderItem.order_id == Order.order_id)
+                .outerjoin(Product, Product.product_id == OrderItem.product_id)
                 .filter(Warehouse.warehouse_id == warehouse_id)
             ).scalar()
 
-            return remaining_volume
+            return remaining_volume if remaining_volume else 0
 
     @staticmethod
     def __get_remaining_products(warehouse_id: int) -> list[tuple]:
