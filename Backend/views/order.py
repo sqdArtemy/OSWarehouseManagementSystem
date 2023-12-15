@@ -674,6 +674,9 @@ class OrderView(GenericView):
                         continue
 
                     if rack.rack_id in [filled_inventory['rack_id'] for filled_inventory in filled_inventories]:
+                        if product.is_stackable:
+                            continue
+
                         quantity = next(
                             (filled_inventory['real_quantity'] for filled_inventory in filled_inventories if
                              filled_inventory['rack_id'] == rack.rack_id),
