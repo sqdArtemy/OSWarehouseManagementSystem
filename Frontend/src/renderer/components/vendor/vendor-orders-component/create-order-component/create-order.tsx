@@ -272,7 +272,7 @@ export default function CreateOrder({
                   <th>
                     Volume m<sup>3</sup>
                   </th>
-                  <th>Weight</th>
+                  <th>Weight (kg)</th>
                   <th>Price per 1 unit ($)</th>
                   <th>Quantity</th>
                   <th>Action</th>
@@ -283,9 +283,11 @@ export default function CreateOrder({
                   <tr key={item.product.value}>
                     <td>{item.product.label}</td>
                     {/* Assuming that volume and weight are available as separate properties */}
-                    <td>{item.product.volume} m^3</td>
+                    <td>
+                      {item.product.volume} m<sup>3</sup>
+                    </td>
                     <td>{item.product.weight} kg</td>
-                    <td>{item.product.price} kg</td>
+                    <td>{item.product.price} $</td>
                     <td>
                       <InputNumber
                         min={1 as any}
