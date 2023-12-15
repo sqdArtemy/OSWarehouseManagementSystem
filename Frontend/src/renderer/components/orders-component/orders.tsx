@@ -194,6 +194,14 @@ export default function Orders() {
       title: 'status',
       dataIndex: 'order_status',
       key: 'order_status',
+      render: (text, record) => {
+        return text
+          .split('')
+          .map((char, index) => {
+            return index === 0 ? char.toUpperCase() : char;
+          })
+          .join('');
+      },
     },
   ];
 
