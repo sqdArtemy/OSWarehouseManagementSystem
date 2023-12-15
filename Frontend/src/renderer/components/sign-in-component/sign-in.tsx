@@ -85,7 +85,6 @@ export function SignIn() {
         <div className="login-form">
           <div className="tabs-container">
             <div className="tabs-left">
-              <span id="id">ID</span>
               <span id="sign-in">Sign In</span>
             </div>
             <div className="tabs-right">
