@@ -166,7 +166,6 @@ class UserView(GenericView):
                 return super().get_list(request=request, pre_selected_query=query, **kwargs)
 
     @view_function_middleware
-    @check_allowed_roles_middleware([UserRole.MANAGER.value["code"], UserRole.ADMIN.value["code"]])
     @check_allowed_methods_middleware([Method.PUT.value])
     def update(self, request: dict) -> dict:
         with get_session() as session:
@@ -177,7 +176,7 @@ class UserView(GenericView):
 
             if self.instance_id != requester_id and (
                     self.instance.company_id != requester.company_id or requester.user_role != UserRole.MANAGER.value["name"]
-            ) and self.requester_role != UserRole.ADMIN.value["code"]:
+            ) and self.requester_role != UserRole.ADMIN.value["code"] and self.requester_role != UserRole.VENDOR.value["code"]:
                 raise ValidationError(status_code=401, message="You can not update data of this user.")
 
             # Remove password if it was passed
