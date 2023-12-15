@@ -61,7 +61,7 @@ export default function ChooseTransport({
       align: 'center',
     },
     {
-      title: 'Total Capacity m³',
+      title: 'Total Capacity (m³)',
       dataIndex: 'totalVolume',
       key: 'totalVolume',
       align: 'center',

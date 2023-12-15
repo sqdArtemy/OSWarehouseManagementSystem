@@ -223,7 +223,7 @@ export default function OwnerWarehouses() {
       align: 'center',
     },
     {
-      title: 'Capacity',
+      title: 'Capacity (m³)',
       dataIndex: 'capacity',
       key: 'capacity',
       align: 'center',

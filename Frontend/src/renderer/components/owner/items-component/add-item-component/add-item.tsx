@@ -131,7 +131,7 @@ export default function AddItem({
           name="Volume"
           label={
             <p>
-              Volume m<sup>3</sup>
+              Volume (m<sup>3</sup>)
             </p>
           }
           rules={[{ required: true }]}

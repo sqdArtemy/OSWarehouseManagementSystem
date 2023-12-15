@@ -194,7 +194,7 @@ export default function OwnerDashboard() {
       align: 'center',
     },
     {
-      title: 'Volume m³',
+      title: 'Volume (m³)',
       dataIndex: 'itemVolume',
       key: 'itemVolume',
       align: 'center',

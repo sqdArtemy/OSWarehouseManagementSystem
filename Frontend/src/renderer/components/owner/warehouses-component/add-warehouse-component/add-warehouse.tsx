@@ -155,7 +155,7 @@ export default function AddWarehouse({
           name="Capacity"
           label={
             <p style={{ fontSize: '1vw' }}>
-              Capacity m<sup>3</sup>
+              Capacity (m<sup>3</sup>)
             </p>
           }
           rules={[{ required: true }]}

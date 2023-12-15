@@ -234,11 +234,7 @@ export default function OwnerItems() {
       key: 'name',
     },
     {
-      label: (
-        <p>
-          Volume m<sup>3</sup>
-        </p>
-      ),
+      title: 'Volume (m³)',
       dataIndex: 'volume',
       key: 'volume',
     },
@@ -375,7 +371,7 @@ export default function OwnerItems() {
               </Dropdown>
               <div className="filter">
                 <label className="labels" htmlFor="volume">
-                  Volume
+                  Volume (m³)
                 </label>
                 <input
                   type=""
