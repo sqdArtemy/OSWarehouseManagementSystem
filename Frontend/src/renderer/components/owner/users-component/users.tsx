@@ -340,7 +340,9 @@ export default function OwnerUsers() {
                 alt={'Delete Button'}
                 onClick={() => handleDeleteUser()}
               ></img>
-              <Button type={'primary'}>Add User</Button>
+              <Button type={'primary'} onClick={handleAddUser}>
+                Add User
+              </Button>
             </Space>
             <AddUser
               hidePopup={hideAddUser}
