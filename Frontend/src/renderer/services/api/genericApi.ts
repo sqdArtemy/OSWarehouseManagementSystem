@@ -12,6 +12,7 @@ export class GenericApi {
     data: ISendData,
   ): Promise<IApiResponse> {
     data.headers.token = this.token || userApi.getToken;
+    console.log(data);
 
     return await handleApiRequest({
       url: data.url,

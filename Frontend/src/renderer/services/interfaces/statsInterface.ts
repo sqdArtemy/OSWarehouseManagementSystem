@@ -1,7 +1,7 @@
 import { IApiResponse } from '../apiRequestHandler';
 
 export interface IStats {
-  getProductsStats(): Promise<IApiResponse>;
+  getProductsStats(warehouseId: number): Promise<IApiResponse>;
   getOrderStats(): Promise<IApiResponse>;
   getLostItems(filters: IOrderFilters): Promise<IApiResponse>;
   getOrderDetails(filters: IOrderFilters): Promise<IApiResponse>;
