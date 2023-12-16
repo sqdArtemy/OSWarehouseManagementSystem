@@ -39,7 +39,7 @@ export class TcpClient {
         method: 'POST',
         url: '/test',
         body: {},
-        headers: {}
+        headers: {},
       };
 
       await sleep(500);
@@ -57,6 +57,7 @@ export class TcpClient {
   async send(data: ISendData | IConnectionData) {
     return new Promise((resolve, reject) => {
       if ('body' in data) {
+        data.headers.url = data.url + data.method;
         this.client.write(
           JSON.stringify({
             body: data.body,
@@ -71,19 +72,21 @@ export class TcpClient {
         }, 10000);
 
         let accumulatedData = '';
-        this.client.on('data', (data) => {
+        this.client.on('data', (response) => {
           clearTimeout(timer);
 
-          accumulatedData += data.toString();
+          accumulatedData += response.toString();
 
           if (accumulatedData.includes('\n')) {
             const messages = accumulatedData.split('\n');
             accumulatedData = messages.pop();
             messages.forEach((message) => {
-              if (message === 'There is no connected backend side to the server') {
+              if (
+                message === 'There is no connected backend side to the server'
+              ) {
                 reject('There is no connected backend side to the server');
               } else {
-                resolve(message);
+                if (message.includes(data.url + data.method)) resolve(message);
               }
             });
           }
@@ -109,7 +112,6 @@ export class TcpClient {
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
 
 // const args = process.argv.slice(2);
 // const serverAddress = args[0] ?? '127.0.0.1';  // Change this to your server's IP or hostname
