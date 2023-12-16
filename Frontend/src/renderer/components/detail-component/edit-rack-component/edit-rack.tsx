@@ -6,7 +6,12 @@ import { useError } from '../../error-component/error-context';
 import { useLoading } from '../../loading-component/loading';
 import { useParams } from 'react-router-dom';
 
-export default function EditRack({ isPopupVisible, hidePopup, rackData, updateGridData }) {
+export default function EditRack({
+  isPopupVisible,
+  hidePopup,
+  rackData,
+  updateGridData,
+}) {
   const { warehouse_id } = useParams();
   const formRef = React.useRef<FormInstance>(null);
   const { showError } = useError();
@@ -31,11 +36,14 @@ export default function EditRack({ isPopupVisible, hidePopup, rackData, updateGr
 
   const handleOk = async (e) => {
     startLoading();
-    const response = await rackApi.updateRack({
-      warehouse_id: Number(warehouse_id),
-      rack_position: formRef.current?.getFieldsValue()['Rack Position'],
-      overall_capacity: Number(formRef.current?.getFieldsValue()['Capacity']),
-    }, rackData.rackData.rack_id);
+    const response = await rackApi.updateRack(
+      {
+        warehouse_id: Number(warehouse_id),
+        rack_position: formRef.current?.getFieldsValue()['Rack Position'],
+        overall_capacity: Number(formRef.current?.getFieldsValue()['Capacity']),
+      },
+      rackData.rackData.rack_id,
+    );
 
     stopLoading();
     console.log(response);
@@ -55,11 +63,11 @@ export default function EditRack({ isPopupVisible, hidePopup, rackData, updateGr
 
   useEffect(() => {
     if (isPopupVisible && rackData.rackData && formRef.current) {
-      rackApi.getRack(rackData.rackData.rack_id).then(data => {
-        if(data.success) {
+      rackApi.getRack(rackData.rackData.rack_id).then((data) => {
+        if (data.success) {
           formRef.current.setFieldsValue({
             'Rack Position': data.data.body.rack_position,
-            'Capacity': data.data.body.overall_capacity
+            Capacity: data.data.body.overall_capacity,
           });
         }
       });
@@ -95,7 +103,11 @@ export default function EditRack({ isPopupVisible, hidePopup, rackData, updateGr
         </Form.Item>
         <Form.Item
           name="Capacity"
-          label={<p style={{ fontSize: '1vw' }}>Capacity:</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Capacity m<sup>3</sup>:
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

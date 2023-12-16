@@ -61,7 +61,7 @@ export default function ChooseTransport({
       align: 'center',
     },
     {
-      title: 'Total Capacity (m^3)',
+      title: 'Total Capacity (m³)',
       dataIndex: 'totalVolume',
       key: 'totalVolume',
       align: 'center',
@@ -225,7 +225,11 @@ export default function ChooseTransport({
       >
         <Form.Item
           name="total-volume"
-          label={<p style={{ fontSize: '1vw' }}>Total Volume</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Total Volume (m<sup>3</sup>)
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} disabled={} />

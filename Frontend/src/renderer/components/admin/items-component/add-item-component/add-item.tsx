@@ -29,7 +29,9 @@ export default function AddItem({
   onAddItemSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
-  const [companyOptions, setCompanyOptions] = React.useState<Select['OptionType'][]>([]);
+  const [companyOptions, setCompanyOptions] = React.useState<
+    Select['OptionType'][]
+  >([]);
   const { showError } = useError();
 
   const layout = {
@@ -69,7 +71,7 @@ export default function AddItem({
       weight: newitemData['Weight'],
       volume: newitemData['Volume'],
       is_stackable: newitemData['Storage type'] === 'stackable',
-      company_id: newitemData['Company']
+      company_id: newitemData['Company'],
     });
 
     if (response.success) {
@@ -150,13 +152,25 @@ export default function AddItem({
         >
           <Input />
         </Form.Item>
-        <Form.Item name="Weight" label="Weight" rules={[{ required: true }]}>
+        <Form.Item
+          name="Weight"
+          label="Weight (kg)"
+          rules={[{ required: true }]}
+        >
           <Input />
         </Form.Item>
-        <Form.Item name="Volume" label="Volume" rules={[{ required: true }]}>
+        <Form.Item
+          name="Volume"
+          label={
+            <p>
+              Volume m<sup>3</sup>
+            </p>
+          }
+          rules={[{ required: true }]}
+        >
           <Input />
         </Form.Item>
-        <Form.Item name="Price" label="Price" rules={[{ required: true }]}>
+        <Form.Item name="Price" label="Price $" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item

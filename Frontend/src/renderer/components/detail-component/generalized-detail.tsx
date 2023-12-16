@@ -43,7 +43,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     labels: ['Occupied', 'Free'],
     datasets: [
       {
-        label: 'Capacity of warehouse',
+        label: 'Capacity of warehouse (m³)',
         data: [
           state.locWarehouseData.capacity - state.locWarehouseData.remaining,
           state.locWarehouseData.remaining,
@@ -63,7 +63,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         labels: ['Occupied', 'Free'],
         datasets: [
           {
-            label: 'Capacity of warehouse',
+            label: 'Capacity of warehouse (m³)',
             data: [
               data.overall_capacity - data.remaining_capacity,
               data.remaining_capacity,
@@ -112,7 +112,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         labels: ['Occupied', 'Free'],
         datasets: [
           {
-            label: 'Capacity of warehouse',
+            label: 'Capacity of warehouse (m³)',
             data: [
               warehouseApi.warehouseData.overall_capacity -
                 warehouseApi.warehouseData.remaining_capacity,
@@ -124,15 +124,17 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       });
 
       const productsStatsResponse = await statsApi.getProductsStats();
-      if(productsStatsResponse.success) {
-        setDataSource(productsStatsResponse.data.body.map(item => {
-          return {
-            itemName: item.product_name,
-            itemVolume: item.total_volume_sum,
-            itemCount: item.products_number,
-            expiry: item.average_expiry_date
-          }
-        }));
+      if (productsStatsResponse.success) {
+        setDataSource(
+          productsStatsResponse.data.body.map((item) => {
+            return {
+              itemName: item.product_name,
+              itemVolume: item.total_volume_sum,
+              itemCount: item.products_number,
+              expiry: item.average_expiry_date,
+            };
+          }),
+        );
       }
     });
 
@@ -151,13 +153,13 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       align: 'center',
     },
     {
-      title: 'Average Expiry',
+      title: 'Expiry Duration (days)',
       dataIndex: 'expiry',
       key: 'expiry',
       align: 'center',
     },
     {
-      title: 'Volume',
+      title: 'Volume m³',
       dataIndex: 'itemVolume',
       key: 'itemVolume',
       align: 'center',
@@ -269,10 +271,17 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       <div className={'generalized-detail-left'}>
         <span className={'generalized-detail-header'}>
           <span className={'generalized-detail-header-type'}>
-            {warehouseData.type} Storage
+            {warehouseData.type
+              .split(' ')
+              .map(
+                (word) =>
+                  word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+              )
+              .join(' ')}{' '}
+            Storage
           </span>
           <span className={'generalized-detail-header-name'}>
-            {warehouseData.warehouseName} {warehouse_id}
+            {warehouseData.warehouseName}
           </span>
           {isForSupervisor ? (
             <span className={'generalized-detail-header-btns'}>

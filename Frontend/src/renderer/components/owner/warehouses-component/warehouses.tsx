@@ -178,12 +178,6 @@ export default function OwnerWarehouses() {
   }
 
   const columns = [
-    // {
-    //   dataIndex: 'warehouse_id',
-    //   key: 'warehouse_id',
-    //   width: '0',
-    //   render: () => null,
-    // },
     {
       title: 'Action',
       dataIndex: 'action',
@@ -229,7 +223,7 @@ export default function OwnerWarehouses() {
       align: 'center',
     },
     {
-      title: 'Capacity',
+      title: 'Capacity (m³)',
       dataIndex: 'capacity',
       key: 'capacity',
       align: 'center',
@@ -315,7 +309,7 @@ export default function OwnerWarehouses() {
         const allUsers = (await userApi.getAllUsers({})).data.body;
         for (let i = 0; i < warehouses.length; i++) {
           const user = allUsers?.find(
-            (user) => (user.user_id === warehouses[i].supervisor),
+            (user) => user.user_id === warehouses[i].supervisor,
           );
           data.push({
             key: (i + 1).toString(),

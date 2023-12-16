@@ -227,26 +227,31 @@ export default function OwnerItems() {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      align: 'center',
     },
     {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      align: 'center',
     },
     {
-      title: 'Volume (m^3)',
+      title: 'Volume (m³)',
       dataIndex: 'volume',
       key: 'volume',
+      align: 'center',
     },
     {
       title: 'Weight (kg)',
       dataIndex: 'weight',
       key: 'weight',
+      align: 'center',
     },
     {
-      title: 'Expiry duration (days)',
+      title: 'Expiry Duration (days)',
       dataIndex: 'expiry-duration',
       key: 'expiry-duration',
+      align: 'center',
     },
   ];
 
@@ -371,7 +376,7 @@ export default function OwnerItems() {
               </Dropdown>
               <div className="filter">
                 <label className="labels" htmlFor="volume">
-                  Volume
+                  Volume (m³)
                 </label>
                 <input
                   type=""

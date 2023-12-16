@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 
 export function SupervisorLayout() {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(0);
   const [name, setName] = useState('Gentlemanbek');
   const location = useLocation();
 

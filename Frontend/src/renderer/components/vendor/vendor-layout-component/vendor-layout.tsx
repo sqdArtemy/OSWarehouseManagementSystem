@@ -9,7 +9,7 @@ import { userApi } from '../../../index';
 
 export function VendorLayout() {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(1);
   const [name, setName] = useState('Gentlemanbek');
   const sideBarElements = [
     { iconSrc: DashboardIcon, text: 'Orders' },

@@ -5,24 +5,24 @@ import DashboardIcon from '../../../../../assets/icons/dashboard-icon.png';
 import UsersIcon from '../../../../../assets/icons/dashboard-users-icon.png';
 import WarehousesIcon from '../../../../../assets/icons/dashboard-warehouses-icon.png';
 import ItemsIcon from '../../../../../assets/icons/dashboard-items-icon.png';
-import TransportIcon from '../../../../../assets/icons/dashboard-transport-icon.png'
-import OrdersIcon from '../../../../../assets/icons/dashboard-orders-icon.png'
-import RacksIcon from '../../../../../assets/icons/dashboard-racks-icon.png'
+import TransportIcon from '../../../../../assets/icons/dashboard-transport-icon.png';
+import OrdersIcon from '../../../../../assets/icons/dashboard-orders-icon.png';
+import RacksIcon from '../../../../../assets/icons/dashboard-racks-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 
 export function AdminDashboardLayout() {
   const navigate = useNavigate();
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(0);
   const sideBarElements = [
     { iconSrc: DashboardIcon, text: 'Companies' },
     { iconSrc: WarehousesIcon, text: 'Warehouses' },
     { iconSrc: UsersIcon, text: 'Users' },
     { iconSrc: ItemsIcon, text: 'Vendors' },
-    { iconSrc: TransportIcon, text: 'Transport'},
-    { iconSrc: OrdersIcon, text: 'Orders'},
-    { iconSrc: RacksIcon, text: 'Racks'},
-    { iconSrc: ItemsIcon, text: 'Products'},
+    { iconSrc: TransportIcon, text: 'Transport' },
+    { iconSrc: OrdersIcon, text: 'Orders' },
+    { iconSrc: RacksIcon, text: 'Racks' },
+    { iconSrc: ItemsIcon, text: 'Products' },
   ];
 
   const handleSideBarElementClick = (
