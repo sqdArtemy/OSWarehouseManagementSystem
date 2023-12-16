@@ -75,11 +75,15 @@ export function AdminDashboardLayout() {
             className="side-bar-bottom-profile"
             onClick={() => {
               setSelected(null);
-              navigate('/admin/profile');
+              navigate('/owner/profile');
             }}
           >
-            <span className="side-bar-bottom-profile-icon">
-              <img src={DashboardProfileIcon} alt={'Dashboard Profile Icon'} />
+            <span>
+              <img
+                className="side-bar-bottom-profile-icon"
+                src={DashboardProfileIcon}
+                alt={'Dashboard Profile Icon'}
+              />
             </span>
             <span className="side-bar-bottom-profile-name">Gentlemenbek</span>
           </div>

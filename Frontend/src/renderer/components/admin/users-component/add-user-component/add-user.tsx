@@ -9,14 +9,15 @@ export interface INewUserData {
   Email?: string;
   Phone?: string;
   Role?: string;
+  Address?: string;
 }
 
 export default function AddUser({
-                                  isPopupVisible,
-                                  hidePopup,
-                                  userData,
-                                  onAddUserSuccess,
-                                }: {
+  isPopupVisible,
+  hidePopup,
+  userData,
+  onAddUserSuccess,
+}: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   userData: {
@@ -26,7 +27,9 @@ export default function AddUser({
   onAddUserSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
-  const [companyOptions, setCompanyOptions] = React.useState<Select['OptionType'][]>([]);
+  const [companyOptions, setCompanyOptions] = React.useState<
+    Select['OptionType'][]
+  >([]);
 
   const layout = {
     labelCol: {
@@ -69,9 +72,10 @@ export default function AddUser({
       user_name: newUserData['First Name'],
       user_surname: newUserData['Last Name'],
       user_email: newUserData['Email'],
-      user_phone: newUserData['Phone'],
+      user_address: newUserData['Address'],
+      user_phone: '+' + newUserData['Phone'],
       user_role: newUserData['Role'],
-      company_id: newUserData['Company']
+      company_id: newUserData['Company'],
     });
 
     console.log(response);
@@ -167,11 +171,18 @@ export default function AddUser({
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
+          name="Address"
+          label={<p style={{ fontSize: '1vw' }}>Address</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
           name="Phone"
           label={<p style={{ fontSize: '1vw' }}>Phone</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Input addonBefore={'+'} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           {...tailLayout}

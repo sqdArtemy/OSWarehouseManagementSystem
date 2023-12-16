@@ -29,10 +29,74 @@ struct clientAddress {
 
 struct ArrayList clientsList;
 
-// Function to handle SIGINT signal
+#define MESSAGE_QUEUE_DELAY 30000 // 10 ms in microseconds
+
+struct MessageQueue {
+    char* message;
+    struct MessageQueue* next;
+};
+
+struct MessageQueue* messageQueue = NULL;
+pthread_mutex_t queueMutex = PTHREAD_MUTEX_INITIALIZER;
+
+// Function to add a message to the message queue
+void addToMessageQueue(const char* message) {
+    pthread_mutex_lock(&queueMutex);
+
+    struct MessageQueue* newMessage = (struct MessageQueue*)malloc(sizeof(struct MessageQueue));
+    newMessage->message = strdup(message); // Duplicate the message to avoid memory issues
+    newMessage->next = NULL;
+
+    if (messageQueue == NULL) {
+        messageQueue = newMessage;
+    } else {
+        struct MessageQueue* temp = messageQueue;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = newMessage;
+    }
+
+    pthread_mutex_unlock(&queueMutex);
+}
+
+// Function to send a message from the message queue with a delay
+void* sendMessageFromQueue(void* arg) {
+    while (true) {
+        pthread_mutex_lock(&queueMutex);
+
+        if (messageQueue != NULL) {
+            struct MessageQueue* temp = messageQueue;
+            messageQueue = messageQueue->next;
+
+            pthread_mutex_unlock(&queueMutex);
+
+            // Send the message
+            usleep(MESSAGE_QUEUE_DELAY);
+            send(server_fd, temp->message, strlen(temp->message), 0);
+             // Introduce a delay
+
+            free(temp->message);
+            free(temp);
+        } else {
+            pthread_mutex_unlock(&queueMutex);
+            usleep(1000); // Sleep for 1 ms if the queue is empty
+        }
+    }
+}
+
 void handle_sigint(int sig) {
     printf("Received SIGINT. Closing server...\n");
     close(server_fd);
+    deleteAll(&clientsList);
+    // Free the message queue
+    while (messageQueue != NULL) {
+        struct MessageQueue* temp = messageQueue;
+        messageQueue = messageQueue->next;
+        free(temp->message);
+        free(temp);
+    }
+    pthread_mutex_destroy(&queueMutex);
     exit(EXIT_SUCCESS);
 }
 
@@ -40,10 +104,10 @@ char* get_current_time(){
   time_t current_time;
   time(&current_time);
   struct tm *local_time = localtime(&current_time);
-  
+
   char *time_string = (char*)malloc(26);
   strftime(time_string, 26, "%Y-%m-%d %H:%M:%S", local_time);
-  
+
   return time_string;
 }
 
@@ -60,19 +124,19 @@ void send_request(cJSON *json, int port, char* address, int new_socket){
 	cJSON_AddItemToObject(json, "headers", headersObject);
 
 	char *request = cJSON_Print(json);
-	send(server_fd, request, strlen(request), 0);
+	addToMessageQueue(request);
 }
 
 void* handle_client(void* client) {
   struct clientAddress* clientArgs = (struct clientAddress*)client;
   int port = clientArgs->port;
   char* address = clientArgs->address;
-  
+
     cJSON *root = cJSON_CreateObject();
     int new_socket = *((int*)clientArgs->client_socket);
     char buffer[1048576] = {0};
 
-    while (true) {    
+    while (true) {
       memset(buffer, 0, sizeof(buffer));
         ssize_t valread = read(new_socket, buffer, sizeof(buffer) - 1);
         if (valread <= 0) {
@@ -87,11 +151,11 @@ void* handle_client(void* client) {
             }
             break;
         }
-        
+
         cJSON *parsedJson = cJSON_Parse(buffer);
         cJSON *role = cJSON_GetObjectItem(parsedJson, "role");
         cJSON *headers = cJSON_GetObjectItem(parsedJson, "headers");
-        
+
         //connection of backend
         if(role != NULL && (strcmp(role->valuestring, "backend") == 0)){
             printf("%s Backend with ip address %s and port %d is connected\n", get_current_time(), address, port);
@@ -104,19 +168,20 @@ void* handle_client(void* client) {
             close(new_socket);
           }
         }
-        
+
         //connection of frontend
         else if(role != NULL && (strcmp(role->valuestring, "frontend") == 0)){
           printf("%s Frontend with ip address %s and port %d is connected\n", get_current_time(), address, port);
         }
-        
+
         //frontend to backend
         else if(headers != NULL && new_socket != server_fd){
           if(server_fd == -1){
             const char *message = "There is no connected backend side to the server";
             send(new_socket, message, strlen(message), 0);
-          } 
-          
+            memset(buffer, 0, sizeof(buffer));
+          }
+
           else {
             if(!isInArray(&clientsList, new_socket)){
                 cJSON *connectJson = cJSON_Parse(connect_json);
@@ -124,11 +189,11 @@ void* handle_client(void* client) {
                 push(&clientsList, new_socket);
                 sleep(1);
             }
-            usleep(50000);
-            send_request(parsedJson, port, address, new_socket);            
+
+            send_request(parsedJson, port, address, new_socket);
           }
         }
-        
+
         //backend to frontend
         else if(headers != NULL && new_socket == server_fd){
           int socket_id = cJSON_GetObjectItem(headers, "socket_id")->valueint;
@@ -153,7 +218,7 @@ int main(int argc, char const* argv[]) {
     PORT = atoi(argv[2]);
     const char* ip = argv[1];
     printf("SERVER IS RUNNING ON IP %s PORT %d\n", ip, PORT);
-  
+
     struct sockaddr_in address;
     int opt = 1;
     socklen_t addrlen = sizeof(address);
@@ -183,11 +248,16 @@ int main(int argc, char const* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server_fd, 3) < 0) {
+    if (listen(server_fd, 10) < 0) {
         perror("listen");
         exit(EXIT_FAILURE);
     }
 
+	pthread_t messageThread;
+    if (pthread_create(&messageThread, NULL, sendMessageFromQueue, NULL) != 0) {
+        perror("pthread_create");
+        exit(EXIT_FAILURE);
+    }
 
     while (true) {
         int* new_socket = (int*)malloc(sizeof(int));
@@ -198,18 +268,17 @@ int main(int argc, char const* argv[]) {
         } else {
             pthread_t client_thread;
             struct clientAddress* client = (struct clientAddress*)malloc(sizeof(struct clientAddress));
-            
+
             client->port = address.sin_port;
             client->address = inet_ntoa(address.sin_addr);
-            client->client_socket = new_socket; 
-            
+            client->client_socket = new_socket;
+
             if (pthread_create(&client_thread, NULL, handle_client, (void*)client) != 0) {
                 perror("pthread_create");
                 free(new_socket);
             }
         }
     }
-
     close(server_fd);
     return 0;
 }

@@ -3,7 +3,7 @@ import './add-warehouse.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { companyApi, userApi, warehouseApi } from '../../../../index';
 import { useLoading } from '../../../loading-component/loading';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export interface INewWarehouseData {
   'Warehouse Name'?: string;

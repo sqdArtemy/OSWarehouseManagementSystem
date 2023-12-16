@@ -12,7 +12,7 @@ import { productApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
 import EditItem from './edit-item-component/edit-item';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 
 export default function OwnerItems() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });

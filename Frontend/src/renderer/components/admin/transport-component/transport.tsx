@@ -11,7 +11,7 @@ import { transportApi, userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddTransport from './add-transport-component/add-transport';
 import EditTransport from './edit-transport-component/edit-transport';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -243,7 +243,7 @@ export default function AdminTransport() {
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.warehouseName === '',
+      disabled: record.transportID === '',
     }),
   };
 
@@ -330,15 +330,13 @@ export default function AdminTransport() {
               alt={'Delete Button'}
               onClick={() => handeDeleteTransport()}
             ></img>
-            <button
-              className={'admin-transport-add-btn'}
-              onClick={(e) => handleAddTransport(e)}
+            <Button
+              type={'primary'}
+              onClick={handleAddTransport}
+              style={{ fontSize: '1vw', minHeight: '2.5vw' }}
             >
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'admin-transport-add-btn-text'}>
-                Add Transport
-              </span>
-            </button>
+              Add Transport
+            </Button>
             <AddTransport
               hidePopup={hideAddTransport}
               isPopupVisible={isAddTransportVisible}

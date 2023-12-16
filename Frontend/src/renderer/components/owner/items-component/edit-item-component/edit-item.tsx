@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './edit-item.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { productApi } from '../../../../index';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export interface IEditItemData {
   'Product Name'?: string;

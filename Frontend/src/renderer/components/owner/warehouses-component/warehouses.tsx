@@ -12,7 +12,7 @@ import debounce from 'lodash.debounce';
 import AddWarehouse from './add-warehouse-component/add-warehouse';
 import EditWarehouse from './edit-warehouse-component/edit-warehouse';
 import { IWarehouseFilters } from '../../../services/interfaces/warehouseInterface';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 import { useNavigate } from 'react-router-dom';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
@@ -130,11 +130,15 @@ export default function OwnerWarehouses() {
     const response = await warehouseApi.getAllWarehouses(filters);
     const warehouses = response.data?.body;
     const data = [];
-    const allUsers = (await userApi.getAllUsers({})).data.body;
+    let allUsers = [];
+    const usersResponse = await userApi.getAllUsers({});
+    if (usersResponse.success) {
+      allUsers = usersResponse.data.body;
+    }
     if (warehouses?.length) {
       for (let i = 0; i < warehouses.length; i++) {
         const user = allUsers?.find(
-          (user) => (user.user_id = warehouses[i].supervisor),
+          (user) => user.user_id === warehouses[i].supervisor,
         );
         data.push({
           key: (i + 1).toString(),
@@ -306,7 +310,11 @@ export default function OwnerWarehouses() {
     warehouseApi.getAllWarehouses({}).then(async (result) => {
       const warehouses = result.data?.body;
       if (warehouses?.length) {
-        const allUsers = (await userApi.getAllUsers({})).data.body;
+        let allUsers = [];
+        const response = await userApi.getAllUsers({});
+        if (response.success) {
+          allUsers = response.data.body;
+        }
         for (let i = 0; i < warehouses.length; i++) {
           const user = allUsers?.find(
             (user) => user.user_id === warehouses[i].supervisor,

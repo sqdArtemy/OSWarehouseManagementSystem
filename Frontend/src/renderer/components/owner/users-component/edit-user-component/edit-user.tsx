@@ -4,7 +4,7 @@ import { Button, Form, FormInstance, Input, Modal } from 'antd';
 import { userApi } from '../../../../index';
 import { INewUserData } from '../add-user-component/add-user';
 import { IUserData } from '../users';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export default function EditUser({
   isPopupVisible,
@@ -66,6 +66,7 @@ export default function EditUser({
         user_email: newUserData['Email'],
         user_phone: newUserData['Phone'],
         user_role: userData?.userData?.role,
+        user_address: newUserData['Address'],
       },
       userData.userData?.user_id,
     );
@@ -114,6 +115,13 @@ export default function EditUser({
         <Form.Item
           name="Email"
           label={<p style={{ fontSize: '1vw' }}>Email</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
+          name="Address"
+          label={<p style={{ fontSize: '1vw' }}>Address</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

@@ -180,7 +180,7 @@ export default function AdminRacks() {
       align: 'center',
       render: (_, record) =>
         record.rackPosition ? (
-          <span className={'admin-table-actions-container'}>
+          <Space direction={'horizontal'} size={25}>
             <EditOutlined
               onClick={() => handleEditRack(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
@@ -189,7 +189,7 @@ export default function AdminRacks() {
               onClick={() => handleDeleteRack(record)}
               style={{ color: 'red', cursor: 'pointer' }}
             />
-          </span>
+          </Space>
         ) : null,
     },
     {
@@ -332,13 +332,13 @@ export default function AdminRacks() {
               alt={'Delete Button'}
               onClick={() => handleDeleteRack()}
             ></img>
-            <button
-              className={'admin-racks-add-btn'}
-              onClick={(e) => handleAddRack(e)}
+            <Button
+              type={'primary'}
+              onClick={handleAddRack}
+              style={{ fontSize: '1vw', minHeight: '2.5vw' }}
             >
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Rack</span>
-            </button>
+              Add Rack
+            </Button>
             <AddRack
               hidePopup={hideAddRack}
               isPopupVisible={isAddRackVisible}

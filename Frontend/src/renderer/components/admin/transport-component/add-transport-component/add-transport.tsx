@@ -10,7 +10,7 @@ import {
   Select,
 } from 'antd';
 import { transportApi, userApi } from '../../../../index';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export interface INewTransportData {
   TransportID?: string;

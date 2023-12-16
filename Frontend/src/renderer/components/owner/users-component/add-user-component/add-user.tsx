@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './add-user.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { userApi } from '../../../../index';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export interface INewUserData {
   'First Name'?: string;
@@ -40,10 +40,6 @@ export default function AddUser({
     wrapperCol: { offset: 13, span: 17 },
   };
 
-  function onRoleChange() {
-    console.log('change');
-  }
-
   const onCancel = () => {
     hidePopup();
     // handleReset();
@@ -62,8 +58,9 @@ export default function AddUser({
       user_name: newUserData['First Name'],
       user_surname: newUserData['Last Name'],
       user_email: newUserData['Email'],
-      user_phone: newUserData['Phone'],
+      user_phone: '+' + newUserData['Phone'],
       user_role: 'supervisor',
+      user_address: newUserData['Address'],
     });
 
     if (response.success) {
@@ -125,11 +122,18 @@ export default function AddUser({
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
+          name="Address"
+          label={<p style={{ fontSize: '1vw' }}>Address</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
           name="Phone"
           label={<p style={{ fontSize: '1vw' }}>Phone</p>}
           rules={[{ required: true }]}
         >
-          <Input style={{ fontSize: '0.9vw' }} />
+          <Input addonBefore={'+'} style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item
           {...tailLayout}

@@ -4,7 +4,7 @@ import { Table, Button, Select, Modal } from 'antd';
 import { orderApi, vendorApi } from '../../../../index';
 import { IAddOrder } from '../../../../services/interfaces/ordersInterface';
 import { useNavigate } from 'react-router-dom';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export default function CreateOrderDetails({ orderDetails, hidePopup }) {
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);

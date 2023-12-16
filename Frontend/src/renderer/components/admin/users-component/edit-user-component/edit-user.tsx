@@ -8,7 +8,8 @@ import { IUserData } from '../users';
 export default function EditUser({
   isPopupVisible,
   hidePopup,
-  userData, onEditUserSuccess
+  userData,
+  onEditUserSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -23,7 +24,7 @@ export default function EditUser({
 
   useEffect(() => {
     if (isPopupVisible && userData.userData && formRef.current) {
-      const { fullName, email, phoneNumber, role } = userData.userData;
+      const { fullName, email, phoneNumber, role, address } = userData.userData;
       const [firstName, lastName] = fullName.split(' ');
 
       formRef.current.setFieldsValue({
@@ -32,6 +33,7 @@ export default function EditUser({
         Email: email,
         Phone: phoneNumber,
         Role: role,
+        Address: address,
       });
     }
   }, [userData]);
@@ -58,16 +60,20 @@ export default function EditUser({
     const newUserData = formRef.current?.getFieldsValue();
     hidePopup();
 
-    const response = await userApi.updateUser({
-      user_name: newUserData['First Name'],
-      user_surname: newUserData['Last Name'],
-      user_email: newUserData['Email'],
-      user_phone: newUserData['Phone'],
-      user_role: userData?.userData?.role
-    }, userData.userData?.user_id);
+    const response = await userApi.updateUser(
+      {
+        user_name: newUserData['First Name'],
+        user_surname: newUserData['Last Name'],
+        user_email: newUserData['Email'],
+        user_phone: newUserData['Phone'],
+        user_role: userData?.userData?.role,
+        user_address: newUserData['Address'],
+      },
+      userData.userData?.user_id,
+    );
 
     console.log(response);
-    if(response?.success){
+    if (response?.success) {
       onEditUserSuccess();
     }
     userData.setUserData(newUserData);
@@ -115,6 +121,13 @@ export default function EditUser({
         <Form.Item
           name="Email"
           label={<p style={{ fontSize: '1vw' }}>Email</p>}
+          rules={[{ required: true }]}
+        >
+          <Input style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
+          name="Address"
+          label={<p style={{ fontSize: '1vw' }}>Address</p>}
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

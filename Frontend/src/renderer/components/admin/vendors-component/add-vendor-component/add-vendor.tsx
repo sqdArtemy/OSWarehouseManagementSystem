@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './add-vendor.scss'; // Ensure you have the correct stylesheet imported
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { companyApi, userApi, vendorApi } from '../../../../index';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 const { Option } = Select;
 
@@ -13,11 +13,11 @@ export interface IVendorData {
 }
 
 export default function AddVendor({
-                                    isPopupVisible,
-                                    hidePopup,
-                                    vendorData,
-                                    onAddVendorSuccess,
-                                  }: {
+  isPopupVisible,
+  hidePopup,
+  vendorData,
+  onAddVendorSuccess,
+}: {
   isPopupVisible: boolean;
   hidePopup: () => void;
   vendorData: {
@@ -57,7 +57,7 @@ export default function AddVendor({
       vendor_name: newVendorData['Vendor Name'],
       vendor_address: newVendorData['Vendor Address'],
       is_government: newVendorData['Is Government'] === 'true',
-      vendor_owner_id: supervisor.user_id
+      vendor_owner_id: supervisor.user_id,
     });
 
     if (response.success) {
@@ -82,10 +82,9 @@ export default function AddVendor({
     formRef.current?.resetFields();
   };
 
-
   useEffect(() => {
     if (isPopupVisible && vendorData.newVendorData && formRef.current) {
-      userApi.getAllUsers({ user_role: 'vendor' }).then( (res) => {
+      userApi.getAllUsers({ user_role: 'vendor' }).then((res) => {
         setOptions(
           res.data.body.map((val) => {
             return {

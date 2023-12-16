@@ -4,7 +4,7 @@ import { Button, Form, FormInstance, Input, Modal } from 'antd';
 import { rackApi, userApi } from '../../../../index';
 import { INewRacksData } from '../add-racks-component/add-racks';
 import { IRacksData } from '../racks';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export default function EditRacks({
   isPopupVisible,

@@ -3,7 +3,7 @@ import './edit-orders.scss';
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { orderApi, userApi } from '../../../../index';
 import { IOrderData } from '../orders';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export default function EditOrders({
   isPopupVisible,

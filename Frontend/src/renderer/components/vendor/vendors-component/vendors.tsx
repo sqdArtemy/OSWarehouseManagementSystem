@@ -12,7 +12,7 @@ import { IVendorFilters } from '../../../services/interfaces/vendorInterface'; /
 import debounce from 'lodash.debounce';
 import AddVendor from './add-vendor-component/add-vendor'; // Create an AddVendor component similar to AddItem
 import EditVendor from './edit-vendor-component/edit-vendor'; // Create an EditVendor component similar to EditItem
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 
 export default function Vendors() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });

@@ -12,7 +12,7 @@ import debounce from 'lodash.debounce';
 import AddUser from './add-user-component/add-user';
 import EditUser from './edit-user-component/edit-user';
 import { useLoading } from '../../loading-component/loading';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 
 export interface IUserData {
   fullName: string;
@@ -20,6 +20,7 @@ export interface IUserData {
   phoneNumber: string;
   email: string;
   user_id: number;
+  address: string;
 }
 
 export default function OwnerUsers() {
@@ -171,6 +172,7 @@ export default function OwnerUsers() {
       role: '',
       phoneNumber: '',
       email: '',
+      address: '',
     }),
   );
 
@@ -289,6 +291,7 @@ export default function OwnerUsers() {
             phoneNumber: users[i].user_phone,
             email: users[i].user_email,
             user_id: users[i].user_id,
+            address: users[i].user_address,
           });
         }
 

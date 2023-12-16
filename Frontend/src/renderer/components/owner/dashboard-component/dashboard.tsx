@@ -39,35 +39,36 @@ export default function OwnerDashboard() {
     const fetchData = async () => {
       const lostItemsResponse = await statsApi.getLostItems({});
       if (lostItemsResponse.success) {
-        setLostItemsDataSource(
-          lostItemsResponse.data.body.map((item) => {
-            return {
-              name: item.product_name,
-              amount: item.total_quantity,
-            };
-          }),
-        );
+        if (lostItemsResponse.data.body.length)
+          setLostItemsDataSource(
+            lostItemsResponse.data.body.map((item) => {
+              return {
+                name: item.product_name,
+                amount: item.total_quantity,
+              };
+            }),
+          );
       }
 
       const productsStatsResponse = await statsApi.getProductsStats();
       if (productsStatsResponse.success) {
-        setDataSource(
-          productsStatsResponse.data.body.map((item) => {
-            return {
-              itemName: item.product_name,
-              itemVolume: item.total_volume_sum,
-              itemCount: item.products_number,
-              expiry: item.average_expiry_date,
-            };
-          }),
-        );
+        if (productsStatsResponse.data.body.length)
+          setDataSource(
+            productsStatsResponse.data.body.map((item) => {
+              return {
+                itemName: item.product_name,
+                itemVolume: item.total_volume_sum,
+                itemCount: item.products_number,
+                expiry: item.average_expiry_date,
+              };
+            }),
+          );
       }
 
       const barChartResponse = await statsApi.getWarehouseItems({});
       console.log(barChartResponse);
-      if (barChartResponse.success) {
+      if (barChartResponse.success && barChartResponse.data.body)
         setDataFromBackend(barChartResponse.data.body);
-      }
     };
 
     fetchData();
@@ -220,19 +221,41 @@ export default function OwnerDashboard() {
           <div className="dashboard-left-side-charts-container">
             <div className="chart-container">
               <Bar
-                data={chartData(dataFromBackend, 'orders_count')}
+                data={
+                  dataFromBackend && dataFromBackend['orders_count']
+                    ? chartData(dataFromBackend, 'orders_count')
+                    : {
+                        labels: [],
+                        datasets: [],
+                      }
+                }
                 options={options('Orders Count Statistics')}
               />
             </div>
             <div className="chart-container">
               <Bar
-                data={chartData(dataFromBackend, 'orders_volume')}
+                data={
+                  dataFromBackend && dataFromBackend['orders_volume']
+                    ? chartData(dataFromBackend, 'orders_volume')
+                    : {
+                        labels: [],
+                        datasets: [],
+                      }
+                }
                 options={options('Orders Volume Statistics')}
               />
             </div>
+
             <div className="chart-container">
               <Bar
-                data={chartData(dataFromBackend, 'orders_price')}
+                data={
+                  dataFromBackend && dataFromBackend['orders_price']
+                    ? chartData(dataFromBackend, 'orders_price')
+                    : {
+                        labels: [],
+                        datasets: [],
+                      }
+                }
                 options={options('Orders Price Statistics')}
               />
             </div>
