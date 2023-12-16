@@ -170,7 +170,6 @@ class InventoryView(GenericView):
         with (get_session() as session):
             # if there is filter by warehouse_id
             warehouse_id = kwargs.get("warehouse_id")
-            print(1)
 
             result = session.query(Inventory.product_id, Product.product_name,
                                    func.count(Inventory.product_id).label("products_number"),
