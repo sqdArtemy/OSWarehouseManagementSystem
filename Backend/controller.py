@@ -85,8 +85,8 @@ def controller(request: dict) -> dict:
                 return inventory_view.create(request=request)
         elif "/inventory" in url:
             if method == Method.GET.value:
-                if "/stats/inventory/" in url:
-                    return inventory_view.group_inventory_by_product(request=request)
+                if "/stats/inventory" in url:
+                    return inventory_view.group_inventory_by_product(request=request, **filters)
                 return inventory_view.get(request=request)
             elif method == Method.DELETE.value:
                 return inventory_view.delete(request=request)

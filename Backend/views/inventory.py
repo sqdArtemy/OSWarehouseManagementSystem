@@ -161,13 +161,16 @@ class InventoryView(GenericView):
                                      UserRole.ADMIN.value["code"],
                                      UserRole.SUPERVISOR.value["code"]])
     @check_allowed_methods_middleware([Method.GET.value])
-    def group_inventory_by_product(self, request: dict) -> dict:
+    def group_inventory_by_product(self, request: dict, **kwargs) -> dict:
         """
         Group inventory by product.
         :param request: dictionary containing url, method, body and headers
         :return: dictionary containing status_code and response body
         """
         with (get_session() as session):
+            # if there is filter by warehouse_id
+            warehouse_id = kwargs.get("warehouse_id")
+            print(1)
 
             result = session.query(Inventory.product_id, Product.product_name,
                                    func.count(Inventory.product_id).label("products_number"),
@@ -186,6 +189,8 @@ class InventoryView(GenericView):
             if self.requester_role == UserRole.MANAGER.value["code"]:
                 manager = session.query(User).filter_by(user_id=self.requester_id).first()
                 wh_ids = session.query(Warehouse.warehouse_id).filter_by(company_id=manager.company_id).all()
+                if warehouse_id:
+                    wh_ids = session.query(Warehouse.warehouse_id).filter_by(warehouse_id=warehouse_id).all()
                 rack_ids = session.query(Rack.rack_id).filter(Rack.warehouse_id.in_([i[0] for i in wh_ids])).all()
                 result = result.filter(Inventory.rack_id.in_([j[0] for j in rack_ids])).all()
 
