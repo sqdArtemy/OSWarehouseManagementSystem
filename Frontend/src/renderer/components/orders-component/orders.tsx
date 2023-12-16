@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './orders.scss';
-import { Table } from 'antd';
+import { Button, Table } from 'antd';
 import PlusIcon from '../../../../assets/icons/users-plus-icon.png';
 import {
   orderApi,
@@ -294,13 +294,7 @@ export default function Orders() {
             />
             {userApi.getUserData &&
               userApi.getUserData.user_role === 'vendor' && (
-                <button
-                  className={'add-btn'}
-                  onClick={(e) => handleAddOrder(e)}
-                >
-                  <img src={PlusIcon} alt={'Add Button'}></img>
-                  <span className={'add-btn-text'}>Add Order</span>
-                </button>
+                <Button type={'primary'}>Add Order</Button>
               )}
           </div>
         </div>

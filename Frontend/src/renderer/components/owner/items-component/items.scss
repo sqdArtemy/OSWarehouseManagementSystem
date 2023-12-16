@@ -8,7 +8,7 @@
   .items-table-container {
     display: flex;
     flex-direction: column;
-    gap: 2.5vw;
+    gap: 1vw;
     min-height: 100vh;
     width: 100%;
     padding-top: 3vw;
@@ -18,7 +18,7 @@
     .items-table-header-container {
       display: flex;
       flex-direction: column;
-      gap: 3vw;
+      gap: 5vw;
 
       .items-table-header {
         font-size: 3vw;
@@ -30,13 +30,15 @@
         gap: 7vw;
         width: 100%;
         height: 2vw;
-        align-items: center;
+        align-items: flex-end;
+        align-self: flex-end;
+        justify-self: flex-end;
 
 
         .search-bar-container {
           display: flex;
           flex-direction: row;
-          align-items: end;
+          align-items: flex-end;
 
           .search-bar-dropdown-container {
             min-height: 3vw;
@@ -88,6 +90,7 @@
             }
 
           }
+
         }
 
         .delete-btn {
@@ -187,3 +190,8 @@
 }
 
 
+.items-search-bar-container-actions{
+  display: flex;
+  flex-direction: row;
+  gap: 2.5vw;
+}

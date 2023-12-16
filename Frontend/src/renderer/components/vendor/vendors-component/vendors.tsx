@@ -53,7 +53,9 @@ export default function Vendors() {
     setSearchVendorName(e.target.value);
   };
 
-  const handleSearchVendorClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSearchVendorClick = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
@@ -121,7 +123,9 @@ export default function Vendors() {
           vendor_name: vendors[i].vendor_name,
           vendor_address: vendors[i].vendor_address,
           is_government: vendors[i].is_government,
-          is_government_display: vendors[i].is_government ? 'Government' : 'Private',
+          is_government_display: vendors[i].is_government
+            ? 'Government'
+            : 'Private',
           vendor_id: vendors[i].vendor_id,
         });
       }
@@ -241,7 +245,9 @@ export default function Vendors() {
             vendor_address: vendors[i].vendor_address,
             is_government: vendors[i].is_government,
             vendor_id: vendors[i].vendor_id,
-            is_government_display: vendors[i].is_government ? 'Government' : 'Private'
+            is_government_display: vendors[i].is_government
+              ? 'Government'
+              : 'Private',
           });
         }
 
@@ -275,16 +281,15 @@ export default function Vendors() {
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
-            <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
-              src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
-              alt={'Delete Button'}
-              onClick={() => handleDeleteVendor()}
-            ></img>
-            <button className={'add-btn'} onClick={(e) => handleAddVendor(e)}>
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Vendor</span>
-            </button>
+            <Space direction={'horizontal'} size={70}>
+              <img
+                className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+                src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
+                alt={'Delete Button'}
+                onClick={() => handleDeleteVendor()}
+              ></img>
+              <Button type={'primary'}>Add Vendor</Button>
+            </Space>
             <AddVendor
               hidePopup={hideAddPopup}
               isPopupVisible={isPopupVisible}

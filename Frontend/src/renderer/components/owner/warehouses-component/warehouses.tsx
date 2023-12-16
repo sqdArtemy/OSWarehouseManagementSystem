@@ -365,19 +365,15 @@ export default function OwnerWarehouses() {
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
-            <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
-              src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
-              alt={'Delete Button'}
-              onClick={() => handeDeleteWarehouse()}
-            ></img>
-            <button
-              className={'add-btn'}
-              onClick={(e) => handleAddWarehouse(e)}
-            >
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Warehouse</span>
-            </button>
+            <Space direction={'horizontal'} size={70}>
+              <img
+                className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+                src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
+                alt={'Delete Button'}
+                onClick={() => handeDeleteWarehouse()}
+              ></img>
+              <Button type={'primary'}>Add Warehouse</Button>
+            </Space>
             <AddWarehouse
               hidePopup={hideAddWarehouse}
               isPopupVisible={isAddWarehouseVisible}
