@@ -33,8 +33,8 @@ def controller(request: dict) -> dict:
     filters = headers.get("filters", {})
     response = ResponseFactory(status_code=400, data={}, message="", headers=headers)
     ip = headers.get("ip", "")
-    port = headers.get("port", "")
-    socket_fd = headers.get("socket_fd", "")
+    port = headers.get("address", "")
+    socket_fd = headers.get("socket_id", "")
 
     # TODO: We need to refactor this code to avoid repetitions and make it more readable
 
@@ -86,7 +86,7 @@ def controller(request: dict) -> dict:
         elif "/inventory" in url:
             if method == Method.GET.value:
                 if "/stats/inventory/" in url:
-                    return inventory_view.group_inventory_by_product(request=request)
+                    return inventory_view.group_inventory_by_product(request=request, **filters)
                 return inventory_view.get(request=request)
             elif method == Method.DELETE.value:
                 return inventory_view.delete(request=request)
