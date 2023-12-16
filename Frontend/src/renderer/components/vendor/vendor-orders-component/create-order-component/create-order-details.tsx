@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './create-order-details.scss'; // Add your stylesheet if needed
 import { Table, Button, Select, Modal } from 'antd';
-import { orderApi } from '../../../../index';
+import { orderApi, vendorApi } from '../../../../index';
 import { IAddOrder } from '../../../../services/interfaces/ordersInterface';
 import { useNavigate } from 'react-router-dom';
 import { useError } from '../../../error-component/error-context';
@@ -42,13 +42,18 @@ export default function CreateOrderDetails({ orderDetails, hidePopup }) {
     if (orderDetails.totalPrice) {
       setTotalPrice(orderDetails.totalPrice);
     }
+    checkVendorType();
   }, [orderDetails.totalPrice]);
 
   const handleSendOrder = async () => {
     if (selectedWarehouse) {
       const { order_type, vendor_id, items } = orderDetails.orderDetails || {};
 
-      if (order_type !== undefined && vendor_id !== undefined && items !== undefined) {
+      if (
+        order_type !== undefined &&
+        vendor_id !== undefined &&
+        items !== undefined
+      ) {
         const orderData: any = {
           warehouse_id: Number(selectedWarehouse),
           vendor_id,
@@ -57,9 +62,9 @@ export default function CreateOrderDetails({ orderDetails, hidePopup }) {
         };
 
         const response = await orderApi.addOrder(orderData);
-        if(response.success) {
+        if (response.success) {
           hidePopup();
-          navigate('/vendor/orders')
+          navigate('/vendor/orders');
         } else {
           showError(response.message);
         }
@@ -67,6 +72,16 @@ export default function CreateOrderDetails({ orderDetails, hidePopup }) {
     }
   };
 
+  const checkVendorType = async () => {
+    const response = await vendorApi.getVendor(
+      orderDetails.orderDetails.vendor_id,
+    );
+    if (response.success) {
+      if (response.data.body.is_government) {
+        setTotalPrice(0);
+      }
+    }
+  };
 
   const handleGoBack = () => {
     // Implement logic to go back
@@ -91,7 +106,9 @@ export default function CreateOrderDetails({ orderDetails, hidePopup }) {
 
       {data.length > 0 ? (
         <>
-          <div className="total-price">Total price for this order is {totalPrice}$</div>
+          <div className="total-price">
+            Total price for this order is {totalPrice}$
+          </div>
           <div className="table-container">
             <Table
               dataSource={data}

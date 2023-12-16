@@ -399,16 +399,15 @@ export default function OwnerItems() {
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
-            <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
-              src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
-              alt={'Delete Button'}
-              onClick={() => handleDeleteItem()}
-            ></img>
-            <button className={'add-btn'} onClick={(e) => handleAddItem(e)}>
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add Item</span>
-            </button>
+            <Space direction={'horizontal'} size={70}>
+              <img
+                className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+                src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
+                alt={'Delete Button'}
+                onClick={() => handleDeleteItem()}
+              ></img>
+              <Button type={'primary'}>Add Item</Button>
+            </Space>
             <AddItem
               hidePopup={hideAddPopup}
               isPopupVisible={isPopupVisible}

@@ -47,7 +47,7 @@ export default function OwnerUsers() {
       startLoading();
       for (let user of selectedRows) {
         const response = await userApi.deleteUser(user.user_id);
-        if(!response.success){
+        if (!response.success) {
           showError(response.message);
           break;
         }
@@ -57,7 +57,7 @@ export default function OwnerUsers() {
     if (record) {
       startLoading();
       const response = await userApi.deleteUser(record.user_id);
-      if(!response.success){
+      if (!response.success) {
         showError(response.message);
       }
       stopLoading();
@@ -242,15 +242,16 @@ export default function OwnerUsers() {
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      selectedRows = selectedRows.filter(row => {
-        return row.user_id !== userApi.userData.user_id
-      })
+      selectedRows = selectedRows.filter((row) => {
+        return row.user_id !== userApi.userData.user_id;
+      });
 
       handleRowSelectionChange(selectedRowKeys, selectedRows);
     },
 
     getCheckboxProps: (record) => ({
-      disabled: record.user_id === userApi.userData.user_id || record.fullName === '',
+      disabled:
+        record.user_id === userApi.userData.user_id || record.fullName === '',
     }),
   };
 
@@ -332,16 +333,15 @@ export default function OwnerUsers() {
                 <img src={SearchIcon} alt={'Search Bar'}></img>
               </button>
             </div>
-            <img
-              className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
-              src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
-              alt={'Delete Button'}
-              onClick={() => handleDeleteUser()}
-            ></img>
-            <button className={'add-btn'} onClick={(e) => handleAddUser(e)}>
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add User</span>
-            </button>
+            <Space direction={'horizontal'} size={70}>
+              <img
+                className={'delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+                src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
+                alt={'Delete Button'}
+                onClick={() => handleDeleteUser()}
+              ></img>
+              <Button type={'primary'}>Add User</Button>
+            </Space>
             <AddUser
               hidePopup={hideAddUser}
               isPopupVisible={isAddUserVisible}
