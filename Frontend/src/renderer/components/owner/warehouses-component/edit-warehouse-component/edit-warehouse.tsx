@@ -26,7 +26,7 @@ export default function EditWarehouse({
         warehouseData.warehouseData;
       // const [firstName, lastName] = warehouseName.split(' ');
 
-      if(String(capacity).includes('/')){
+      if (String(capacity).includes('/')) {
         capacity = String(capacity).split('/')[1];
       }
 
@@ -100,7 +100,11 @@ export default function EditWarehouse({
         </Form.Item>
         <Form.Item
           name="Capacity"
-          label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Capacity (m<sup>3</sup>)
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

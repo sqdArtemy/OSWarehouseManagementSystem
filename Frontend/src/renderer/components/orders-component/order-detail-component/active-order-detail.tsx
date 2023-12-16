@@ -97,12 +97,14 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
           orderDetails.warehouse = warehouse?.warehouse_name;
           console.log(orderDetails);
           setOrderDetails(data.data?.body);
-          setLostItemsDataSource(orderLostItems.map(item => {
-            return {
-              name: item.product_name,
-              amount: item.quantity
-            }
-          }));
+          setLostItemsDataSource(
+            orderLostItems.map((item) => {
+              return {
+                name: item.product_name,
+                amount: item.quantity,
+              };
+            }),
+          );
         } else {
           showError(data.message);
         }
@@ -382,7 +384,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
             <span className="form-value">{orderDetails?.order_status}</span>
           </Form.Item>
           <Form.Item
-            label={<p style={{ fontSize: '1vw', margin: 0 }}>Total Price</p>}
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Total Price $</p>}
             name="total_price"
           >
             <span className="form-value">{orderDetails?.total_price}</span>

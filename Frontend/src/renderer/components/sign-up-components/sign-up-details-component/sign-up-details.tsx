@@ -80,7 +80,6 @@ export function SignUpDetails() {
         <div className="sign-up-details-form">
           <div className="tabs-container">
             <div className="tabs-left">
-              <span id="id">ID</span>
               <span id="sign-in">Sign Up</span>
             </div>
             <div className="tabs-right">

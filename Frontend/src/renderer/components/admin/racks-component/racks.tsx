@@ -53,7 +53,7 @@ export default function AdminRacks() {
     }
 
     await getAllRacks(filters);
-  }
+  };
 
   const getAllRacks = async (filters: IRackFilter) => {
     startLoading();
@@ -64,15 +64,15 @@ export default function AdminRacks() {
     let warehouses = [];
     const warehousesResponse = await warehouseApi.getAllWarehouses({});
 
-    if(warehousesResponse.success){
+    if (warehousesResponse.success) {
       warehouses = warehousesResponse.data.body;
     }
 
     if (racks?.length) {
       for (let i = 0; i < racks.length; i++) {
-        const warehouse = warehouses.find(warehouse => {
+        const warehouse = warehouses.find((warehouse) => {
           return warehouse.warehouse_id === racks[i].warehouse;
-        })
+        });
 
         dataItems.push({
           key: (i + 1).toString(),
@@ -88,7 +88,7 @@ export default function AdminRacks() {
       setDataSource([]);
     }
     stopLoading();
-  }
+  };
 
   const debouncedSearch = debounce(async (filters) => {
     await getAllRacks(filters);
@@ -108,13 +108,13 @@ export default function AdminRacks() {
       filters.rack_position = searchValue;
     }
 
-    if(selectedWarehouse){
+    if (selectedWarehouse) {
       const warehouses = warehouseData;
-      const warehouse = warehouseData.find(warehouse => {
+      const warehouse = warehouseData.find((warehouse) => {
         return warehouse.warehouse_name === selectedWarehouse;
-      })
+      });
 
-      if(warehouse) {
+      if (warehouse) {
         filters.warehouse_id = warehouse.warehouse_id;
       } else {
         delete filters.warehouse_id;
@@ -169,7 +169,6 @@ export default function AdminRacks() {
     setIsEditRackVisible(false);
   };
 
-
   let tableData = dataSource.length > 0 ? dataSource : [];
 
   const columns = [
@@ -206,19 +205,19 @@ export default function AdminRacks() {
       align: 'center',
     },
     {
-      title: 'Overall Capacity (m^3)',
+      title: 'Overall Capacity (m³)',
       dataIndex: 'overallCapacity',
       key: 'overallCapacity',
       align: 'center',
     },
-
   ];
 
-
   const warehouseProps = {
-    items: warehouseData.length ? warehouseData.map(warehouse=> ({ label: warehouse.warehouse_name })) : [],
+    items: warehouseData.length
+      ? warehouseData.map((warehouse) => ({ label: warehouse.warehouse_name }))
+      : [],
     onClick: handleMenuWarehouseClick,
-  }
+  };
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -252,23 +251,23 @@ export default function AdminRacks() {
     window.addEventListener('resize', calculateScrollSize);
 
     startLoading();
-    rackApi.getAll(filters).then(async (result) =>{
+    rackApi.getAll(filters).then(async (result) => {
       const racks = result.data?.body;
       const dataItems = [];
 
       let warehouses = [];
       const warehousesResponse = await warehouseApi.getAllWarehouses({});
 
-      if(warehousesResponse.success){
+      if (warehousesResponse.success) {
         warehouses = warehousesResponse.data.body;
         setWarehouseData(warehouses);
       }
 
       if (racks?.length) {
         for (let i = 0; i < racks.length; i++) {
-          const warehouse = warehouses.find(warehouse => {
+          const warehouse = warehouses.find((warehouse) => {
             return warehouse.warehouse_id === racks[i].warehouse;
-          })
+          });
 
           dataItems.push({
             key: (i + 1).toString(),
@@ -326,12 +325,17 @@ export default function AdminRacks() {
               </button>
             </div>
             <img
-              className={'admin-racks-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={
+                'admin-racks-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')
+              }
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handleDeleteRack()}
             ></img>
-            <button className={'admin-racks-add-btn'} onClick={(e) => handleAddRack(e)}>
+            <button
+              className={'admin-racks-add-btn'}
+              onClick={(e) => handleAddRack(e)}
+            >
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add Rack</span>
             </button>

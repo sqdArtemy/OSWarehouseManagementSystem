@@ -95,7 +95,11 @@ export default function AddMultipleRacks({
         </Form.Item>
         <Form.Item
           name="Total Capacity"
-          label={<p style={{ fontSize: '1vw' }}>Total Capacity:</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Total Capacity (m<sup>3</sup>):
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

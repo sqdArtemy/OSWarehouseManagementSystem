@@ -45,8 +45,10 @@ export default function AdminTransport() {
     if (selectedRows.length > 0) {
       console.log('delete', selectedRows);
       for (let transport of selectedRows) {
-        const response = await transportApi.deleteTransport(transport.transportID);
-        if(!response.success){
+        const response = await transportApi.deleteTransport(
+          transport.transportID,
+        );
+        if (!response.success) {
           showError(response.message);
         }
       }
@@ -54,7 +56,7 @@ export default function AdminTransport() {
     if (record) {
       console.log('delete', record);
       const response = await transportApi.deleteTransport(record.transportID);
-      if(!response.success){
+      if (!response.success) {
         showError(response.message);
       }
     }
@@ -64,7 +66,7 @@ export default function AdminTransport() {
 
   const handleSuccessAdd = async () => {
     await debouncedSearch({});
-  }
+  };
 
   const debouncedSearch = debounce(async (filters) => {
     const response = await transportApi.getAllTransports(filters);
@@ -84,7 +86,7 @@ export default function AdminTransport() {
       }
       setDataSource(data);
     } else {
-    setDataSource([]);
+      setDataSource([]);
     }
   }, 1000);
 
@@ -193,7 +195,7 @@ export default function AdminTransport() {
       align: 'center',
     },
     {
-      title: 'Capacity',
+      title: 'Capacity m³',
       dataIndex: 'capacity',
       key: 'capacity',
       align: 'center',
@@ -205,7 +207,7 @@ export default function AdminTransport() {
       align: 'center',
     },
     {
-      title: 'Price/weight',
+      title: 'Price/weight ($/kg)',
       dataIndex: 'price_weight',
       key: 'price_weight',
       align: 'center',
@@ -283,7 +285,6 @@ export default function AdminTransport() {
       }
     });
 
-
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
@@ -320,7 +321,11 @@ export default function AdminTransport() {
               </button>
             </div>
             <img
-              className={'admin-transport-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={
+                'admin-transport-delete-btn' +
+                ' ' +
+                (deleteBtn ? 'enabled' : '')
+              }
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handeDeleteTransport()}
@@ -330,7 +335,9 @@ export default function AdminTransport() {
               onClick={(e) => handleAddTransport(e)}
             >
               <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'admin-transport-add-btn-text'}>Add Transport</span>
+              <span className={'admin-transport-add-btn-text'}>
+                Add Transport
+              </span>
             </button>
             <AddTransport
               hidePopup={hideAddTransport}

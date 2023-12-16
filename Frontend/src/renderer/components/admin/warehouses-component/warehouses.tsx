@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './warehouses.scss';
 import SearchIcon from '../../../../../assets/icons/search-bar-icon.png';
-import { Button, Dropdown, Select, Space, Table } from "antd";
+import { Button, Dropdown, Select, Space, Table } from 'antd';
 import { DownOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
@@ -47,7 +47,7 @@ export default function AdminWarehouses() {
   };
   const handleMenuCompanyClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
-    console.log(e.domEvent.target.innerText)
+    console.log(e.domEvent.target.innerText);
     setSelectedCompany(e.domEvent.target.innerText);
     e.domEvent.target.innerText = selectedCompany;
   };
@@ -59,29 +59,34 @@ export default function AdminWarehouses() {
 
     const companiesResponse = await companyApi.getAll();
     let companies = [];
-    if(companiesResponse.success){
+    if (companiesResponse.success) {
       companies = companiesResponse.data.body;
       companies.push({
         company_id: null,
-        company_name: 'All'
-      })
+        company_name: 'All',
+      });
       setCompaniesData(companies);
     }
 
     if (warehouses?.length) {
-      const allUsers = (await userApi.getAllUsers({})).data.body;
+      const allUsersResponse = await userApi.getAllUsers({});
+      if (!allUsersResponse.success) {
+        showError(allUsersResponse.message);
+        return;
+      }
+      const allUsers = allUsersResponse.data.body;
       for (let i = 0; i < warehouses.length; i++) {
         const user = allUsers?.find(
-          (user) => (user.user_id === warehouses[i].supervisor),
+          (user) => user.user_id === warehouses[i].supervisor,
         );
 
-        const company = companies.find(company => {
+        const company = companies.find((company) => {
           return company.company_id === warehouses[i].company;
         });
 
         data.push({
           key: (i + 1).toString(),
-          companyName: company ? company.company_name: '',
+          companyName: company ? company.company_name : '',
           warehouseName: warehouses[i].warehouse_name,
           supervisor: user ? user.user_name + ' ' + user.user_surname : '',
           address: warehouses[i].warehouse_address,
@@ -103,7 +108,7 @@ export default function AdminWarehouses() {
 
   const onAddSuccess = async () => {
     await getAllWarehouses(filters);
-  }
+  };
 
   const handeDeleteWarehouse = async (record?) => {
     if (record) {
@@ -137,15 +142,15 @@ export default function AdminWarehouses() {
       delete filters.warehouse_type;
     }
 
-    if(selectedCompany){
-      const company = companiesData.find(company => {
+    if (selectedCompany) {
+      const company = companiesData.find((company) => {
         return company.company_name === selectedCompany;
-      })
+      });
 
-      if(company && company.company_name !== 'All'){
+      if (company && company.company_name !== 'All') {
         filters.company_id = company.company_id;
       } else {
-        if(filters.company_id){
+        if (filters.company_id) {
           delete filters.company_id;
         }
       }
@@ -288,15 +293,16 @@ export default function AdminWarehouses() {
     },
   ];
 
-
   const menuProps = {
     items: types,
     onClick: handleMenuClick,
   };
   const menuCompanyProps = {
-    items: companiesData.length ? companiesData.map(company => ({ label: company.company_name })) : [],
+    items: companiesData.length
+      ? companiesData.map((company) => ({ label: company.company_name }))
+      : [],
     onClick: handleMenuCompanyClick,
-  }
+  };
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -334,29 +340,34 @@ export default function AdminWarehouses() {
       const companiesResponse = await companyApi.getAll();
 
       let companies = [];
-      if(companiesResponse.success){
+      if (companiesResponse.success) {
         companies = companiesResponse.data.body;
         companies.push({
           company_id: null,
-          company_name: 'All'
-        })
+          company_name: 'All',
+        });
         setCompaniesData(companies);
       }
 
       if (warehouses?.length) {
-        const allUsers = (await userApi.getAllUsers({})).data.body;
+        const allUsersResponse = await userApi.getAllUsers({});
+        if (!allUsersResponse.success) {
+          showError(allUsersResponse.message);
+          return;
+        }
+        const allUsers = allUsersResponse.data.body;
         for (let i = 0; i < warehouses.length; i++) {
           const user = allUsers?.find(
-            (user) => (user.user_id === warehouses[i].supervisor),
+            (user) => user.user_id === warehouses[i].supervisor,
           );
 
-          const company = companies.find(company => {
+          const company = companies.find((company) => {
             return company.company_id === warehouses[i].company;
           });
 
           data.push({
             key: (i + 1).toString(),
-            companyName: company ? company.company_name: '',
+            companyName: company ? company.company_name : '',
             warehouseName: warehouses[i].warehouse_name,
             supervisor: user ? user.user_name + ' ' + user.user_surname : '',
             address: warehouses[i].warehouse_address,
@@ -399,18 +410,18 @@ export default function AdminWarehouses() {
                 </Dropdown>
               </div>
               <div className="admin-warehouse-filter">
-              <label className="admin-warehouse-filter-labels">Type</label>
-              <Dropdown
-                menu={menuProps}
-                className={'admin-search-bar-dropdown-container'}
-              >
-                <Button>
-                  <Space>
-                    {selectedType}
-                    <DownOutlined />
-                  </Space>
-                </Button>
-              </Dropdown>
+                <label className="admin-warehouse-filter-labels">Type</label>
+                <Dropdown
+                  menu={menuProps}
+                  className={'admin-search-bar-dropdown-container'}
+                >
+                  <Button>
+                    <Space>
+                      {selectedType}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
               </div>
               <input
                 type=""
@@ -427,7 +438,9 @@ export default function AdminWarehouses() {
               </button>
             </div>
             <img
-              className={'admin-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={
+                'admin-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')
+              }
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handeDeleteWarehouse()}

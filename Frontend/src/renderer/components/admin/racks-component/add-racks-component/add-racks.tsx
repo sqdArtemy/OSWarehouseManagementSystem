@@ -12,7 +12,8 @@ export interface INewRacksData {
 export default function AddRacks({
   isPopupVisible,
   hidePopup,
-  racksData, onAddRackSuccess,
+  racksData,
+  onAddRackSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -25,7 +26,6 @@ export default function AddRacks({
   const formRef = React.useRef<FormInstance>(null);
   const [options, setOptions] = React.useState<Select['OptionType'][]>([]);
   const [warehouse, setWarehouse] = React.useState<Select['ValueType']>({});
-
 
   const layout = {
     labelCol: {
@@ -53,10 +53,10 @@ export default function AddRacks({
     const response = await rackApi.addRack({
       rack_position: newRackData['rackPosition'],
       overall_capacity: Number(newRackData['overallCapacity']),
-      warehouse_id: newRackData['warehouse']
-    })
+      warehouse_id: newRackData['warehouse'],
+    });
     console.log(response);
-    if(response.success){
+    if (response.success) {
       onAddRackSuccess();
     }
     hidePopup();
@@ -69,7 +69,7 @@ export default function AddRacks({
 
   useEffect(() => {
     if (isPopupVisible && racksData.racksData && formRef.current) {
-      warehouseApi.getAllWarehouses({  }).then(async (res) => {
+      warehouseApi.getAllWarehouses({}).then(async (res) => {
         setOptions(
           res.data.body.map((val) => {
             return {
@@ -80,9 +80,9 @@ export default function AddRacks({
         );
 
         setWarehouse(formRef.current.getFieldsValue()['Supervisor']);
-      })
+      });
     }
-  })
+  });
   return (
     <Modal
       title={<p style={{ fontSize: '1.2vw' }}>Add New Rack</p>}
@@ -122,7 +122,11 @@ export default function AddRacks({
         </Form.Item>
         <Form.Item
           name="overallCapacity"
-          label={<p style={{ fontSize: '1vw' }}>Overall Capacity</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Overall Capacity (m<sup>3</sup>)
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

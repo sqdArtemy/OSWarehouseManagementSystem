@@ -38,30 +38,34 @@ export default function OwnerDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       const lostItemsResponse = await statsApi.getLostItems({});
-      if(lostItemsResponse.success) {
-        setLostItemsDataSource(lostItemsResponse.data.body.map(item => {
-          return {
-            name: item.product_name,
-            amount: item.total_quantity
-          }
-        }));
+      if (lostItemsResponse.success) {
+        setLostItemsDataSource(
+          lostItemsResponse.data.body.map((item) => {
+            return {
+              name: item.product_name,
+              amount: item.total_quantity,
+            };
+          }),
+        );
       }
 
       const productsStatsResponse = await statsApi.getProductsStats();
-      if(productsStatsResponse.success) {
-        setDataSource(productsStatsResponse.data.body.map(item => {
-          return {
-            itemName: item.product_name,
-            itemVolume: item.total_volume_sum,
-            itemCount: item.products_number,
-            expiry: item.average_expiry_date
-          }
-        }));
+      if (productsStatsResponse.success) {
+        setDataSource(
+          productsStatsResponse.data.body.map((item) => {
+            return {
+              itemName: item.product_name,
+              itemVolume: item.total_volume_sum,
+              itemCount: item.products_number,
+              expiry: item.average_expiry_date,
+            };
+          }),
+        );
       }
 
       const barChartResponse = await statsApi.getWarehouseItems({});
       console.log(barChartResponse);
-      if(barChartResponse.success){
+      if (barChartResponse.success) {
         setDataFromBackend(barChartResponse.data.body);
       }
     };
@@ -184,13 +188,13 @@ export default function OwnerDashboard() {
       align: 'center',
     },
     {
-      title: 'Average Expiry',
+      title: 'Expiry Duration (days)',
       dataIndex: 'expiry',
       key: 'expiry',
       align: 'center',
     },
     {
-      title: 'Volume',
+      title: 'Volume (m³)',
       dataIndex: 'itemVolume',
       key: 'itemVolume',
       align: 'center',
@@ -212,26 +216,28 @@ export default function OwnerDashboard() {
     <div className="dashboard-container">
       <div className="dashboard-left-side-container">
         <span className="dashboard-left-side-header">DASHBOARD</span>
-        {Object.keys(dataFromBackend).length > 0 && (<div className="dashboard-left-side-charts-container">
-          <div className="chart-container">
-            <Bar
-              data={chartData(dataFromBackend, 'orders_count')}
-              options={options('Orders Count Statistics')}
-            />
+        {Object.keys(dataFromBackend).length > 0 && (
+          <div className="dashboard-left-side-charts-container">
+            <div className="chart-container">
+              <Bar
+                data={chartData(dataFromBackend, 'orders_count')}
+                options={options('Orders Count Statistics')}
+              />
+            </div>
+            <div className="chart-container">
+              <Bar
+                data={chartData(dataFromBackend, 'orders_volume')}
+                options={options('Orders Volume Statistics')}
+              />
+            </div>
+            <div className="chart-container">
+              <Bar
+                data={chartData(dataFromBackend, 'orders_price')}
+                options={options('Orders Price Statistics')}
+              />
+            </div>
           </div>
-          <div className="chart-container">
-            <Bar
-              data={chartData(dataFromBackend, 'orders_volume')}
-              options={options('Orders Volume Statistics')}
-            />
-          </div>
-          <div className="chart-container">
-            <Bar
-              data={chartData(dataFromBackend, 'orders_price')}
-              options={options('Orders Price Statistics')}
-            />
-          </div>
-        </div>)}
+        )}
       </div>
       <div className="dashboard-right-side-container">
         <div className={'dashboard-right-side-left-tables-container'}>

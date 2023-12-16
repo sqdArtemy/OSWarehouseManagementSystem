@@ -17,7 +17,7 @@ export default function AdminAddWarehouse({
   isPopupVisible,
   hidePopup,
   warehouseData,
-  onAddWarehouseSuccess
+  onAddWarehouseSuccess,
 }: {
   isPopupVisible: boolean;
   hidePopup: () => void;
@@ -28,7 +28,9 @@ export default function AdminAddWarehouse({
   onAddWarehouseSuccess: () => void;
 }) {
   const formRef = React.useRef<FormInstance>(null);
-  const [companyOptions, setCompanyOptions] = React.useState<Select['OptionType'][]>([]);
+  const [companyOptions, setCompanyOptions] = React.useState<
+    Select['OptionType'][]
+  >([]);
   const { startLoading, stopLoading } = useLoading();
   const { showError } = useError();
   const [options, setOptions] = React.useState<Select['OptionType'][]>([]);
@@ -70,14 +72,14 @@ export default function AdminAddWarehouse({
     }
 
     startLoading();
-    console.log(newWarehouseData)
+    console.log(newWarehouseData);
     const response = await warehouseApi.addWarehouse({
       warehouse_address: newWarehouseData['Address'],
       warehouse_name: newWarehouseData['Warehouse Name'],
       overall_capacity: newWarehouseData['Capacity'],
       supervisor_id: newWarehouseData['Supervisor'],
       warehouse_type: newWarehouseData['Type'],
-      company_id: newWarehouseData['Company']
+      company_id: newWarehouseData['Company'],
     });
 
     if (response.success) {
@@ -126,7 +128,6 @@ export default function AdminAddWarehouse({
           showError(res.message);
         }
       });
-
     }
   }, [warehouseData]);
 
@@ -169,7 +170,11 @@ export default function AdminAddWarehouse({
         </Form.Item>
         <Form.Item
           name="Capacity"
-          label={<p style={{ fontSize: '1vw' }}>Capacity</p>}
+          label={
+            <p style={{ fontSize: '1vw' }}>
+              Capacity m<sup>3</sup>
+            </p>
+          }
           rules={[{ required: true }]}
         >
           <Input style={{ fontSize: '0.9vw' }} />

@@ -11,6 +11,7 @@ import { companyApi, userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddUser from './add-user-component/add-user';
 import EditUser from './edit-user-component/edit-user';
+import { useError } from '../../error-component/error-context';
 
 export interface IUserData {
   fullName: string;
@@ -32,6 +33,7 @@ export default function AdminUsers() {
   const [isEditUserVisible, setIsEditUserVisible] = useState(false);
   const [userData, setUserData] = useState({});
   const [companiesData, setCompaniesData] = useState([]);
+  const { showError } = useError();
   let filters = {};
 
   const handleMenuClick: MenuProps['onClick'] = (e) => {
@@ -57,9 +59,9 @@ export default function AdminUsers() {
     }
 
     await getAllUsers(filters);
-  }
+  };
 
-  const getAllUsers = async (filters: {[key: string]: any}) => {
+  const getAllUsers = async (filters: { [key: string]: any }) => {
     const result = await userApi.getAllUsers(filters);
     const users = result.data?.body;
     const dataItems = [];
@@ -67,13 +69,13 @@ export default function AdminUsers() {
     const companiesResponse = await companyApi.getAll();
 
     let companies = [];
-    if(companiesResponse.success) {
+    if (companiesResponse.success) {
       companies = companiesResponse.data.body;
     }
 
     if (users?.length) {
       for (let i = 0; i < users.length; i++) {
-        const company = companies.find(company => {
+        const company = companies.find((company) => {
           return company.company_id === users[i].company;
         });
 
@@ -92,7 +94,7 @@ export default function AdminUsers() {
     } else {
       setDataSource([]);
     }
-  }
+  };
   const debouncedSearch = debounce(async (filters) => {
     await getAllUsers(filters);
   }, 1000);
@@ -118,15 +120,15 @@ export default function AdminUsers() {
       filters.user_name_like = searchValue;
     }
 
-    if(selectedCompany){
-      const company = companiesData.find(company => {
+    if (selectedCompany) {
+      const company = companiesData.find((company) => {
         return company.company_name === selectedCompany;
-      })
+      });
 
-      if(company && company.company_name !== 'All'){
+      if (company && company.company_name !== 'All') {
         filters.company_id = company.company_id;
       } else {
-        if(filters.company_id){
+        if (filters.company_id) {
           delete filters.company_id;
         }
       }
@@ -271,9 +273,11 @@ export default function AdminUsers() {
   };
 
   const companyProps = {
-    items: companiesData.length ? companiesData.map(company => ({ label: company.company_name })) : [],
+    items: companiesData.length
+      ? companiesData.map((company) => ({ label: company.company_name }))
+      : [],
     onClick: handleMenuCompanyClick,
-  }
+  };
 
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
@@ -306,25 +310,29 @@ export default function AdminUsers() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-    userApi.getAllUsers(filters).then(async (result) =>{
+    userApi.getAllUsers(filters).then(async (result) => {
       const companiesResponse = await companyApi.getAll();
 
       let companies = [];
-      if(companiesResponse.success){
+      if (companiesResponse.success) {
         companies = companiesResponse.data.body;
         companies.push({
           company_id: null,
-          company_name: 'All'
-        })
+          company_name: 'All',
+        });
         setCompaniesData(companies);
       }
 
+      if (!result.success) {
+        showError(result.message);
+        return;
+      }
       const users = result.data?.body;
       const dataItems = [];
 
       if (users?.length) {
         for (let i = 0; i < users.length; i++) {
-          const company = companies.find(company => {
+          const company = companies.find((company) => {
             return company.company_id === users[i].company;
           });
 
@@ -398,12 +406,17 @@ export default function AdminUsers() {
               </button>
             </div>
             <img
-              className={'admin-users-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={
+                'admin-users-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')
+              }
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handleDeleteUser()}
             ></img>
-            <button className={'admin-users-add-btn'} onClick={(e) => handleAddUser(e)}>
+            <button
+              className={'admin-users-add-btn'}
+              onClick={(e) => handleAddUser(e)}
+            >
               <img src={PlusIcon} alt={'Add Button'}></img>
               <span className={'add-btn-text'}>Add User</span>
             </button>
