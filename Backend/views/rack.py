@@ -1,4 +1,5 @@
 from sqlalchemy import func
+import re
 
 from db_config import get_session
 from models import Rack, User, Warehouse, Inventory, Product
@@ -52,7 +53,12 @@ class RackView(GenericView):
             if not warehouse:
                 raise ValidationError("Warehouse Not Found", 404)
 
+            # check rack position
             rack_position = self.body.get("rack_position")
+            pattern = re.compile(r'^[A-Z]\d+$')
+            if not pattern.match(rack_position):
+                raise ValidationError("Not correct rack position", 400)
+
             rack = session.query(Rack).filter_by(rack_position=rack_position, warehouse_id=warehouse_id).first()
             if rack:
                 raise ValidationError("The current position is already used by another rack", 404)
