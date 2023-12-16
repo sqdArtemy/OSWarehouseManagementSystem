@@ -294,7 +294,9 @@ export default function Orders() {
             />
             {userApi.getUserData &&
               userApi.getUserData.user_role === 'vendor' && (
-                <Button type={'primary'}>Add Order</Button>
+                <Button type={'primary'} onClick={handleAddOrder}>
+                  Add Order
+                </Button>
               )}
           </div>
         </div>

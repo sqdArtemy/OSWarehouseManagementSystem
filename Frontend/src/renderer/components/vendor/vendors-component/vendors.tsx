@@ -288,7 +288,9 @@ export default function Vendors() {
                 alt={'Delete Button'}
                 onClick={() => handleDeleteVendor()}
               ></img>
-              <Button type={'primary'}>Add Vendor</Button>
+              <Button type={'primary'} onClick={handleAddVendor}>
+                Add Vendor
+              </Button>
             </Space>
             <AddVendor
               hidePopup={hideAddPopup}
