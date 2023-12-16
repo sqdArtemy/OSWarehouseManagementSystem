@@ -372,7 +372,9 @@ export default function OwnerWarehouses() {
                 alt={'Delete Button'}
                 onClick={() => handeDeleteWarehouse()}
               ></img>
-              <Button type={'primary'}>Add Warehouse</Button>
+              <Button type={'primary'} onClick={handleAddWarehouse}>
+                Add Warehouse
+              </Button>
             </Space>
             <AddWarehouse
               hidePopup={hideAddWarehouse}

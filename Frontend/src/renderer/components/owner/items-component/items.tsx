@@ -406,7 +406,9 @@ export default function OwnerItems() {
                 alt={'Delete Button'}
                 onClick={() => handleDeleteItem()}
               ></img>
-              <Button type={'primary'}>Add Item</Button>
+              <Button type={'primary'} onClick={handleAddItem}>
+                Add Item
+              </Button>
             </Space>
             <AddItem
               hidePopup={hideAddPopup}
