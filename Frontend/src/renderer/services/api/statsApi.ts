@@ -22,9 +22,13 @@ export class StatsApi extends GenericApi implements IStats {
     return await this.genericRequest({ url, method: 'GET', body: {}, headers: {}});
   }
 
-  public async getProductsStats(): Promise<IApiResponse> {
+  public async getProductsStats(warehouseId?: number): Promise<IApiResponse> {
     const url = '/stats/inventory/';
-    return await this.genericRequest({ url, method: 'GET', body: {}, headers: {}});
+    const filters = {};
+    if(warehouseId){
+      filters.warehouse_id = warehouseId;
+    }
+    return await this.genericRequest({ url, method: 'GET', body: {}, headers: { filters }});
   }
 
   public async getWarehouseItems(filters: IOrderFilters): Promise<IApiResponse> {
