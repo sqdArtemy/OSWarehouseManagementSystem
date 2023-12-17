@@ -170,7 +170,7 @@ export default function AdminVendors() {
     await getAllVendors(filters);
   };
 
-  const placeholderRowCount = 30;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
@@ -279,10 +279,7 @@ export default function AdminVendors() {
       if (vendors?.length) {
         for (let i = 0; i < vendors.length; i++) {
           const user = users.find((user) => {
-            console.log(user.user_id, vendors[i]);
-            return user.user_id === vendors[i].vendor_owner
-              ? vendors[i].vendor_owner.user_id
-              : -1;
+            return user.user_id === vendors[i].vendor_owner.user_id
           });
 
           dataItems.push({

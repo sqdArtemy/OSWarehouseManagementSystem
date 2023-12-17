@@ -39,7 +39,7 @@ export default function Requests() {
   const location = useLocation();
   const { state } = location;
 
-  const placeholderRowCount = 30;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },

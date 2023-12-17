@@ -311,7 +311,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
     },
   ];
 
-  const placeholderRowCount = 30;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },

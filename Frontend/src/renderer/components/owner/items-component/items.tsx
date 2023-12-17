@@ -183,7 +183,7 @@ export default function OwnerItems() {
     await getAllProducts(filters);
   };
 
-  const placeholderRowCount = 30;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },

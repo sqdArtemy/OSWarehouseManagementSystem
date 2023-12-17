@@ -148,7 +148,7 @@ export default function AdminTransport() {
     setIsEditTransportVisible(false);
   };
 
-  const placeholderRowCount = 30;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
