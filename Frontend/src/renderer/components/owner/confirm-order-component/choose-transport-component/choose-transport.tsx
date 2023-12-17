@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Form, FormInstance, Input, Modal, Select, Table } from 'antd';
 import { orderApi, transportApi } from '../../../../index';
 import { useNavigate } from 'react-router-dom';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export interface INewAcceptData {
   from?: string;

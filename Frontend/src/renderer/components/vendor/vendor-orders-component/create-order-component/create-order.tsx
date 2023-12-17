@@ -14,7 +14,7 @@ import {
   warehouseApi,
   productApi,
 } from '../../../../index';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 import './create-order.scss';
 import { IProductFilters } from '../../../../services/interfaces/productsInterface';
 import { Modal } from 'antd';

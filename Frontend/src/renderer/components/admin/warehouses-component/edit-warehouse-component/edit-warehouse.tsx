@@ -5,7 +5,7 @@ import { INewWarehouseData } from '../add-warehouse-component/add-warehouse';
 import { IWarehouseData } from '../warehouses';
 import { companyApi, userApi, warehouseApi } from '../../../../index';
 import { useLoading } from '../../../loading-component/loading';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export default function EditWarehouse({
   isPopupVisible,

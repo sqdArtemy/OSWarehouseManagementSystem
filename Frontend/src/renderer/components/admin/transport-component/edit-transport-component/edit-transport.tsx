@@ -4,7 +4,7 @@ import { Button, Form, FormInstance, InputNumber, Modal } from 'antd';
 import { transportApi } from '../../../../index';
 import { INewTransportData } from '../add-transport-component/add-transport';
 import { ITransportData } from '../transport';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 export default function EditTransport({
   isPopupVisible,

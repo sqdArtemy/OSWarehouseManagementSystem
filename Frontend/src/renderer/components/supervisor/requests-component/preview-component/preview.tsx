@@ -6,7 +6,7 @@ import { orderApi, userApi, warehouseApi } from '../../../../index';
 import { normalizeRacksForGrid } from '../../../../services/utils/normalizeRacksForGrid';
 import { normalizePreviewedRacks } from '../../../../services/utils/normalizePreviewedRacks';
 import { useLoading } from '../../../loading-component/loading';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 import { useNavigate } from 'react-router-dom';
 import './preview.scss';
 import { getItems, getLostItems } from '../util';
@@ -46,7 +46,7 @@ export default function Preview({
             );
 
             let previewResponse;
-            if(orderData.orderData.orderType === 'to_warehouse') {
+            if (orderData.orderData.orderType === 'to_warehouse') {
               previewResponse = await orderApi.receiveOrderPreview(
                 orderData.orderData.orderId,
               );
@@ -91,7 +91,7 @@ export default function Preview({
     console.log(orderData.orderData);
     let result;
 
-    if(orderData.orderData.orderType === 'to_warehouse') {
+    if (orderData.orderData.orderType === 'to_warehouse') {
       result = await orderApi.receiveOrder(
         orderData.orderData.orderId,
         filledInventories,
@@ -99,7 +99,7 @@ export default function Preview({
     } else {
       result = await orderApi.sendOrder(
         orderData.orderData.orderId,
-        filledInventories
+        filledInventories,
       );
     }
 

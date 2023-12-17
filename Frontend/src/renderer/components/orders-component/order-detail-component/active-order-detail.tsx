@@ -3,7 +3,7 @@ import { Modal, Form, Table, Button, InputNumber, Space } from 'antd';
 import { orderApi, productApi, transportApi, userApi } from '../../../index';
 import './active-order-detail.scss';
 import { useNavigate } from 'react-router-dom';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 import ChooseTransport from '../../owner/confirm-order-component/choose-transport-component/choose-transport';
 import Accept from '../../supervisor/requests-component/accept-component/accept';
 import { IOrderData } from '../../supervisor/requests-component/requests';

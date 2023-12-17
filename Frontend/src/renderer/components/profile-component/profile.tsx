@@ -4,16 +4,17 @@ import './profile.scss';
 import { Button, Form, FormInstance, Input, Space } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 import { userApi } from '../../index';
-import { useError } from '../error-component/error-context';
+import { useError } from '../result-handler-component/error-component/error-context';
 import { useNavigate } from 'react-router-dom';
+import { useSuccess } from '../result-handler-component/success-component/success-context';
 
 export default function OwnerProfile() {
   const [changePassDisplay, setChangePassDisplay] = useState(false);
   const [userData, setUserData] = useState({});
   const { showError } = useError();
+  const { showSuccess } = useSuccess();
   const navigate = useNavigate();
-
-  let id;
+  const [id, setId] = useState(0);
 
   const formRef = React.useRef<FormInstance>(null);
 
@@ -37,21 +38,25 @@ export default function OwnerProfile() {
       formRef.current?.setFieldValue('New Password' as any, '');
       formRef.current?.setFieldValue('Confirm Password' as any, '');
       setChangePassDisplay(false);
+      showSuccess('Password changed successfully');
     } else {
       const response = await userApi.updateUser(
         {
           user_name: newUserData['First Name'],
           user_surname: newUserData['Last Name'],
           user_email: newUserData['Email'],
+          user_address: newUserData['Address'],
         },
         id,
       );
 
       if (!response.success) {
-        showError(response.message);
+        return showError(response.message);
       }
+      showSuccess('User info updated successfully');
     }
     setUserData(newUserData);
+    setId(userApi.userData.user_id);
   };
 
   const handleDelete = async () => {
@@ -70,9 +75,10 @@ export default function OwnerProfile() {
         'First Name': data.user_name,
         'Last Name': data.user_surname,
         Email: data.user_email,
+        Address: data.user_address,
       });
 
-      id = data?.user_id;
+      setId(data?.user_id);
     }
   }, []);
 
@@ -134,6 +140,13 @@ export default function OwnerProfile() {
           rules={[{ required: true }]}
         >
           <Input placeholder="Email" style={{ fontSize: '0.9vw' }} />
+        </Form.Item>
+        <Form.Item
+          name="Address"
+          label={<p style={{ fontSize: '1vw' }}>Address</p>}
+          rules={[{ required: true }]}
+        >
+          <Input placeholder="Address" style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         {!changePassDisplay ? (
           <></>

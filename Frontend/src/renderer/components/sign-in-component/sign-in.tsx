@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../index';
 import './sign-in.scss';
 import { Button, Form, Input, Tooltip } from 'antd';
-import { useError } from '../error-component/error-context';
+import { useError } from '../result-handler-component/error-component/error-context';
 import { useLoading } from '../loading-component/loading';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 
@@ -27,6 +27,7 @@ export function SignIn() {
     locPassword,
     locRePassword,
     locRole,
+    locUserAddress,
   } = state || {};
   const { showError } = useError();
   const handleSignIn = async () => {
@@ -107,6 +108,7 @@ export function SignIn() {
                       locPassword: locPassword,
                       locRePassword: locRePassword,
                       locRole: locRole,
+                      locUserAddress: locUserAddress,
                     },
                   });
                 }}

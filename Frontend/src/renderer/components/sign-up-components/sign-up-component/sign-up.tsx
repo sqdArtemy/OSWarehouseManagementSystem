@@ -28,6 +28,7 @@ export function SignUp() {
     locPassword,
     locRePassword,
     locRole,
+    locUserAddress,
   } = location.state || {};
 
   const handleContinue = () => {
@@ -48,6 +49,7 @@ export function SignUp() {
         locPassword: locPassword,
         locRePassword: locRePassword,
         locRole: role,
+        locUserAddress: locUserAddress,
       },
     });
   };
@@ -94,6 +96,7 @@ export function SignUp() {
                       locPassword: locPassword,
                       locRePassword: locRePassword,
                       locRole: role,
+                      locUserAddress: locUserAddress,
                     },
                   });
                 }}

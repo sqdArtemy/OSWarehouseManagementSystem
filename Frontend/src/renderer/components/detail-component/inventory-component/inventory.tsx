@@ -8,7 +8,7 @@ import {
   userApi,
   warehouseApi,
 } from '../../../index';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 import EditRack from '../edit-rack-component/edit-rack';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';

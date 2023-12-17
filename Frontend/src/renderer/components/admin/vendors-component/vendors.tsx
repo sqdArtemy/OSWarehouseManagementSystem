@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './vendors.scss'; // Update the stylesheet path
-import { Button, Dropdown, Space, Table } from "antd";
-import { EditOutlined, DeleteOutlined, DownOutlined } from "@ant-design/icons";
+import { Button, Dropdown, Space, Table } from 'antd';
+import { EditOutlined, DeleteOutlined, DownOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import DeleteButtonDisabled from '../../../../../assets/icons/users-delete-btn-disabled.png';
 import DeleteButton from '../../../../../assets/icons/users-delete-btn.png';
@@ -12,7 +12,7 @@ import { IVendorFilters } from '../../../services/interfaces/vendorInterface'; /
 import debounce from 'lodash.debounce';
 import AddVendor from './add-vendor-component/add-vendor'; // Create an AddVendor component similar to AddItem
 import EditVendor from './edit-vendor-component/edit-vendor'; // Create an EditVendor component similar to EditItem
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 
 export default function AdminVendors() {
   const [selectedType, setSelectedType] = useState('All');
@@ -54,7 +54,9 @@ export default function AdminVendors() {
     setSearchVendorName(e.target.value);
   };
 
-  const handleSearchVendorClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSearchVendorClick = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+  ) => {
     setTimeout(() => {
       if (e.target instanceof HTMLButtonElement) e.target.blur();
       else {
@@ -68,9 +70,11 @@ export default function AdminVendors() {
       if (!filters.vendor_name_like) delete filters.vendor_name_like;
     }
 
-    if(selectedType){
-      if(selectedType.toLowerCase() === 'government') filters.is_government = 1;
-      else if(selectedType.toLowerCase() === 'private') filters.is_government = 0;
+    if (selectedType) {
+      if (selectedType.toLowerCase() === 'government')
+        filters.is_government = 1;
+      else if (selectedType.toLowerCase() === 'private')
+        filters.is_government = 0;
       else delete filters.is_government;
     } else {
       delete filters.is_government;
@@ -125,25 +129,26 @@ export default function AdminVendors() {
 
     const usersResponse = await userApi.getAllUsers({});
 
-    if(usersResponse.success){
+    if (usersResponse.success) {
       users = usersResponse.data.body;
     }
 
     if (vendors?.length) {
       for (let i = 0; i < vendors.length; i++) {
-
-        const user = users.find( user => {
+        const user = users.find((user) => {
           return user.user_id === vendors[i].vendor_owner?.user_id;
-        })
+        });
         dataItems.push({
           key: (i + 1).toString(),
-          owner: user ? user.user_name + ' ' + user.user_surname: '',
+          owner: user ? user.user_name + ' ' + user.user_surname : '',
           vendor_name: vendors[i].vendor_name,
           vendor_address: vendors[i].vendor_address,
           is_government: vendors[i].is_government,
           vendor_id: vendors[i].vendor_id,
-          is_government_display: vendors[i].is_government ? 'Government' : 'Private',
-          vendor_owner_id: vendors[i].vendor_owner.user_id
+          is_government_display: vendors[i].is_government
+            ? 'Government'
+            : 'Private',
+          vendor_owner_id: vendors[i].vendor_owner.user_id,
         });
       }
 
@@ -267,26 +272,32 @@ export default function AdminVendors() {
 
       const usersResponse = await userApi.getAllUsers({});
 
-      if(usersResponse.success){
-        users = usersResponse.data.body;
+      if (!usersResponse.success) {
+        return showError(usersResponse.message);
       }
-
+      users = usersResponse.data.body;
       if (vendors?.length) {
         for (let i = 0; i < vendors.length; i++) {
-
-          const user = users.find( user => {
-            return user.user_id === vendors[i].vendor_owner.user_id;
-          })
+          const user = users.find((user) => {
+            console.log(user.user_id, vendors[i]);
+            return user.user_id === vendors[i].vendor_owner
+              ? vendors[i].vendor_owner.user_id
+              : -1;
+          });
 
           dataItems.push({
             key: (i + 1).toString(),
-            owner: user ? user.user_name + ' ' + user.user_surname: '',
+            owner: user ? user.user_name + ' ' + user.user_surname : '',
             vendor_name: vendors[i].vendor_name,
             vendor_address: vendors[i].vendor_address,
             is_government: vendors[i].is_government,
             vendor_id: vendors[i].vendor_id,
-            is_government_display: vendors[i].is_government ? 'Government' : 'Private',
-            vendor_owner_id: vendors[i].vendor_owner.user_id
+            is_government_display: vendors[i].is_government
+              ? 'Government'
+              : 'Private',
+            vendor_owner_id: vendors[i].vendor_owner
+              ? vendors[i].vendor_owner.user_id
+              : -1,
           });
         }
 
@@ -312,12 +323,12 @@ export default function AdminVendors() {
     {
       label: 'Private',
     },
-  ]
+  ];
 
   const typesProps = {
     items: types,
     onClick: handleMenuTypeClick,
-  }
+  };
 
   return (
     <div className="admin-vendors-container">
@@ -355,15 +366,20 @@ export default function AdminVendors() {
               </button>
             </div>
             <img
-              className={'admin-vendors-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')}
+              className={
+                'admin-vendors-delete-btn' + ' ' + (deleteBtn ? 'enabled' : '')
+              }
               src={deleteBtn ? DeleteButton : DeleteButtonDisabled}
               alt={'Delete Button'}
               onClick={() => handleDeleteVendor()}
             ></img>
-            <button className={'admin-vendors-add-btn'} onClick={(e) => handleAddVendor(e)}>
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'admin-vendors-add-btn-text'}>Add Vendor</span>
-            </button>
+            <Button
+              type={'primary'}
+              onClick={handleAddVendor}
+              style={{ fontSize: '1vw', minHeight: '2.5vw' }}
+            >
+              Add Vendor
+            </Button>
             <AddVendor
               hidePopup={hideAddPopup}
               isPopupVisible={isPopupVisible}

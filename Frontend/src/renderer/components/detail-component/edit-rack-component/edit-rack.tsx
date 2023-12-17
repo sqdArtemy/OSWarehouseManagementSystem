@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Button, Form, FormInstance, Input, Modal } from 'antd';
 import { rackApi, warehouseApi } from '../../../index';
 import { normalizeRacksForGrid } from '../../../services/utils/normalizeRacksForGrid';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 import { useLoading } from '../../loading-component/loading';
 import { useParams } from 'react-router-dom';
 

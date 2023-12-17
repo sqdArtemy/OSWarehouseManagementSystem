@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import './edit-vendor.scss'; // Ensure you have the correct stylesheet imported
 import { Button, Form, FormInstance, Input, Modal, Select } from 'antd';
 import { userApi, vendorApi } from '../../../../index';
-import { useError } from '../../../error-component/error-context';
+import { useError } from '../../../result-handler-component/error-component/error-context';
 
 const { Option } = Select;
 
@@ -13,11 +13,11 @@ export interface IVendorData {
 }
 
 export default function EditVendor({
-                                     hidePopup,
-                                     isEditPopupVisible, // Change isPopupVisible to isEditPopupVisible
-                                     vendorData,
-                                     onEditVendorSuccess,
-                                   }: {
+  hidePopup,
+  isEditPopupVisible, // Change isPopupVisible to isEditPopupVisible
+  vendorData,
+  onEditVendorSuccess,
+}: {
   hidePopup: () => void;
   isEditPopupVisible: boolean; // Change isPopupVisible to isEditPopupVisible
   vendorData: {
@@ -44,11 +44,8 @@ export default function EditVendor({
 
   useEffect(() => {
     if (isEditPopupVisible && vendorData.editVendorData && formRef.current) {
-      const {
-        vendor_name,
-        vendor_address,
-        is_government,
-      } = vendorData.editVendorData;
+      const { vendor_name, vendor_address, is_government } =
+        vendorData.editVendorData;
 
       formRef.current.setFieldsValue({
         'Vendor Name': vendor_name,
@@ -73,17 +70,18 @@ export default function EditVendor({
       vendor_name: editVendorData['Vendor Name'],
       vendor_address: editVendorData['Vendor Address'],
       is_government: editVendorData['Is Government'] === 'true',
-      vendor_owner_id: vendorData.editVendorData.vendor_owner_id
+      vendor_owner_id: vendorData.editVendorData.vendor_owner_id,
     };
 
-
-    if(vendorData.editVendorData?.vendor_name === editVendorData['Vendor Name'] ){
+    if (
+      vendorData.editVendorData?.vendor_name === editVendorData['Vendor Name']
+    ) {
       delete data.vendor_name;
     }
 
     const response = await vendorApi.updateVendor(
       data,
-      vendorData.editVendorData?.vendor_id
+      vendorData.editVendorData?.vendor_id,
     );
 
     if (response.success) {

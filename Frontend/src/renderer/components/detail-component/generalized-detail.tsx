@@ -18,7 +18,7 @@ import { normalizeRacksForGrid } from '../../services/utils/normalizeRacksForGri
 import AddRack from './add-rack-component/add-rack';
 import AddMultipleRacks from './add-multiple-racks-component/add-multiple-racks';
 import EditRack from './edit-rack-component/edit-rack';
-import { useError } from '../error-component/error-context';
+import { useError } from '../result-handler-component/error-component/error-context';
 import { useLoading } from '../loading-component/loading';
 
 ChartJS.register(ArcElement, Tooltip, Legend);

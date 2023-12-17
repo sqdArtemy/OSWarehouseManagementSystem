@@ -102,12 +102,20 @@
           margin-bottom: 5px;
         }
 
-        input {
+        .sign-up-details-field-input {
           padding: 10px;
           margin-bottom: 20px;
           border: 1px solid #ddd;
           border-radius: 5px;
           font-size: 1vw;
+        }
+
+        .sign-up-details-phone-field-input{
+
+          input{
+            font-size: 1vw;
+          }
+          margin-bottom: 1rem;
         }
 
 

@@ -3,7 +3,6 @@ import './companies.scss';
 import { Table } from 'antd';
 import { companyApi, userApi } from '../../../index';
 
-
 export interface IOrderData {
   fromWarehouse: string;
   toWarehouse: string;
@@ -84,42 +83,48 @@ export default function AdminСompanies() {
     calculateScrollSize();
     window.addEventListener('resize', calculateScrollSize);
 
-
-    companyApi.getAll().then(async data => {
+    companyApi.getAll().then(async (data) => {
       if (data.success) {
         const companiesSource = [];
         let users = [];
 
         const usersResponse = await userApi.getAllUsers({});
-        if(usersResponse.data.body){
+        if (usersResponse.success && usersResponse.data.body) {
           users = usersResponse.data.body;
         }
 
-        if(data.data.body && data.data.body.length){
-          let i =0;
-          for (let company of data.data.body){
-
-            const user = users.find( user => {
-              return (['manager', 'vendor'].includes(user.user_role)) && user.company === company.company_id
+        if (data.data.body && data.data.body.length) {
+          let i = 0;
+          for (let company of data.data.body) {
+            const user = users.find((user) => {
+              return (
+                ['manager', 'vendor'].includes(user.user_role) &&
+                user.company === company.company_id
+              );
             });
             let employees = 0;
 
-            employees = users.filter(user => {
-              return user.company === company.company_id && user.user_role !== 'admin'
+            employees = users.filter((user) => {
+              return (
+                user.company === company.company_id &&
+                user.user_role !== 'admin'
+              );
             }).length;
 
             companiesSource.push({
               key: (i + 1).toString(),
               companyName: company.company_name,
               companyEmail: company.company_email,
-              companyOwner: user ? user.user_name + ' ' + user.user_surname : '',
-              employees
-            })
+              companyOwner: user
+                ? user.user_name + ' ' + user.user_surname
+                : '',
+              employees,
+            });
           }
           setDataSource(companiesSource);
         }
       }
-    })
+    });
 
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);

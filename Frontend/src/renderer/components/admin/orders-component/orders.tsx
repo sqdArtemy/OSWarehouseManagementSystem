@@ -444,7 +444,6 @@ export default function AdminOrders() {
           </div>
         </div>
         <Table
-          rowSelection={{}}
           dataSource={tableData as []}
           columns={columns as []}
           scroll={scrollSize}
@@ -453,7 +452,9 @@ export default function AdminOrders() {
           className={'admin-orders-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
-          rowClassName={'highlight-bottom-border highlight-left-border'}
+          rowClassName={
+            'highlight-bottom-border highlight-left-border default-table-row-height'
+          }
         />
       </div>
     </div>

@@ -12,7 +12,7 @@ import { productApi } from '../../../index';
 import { IProductFilters } from '../../../services/interfaces/productsInterface';
 import debounce from 'lodash.debounce';
 import EditItem from './edit-item-component/edit-item';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 
 export default function AdminItems() {
   const [scrollSize, setScrollSize] = useState({ x: 0, y: 0 });
@@ -211,7 +211,7 @@ export default function AdminItems() {
       align: 'center',
       render: (_, record) =>
         record.name ? (
-          <span className={'admin-items-table-actions-container'}>
+          <Space direction={'horizontal'} size={25}>
             <EditOutlined
               onClick={() => handleEditItem(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
@@ -220,7 +220,7 @@ export default function AdminItems() {
               onClick={() => handleDeleteItem(record)}
               style={{ color: 'red', cursor: 'pointer' }}
             />
-          </span>
+          </Space>
         ) : null,
     },
     {
@@ -402,13 +402,13 @@ export default function AdminItems() {
               alt={'Delete Button'}
               onClick={() => handleDeleteItem()}
             ></img>
-            <button
-              className={'admin-items-add-btn'}
-              onClick={(e) => handleAddItem(e)}
+            <Button
+              type={'primary'}
+              onClick={handleAddItem}
+              style={{ fontSize: '1vw', minHeight: '2.5vw' }}
             >
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'admin-items-add-btn-text'}>Add Item</span>
-            </button>
+              Add Item
+            </Button>
             <AddItem
               hidePopup={hideAddPopup}
               isPopupVisible={isPopupVisible}

@@ -12,7 +12,7 @@ import debounce from 'lodash.debounce';
 import AddWarehouse from './add-warehouse-component/add-warehouse';
 import EditWarehouse from './edit-warehouse-component/edit-warehouse';
 import { IWarehouseFilters } from '../../../services/interfaces/warehouseInterface';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 // import AddUser from './add-user-component/add-user';
 // import EditUser from './edit-user-component/edit-user';
 
@@ -445,13 +445,13 @@ export default function AdminWarehouses() {
               alt={'Delete Button'}
               onClick={() => handeDeleteWarehouse()}
             ></img>
-            <button
-              className={'admin-add-btn'}
-              onClick={(e) => handleAddWarehouse(e)}
+            <Button
+              type={'primary'}
+              onClick={handleAddWarehouse}
+              style={{ fontSize: '1vw', minHeight: '2.5vw' }}
             >
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'admin-add-btn-text'}>Add Warehouse</span>
-            </button>
+              Add Warehouse
+            </Button>
             <AddWarehouse
               hidePopup={hideAddWarehouse}
               isPopupVisible={isAddWarehouseVisible}

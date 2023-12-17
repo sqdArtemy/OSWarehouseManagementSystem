@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import './sign-up-details.scss';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../../index';
-import { Button, Tooltip } from 'antd';
-import { useError } from '../../error-component/error-context';
+import { Button, Input, Tooltip } from 'antd';
+import { useError } from '../../result-handler-component/error-component/error-context';
 import { useLoading } from '../../loading-component/loading';
 
 export function SignUpDetails() {
@@ -22,6 +22,7 @@ export function SignUpDetails() {
   const [userName, setUserName] = useState('');
   const [lastName, setLastName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [userAddress, setUserAddress] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [rePassword, setRePassword] = useState('');
@@ -36,6 +37,7 @@ export function SignUpDetails() {
       setPhoneNumber(state.locPhoneNumber || '');
       setPassword(state.locPassword || '');
       setRePassword(state.locRePassword || '');
+      setUserAddress(state.locUserAddress || '');
     }
   }, [state]);
 
@@ -47,11 +49,12 @@ export function SignUpDetails() {
       company_name: companyName,
       user_email: userEmail,
       user_name: userName,
-      user_phone: phoneNumber,
+      user_phone: '+' + phoneNumber,
       password,
       confirm_password: rePassword,
       user_surname: lastName,
       user_role: locRole,
+      user_address: userAddress,
     });
 
     if (response.success) {
@@ -99,6 +102,7 @@ export function SignUpDetails() {
                       locFirstName: userName,
                       locLastName: lastName,
                       locUserEmail: userEmail,
+                      locUserAddress: userAddress,
                       locPhoneNumber: phoneNumber,
                       locPassword: password,
                       locRePassword: rePassword,
@@ -116,6 +120,7 @@ export function SignUpDetails() {
           <form>
             <Tooltip title={'Input First Name'} placement={'topLeft'}>
               <input
+                className={'sign-up-details-field-input'}
                 id="name"
                 placeholder={'First Name'}
                 value={userName}
@@ -124,6 +129,7 @@ export function SignUpDetails() {
             </Tooltip>
             <Tooltip title={'Input Last Name'} placement={'topLeft'}>
               <input
+                className={'sign-up-details-field-input'}
                 id="userName"
                 placeholder={'Last Name'}
                 value={lastName}
@@ -132,6 +138,7 @@ export function SignUpDetails() {
             </Tooltip>
             <Tooltip title={'Input Email'} placement={'topLeft'}>
               <input
+                className={'sign-up-details-field-input'}
                 type="Email"
                 id="userEmail"
                 placeholder={'User Email'}
@@ -139,16 +146,29 @@ export function SignUpDetails() {
                 onChange={(e) => setUserEmail(e.target.value)}
               />
             </Tooltip>
-            <Tooltip title={'Input Phone Number'} placement={'topLeft'}>
+            <Tooltip title={'Input User Address'} placement={'topLeft'}>
               <input
-                id="number"
+                className={'sign-up-details-field-input'}
+                type="Address"
+                id="userAddress"
+                placeholder={'User Address'}
+                value={userAddress}
+                onChange={(e) => setUserAddress(e.target.value)}
+              />
+            </Tooltip>
+            <Tooltip title={'Input Phone Number'} placement={'topLeft'}>
+              <Input
+                className={'sign-up-details-phone-field-input'}
+                addonBefore={'+'}
                 placeholder={'Phone Number'}
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
+                style={{ fontSize: '1vw' }}
               />
             </Tooltip>
             <Tooltip title={'Input Password'} placement={'topLeft'}>
               <input
+                className={'sign-up-details-field-input'}
                 type="Password"
                 id="password"
                 placeholder={'Password'}
@@ -158,6 +178,7 @@ export function SignUpDetails() {
             </Tooltip>
             <Tooltip title={'Confirm Password'} placement={'topLeft'}>
               <input
+                className={'sign-up-details-field-input'}
                 type="Password"
                 id="re-password"
                 placeholder={'Confirm Password'}
@@ -186,6 +207,7 @@ export function SignUpDetails() {
                       locLoginEmail: locLoginEmail,
                       locLoginPassword: locLoginPassword,
                       locRole: locRole,
+                      locUserAddress: userAddress,
                     },
                   });
                 }}

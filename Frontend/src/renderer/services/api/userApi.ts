@@ -20,37 +20,39 @@ export class UserApi implements IUser {
   public async addUser(body: IAddUser): Promise<IApiResponse> {
     const url = '/users';
     const method = 'POST';
-    const headers = { token: this.token } ;
+    const headers = { token: this.token };
 
-    return await handleApiRequest({ url, method, body, headers});
+    return await handleApiRequest({ url, method, body, headers });
   }
 
   public async deleteUser(id: number): Promise<IApiResponse> {
     const url = '/user/' + id;
     const method = 'DELETE';
     const body = {};
-    const headers = { token: this.token } ;
+    const headers = { token: this.token };
 
-    return await handleApiRequest({ url, method, body, headers});
+    return await handleApiRequest({ url, method, body, headers });
   }
 
-  public async getAllUsers(filters: { [p: string]: any }): Promise<IApiResponse> {
+  public async getAllUsers(filters: {
+    [p: string]: any;
+  }): Promise<IApiResponse> {
     const url = '/users';
     const method = 'GET';
     const body = {};
-    filters = {...filters};
+    filters = { ...filters };
     const headers = { filters, token: this.token };
 
-    return await handleApiRequest({ url, method, body, headers});
+    return await handleApiRequest({ url, method, body, headers });
   }
 
   public async getUser(id: number): Promise<IApiResponse> {
     const url = '/user/' + id;
     const method = 'GET';
     const body = {};
-    const headers = { token: this.token } ;
+    const headers = { token: this.token };
 
-    return await handleApiRequest({ url, method, body, headers});
+    return await handleApiRequest({ url, method, body, headers });
   }
 
   public async resetPassword(
@@ -60,10 +62,14 @@ export class UserApi implements IUser {
   ): Promise<IApiResponse> {
     const url = '/user/change_password';
     const method = 'PUT'; // Adjust the method based on your API requirements
-    const body = { old_password: oldPassword, new_password: newPassword, confirm_password: passwordConfirm};
-    const headers = { token: this.token } ;
+    const body = {
+      old_password: oldPassword,
+      new_password: newPassword,
+      confirm_password: passwordConfirm,
+    };
+    const headers = { token: this.token };
 
-    return await handleApiRequest({ url, method, body, headers});
+    return await handleApiRequest({ url, method, body, headers });
   }
 
   public async signIn(email: string, password: string): Promise<IApiResponse> {
@@ -76,13 +82,13 @@ export class UserApi implements IUser {
 
     const headers = {};
 
-    const response = await handleApiRequest({ url, method, body, headers});
-    if(response?.success === true){
+    const response = await handleApiRequest({ url, method, body, headers });
+    if (response?.success === true) {
       this.token = response?.data?.headers?.token;
       this.userData = response?.data?.body;
       return {
         success: true,
-        data: response?.data?.body
+        data: response?.data?.body,
       };
     } else {
       return response;
@@ -95,13 +101,13 @@ export class UserApi implements IUser {
 
     const headers = {};
 
-    const response = await handleApiRequest({ url, method, body, headers});
-    if(response?.success === true){
+    const response = await handleApiRequest({ url, method, body, headers });
+    if (response?.success === true) {
       this.token = response?.data?.headers?.token;
       this.userData = response?.data?.body;
       return {
         success: true,
-        data: response?.data?.body
+        data: response?.data?.body,
       };
     } else {
       return response;
@@ -111,11 +117,12 @@ export class UserApi implements IUser {
   public async updateUser(body: IAddUser, id: number): Promise<IApiResponse> {
     const url = '/user/' + id;
     const method = 'PUT';
-    const headers = { token: this.token } ;
+    const headers = { token: this.token };
 
-    const response = await handleApiRequest({ url, method, body, headers});
-    if(response.success && this.userData.user_id == id){
+    const response = await handleApiRequest({ url, method, body, headers });
+    if (response.success && this.userData.user_id == id) {
       this.userData = response?.data?.body;
+      console.log('update-user:', this.userData);
     }
     return response;
   }

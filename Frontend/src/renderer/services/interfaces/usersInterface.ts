@@ -26,6 +26,7 @@ export interface ISignUp {
   user_phone: string;
   password: string;
   confirm_password: string;
+  user_address: string;
 }
 
 export interface IAddUser {
@@ -35,7 +36,8 @@ export interface IAddUser {
   user_role?: string;
   user_phone?: string;
   user_id?: number;
-  company_id?: number
+  company_id?: number;
+  user_address?: string;
 }
 
 interface IGetUsersFilters {}

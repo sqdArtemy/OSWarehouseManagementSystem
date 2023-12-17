@@ -196,11 +196,13 @@ export default function Orders() {
       key: 'order_status',
       render: (text, record) => {
         return text
-          .split('')
-          .map((char, index) => {
-            return index === 0 ? char.toUpperCase() : char;
-          })
-          .join('');
+          ? text
+              .split('')
+              .map((char, index) => {
+                return index === 0 ? char.toUpperCase() : char;
+              })
+              .join('')
+          : '';
       },
     },
   ];

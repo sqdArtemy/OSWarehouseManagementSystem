@@ -11,7 +11,7 @@ import { companyApi, userApi } from '../../../index';
 import debounce from 'lodash.debounce';
 import AddUser from './add-user-component/add-user';
 import EditUser from './edit-user-component/edit-user';
-import { useError } from '../../error-component/error-context';
+import { useError } from '../../result-handler-component/error-component/error-context';
 
 export interface IUserData {
   fullName: string;
@@ -87,6 +87,7 @@ export default function AdminUsers() {
           phoneNumber: users[i].user_phone,
           email: users[i].user_email,
           user_id: users[i].user_id,
+          address: users[i].user_address,
         });
       }
 
@@ -192,6 +193,7 @@ export default function AdminUsers() {
       role: '',
       phoneNumber: '',
       email: '',
+      address: '',
     }),
   );
 
@@ -413,13 +415,16 @@ export default function AdminUsers() {
               alt={'Delete Button'}
               onClick={() => handleDeleteUser()}
             ></img>
-            <button
-              className={'admin-users-add-btn'}
-              onClick={(e) => handleAddUser(e)}
+            <Button
+              type={'primary'}
+              onClick={handleAddUser}
+              style={{
+                fontSize: '1vw',
+                minHeight: '2.5vw',
+              }}
             >
-              <img src={PlusIcon} alt={'Add Button'}></img>
-              <span className={'add-btn-text'}>Add User</span>
-            </button>
+              Add User
+            </Button>
             <AddUser
               hidePopup={hideAddUser}
               isPopupVisible={isAddUserVisible}
