@@ -147,7 +147,11 @@ export function SignUp() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </Tooltip>
-            <Button type="primary" onClick={handleContinue}>
+            <Button
+              type="primary"
+              style={{ minHeight: '1.8vw', fontSize: '0.9vw' }}
+              onClick={handleContinue}
+            >
               Continue
             </Button>
           </form>

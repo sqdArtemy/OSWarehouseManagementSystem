@@ -161,7 +161,11 @@ export default function OwnerProfile() {
                 placeholder="Current Password"
                 style={{ fontSize: '0.9vw' }}
                 iconRender={(visible) =>
-                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  visible ? (
+                    <EyeTwoTone style={{ fontSize: '1vw' }} />
+                  ) : (
+                    <EyeInvisibleOutlined style={{ fontSize: '1vw' }} />
+                  )
                 }
               />
             </Form.Item>
@@ -174,7 +178,11 @@ export default function OwnerProfile() {
                 placeholder="New Password"
                 style={{ fontSize: '0.9vw' }}
                 iconRender={(visible) =>
-                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  visible ? (
+                    <EyeTwoTone style={{ fontSize: '1vw' }} />
+                  ) : (
+                    <EyeInvisibleOutlined style={{ fontSize: '1vw' }} />
+                  )
                 }
               />
             </Form.Item>
@@ -187,7 +195,11 @@ export default function OwnerProfile() {
                 placeholder="Confirm Password"
                 style={{ fontSize: '0.9vw' }}
                 iconRender={(visible) =>
-                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  visible ? (
+                    <EyeTwoTone style={{ fontSize: '1vw' }} />
+                  ) : (
+                    <EyeInvisibleOutlined style={{ fontSize: '1vw' }} />
+                  )
                 }
               />
             </Form.Item>

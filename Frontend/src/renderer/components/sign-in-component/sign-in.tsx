@@ -134,7 +134,11 @@ export function SignIn() {
                   placeholder={'Password'}
                   value={password}
                   iconRender={(visible) =>
-                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                    visible ? (
+                      <EyeTwoTone style={{ fontSize: '1vw' }} />
+                    ) : (
+                      <EyeInvisibleOutlined style={{ fontSize: '1vw' }} />
+                    )
                   }
                   onChange={(e) => setPassword(e.target.value)}
                 />

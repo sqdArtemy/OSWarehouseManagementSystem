@@ -142,7 +142,7 @@ export default function Orders() {
     await getAllOrders(filters);
   };
 
-  const placeholderRowCount = 5;
+  const placeholderRowCount = 3;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },

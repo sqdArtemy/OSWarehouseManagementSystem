@@ -183,7 +183,7 @@ export default function OwnerItems() {
     await getAllProducts(filters);
   };
 
-  const placeholderRowCount = 5;
+  const placeholderRowCount = 11;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
@@ -436,7 +436,7 @@ export default function OwnerItems() {
           scroll={scrollSize}
           pagination={false}
           size={'small'}
-          className={'users-table'}
+          className={'warehouses-table'}
           bordered={true}
           rowClassName={'highlight-bottom-border highlight-left-border'}
         />

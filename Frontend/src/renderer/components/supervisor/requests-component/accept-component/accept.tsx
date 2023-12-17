@@ -141,7 +141,10 @@ export default function Accept({
   const formRef = React.useRef<FormInstance>(null);
   const onFinish = async () => {
     let response;
-    if (selectedStatus === 'delivered' || userApi.userData.user_role === 'vendor') {
+    if (
+      selectedStatus === 'delivered' ||
+      userApi.userData.user_role === 'vendor'
+    ) {
       response = await orderApi.changeStatusOfOrder(
         orderData.orderData.orderId,
         'delivered',
@@ -157,7 +160,11 @@ export default function Accept({
           };
         })
         .filter((item) => item.name !== '' && item.damaged !== 0);
-      response = await orderApi.lostItems(orderData.orderData.orderId, 'damaged', items);
+      response = await orderApi.lostItems(
+        orderData.orderData.orderId,
+        'damaged',
+        items,
+      );
     } else if (selectedStatus == 'lost') {
       const items = itemsData
         .map((value) => {
@@ -167,11 +174,18 @@ export default function Accept({
           };
         })
         .filter((item) => item.name !== '' && item.lost !== 0);
-      response = await orderApi.lostItems(orderData.orderData.orderId, 'lost', items);
+      response = await orderApi.lostItems(
+        orderData.orderData.orderId,
+        'lost',
+        items,
+      );
     }
 
-    if(response.success && userApi.userData.user_role === 'vendor'){
-      await orderApi.changeStatusOfOrder(orderData.orderData.orderId, 'finished');
+    if (response.success && userApi.userData.user_role === 'vendor') {
+      await orderApi.changeStatusOfOrder(
+        orderData.orderData.orderId,
+        'finished',
+      );
     }
 
     onSuccessDeliver();
@@ -198,7 +212,7 @@ export default function Accept({
     setShowColumn(!selectedOption.includes('delivered'));
   };
 
-  const placeholderRowCount = 5;
+  const placeholderRowCount = 11;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
