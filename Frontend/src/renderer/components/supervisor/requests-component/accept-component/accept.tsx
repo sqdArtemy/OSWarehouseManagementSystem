@@ -198,7 +198,7 @@ export default function Accept({
     setShowColumn(!selectedOption.includes('delivered'));
   };
 
-  const placeholderRowCount = 30;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },

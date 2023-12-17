@@ -36,7 +36,7 @@ export default function ChooseTransport({
     'total-volume': acceptData ? acceptData.total_volume : 0,
   };
 
-  const placeholderRowCount = 30;
+  const placeholderRowCount = 5;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
