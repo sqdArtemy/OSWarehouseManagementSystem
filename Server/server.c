@@ -1,5 +1,4 @@
-// Server side C/C++ program to demonstrate Socket
-// programming
+// IPC implementation using sockets by TEAM 7
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +11,7 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 #include <time.h>
-#include "linked_list.h"
+#include "list.h"
 #include <unistd.h>
 
 
@@ -29,7 +28,7 @@ struct clientAddress {
 
 struct ArrayList clientsList;
 
-#define MESSAGE_QUEUE_DELAY 30000 // 10 ms in microseconds
+#define MESSAGE_QUEUE_DELAY 30000 // 30 ms in microseconds
 
 struct MessageQueue {
     char* message;
@@ -39,12 +38,11 @@ struct MessageQueue {
 struct MessageQueue* messageQueue = NULL;
 pthread_mutex_t queueMutex = PTHREAD_MUTEX_INITIALIZER;
 
-// Function to add a message to the message queue
 void addToMessageQueue(const char* message) {
     pthread_mutex_lock(&queueMutex);
 
     struct MessageQueue* newMessage = (struct MessageQueue*)malloc(sizeof(struct MessageQueue));
-    newMessage->message = strdup(message); // Duplicate the message to avoid memory issues
+    newMessage->message = strdup(message);
     newMessage->next = NULL;
 
     if (messageQueue == NULL) {
@@ -60,7 +58,6 @@ void addToMessageQueue(const char* message) {
     pthread_mutex_unlock(&queueMutex);
 }
 
-// Function to send a message from the message queue with a delay
 void* sendMessageFromQueue(void* arg) {
     while (true) {
         pthread_mutex_lock(&queueMutex);
@@ -71,16 +68,14 @@ void* sendMessageFromQueue(void* arg) {
 
             pthread_mutex_unlock(&queueMutex);
 
-            // Send the message
             usleep(MESSAGE_QUEUE_DELAY);
             send(server_fd, temp->message, strlen(temp->message), 0);
-             // Introduce a delay
 
             free(temp->message);
             free(temp);
         } else {
             pthread_mutex_unlock(&queueMutex);
-            usleep(1000); // Sleep for 1 ms if the queue is empty
+            usleep(1000);
         }
     }
 }
@@ -89,7 +84,7 @@ void handle_sigint(int sig) {
     printf("Received SIGINT. Closing server...\n");
     close(server_fd);
     deleteAll(&clientsList);
-    // Free the message queue
+
     while (messageQueue != NULL) {
         struct MessageQueue* temp = messageQueue;
         messageQueue = messageQueue->next;
@@ -202,7 +197,7 @@ void* handle_client(void* client) {
 
     }
 
-    // Close the connected socket for this client
+    // сlose the connected socket for this client
     close(new_socket);
     free(clientArgs->client_socket);
     return NULL;
