@@ -6,6 +6,8 @@
   position: absolute;
 
   .side-bar {
+    display: flex;
+    flex-direction: column;
     width: 15%;
     background-color: #5564B2;
     color: #FFFFFF;
@@ -72,15 +74,15 @@
     }
 
     .side-bar-bottom {
-      min-height: 20%;
+      min-height: 30%;
       width: 100%;
       border-top: 1.5px solid #FFFFFF;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: center;
       align-items: center;
-      padding-top: 2vw;
-      gap: 1vw;
+      padding-top: 0.6vw;
+      gap: 0.3vw;
 
       .side-bar-bottom-profile {
         display: flex;
@@ -96,6 +98,7 @@
 
         .side-bar-bottom-profile-name {
           font-size: 1.5vw;
+          text-align: center;
 
         }
       }

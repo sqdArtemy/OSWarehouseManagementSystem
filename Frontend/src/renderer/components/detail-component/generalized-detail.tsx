@@ -123,7 +123,9 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
         ],
       });
 
-      const productsStatsResponse = await statsApi.getProductsStats(Number(warehouse_id));
+      const productsStatsResponse = await statsApi.getProductsStats(
+        Number(warehouse_id),
+      );
       console.log(productsStatsResponse);
       if (productsStatsResponse.success) {
         setDataSource(
@@ -191,7 +193,7 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
     setIsAddMultipleRacksPopupVisible(false);
   };
 
-  const placeholderRowCount = 5;
+  const placeholderRowCount = 11;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },

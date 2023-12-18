@@ -161,7 +161,7 @@ export default function OwnerDashboard() {
     },
   ];
 
-  const placeholderRowCount = 5;
+  const placeholderRowCount = 8;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
