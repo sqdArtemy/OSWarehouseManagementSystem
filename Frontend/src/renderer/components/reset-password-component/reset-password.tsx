@@ -5,6 +5,7 @@ import { useError } from '../result-handler-component/error-component/error-cont
 import { useLoading } from '../loading-component/loading';
 import './reset-password.scss';
 import { useSuccess } from '../result-handler-component/success-component/success-context';
+import { userApi } from '../../index';
 
 export function ResetPassword() {
   const location = useLocation();
@@ -57,6 +58,13 @@ export function ResetPassword() {
     });
   };
 
+  const handleFinish = async () => {
+    const response = await userApi.forgotPassword(resetEmail);
+    if (!response.success) return showError(response.message);
+    navigateToPath('/sign-in');
+    showSuccess('Please wait. System Administrator will reset password soon.');
+  };
+
   return (
     <div className="sign-in-container">
       <header>WAREHOUSE MANAGEMENT SYSTEM</header>
@@ -87,14 +95,7 @@ export function ResetPassword() {
               </span>
             </div>
           </div>
-          <Form
-            onFinish={() => {
-              navigateToPath('/sign-in');
-              showSuccess(
-                'Please wait. System Administrator will reset password soon.',
-              );
-            }}
-          >
+          <Form onFinish={handleFinish}>
             <Form.Item
               label={<p style={{ fontSize: '1vw' }}>Your Email</p>}
               name="Email"
@@ -137,6 +138,8 @@ export function ResetPassword() {
                     width: '5vw',
                     margin: '0',
                   }}
+                  htmlType="button"
+                  onClick={() => navigateToPath('/sign-in')}
                 >
                   No
                 </Button>
