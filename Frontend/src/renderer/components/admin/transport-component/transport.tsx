@@ -35,6 +35,19 @@ export default function AdminTransport() {
   const [transportData, setTransportData] = useState({});
   const { showError } = useError();
 
+  const reverseMapping = {
+    'truck': 'Truck',
+    'mini_truck': 'Mini-Truck',
+    'van': 'Van',
+    'mini_van': 'Mini-Van',
+    'ship': 'Ship',
+    'rail_transport': 'Rail Transport',
+    'plane': 'Plane',
+    'helicopter': 'Helicopter',
+    'refrigerated_truck': 'Refrigerator Truck',
+    'car': 'Car'
+  };
+
   const handleMenuClick: MenuProps['onClick'] = (e) => {
     console.log('click', e);
     setSelectedType(e.domEvent.target.innerText);
@@ -81,7 +94,7 @@ export default function AdminTransport() {
           capacity: transports[i].transport_capacity,
           maxSpeed: transports[i].transport_speed,
           price_weight: transports[i].price_per_weight,
-          type: transports[i].transport_type,
+          type: reverseMapping[transports[i].transport_type],
         });
       }
       setDataSource(data);
@@ -99,8 +112,20 @@ export default function AdminTransport() {
     }, 100);
 
     const filters = {};
+    const mapping = {
+      'Truck': 'truck',
+      'Mini-Truck': 'mini_truck',
+      'Van': 'van',
+      'Mini-Van': 'mini_van',
+      'Ship': 'ship',
+      'Rail Transport': 'rail_transport',
+      'Plane': 'plane',
+      'Helicopter': 'helicopter',
+      'Refrigerator Truck': 'refrigerated_truck',
+      'Car': 'car'
+    }
     if (selectedType) {
-      filters.transport_type = selectedType.toLowerCase();
+      filters.transport_type = mapping[selectedType];
     }
 
     if (selectedType === 'All' && filters.transport_type) {
@@ -230,6 +255,27 @@ export default function AdminTransport() {
     {
       label: 'Car',
     },
+    {
+      label: 'Plane',
+    },
+    {
+      label: 'Ship',
+    },
+    {
+      label: 'Mini-Van',
+    },
+    {
+      label: 'Mini-Truck'
+    },
+    {
+      label: 'Refrigerator Truck'
+    },
+    {
+      label: 'Rail Transport'
+    },
+    {
+      label: 'Helicopter'
+    }
   ];
 
   const menuProps = {
@@ -278,7 +324,7 @@ export default function AdminTransport() {
             capacity: transports[i].transport_capacity,
             maxSpeed: transports[i].transport_speed,
             price_weight: transports[i].price_per_weight,
-            type: transports[i].transport_type,
+            type: reverseMapping[transports[i].transport_type],
           });
         }
         setDataSource(data);

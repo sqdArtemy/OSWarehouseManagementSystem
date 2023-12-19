@@ -69,10 +69,23 @@ export default function AdminAddTransport({
       }
     }
 
+    const mapping = {
+      'Truck': 'truck',
+      'Mini-Truck': 'mini_truck',
+      'Van': 'van',
+      'Mini-Van': 'mini_van',
+      'Ship': 'ship',
+      'Rail Transport': 'rail_transport',
+      'Plane': 'plane',
+      'Helicopter': 'helicopter',
+      'Refrigerator Truck': 'refrigerated_truck',
+      'Car': 'car'
+    }
+
     const response = await transportApi.addTransport({
       transport_capacity: Number(newTransportData.Capacity),
       transport_speed: Number(newTransportData['Max Speed']),
-      transport_type: newTransportData.Type,
+      transport_type: mapping[newTransportData.Type],
       price_per_weight: Number(newTransportData['Price_weight']),
     });
 
@@ -149,9 +162,16 @@ export default function AdminAddTransport({
             onChange={onRoleChange}
             style={{ minHeight: '2vw' }}
           >
-            <Select.Option value="truck">Truck</Select.Option>
-            <Select.Option value="van">Van</Select.Option>
-            <Select.Option value="car">Car</Select.Option>
+            <Select.Option value="Truck">Truck</Select.Option>
+            <Select.Option value="Van">Van</Select.Option>
+            <Select.Option value="Car">Car</Select.Option>
+            <Select.Option value="Plane">Plane</Select.Option>
+            <Select.Option value="Helicopter">Helicopter</Select.Option>
+            <Select.Option value="Rail Transport">Rail Transport</Select.Option>
+            <Select.Option value="Mini-Truck">Mini-Truck</Select.Option>
+            <Select.Option value="Mini-Van">Mini-Van</Select.Option>
+            <Select.Option value="Refrigerator Truck">Refrigerator Truck</Select.Option>
+            <Select.Option value="Ship">Ship</Select.Option>
           </Select>
         </Form.Item>
         <Form.Item
