@@ -22,6 +22,7 @@ class Product(Base):
     company = relationship("Company", back_populates="products")
     ordered_item = relationship("OrderItem", back_populates="product")
     lost_item = relationship("LostItem", back_populates="product")
+    thrown_item = relationship("ThrownItem", back_populates="product")
     product_transaction_items = relationship("TransactionItem", back_populates="product")
 
     # Constraints

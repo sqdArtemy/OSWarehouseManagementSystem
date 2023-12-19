@@ -1,5 +1,5 @@
 from views import UserView, CompanyView, InventoryView, OrderView, OrderItemView, ProductView, RackView, VendorView, \
-    TransactionView, TransactionItemView, WarehouseView, TransportView, LostItemView
+    TransactionView, TransactionItemView, WarehouseView, TransportView, LostItemView, ThrownItemView
 from utilities.exceptions import ValidationError, DatabaseError
 from utilities.templates import ResponseFactory
 from utilities.enums.method import Method
@@ -18,6 +18,7 @@ def controller(request: dict) -> dict:
     inventory_view = InventoryView()
     order_view = OrderView()
     lost_item_view = LostItemView()
+    thrown_item_view = ThrownItemView()
     order_item_view = OrderItemView()
     product_view = ProductView()
     rack_view = RackView()
@@ -61,6 +62,10 @@ def controller(request: dict) -> dict:
             elif method == Method.PUT.value:
                 if "/change_password" in url:
                     return user_view.change_password(request=request)
+                if "/user/forgot-password" in url:
+                    return user_view.forgot_password(request=request)
+                if "/user/reset-password" in url:
+                    return user_view.reset_password(request=request)
                 return user_view.update(request=request)
 
         # Company`s endpoints
@@ -254,8 +259,10 @@ def controller(request: dict) -> dict:
 
         elif "/stats" in url:
             if method == Method.GET.value:
-                if "/lost-items":
+                if "/lost-items" in url:
                     return lost_item_view.get_list(request=request)
+                elif "/thrown-items" in url:
+                    return thrown_item_view.get_list(request=request)
 
         # In case of no route found
         else:

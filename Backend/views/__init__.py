@@ -11,3 +11,4 @@ from .transaction import TransactionView
 from .transaction_item import TransactionItemView
 from .warehouse import WarehouseView
 from .transport import TransportView
+from .thrown_items import ThrownItemView

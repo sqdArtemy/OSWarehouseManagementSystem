@@ -175,8 +175,10 @@ class UserView(GenericView):
             requester = session.query(User).filter_by(user_id=requester_id).first()
 
             if self.instance_id != requester_id and (
-                    self.instance.company_id != requester.company_id or requester.user_role != UserRole.MANAGER.value["name"]
-            ) and self.requester_role != UserRole.ADMIN.value["code"] and self.requester_role != UserRole.VENDOR.value["code"]:
+                    self.instance.company_id != requester.company_id or requester.user_role != UserRole.MANAGER.value[
+                "name"]
+            ) and self.requester_role != UserRole.ADMIN.value["code"] and self.requester_role != UserRole.VENDOR.value[
+                "code"]:
                 raise ValidationError(status_code=401, message="You can not update data of this user.")
 
             # Remove password if it was passed
@@ -284,3 +286,49 @@ class UserView(GenericView):
             request["body"] = self.body = dict()
 
             return super().delete(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.PUT.value])
+    def forgot_password(self, request: dict) -> dict:
+        """
+        Endpoint to delete user.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+        employee_email = self.body["user_email"]
+
+        with get_session() as session:
+            user_emails = session.query(User.user_email).all()
+            if employee_email not in user_emails:
+                raise ValidationError("Wrong Credentials", 401)
+
+            user = session.query(User).filter_by(user_email=employee_email).all()
+
+            self.body["is_password_forgotten"] = 1
+            self.body = user.to_dict()
+
+            return super().update(request=request)
+
+    @view_function_middleware
+    @check_allowed_methods_middleware([Method.PUT.value])
+    def reset_password(self, request: dict) -> dict:
+        """
+        Endpoint to delete user.
+        :param request: dictionary containing url, method and body
+        :return: dictionary containing status_code and response body
+        """
+
+        with get_session() as session:
+            user_id = extract_id_from_url(request["url"], "user")
+            user = session.query(User).filter_by(user_id=user_id).first()
+
+            if not user:
+                raise ValidationError("User not found", 404)
+
+            if not user.is_password_forgotten:
+                raise ValidationError("User did not forget password", 400)
+
+            self.body["password"] = f"{user.user_name[0]}{user.user_surname[0]}{user.user_phone[-4:]}"
+            self.body["is_password_forgotten"] = 0
+
+            return super().update(request=request)
