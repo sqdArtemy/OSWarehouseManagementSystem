@@ -299,6 +299,7 @@ class UserView(GenericView):
 
         with get_session() as session:
             user_emails = session.query(User.user_email).all()
+            user_emails = [user for user in user_emails]
             if employee_email not in user_emails:
                 raise ValidationError("Wrong Credentials", 401)
 
