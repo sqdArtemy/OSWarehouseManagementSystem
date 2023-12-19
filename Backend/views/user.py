@@ -64,7 +64,8 @@ class UserView(GenericView):
                     user_role=self.body["user_role"],
                     user_phone=self.body["user_phone"],
                     user_password=hash_password(self.body["password"]).decode("utf8"),
-                    company_id=new_company_id
+                    company_id=new_company_id,
+                    is_password_forgotten=0
                 )
                 session.add(new_user)
                 session.commit()
