@@ -12,6 +12,12 @@ export class StatsApi extends GenericApi implements IStats {
     return await this.genericRequest({ url, method: 'GET', body: {}, headers: { filters }});
   }
 
+  public async getThrownItems(filters: IOrderFilters): Promise<IApiResponse> {
+    const url = '/stats/thrown-items';
+    return await this.genericRequest({ url, method: 'GET', body: {}, headers: { filters }});
+  }
+
+
   public async getOrderDetails(filters: IOrderFilters): Promise<IApiResponse> {
     const url = '/orders/details';
     return await this.genericRequest({ url, method: 'GET', body: {}, headers: { filters }});

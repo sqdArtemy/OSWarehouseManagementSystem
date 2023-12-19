@@ -4,6 +4,7 @@ export interface IStats {
   getProductsStats(warehouseId: number): Promise<IApiResponse>;
   getOrderStats(): Promise<IApiResponse>;
   getLostItems(filters: IOrderFilters): Promise<IApiResponse>;
+  getThrownItems(filters: IOrderFilters): Promise<IApiResponse>;
   getOrderDetails(filters: IOrderFilters): Promise<IApiResponse>;
   getWarehouseItems(filters: IOrderFilters): Promise<IApiResponse>;
 }
