@@ -299,16 +299,15 @@ class UserView(GenericView):
 
         with get_session() as session:
             user_emails = session.query(User.user_email).all()
-            user_emails = [user for user in user_emails]
+            user_emails = [user[0] for user in user_emails]
             if employee_email not in user_emails:
                 raise ValidationError("Wrong Credentials", 401)
 
-            user = session.query(User).filter_by(user_email=employee_email).all()
-
-            self.body["is_password_forgotten"] = 1
-            self.body = user.to_dict()
-
-            return super().update(request=request)
+            user = session.query(User).filter_by(user_email=employee_email).first()
+            user.is_password_forgotten = 1
+            session.commit()
+            self.response.status_code = 200
+            return self.response.create_response()
 
     @view_function_middleware
     @check_allowed_roles_middleware([UserRole.ADMIN.value["code"]])
