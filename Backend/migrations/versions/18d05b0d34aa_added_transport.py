@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.create_table('transports',
     sa.Column('transport_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('transport_capacity', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
-    sa.Column('transport_type', sa.Enum('truck', 'van', 'car', 'helicopter', name='transport_type'), nullable=False),
+    sa.Column('transport_type', sa.Enum('truck', 'van', 'car', 'helicopter', "ship", "plane", name='transport_type'), nullable=False),
     sa.Column('transport_speed', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
     sa.Column('price_per_weight', sa.Numeric(precision=20, scale=2, asdecimal=False), nullable=False),
     sa.CheckConstraint('price_per_weight >= 0', name='check_price_per_weight'),

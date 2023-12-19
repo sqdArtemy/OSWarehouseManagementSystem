@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, or_, and_, desc, text, cast, Float
 
 from db_config import get_session
-from models import Inventory, User, Warehouse, Rack, Product
+from models import Inventory, User, Warehouse, Rack, Product, ThrownItem
 from services import view_function_middleware, check_allowed_methods_middleware, check_allowed_roles_middleware
 from services.generics import GenericView
 from utilities import decode_token, ValidationError
@@ -140,6 +140,14 @@ class InventoryView(GenericView):
                 session.query(Inventory).filter_by(rack_id=rack_id, product_id=product_id).update({"quantity": diff,
                                                                                                    "total_volume": inventory.total_volume - changed_volume})
 
+            new_thrown_item = ThrownItem(
+                product_id=product_id,
+                warehouse_id=warehouse.warehouse_id,
+                quantity=quantity,
+                created_at=datetime.now()
+            )
+
+            session.add(new_thrown_item)
             session.flush()
 
             rack = session.query(Rack).filter_by(rack_id=rack_id).first()

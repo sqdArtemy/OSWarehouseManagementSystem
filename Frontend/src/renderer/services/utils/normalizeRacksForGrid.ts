@@ -8,6 +8,8 @@ export interface INormalizedRack {
   rack_id: number;
   capacity: number;
   isSelected: boolean;
+  remainingCapacity: number;
+  color: 'grey' | 'green' | 'red' | 'yellow' | 'orange' | 'blue';
 }
 
 export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
@@ -46,7 +48,9 @@ export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
         isEmpty: true,
         rack_id: null,
         capacity: 0,
-        isSelected: false
+        remainingCapacity: 0,
+        isSelected: false,
+        color: 'grey'
       })
     }
   }
@@ -60,16 +64,33 @@ export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
       if(existingRack){
         column.isHidden = false;
         column.capacity = existingRack.overall_capacity;
+        column.remainingCapacity = existingRack.remaining_capacity;
         column.rack_id = existingRack.rack_id;
+
         if(existingRack.overall_capacity !== existingRack.remaining_capacity){
           column.isEmpty = false;
+          if (Number(existingRack.remaining_capacity) / Number(existingRack.overall_capacity) >= 0.66){
+            column.color = 'green';
+          }
+          else if (Number(existingRack.remaining_capacity) / Number(existingRack.overall_capacity) > 0.33){
+            column.color = 'yellow';
+          }
+          else if (Number(existingRack.remaining_capacity) / Number(existingRack.overall_capacity) > 0){
+            column.color = 'orange';
+          }
         }
+
         if(existingRack.remaining_capacity === 0){
           column.isFull = true;
+          column.color = 'red'
+        }
+
+        if(existingRack.is_expired){
+          column.color = 'swamp';
         }
       }
     }
   }
-
+  console.log(finalGrid);
   return finalGrid;
 }
