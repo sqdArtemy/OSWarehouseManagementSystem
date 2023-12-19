@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, ForeignKey, Enum, Boolean
 from sqlalchemy.orm import relationship
 from db_config import Base, get_session
 
@@ -14,6 +14,7 @@ class User(Base):
     user_email = Column(String(255), unique=True, index=True, nullable=False)
     user_address = Column(String(255), nullable=True)
     user_password = Column(String(255), nullable=False)
+    is_password_forgotten = Column(Boolean, nullable=False)
     user_role = Column(Enum("manager", "supervisor", "vendor", "admin", name="user_role"), nullable=False)
 
     # Relationships with other tables

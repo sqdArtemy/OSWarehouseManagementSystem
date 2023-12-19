@@ -9,7 +9,7 @@ class Transport(Base):
 
     transport_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     transport_capacity = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
-    transport_type = Column(Enum("truck", "van", "car", "helicopter", name="transport_type"), nullable=False)
+    transport_type = Column(Enum("truck", "van", "car", "helicopter", "ship", "plane", name="transport_type"), nullable=False)
     transport_speed = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
     price_per_weight = Column(Numeric(precision=20, scale=2, asdecimal=False), nullable=False)
 
