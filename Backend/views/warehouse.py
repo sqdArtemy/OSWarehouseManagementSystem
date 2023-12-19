@@ -224,7 +224,7 @@ class WarehouseView(GenericView):
             racks = (
                 session.query(
                     Rack,
-                    case([(Inventory.expiry_date <= now, True)], else_=False).label("is_expired")
+                    case((Inventory.expiry_date <= now, True), else_=False).label("is_expired")
                 )
                 .join(Inventory, Inventory.rack_id == Rack.rack_id)
                 .filter(
@@ -236,11 +236,12 @@ class WarehouseView(GenericView):
 
             for rack in racks:
                 rack_info = {
-                    "rack_id": rack.rack_id,
-                    "rack_position": rack.rack_position,
-                    "overall_capacity": rack.overall_capacity,
-                    "remaining_capacity": rack.remaining_capacity,
-                    "ratio": (rack.remaining_capacity / rack.overall_capacity) * 100
+                    "rack_id": rack[0].rack_id,
+                    "rack_position": rack[0].rack_position,
+                    "overall_capacity": rack[0].overall_capacity,
+                    "remaining_capacity": rack[0].remaining_capacity,
+                    "ratio": (rack[0].remaining_capacity / rack[0].overall_capacity) * 100,
+                    "is_expired": rack[1]
                 }
                 warehouse_info["racks"].append(rack_info)
 
