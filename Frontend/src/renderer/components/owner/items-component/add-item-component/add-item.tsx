@@ -191,7 +191,7 @@ export default function AddItem({
             placeholder="Write the description of item here"
             rows={4}
             cols={45}
-            style={{ resize: 'none', maxWidth: '23vw' }}
+            style={{ resize: 'none', maxWidth: '15vw' }}
           />
         </Form.Item>
         <Form.Item {...tailLayout}>

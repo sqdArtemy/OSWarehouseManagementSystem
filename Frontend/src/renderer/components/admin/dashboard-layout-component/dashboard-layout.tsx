@@ -37,7 +37,6 @@ export function AdminDashboardLayout() {
     navigate(`/admin/${textElement.innerText.toLowerCase()}`);
   };
 
-
   useEffect(() => {
     if (userApi.getUserData) {
       setName(
@@ -86,7 +85,7 @@ export function AdminDashboardLayout() {
             className="side-bar-bottom-profile"
             onClick={() => {
               setSelected(null);
-              navigate('/owner/profile');
+              navigate('/admin/profile');
             }}
           >
             <span>
