@@ -144,7 +144,7 @@ class InventoryView(GenericView):
                 product_id=product_id,
                 warehouse_id=warehouse.warehouse_id,
                 quantity=quantity,
-                created_at=datetime.now()
+                thrown_at=datetime.now()
             )
 
             session.add(new_thrown_item)
