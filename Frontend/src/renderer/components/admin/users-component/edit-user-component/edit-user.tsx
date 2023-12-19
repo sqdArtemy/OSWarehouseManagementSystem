@@ -5,6 +5,7 @@ import { userApi } from '../../../../index';
 import { INewUserData } from '../add-user-component/add-user';
 import { IUserData } from '../users';
 import { useError } from '../../../result-handler-component/error-component/error-context';
+import { useSuccess } from '../../../result-handler-component/success-component/success-context';
 
 export default function EditUser({
   isPopupVisible,
@@ -21,6 +22,7 @@ export default function EditUser({
   onEditUserSuccess: () => void;
 }) {
   const { showError } = useError();
+  const { showSuccess } = useSuccess();
   const formRef = React.useRef<FormInstance>(null);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   useEffect(() => {
@@ -162,10 +164,10 @@ export default function EditUser({
           title={'Are you sure to reset the password?'}
           onOk={async () => {
             const response = await userApi.resetPasswordToDefault(
-              userData.userData.id,
+              userData.userData.user_id,
             );
-            if (!response.success) showError(response.message);
-
+            if (!response.success) return showError(response.message);
+            showSuccess('Password has been reset to default');
             setIsConfirmModalVisible(false);
           }}
           onCancel={() => {
