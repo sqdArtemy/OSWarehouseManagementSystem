@@ -19,6 +19,7 @@ export const normalizePreviewedRacks = (
 
       if (rack && rack.real_quantity > 0) {
         column.isSelected = true;
+        column.color = 'blue';
       }
     }
   }
