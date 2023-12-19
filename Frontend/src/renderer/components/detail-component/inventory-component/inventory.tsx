@@ -94,6 +94,7 @@ export default function Inventory({
     window.addEventListener('resize', calculateScrollSize);
 
     originalInventory = JSON.parse(JSON.stringify(inventoryData.inventoryData));
+    console.log(rackData.rackData);
     return () => window.removeEventListener('resize', calculateScrollSize);
   }, []);
 
@@ -386,7 +387,7 @@ export default function Inventory({
       okButtonProps={{ style: { display: 'none' } }}
       width={'60vw'}
     >
-      <Space direction="vertical" size="middle">
+      <Space direction="vertical" size="middle" style={{ maxWidth: '100%' }}>
         {isEditMode && (
           <>
             {/* Add a button to handle updating the inventory */}
@@ -418,12 +419,40 @@ export default function Inventory({
           </>
         )}
         <Table
+          columns={[
+            {
+              title: 'Overall Capacity',
+              dataIndex: 'overallCapacity',
+              key: 'overallCapacity',
+            },
+            {
+              title: 'Remaining Capacity',
+              dataIndex: 'remainingCapacity',
+              key: 'remainingCapacity',
+            },
+          ]}
+          dataSource={
+            [
+              {
+                key: '1',
+                overallCapacity: rackData.rackData['capacity'],
+                remainingCapacity: rackData.rackData['remaining_capacity'],
+              },
+            ] as []
+          }
+          bordered={true}
+          pagination={false}
+          style={{ maxWidth: '100%' }}
+        />
+        <Table
           columns={columns as []}
           dataSource={tableData as []}
           scroll={scrollSize}
           pagination={false}
           size={'small'}
           bordered={true}
+          style={{ maxWidth: '100%' }}
+          rootClassName={}
         />
         <Space
           direction="horizontal"

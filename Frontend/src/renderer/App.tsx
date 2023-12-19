@@ -41,6 +41,7 @@ import SupervisorRequests from './components/supervisor/requests-component/reque
 import { SupervisorLayout } from './components/supervisor/supervisor-layout-component/supervisor-layout';
 import { ConfigProvider } from 'antd';
 import { SuccessProvider } from './components/result-handler-component/success-component/success-context';
+import { ResetPassword } from './components/reset-password-component/reset-password';
 
 export default function App() {
   return (
@@ -60,6 +61,7 @@ export default function App() {
                 <Route path="sign-in" element={<SignIn />} />
                 <Route path="sign-up" element={<SignUp />} />
                 <Route path="sign-up-details" element={<SignUpDetails />} />
+                <Route path="reset-password" element={<ResetPassword />} />
                 <Route path="owner/*" element={<OwnerDashboardLayout />}>
                   <Route
                     index

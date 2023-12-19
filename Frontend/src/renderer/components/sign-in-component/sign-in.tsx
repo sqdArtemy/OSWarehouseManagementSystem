@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { userApi } from '../../index';
 import './sign-in.scss';
-import { Button, Form, Input, Tooltip } from 'antd';
+import { Button, Form, Input, Space, Tooltip } from 'antd';
 import { useError } from '../result-handler-component/error-component/error-context';
 import { useLoading } from '../loading-component/loading';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
@@ -28,6 +28,7 @@ export function SignIn() {
     locRePassword,
     locRole,
     locUserAddress,
+    locResetEmail,
   } = state || {};
   const { showError } = useError();
   const handleSignIn = async () => {
@@ -109,6 +110,7 @@ export function SignIn() {
                       locRePassword: locRePassword,
                       locRole: locRole,
                       locUserAddress: locUserAddress,
+                      locResetEmail: locResetEmail,
                     },
                   });
                 }}
@@ -144,10 +146,46 @@ export function SignIn() {
                 />
               </Tooltip>
             </Form.Item>
-
-            <Button type="primary" onClick={async () => handleSignIn()}>
-              SIGN IN
-            </Button>
+            <Space direction={'horizontal'} size={75}>
+              <Button
+                type="primary"
+                onClick={async () => handleSignIn()}
+                style={{
+                  width: '15vw',
+                }}
+              >
+                SIGN IN
+              </Button>
+              <Button
+                type="dashed"
+                block
+                style={{
+                  width: '13vw',
+                }}
+                onClick={() => {
+                  navigate('/reset-password', {
+                    state: {
+                      locLoginEmail: email,
+                      locLoginPassword: password,
+                      locName: locName,
+                      locEmail: locEmail,
+                      locAddress: locAddress,
+                      locFirstName: locFirstName,
+                      locLastName: locLastName,
+                      locUserEmail: locUserEmail,
+                      locPhoneNumber: locPhoneNumber,
+                      locPassword: locPassword,
+                      locRePassword: locRePassword,
+                      locRole: locRole,
+                      locUserAddress: locUserAddress,
+                      locResetEmail: locResetEmail,
+                    },
+                  });
+                }}
+              >
+                Forgot Password
+              </Button>
+            </Space>
           </Form>
         </div>
       </div>
