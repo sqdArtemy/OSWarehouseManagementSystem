@@ -60,7 +60,7 @@ export default function OwnerDashboard() {
       if (thrownItemsResponse.success) {
         if (thrownItemsResponse.data.body.length) {
           setThrownItemsDataSource(
-            lostItemsResponse.data.body.map((item) => {
+            thrownItemsResponse.data.body.map((item) => {
               return {
                 name: item.product_name,
                 amount: item.total_quantity,
@@ -105,17 +105,17 @@ export default function OwnerDashboard() {
 
       setLostItemsScrollSize({
         x: vw * 0.2,
-        y: vh * 0.3,
+        y: vh * 0.15,
       });
 
       setThrownItemsScrollSize({
         x: vw * 0.2,
-        y: vh * 0.3,
+        y: vh * 0.15,
       });
 
       setProductsScrollSize({
         x: vw * 0.3,
-        y: vh * 0.25,
+        y: vh * 0.15,
       });
     };
     calculateScrollSize();
