@@ -13,6 +13,8 @@ export interface IUser {
     newPassword: string,
     passwordConfirm: string,
   ): Promise<IApiResponse>;
+  forgotPassword(): Promise<IApiResponse>;
+  resetPasswordToDefault(id: number): Promise<IApiResponse>;
 }
 
 export interface ISignUp {
