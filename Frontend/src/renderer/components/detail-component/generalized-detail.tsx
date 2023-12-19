@@ -54,9 +54,9 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
   });
 
   const updateChartData = async () => {
-    startLoading();
+    // startLoading();
     const result = await warehouseApi.getWarehouse(Number(warehouse_id));
-    stopLoading();
+    // stopLoading();
     if (result.success) {
       const data = result.data?.data;
       setChartData({
@@ -99,14 +99,14 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
 
     console.log('Warehouse ID: ', warehouse_id);
 
-    startLoading();
+    // startLoading();
     warehouseApi.getWarehouse(Number(warehouse_id)).then(async (data) => {
       if (data.success && data.data?.data) {
         setGridData(normalizeRacksForGrid(data.data.data.racks));
       } else {
         showError(data.message);
       }
-      stopLoading();
+      // stopLoading();
 
       setChartData({
         labels: ['Occupied', 'Free'],
