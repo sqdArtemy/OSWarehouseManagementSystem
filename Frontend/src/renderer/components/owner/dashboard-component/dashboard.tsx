@@ -32,6 +32,11 @@ export default function OwnerDashboard() {
     y: 0,
   });
   const [lostItemsDataSource, setLostItemsDataSource] = useState([]);
+  const [thrownItemsScrollSize, setThrownItemsScrollSize] = useState({
+    x: 0,
+    y: 0,
+  });
+  const [thrownItemsDataSource, setThrownItemsDataSource] = useState([]);
   const [dataSource, setDataSource] = useState([]);
   const [dataFromBackend, setDataFromBackend] = useState({});
 
@@ -48,6 +53,21 @@ export default function OwnerDashboard() {
               };
             }),
           );
+      }
+
+      const thrownItemsResponse = await statsApi.getThrownItems({});
+      console.log(thrownItemsResponse);
+      if (thrownItemsResponse.success) {
+        if (thrownItemsResponse.data.body.length) {
+          setThrownItemsDataSource(
+            thrownItemsResponse.data.body.map((item) => {
+              return {
+                name: item.product_name,
+                amount: item.total_quantity,
+              };
+            }),
+          );
+        }
       }
 
       const productsStatsResponse = await statsApi.getProductsStats();
@@ -85,11 +105,17 @@ export default function OwnerDashboard() {
 
       setLostItemsScrollSize({
         x: vw * 0.2,
-        y: vh * 0.3,
+        y: vh * 0.15,
       });
+
+      setThrownItemsScrollSize({
+        x: vw * 0.2,
+        y: vh * 0.15,
+      });
+
       setProductsScrollSize({
         x: vw * 0.3,
-        y: vh * 0.25,
+        y: vh * 0.15,
       });
     };
     calculateScrollSize();
@@ -161,7 +187,7 @@ export default function OwnerDashboard() {
     },
   ];
 
-  const placeholderRowCount = 8;
+  const placeholderRowCount = 3;
 
   const placeholderData = Array.from(
     { length: placeholderRowCount },
@@ -178,6 +204,15 @@ export default function OwnerDashboard() {
     lostItemsTableData = [
       ...lostItemsTableData,
       ...placeholderData.slice(lostItemsTableData.length + 1),
+    ];
+  }
+
+  let thrownItemsTableData =
+    thrownItemsDataSource.length > 0 ? thrownItemsDataSource : placeholderData;
+  if (thrownItemsTableData.length < placeholderRowCount) {
+    thrownItemsTableData = [
+      ...thrownItemsTableData,
+      ...placeholderData.slice(thrownItemsTableData.length + 1),
     ];
   }
 
@@ -274,6 +309,23 @@ export default function OwnerDashboard() {
               dataSource={tableData as []}
               columns={columns as []}
               scroll={productsScrollSize}
+              pagination={false}
+              size={'small'}
+              bordered={true}
+              style={{ fontSize: '1vw' }}
+              rowClassName={'default-table-row-height'}
+            />
+          </div>
+          <div className={'dashboard-right-side-products-distribution-table'}>
+            <Table
+              title={() => (
+                <p style={{ fontSize: '1.1vw', textAlign: 'center' }}>
+                  Thrown Items
+                </p>
+              )}
+              dataSource={thrownItemsTableData as []}
+              columns={lostItemColumns as []}
+              scroll={thrownItemsScrollSize}
               pagination={false}
               size={'small'}
               bordered={true}

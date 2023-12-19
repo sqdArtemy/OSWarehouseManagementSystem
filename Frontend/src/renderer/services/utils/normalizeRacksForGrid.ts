@@ -9,10 +9,11 @@ export interface INormalizedRack {
   capacity: number;
   isSelected: boolean;
   remainingCapacity: number;
-  color: 'grey' | 'green' | 'red' | 'yellow' | 'orange' | 'blue';
+  color: 'grey' | 'green' | 'red' | 'yellow' | 'orange' | 'blue' | 'swamp';
 }
 
 export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
+  console.log(racks);
   const sortedRacks = racks.sort((a, b) => {
     return a.rack_position.localeCompare(b.rack_position);
   })
@@ -91,6 +92,5 @@ export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
       }
     }
   }
-  console.log(finalGrid);
   return finalGrid;
 }

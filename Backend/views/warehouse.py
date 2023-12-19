@@ -1,6 +1,7 @@
+from datetime import timedelta, datetime
 from sqlite3 import IntegrityError
 
-from sqlalchemy import func, cast, Float, Integer, text, distinct
+from sqlalchemy import func, cast, Float, Integer, text, distinct, case
 
 from db_config import get_session
 from models import Warehouse, User, Rack, Product, Inventory, OrderItem, Order
@@ -218,16 +219,29 @@ class WarehouseView(GenericView):
                 "racks": []
             }
 
+            now = datetime.now()
             # Get details about racks in the warehouse
-            racks = session.query(Rack).filter_by(warehouse_id=warehouse_id).all()
+            racks = (
+                session.query(
+                    Rack,
+                    case((Inventory.expiry_date <= now, True), else_=False).label("is_expired")
+                )
+                .join(Inventory, Inventory.rack_id == Rack.rack_id)
+                .filter(
+                    Rack.warehouse_id == warehouse_id,
+                    Inventory.expiry_date <= now
+                )
+                .all()
+            )
 
             for rack in racks:
                 rack_info = {
-                    "rack_id": rack.rack_id,
-                    "rack_position": rack.rack_position,
-                    "overall_capacity": rack.overall_capacity,
-                    "remaining_capacity": rack.remaining_capacity,
-                    "ratio": (rack.remaining_capacity / rack.overall_capacity) * 100
+                    "rack_id": rack[0].rack_id,
+                    "rack_position": rack[0].rack_position,
+                    "overall_capacity": rack[0].overall_capacity,
+                    "remaining_capacity": rack[0].remaining_capacity,
+                    "ratio": (rack[0].remaining_capacity / rack[0].overall_capacity) * 100,
+                    "is_expired": rack[1]
                 }
                 warehouse_info["racks"].append(rack_info)
 

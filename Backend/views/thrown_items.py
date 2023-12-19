@@ -50,18 +50,18 @@ class ThrownItemView(GenericView):
                     Product.product_id.label('product_id'),
                     Warehouse.warehouse_id.label('warehouse_id'),
                     cast(func.sum(ThrownItem.quantity), Float).label('total_quantity'),
-                    Warehouse.warehouse_name.label('warehouse_name'),
                     Product.product_name.label('product_name')
                 )
                 .join(ThrownItem, ThrownItem.product_id == Product.product_id)
-                .join(Order, Order.order_id == ThrownItem.order_id)
-                .join(Warehouse, or_(
-                    and_(Order.order_type == 'to_warehouse', Order.recipient_id == Warehouse.warehouse_id),
-                    and_(Order.order_type == 'from_warehouse', Order.supplier_id == Warehouse.warehouse_id)
-                ))
-                .filter(Warehouse.company_id == requester.company_id)
-                .group_by(Warehouse.warehouse_id, Product.product_id)
-                .order_by(Warehouse.warehouse_name, Product.product_name)
+                .join(
+                        Warehouse,
+                        and_(
+                            Warehouse.company_id == requester.company_id,
+                            Warehouse.warehouse_id == ThrownItem.warehouse_id
+                        )
+                    )
+                .group_by(Product.product_id)
+                .order_by(Product.product_name)
             )
 
             # Apply the filters to the query
@@ -74,7 +74,6 @@ class ThrownItemView(GenericView):
                 product_id = thrown_product.product_id
                 warehouse_id = thrown_product.warehouse_id
                 total_quantity = thrown_product.total_quantity
-                warehouse_name = thrown_product.warehouse_name
                 product_name = thrown_product.product_name
 
                 # Append values with corresponding names to the lost list
@@ -82,7 +81,6 @@ class ThrownItemView(GenericView):
                     'product_id': product_id,
                     'warehouse_id': warehouse_id,
                     'total_quantity': total_quantity,
-                    'warehouse_name': warehouse_name,
                     'product_name': product_name
                 })
 

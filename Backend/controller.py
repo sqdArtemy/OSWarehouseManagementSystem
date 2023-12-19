@@ -62,9 +62,9 @@ def controller(request: dict) -> dict:
             elif method == Method.PUT.value:
                 if "/change_password" in url:
                     return user_view.change_password(request=request)
-                if "/user/forgot-password" in url:
+                if "/forgot-password" in url:
                     return user_view.forgot_password(request=request)
-                if "/user/reset-password" in url:
+                if "/reset-password" in url:
                     return user_view.reset_password(request=request)
                 return user_view.update(request=request)
 
