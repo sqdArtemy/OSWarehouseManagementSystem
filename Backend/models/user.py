@@ -36,5 +36,6 @@ class User(Base):
                 "user_role": self.user_role,
                 "warehouses": [
                     w.to_dict() if "warehouses" in cascade_fields else w.warehouse_id for w in user.warehouses
-                ]
+                ],
+                "is_password_forgotten": self.is_password_forgotten
             }
