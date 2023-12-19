@@ -127,11 +127,11 @@ export class UserApi implements IUser {
     return response;
   }
 
-  public async forgotPassword(): Promise<IApiResponse> {
+  public async forgotPassword(userEmail: string): Promise<IApiResponse> {
     const url = '/user/forgot-password';
     const method = 'PUT';
     const headers = { token: this.token };
-    const body = {};
+    const body = { user_email: userEmail };
     return await handleApiRequest({ url, method, body, headers });
   }
 
