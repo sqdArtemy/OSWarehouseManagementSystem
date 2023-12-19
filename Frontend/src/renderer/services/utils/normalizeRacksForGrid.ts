@@ -79,9 +79,14 @@ export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
             column.color = 'orange';
           }
         }
+
         if(existingRack.remaining_capacity === 0){
           column.isFull = true;
           column.color = 'red'
+        }
+
+        if(existingRack.is_expired){
+          column.color = 'swamp';
         }
       }
     }

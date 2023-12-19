@@ -16,6 +16,7 @@ export interface IAddRack {
   overall_capacity: number;
   remaining_capacity?: number;
   rack_id?: number;
+  is_expired?: boolean | number;
 }
 
 export interface IAddMultipleRacks {
