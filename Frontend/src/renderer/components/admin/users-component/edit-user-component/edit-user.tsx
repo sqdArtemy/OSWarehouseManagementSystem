@@ -4,6 +4,8 @@ import { Button, Form, FormInstance, Input, Modal, Space } from 'antd';
 import { userApi } from '../../../../index';
 import { INewUserData } from '../add-user-component/add-user';
 import { IUserData } from '../users';
+import { useError } from '../../../result-handler-component/error-component/error-context';
+import { useSuccess } from '../../../result-handler-component/success-component/success-context';
 
 export default function EditUser({
   isPopupVisible,
@@ -19,7 +21,8 @@ export default function EditUser({
   };
   onEditUserSuccess: () => void;
 }) {
-  console.log(userData.userData);
+  const { showError } = useError();
+  const { showSuccess } = useSuccess();
   const formRef = React.useRef<FormInstance>(null);
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   useEffect(() => {
@@ -159,7 +162,12 @@ export default function EditUser({
         <Modal
           open={isConfirmModalVisible}
           title={'Are you sure to reset the password?'}
-          onOk={() => {
+          onOk={async () => {
+            const response = await userApi.resetPasswordToDefault(
+              userData.userData.user_id,
+            );
+            if (!response.success) return showError(response.message);
+            showSuccess('Password has been reset to default');
             setIsConfirmModalVisible(false);
           }}
           onCancel={() => {

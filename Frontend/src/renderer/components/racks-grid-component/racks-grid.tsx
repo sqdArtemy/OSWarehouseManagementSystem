@@ -22,24 +22,40 @@ export default function RacksGrid({ externalGridData, handleCellClick }) {
     setGridData(externalGridData);
     setNumColumns(gridData.length > 0 ? gridData[0].length : 0);
     setNumRows(gridData.length);
+    console.log('gridData', externalGridData);
   }, [externalGridData]);
-
+  const mapColor = {
+    grey: '',
+    green: '#32cd32',
+    red: '#f5222d',
+    blue: '#1890ff',
+    yellow: '#fadb14',
+    orange: '#fa8c16',
+    swamp: '#828c51',
+  };
   const renderGrid = () => {
     return gridData.map((row, rowIndex) => (
       <div className="grid-row" key={`row-${rowIndex}`}>
         {row.map((cell, cellIndex) => (
           <Tooltip
             placement={'topLeft'}
-            title={`${cell.isSelected ? 'Selected Rack' : ''}`}
+            title={`
+                  ${cell.color === 'blue' ? 'Selected Rack' : ''}
+                  ${cell.color === 'grey' ? 'Empty Rack' : ''}
+                  ${cell.color === 'green' ? 'Occupied: 1 - 33%' : ''}
+                  ${cell.color === 'yellow' ? 'Occupied: 33 - 66%' : ''}
+                  ${cell.color === 'orange' ? 'Occupied: 66 - 99%' : ''}
+                  ${cell.color === 'red' ? 'Fully Occupied' : ''}
+                  ${cell.color === 'swamp' ? 'With Expired Item' : ''}
+            `}
           >
             <div
-              className={`grid-cell ${
-                cell.isFull ? 'full' : !cell.isEmpty ? 'nonempty' : ''
-              } ${cell.isHidden ? 'hidden' : ''} ${
-                cell.isSelected ? 'selected' : ''
-              }`}
+              className={`grid-cell  ${cell.isHidden ? 'hidden' : ''} }`}
               key={`cell-${rowIndex}-${cellIndex}`}
               onClick={handleCellClick ? () => handleCellClick(cell) : null}
+              style={{
+                backgroundColor: mapColor[cell.color],
+              }}
             ></div>
           </Tooltip>
         ))}

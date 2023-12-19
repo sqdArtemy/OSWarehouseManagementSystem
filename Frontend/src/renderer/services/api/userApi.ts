@@ -136,7 +136,7 @@ export class UserApi implements IUser {
   }
 
   public async resetPasswordToDefault(id: number): Promise<IApiResponse> {
-    const url = '/user/reset-password/' + id;
+    const url = '/user/' + id + '/reset-password';
     const method = 'PUT';
     const headers = { token: this.token };
     const body = {};
