@@ -329,7 +329,9 @@ class UserView(GenericView):
             if not user.is_password_forgotten:
                 raise ValidationError("User did not forget password", 400)
 
-            self.body["password"] = f"{user.user_name[0]}{user.user_surname[0]}{user.user_phone[-4:]}"
-            self.body["is_password_forgotten"] = 0
+            user.is_password_forgotten = 0
+            user.user_password = hash_password(f"{user.user_name[0]}{user.user_surname[0]}{user.user_phone[-4:]}").decode(
+                "utf8")
+            self.response.status_code=200
 
-            return super().update(request=request)
+            return self.response.create_response()
