@@ -19,7 +19,7 @@ class Warehouse(Base):
     # Relationships with other tables
     company = relationship("Company", back_populates="warehouses")
     supervisor = relationship("User", back_populates="warehouses")
-    thrown_item = relationship("ThrownItems", back_populates="warehouse")
+    thrown_items = relationship("ThrownItem", back_populates="warehouse")
     racks = relationship("Rack", back_populates="warehouse")
     supplier_transactions = relationship("Transaction", foreign_keys=[Transaction.supplier_id], back_populates="supplier")
     receiver_transactions = relationship("Transaction", foreign_keys=[Transaction.recipient_id], back_populates="recipient_warehouse")
