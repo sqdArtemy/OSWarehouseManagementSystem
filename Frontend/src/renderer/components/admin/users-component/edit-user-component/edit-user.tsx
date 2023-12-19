@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './edit-user.scss';
-import { Button, Form, FormInstance, Input, Modal } from 'antd';
+import { Button, Form, FormInstance, Input, Modal, Space } from 'antd';
 import { userApi } from '../../../../index';
 import { INewUserData } from '../add-user-component/add-user';
 import { IUserData } from '../users';
@@ -21,7 +21,7 @@ export default function EditUser({
 }) {
   console.log(userData.userData);
   const formRef = React.useRef<FormInstance>(null);
-
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   useEffect(() => {
     if (isPopupVisible && userData.userData && formRef.current) {
       const { fullName, email, phoneNumber, role, address } = userData.userData;
@@ -44,7 +44,7 @@ export default function EditUser({
   };
 
   const tailLayout = {
-    wrapperCol: { offset: 16, span: 17 },
+    wrapperCol: { offset: 13, span: 10 },
   };
 
   const handleReset = () => {
@@ -140,10 +140,32 @@ export default function EditUser({
           <Input style={{ fontSize: '0.9vw' }} />
         </Form.Item>
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
+          <Space size={10}>
+            <Button
+              type={'dashed'}
+              block
+              htmlType={'button'}
+              onClick={() => {
+                setIsConfirmModalVisible(true);
+              }}
+            >
+              Reset Password
+            </Button>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Space>
         </Form.Item>
+        <Modal
+          open={isConfirmModalVisible}
+          title={'Are you sure to reset the password?'}
+          onOk={() => {
+            setIsConfirmModalVisible(false);
+          }}
+          onCancel={() => {
+            setIsConfirmModalVisible(false);
+          }}
+        ></Modal>
       </Form>
     </Modal>
   );
