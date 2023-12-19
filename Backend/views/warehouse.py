@@ -226,10 +226,9 @@ class WarehouseView(GenericView):
                     Rack,
                     case((Inventory.expiry_date <= now, True), else_=False).label("is_expired")
                 )
-                .join(Inventory, Inventory.rack_id == Rack.rack_id)
+                .outerjoin(Inventory, Inventory.rack_id == Rack.rack_id)
                 .filter(
-                    Rack.warehouse_id == warehouse_id,
-                    Inventory.expiry_date <= now
+                    Rack.warehouse_id == warehouse_id
                 )
                 .all()
             )

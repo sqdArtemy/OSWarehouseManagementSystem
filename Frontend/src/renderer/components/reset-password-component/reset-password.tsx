@@ -4,6 +4,8 @@ import { Button, Form, Input, Space, Tooltip } from 'antd';
 import { useError } from '../result-handler-component/error-component/error-context';
 import { useLoading } from '../loading-component/loading';
 import './reset-password.scss';
+import { useSuccess } from '../result-handler-component/success-component/success-context';
+import { userApi } from '../../index';
 
 export function ResetPassword() {
   const location = useLocation();
@@ -29,6 +31,7 @@ export function ResetPassword() {
     locUserAddress,
   } = state || {};
   const { showError } = useError();
+  const { showSuccess } = useSuccess();
 
   useEffect(() => {
     setResetEmail(locResetEmail || ''); // Use empty string as a fallback
@@ -53,6 +56,13 @@ export function ResetPassword() {
         locResetEmail: resetEmail,
       },
     });
+  };
+
+  const handleFinish = async () => {
+    const response = await userApi.forgotPassword(resetEmail);
+    if (!response.success) return showError(response.message);
+    navigateToPath('/sign-in');
+    showSuccess('Please wait. System Administrator will reset password soon.');
   };
 
   return (
@@ -85,11 +95,7 @@ export function ResetPassword() {
               </span>
             </div>
           </div>
-          <Form
-            onFinish={() => {
-              navigateToPath('/sign-in');
-            }}
-          >
+          <Form onFinish={handleFinish}>
             <Form.Item
               label={<p style={{ fontSize: '1vw' }}>Your Email</p>}
               name="Email"
@@ -132,6 +138,8 @@ export function ResetPassword() {
                     width: '5vw',
                     margin: '0',
                   }}
+                  htmlType="button"
+                  onClick={() => navigateToPath('/sign-in')}
                 >
                   No
                 </Button>
