@@ -16,8 +16,8 @@ from models import User, Company
 from utilities import hash_password
 
 # revision identifiers, used by Alembic.
-revision: str = 'cf03e536d62a'
-down_revision: Union[str, None] = 'd73ead2bb5f2'
+revision: str = '8d98673fa6f3'
+down_revision: Union[str, None] = 'cf03e536d62a'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
