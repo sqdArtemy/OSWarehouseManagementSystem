@@ -37,14 +37,14 @@
           flex-direction: row;
           align-items: end;
 
-          .admin-users-filter{
+          .admin-users-filter {
             display: flex;
             flex-direction: column;
 
-            .admin-users-filter-labels{
+            .admin-users-filter-labels {
               width: 8vw;
               text-align: center;
-              font-size:1vw;
+              font-size: 1vw;
             }
           }
 
@@ -164,4 +164,10 @@
 
 }
 
-.ant-table table { font-size: 1vw; }
+.ant-table table {
+  font-size: 1vw;
+}
+
+.custom-row-red-color {
+  background-color: rgba(255, 0, 0, 0.5) !important;
+}

@@ -27,6 +27,7 @@ export default function EditUser({
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   useEffect(() => {
     if (isPopupVisible && userData.userData && formRef.current) {
+      console.log(userData);
       const { fullName, email, phoneNumber, role, address } = userData.userData;
       const [firstName, lastName] = fullName.split(' ');
 
@@ -144,16 +145,21 @@ export default function EditUser({
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Space size={10}>
-            <Button
-              type={'dashed'}
-              block
-              htmlType={'button'}
-              onClick={() => {
-                setIsConfirmModalVisible(true);
-              }}
-            >
-              Reset Password
-            </Button>
+            {userData.userData.isPasswordForgotten !== null &&
+            userData.userData.isPasswordForgotten !== 0 ? (
+              <Button
+                type={'dashed'}
+                block
+                htmlType={'button'}
+                onClick={() => {
+                  setIsConfirmModalVisible(true);
+                }}
+              >
+                Reset Password
+              </Button>
+            ) : (
+              <> </>
+            )}
             <Button type="primary" htmlType="submit">
               Submit
             </Button>

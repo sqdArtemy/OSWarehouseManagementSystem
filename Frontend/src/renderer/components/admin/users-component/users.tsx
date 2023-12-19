@@ -88,6 +88,7 @@ export default function AdminUsers() {
           email: users[i].user_email,
           user_id: users[i].user_id,
           address: users[i].user_address,
+          isPasswordForgotten: users[i].is_password_forgotten,
         });
       }
 
@@ -194,6 +195,7 @@ export default function AdminUsers() {
       phoneNumber: '',
       email: '',
       address: '',
+      isPasswordForgotten: 0,
     }),
   );
 
@@ -332,6 +334,7 @@ export default function AdminUsers() {
       const users = result.data?.body;
       const dataItems = [];
 
+      console.log(users);
       if (users?.length) {
         for (let i = 0; i < users.length; i++) {
           const company = companies.find((company) => {
@@ -346,6 +349,7 @@ export default function AdminUsers() {
             phoneNumber: users[i].user_phone,
             email: users[i].user_email,
             user_id: users[i].user_id,
+            isPasswordForgotten: users[i].is_password_forgotten,
           });
         }
 
@@ -451,7 +455,11 @@ export default function AdminUsers() {
           className={'admin-users-table'}
           bordered={true}
           style={{ fontSize: '1.5vw' }}
-          rowClassName={'highlight-bottom-border highlight-left-border'}
+          rowClassName={(record, index) => {
+            return record.isPasswordForgotten
+              ? 'highlight-bottom-border highlight-left-border custom-row-red-color'
+              : 'highlight-bottom-border highlight-left-border';
+          }}
         />
       </div>
     </div>

@@ -436,7 +436,7 @@ export default function Inventory({
               {
                 key: '1',
                 overallCapacity: rackData.rackData['capacity'],
-                remainingCapacity: rackData.rackData['remaining_capacity'],
+                remainingCapacity: rackData.rackData['remainingCapacity'],
               },
             ] as []
           }
