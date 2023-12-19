@@ -55,6 +55,7 @@ class UserView(GenericView):
         new_company_id = int(company_response.get("body").get("company_id"))
 
         try:
+
             with get_session() as session:
                 # Creation of new user
                 new_user = User(
