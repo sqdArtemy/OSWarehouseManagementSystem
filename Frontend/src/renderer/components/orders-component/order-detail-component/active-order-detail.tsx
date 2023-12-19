@@ -95,7 +95,7 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
           orderDetails.vendor = vendor?.vendor_name;
           orderDetails.vendor_id = vendor?.vendor_id;
           orderDetails.warehouse = warehouse?.warehouse_name;
-          console.log(orderDetails);
+
           setOrderDetails(data.data?.body);
           setLostItemsDataSource(
             orderLostItems.map((item) => {
@@ -394,6 +394,12 @@ const OrderActiveDetails: React.FC<OrderActiveDetailsProps> = ({
             name="total_volume"
           >
             <span className="form-value">{orderDetails?.total_volume}</span>
+          </Form.Item>
+          <Form.Item
+            label={<p style={{ fontSize: '1vw', margin: 0 }}>Transport</p>}
+            name="transport"
+          >
+            <span className="form-value">{orderDetails?.transport ? orderDetails?.transport.transport_type : 'No Transport' }</span>
           </Form.Item>
         </Form>
         <Table
