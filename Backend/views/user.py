@@ -310,6 +310,7 @@ class UserView(GenericView):
             return super().update(request=request)
 
     @view_function_middleware
+    @check_allowed_roles_middleware([UserRole.ADMIN.value["code"]])
     @check_allowed_methods_middleware([Method.PUT.value])
     def reset_password(self, request: dict) -> dict:
         """
