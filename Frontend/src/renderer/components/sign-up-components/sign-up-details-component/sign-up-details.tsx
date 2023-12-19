@@ -16,6 +16,7 @@ export function SignUpDetails() {
     locLoginEmail,
     locLoginPassword,
     locRole,
+    locResetEmail,
   } = state || {};
 
   const navigate = useNavigate();
@@ -107,6 +108,7 @@ export function SignUpDetails() {
                       locPassword: password,
                       locRePassword: rePassword,
                       locRole: locRole,
+                      locResetEmail: locResetEmail,
                     },
                   });
                 }}

@@ -211,7 +211,7 @@ export default function AdminUsers() {
       align: 'center',
       render: (_, record) =>
         record.fullName ? (
-          <span className={'admin-table-actions-container'}>
+          <Space size={10}>
             <EditOutlined
               onClick={() => handleEditUser(record)}
               style={{ color: 'blue', cursor: 'pointer' }}
@@ -220,7 +220,7 @@ export default function AdminUsers() {
               onClick={() => handleDeleteUser(record)}
               style={{ color: 'red', cursor: 'pointer' }}
             />
-          </span>
+          </Space>
         ) : null,
     },
     {
