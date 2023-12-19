@@ -64,8 +64,6 @@ class ThrownItemView(GenericView):
                 .order_by(Product.product_name)
             )
 
-            print(thrown_products)
-
             # Apply the filters to the query
             if filters_to_apply:
                 thrown_products = thrown_products.filter(*filters_to_apply).all()
