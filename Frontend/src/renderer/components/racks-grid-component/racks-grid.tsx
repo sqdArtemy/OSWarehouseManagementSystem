@@ -39,7 +39,15 @@ export default function RacksGrid({ externalGridData, handleCellClick }) {
         {row.map((cell, cellIndex) => (
           <Tooltip
             placement={'topLeft'}
-            title={`${cell.isSelected ? 'Selected Rack' : ''}`}
+            title={`
+                  ${cell.color === 'blue' ? 'Selected Rack' : ''}
+                  ${cell.color === 'grey' ? 'Empty Rack' : ''}
+                  ${cell.color === 'green' ? 'Occupied: 0 - 33%' : ''}
+                  ${cell.color === 'yellow' ? 'Occupied: 33 - 66%' : ''}
+                  ${cell.color === 'orange' ? 'Occupied: 66 - 99%' : ''}
+                  ${cell.color === 'red' ? 'Fully Occupied' : ''}
+                  ${cell.color === 'swamp' ? 'With Expired Item' : ''}
+            `}
           >
             <div
               className={`grid-cell  ${cell.isHidden ? 'hidden' : ''} }`}

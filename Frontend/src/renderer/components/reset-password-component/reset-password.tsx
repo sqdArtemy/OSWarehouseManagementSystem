@@ -4,6 +4,7 @@ import { Button, Form, Input, Space, Tooltip } from 'antd';
 import { useError } from '../result-handler-component/error-component/error-context';
 import { useLoading } from '../loading-component/loading';
 import './reset-password.scss';
+import { useSuccess } from '../result-handler-component/success-component/success-context';
 
 export function ResetPassword() {
   const location = useLocation();
@@ -29,6 +30,7 @@ export function ResetPassword() {
     locUserAddress,
   } = state || {};
   const { showError } = useError();
+  const { showSuccess } = useSuccess();
 
   useEffect(() => {
     setResetEmail(locResetEmail || ''); // Use empty string as a fallback
@@ -88,6 +90,9 @@ export function ResetPassword() {
           <Form
             onFinish={() => {
               navigateToPath('/sign-in');
+              showSuccess(
+                'Please wait. System Administrator will reset password soon.',
+              );
             }}
           >
             <Form.Item
