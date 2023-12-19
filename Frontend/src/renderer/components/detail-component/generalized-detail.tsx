@@ -126,7 +126,6 @@ export default function GeneralizedDetail({ isForSupervisor = false }) {
       const productsStatsResponse = await statsApi.getProductsStats(
         Number(warehouse_id),
       );
-      console.log(productsStatsResponse);
       if (productsStatsResponse.success) {
         setDataSource(
           productsStatsResponse.data.body.map((item) => {
