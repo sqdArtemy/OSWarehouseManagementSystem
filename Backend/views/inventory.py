@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from sqlalchemy import func, or_, and_, desc, text, cast, Float
+from sqlalchemy import func, or_, and_, desc, text, cast, Float, null
 
 from db_config import get_session
 from models import Inventory, User, Warehouse, Rack, Product, ThrownItem
@@ -77,6 +77,7 @@ class InventoryView(GenericView):
                     product_id=product_id,
                     quantity=quantity,
                     total_volume=total_volume_init,
+                    company_id=null,
                     arrival_date=datetime.now(),
                     expiry_date=datetime.now() + timedelta(days=product.expiry_duration),
                 )

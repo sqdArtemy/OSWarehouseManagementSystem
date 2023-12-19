@@ -4,7 +4,7 @@ from math import floor
 from sqlalchemy import func, or_, and_, desc, cast, Float
 
 from db_config import get_session
-from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User, Inventory, Rack
+from models import Order, Transport, OrderItem, Product, Vendor, Warehouse, User, Inventory, Rack, Company
 from services import view_function_middleware, check_allowed_methods_middleware
 from services.generics import GenericView
 from utilities import ValidationError, is_instance_already_exists, extract_id_from_url, decode_token
@@ -486,7 +486,7 @@ class OrderView(GenericView):
         """
         order_id = extract_id_from_url(request["url"], "order")
         creator_id = decode_token(self.headers.get("token"))
-        with get_session() as session:
+        with (get_session() as session):
 
             warehouse_id = session.query(Warehouse.warehouse_id).filter_by(supervisor_id=creator_id).scalar()
             order = session.query(Order).filter_by(order_id=order_id, supplier_id=warehouse_id).first()
@@ -506,7 +506,9 @@ class OrderView(GenericView):
 
                 inventories = session.query(Inventory
                                             ).join(Rack, Rack.rack_id == Inventory.rack_id
-                                                   ).filter(Inventory.product_id == product.product_id
+                                                   ).join(Company, Company.company_id == Inventory.company_id
+                                                          ).filter(Inventory.product_id == product.product_id,
+                                                                   Company.company_id == order.recipient_vendor.vendor_owner_id
                                                             ).order_by(Rack.rack_position).all()
 
                 for inventory in inventories:

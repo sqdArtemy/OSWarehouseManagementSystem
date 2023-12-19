@@ -14,6 +14,7 @@ class Company(Base):
     products = relationship("Product", back_populates="company")
     users = relationship("User", back_populates="company")
     warehouses = relationship("Warehouse", back_populates="company")
+    inventories = relationship("Inventory", back_populates="company")
 
     def to_dict(self, cascade_fields: list[str] = ()):
         with get_session() as session:
