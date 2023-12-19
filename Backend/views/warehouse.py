@@ -321,7 +321,8 @@ class WarehouseView(GenericView):
 
             # Filter warehouses by order type
             if order_type == "from_warehouse":
-                warehouses = warehouses.join(Rack).join(Inventory).filter(Inventory.product_id.in_(product_ids)). \
+                requester = session.query(User).filter(User.user_id == self.requester_id).first()
+                warehouses = warehouses.join(Rack).join(Inventory).filter(Inventory.product_id.in_(product_ids), Inventory.company_id.in_(None, requester.company_id)). \
                     with_entities(
                     Warehouse,
                     Inventory.product_id,

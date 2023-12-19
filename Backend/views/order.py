@@ -32,7 +32,7 @@ class OrderView(GenericView):
                 .outerjoin(Order, and_(
                     Order.recipient_id == Warehouse.warehouse_id,
                     Order.order_status.in_(["processing", "delivered", "submitted"]))
-                      )
+                           )
                 .outerjoin(OrderItem, OrderItem.order_id == Order.order_id)
                 .outerjoin(Product, Product.product_id == OrderItem.product_id)
                 .filter(Warehouse.warehouse_id == warehouse_id)
@@ -120,7 +120,7 @@ class OrderView(GenericView):
                     )
                     ) or (
                             (requester_role in (
-                            UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
                                     (
                                             order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
                                     (
@@ -454,7 +454,7 @@ class OrderView(GenericView):
                     )
                     ) or (
                             (requester_role in (
-                             UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
+                                    UserRole.MANAGER.value["code"], UserRole.SUPERVISOR.value["code"])) and (
                                     (
                                             order.order_type == "to_warehouse" and order.recipient_id not in requester_warehouses) or
                                     (
@@ -508,8 +508,9 @@ class OrderView(GenericView):
                                             ).join(Rack, Rack.rack_id == Inventory.rack_id
                                                    ).join(Company, Company.company_id == Inventory.company_id
                                                           ).filter(Inventory.product_id == product.product_id,
-                                                                   Company.company_id == order.recipient_vendor.vendor_owner_id
-                                                            ).order_by(Rack.rack_position).all()
+                                                                   or_(Company.company_id == order.recipient_vendor.vendor_owner_id,
+                                                                       Company.company_id == None)
+                                                                   ).order_by(Rack.rack_position).all()
 
                 for inventory in inventories:
                     if overall_volume < inventory.total_volume:
@@ -947,11 +948,11 @@ class OrderView(GenericView):
                 )
 
             result = (
-                    session.query(Order.order_status, func.count().label('order_count'))
-                    .filter(Order.order_id.in_(orders))
-                    .group_by(Order.order_status)
-                    .all()
-                )
+                session.query(Order.order_status, func.count().label('order_count'))
+                .filter(Order.order_id.in_(orders))
+                .group_by(Order.order_status)
+                .all()
+            )
 
             data = dict()
             for status, count in result:
@@ -960,7 +961,6 @@ class OrderView(GenericView):
             self.response.status_code = 200
             self.response.data = data
             return self.response.create_response()
-
 
     @view_function_middleware
     @check_allowed_methods_middleware([Method.GET.value])
@@ -1018,7 +1018,8 @@ class OrderView(GenericView):
 
                 if len(result["ordered_items"]) != 0:
                     for var in result["ordered_items"]:
-                        product_name = session.query(Product.product_name).filter(Product.product_id == var["product"]).scalar()
+                        product_name = session.query(Product.product_name).filter(
+                            Product.product_id == var["product"]).scalar()
                         var["product_name"] = product_name
 
                 result["lost_items"] = [
@@ -1027,7 +1028,8 @@ class OrderView(GenericView):
 
                 if len(result["lost_items"]) != 0:
                     for var in result["lost_items"]:
-                        product_name = session.query(Product.product_name).filter(Product.product_id == var["product"]).scalar()
+                        product_name = session.query(Product.product_name).filter(
+                            Product.product_id == var["product"]).scalar()
                         var["product_name"] = product_name
 
                 all_results.append(result)
