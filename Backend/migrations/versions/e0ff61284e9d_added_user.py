@@ -29,7 +29,7 @@ def upgrade() -> None:
                     sa.Column('user_email', sa.String(length=255), nullable=False),
                     sa.Column('user_address', sa.String(length=255), nullable=True),
                     sa.Column('user_password', sa.String(length=255), nullable=False),
-                    sa.Column('is_password_forgotten', sa.Boolean(), default=False),
+                    sa.Column('is_password_forgotten', sa.Boolean(), server_default=sa.sql.expression.false()),
                     sa.Column('user_role', sa.Enum('manager', 'supervisor', 'vendor', 'admin', name='user_role'),
                               nullable=False),
                     sa.ForeignKeyConstraint(['company_id'], ['companies.company_id'], ),

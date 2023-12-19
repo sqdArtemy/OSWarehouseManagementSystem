@@ -9,7 +9,7 @@ export interface INormalizedRack {
   capacity: number;
   isSelected: boolean;
   remainingCapacity: number;
-  color: 'grey' | 'green' | 'red' | 'yellow' | 'orange' | 'blue';
+  color: 'grey' | 'green' | 'red' | 'yellow' | 'orange' | 'blue' | 'swamp';
 }
 
 export const normalizeRacksForGrid = (racks: IAddRack[]): INormalizedRack[] => {
