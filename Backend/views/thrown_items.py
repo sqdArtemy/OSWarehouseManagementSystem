@@ -1,9 +1,4 @@
-from datetime import datetime
-from sqlite3 import IntegrityError
-
-from sqlalchemy import func
 from sqlalchemy import func, or_, and_, desc, Float, cast
-from sqlalchemy.orm import joinedload
 
 from db_config import get_session
 from models import ThrownItem, User, Warehouse, Order, Product
@@ -48,7 +43,6 @@ class ThrownItemView(GenericView):
             thrown_products = (
                 session.query(
                     Product.product_id.label('product_id'),
-                    Warehouse.warehouse_id.label('warehouse_id'),
                     cast(func.sum(ThrownItem.quantity), Float).label('total_quantity'),
                     Product.product_name.label('product_name')
                 )
@@ -72,14 +66,12 @@ class ThrownItemView(GenericView):
 
             for thrown_product in thrown_products:
                 product_id = thrown_product.product_id
-                warehouse_id = thrown_product.warehouse_id
                 total_quantity = thrown_product.total_quantity
                 product_name = thrown_product.product_name
 
                 # Append values with corresponding names to the lost list
                 lost.append({
                     'product_id': product_id,
-                    'warehouse_id': warehouse_id,
                     'total_quantity': total_quantity,
                     'product_name': product_name
                 })
